@@ -20,6 +20,27 @@ In comparison to a more traditional database like PostgreSQL, SQLite is also mor
 
 ## Local Development
 
+At the moment, the only program is `dump-images-from-airtable.go`.
+
+This takes a SQLite export of the Airtable database and downloads all of the images to the `images/` directory in this repository. It also stores the images in the database.
+
+### Creating a SQLite export of the Airtable database
+
+1. You will need three things:
+ - Access to the Dudley People's School of Climate Justice Airtable. You can request this from someone involved in the project.
+ - An Airtable personal access token, [which you can create here](https://airtable.com/create/tokens). Assigning the token the `data.records:read` scope is sufficient.
+ - The Airtable table ID, which you can find by going to the table in Airtable and [copying the ID from the URL](https://support.airtable.com/docs/finding-airtable-ids).
+
+2. Install [airtable-to-sqlite](https://github.com/simonw/airtable-to-sqlite) following the instructions in the README.
+
+3. Run the following command to export the table to a SQLite database:
+
+```bash
+airtable-to-sqlite --personal-access-token <your-token> --table-id <your-table-id> --output airtable-export.db
+```
+
+This will create a file called `airtable-export.db` in the current directory. The `dump-images-from-airtable` program expects this file to be present in the root of the repository.
+
 ### Mac OS X
 
 1. In order to run the programs in this repository, you'll need to install Go.
