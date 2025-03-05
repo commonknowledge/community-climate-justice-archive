@@ -23,3 +23,6 @@ go.work.sum
 
 # env file
 .env
+
+# For the moment, we aren't commiting our SQLite database file, as we can't verify it has no user data in it
+airtable-export.db
