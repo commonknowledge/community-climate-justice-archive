@@ -1,4 +1,4 @@
-# community-climate-justice-archive
+# Dudley Climate Justice Archive
 
 ## Technology Choices
 
