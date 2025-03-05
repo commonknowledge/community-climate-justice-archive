@@ -20,7 +20,7 @@ In comparison to a more traditional database like PostgreSQL, SQLite is also mor
 
 ## Local Development
 
-At the moment, the only program is `dump-images-from-airtable.go`.
+At the moment, the only program is `dump-images-from-airtable`, in the `dump-images-from-airtable.go` file.
 
 This takes a SQLite export of the Airtable database and downloads all of the images to the `images/` directory in this repository. It also stores the images in the database.
 
