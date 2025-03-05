@@ -37,7 +37,7 @@ git clone https://github.com/commonknowledge/community-climate-justice-archive.g
 3. Run the program.
 
 ```bash
-go run main.go
+go run dump-images-from-airtable.go
 ```
 
 
