@@ -200,6 +200,11 @@ func DownloadFile(db *sql.DB, storyID string, url, filename string) error {
 func main() {
 	dbPath := "airtable-export.db"
 
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		fmt.Println("Error: airtable-export.db does not exist. Please create it by exporting the Airtable database using the instructions in the README.")
+		return
+	}
+
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println("Error opening database:", err)
