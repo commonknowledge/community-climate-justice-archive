@@ -1,5 +1,9 @@
 # Dudley Climate Justice Archive
 
+## Status
+
+At the time of writing, this repository contains small programs used to bootstrap the archive. Including downloading images from Airtable and storing them in a local SQLite database.
+
 ## Technology Choices
 
 ### Go
