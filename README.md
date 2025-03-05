@@ -61,5 +61,5 @@ git clone https://github.com/commonknowledge/community-climate-justice-archive.g
 go run dump-images-from-airtable.go
 ```
 
-
+As we have already exported all the images into this repository, the only thing that will happen is a series of log messages, noting that the images are already present and the download has been skipped.
 
