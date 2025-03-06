@@ -31,7 +31,7 @@ This takes a SQLite export of the Airtable database and downloads all of the ima
  - An Airtable personal access token, [which you can create here](https://airtable.com/create/tokens). Assigning the token the `data.records:read` scope is sufficient.
  - The Airtable table ID, which you can find by going to the table in Airtable and [copying the ID from the URL](https://support.airtable.com/docs/finding-airtable-ids).
 
-2. Install [airtable-to-sqlite](https://github.com/simonw/airtable-to-sqlite) following the instructions in the README.
+2. Install [airtable-to-sqlite](https://github.com/kanedata/airtable-to-sqlite) following the instructions in the README.
 
 3. Run the following command to export the table to a SQLite database:
 
