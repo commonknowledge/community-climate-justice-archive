@@ -201,7 +201,7 @@ func regenerate() error {
 func waitForInput() {
 	log.Println("Press enter to regenerate the archive...")
 	reader := bufio.NewReader(os.Stdin)
-	reader.ReadRune() // Read the keypress
+	reader.ReadRune()
 }
 
 func main() {
