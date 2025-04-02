@@ -1,9 +1,11 @@
-// The archive command builds the archive and serves it on port 8080.
+// The archive command builds the archive and optionally serves it in development mode.
 package main
 
 import (
 	"bufio"
 	"community-climate-justice-archive/internal/generate"
+	"community-climate-justice-archive/internal/server"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -36,25 +38,35 @@ func waitForInput() {
 	reader.ReadRune()
 }
 
-// main builds the archive and serves it on port 8080.
+// main builds the archive and optionally serves it in development mode.
 func main() {
+	devMode := flag.Bool("development", false, "Run in development mode with live reload")
+	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
+	flag.Parse()
+
 	// Build the archive.
 	if err := regenerate(); err != nil {
 		log.Fatalf("Initial build failed: %v", err)
 	}
 
-	// Start a simple HTTP server to serve the archive on port 8080.
-	// The "go" keyword is used to run the server in a separate "goroutine".
-	// A goroutine is a lightweight way of running a function in parallel with the main program.
-	// This allows the server to run concurrently with the main program.
-	// For more information see: https://go.dev/doc/effective_go#goroutines
-	// go server.Serve()
+	if *devMode {
+		log.Println("Starting development server...")
+		// Start a simple HTTP server to serve the archive on port 8080.
+		// The "go" keyword is used to run the server in a separate "goroutine".
+		// A goroutine is a lightweight way of running a function in parallel with the main program.
+		// This allows the server to run concurrently with the main program.
+		// For more information see: https://go.dev/doc/effective_go#goroutines
+		go server.Serve()
 
-	// // Wait for input and then rebuild the archive when enter is pressed.
-	// for {
-	// 	waitForInput()
-	// 	if err := regenerate(); err != nil {
-	// 		log.Printf("Regeneration failed: %v", err)
-	// 	}
-	// }
+		log.Println("Development server running at http://localhost:8080")
+		log.Println("Press enter to rebuild the archive...")
+
+		// Wait for input and then rebuild the archive when enter is pressed.
+		for {
+			waitForInput()
+			if err := regenerate(); err != nil {
+				log.Printf("Regeneration failed: %v", err)
+			}
+		}
+	}
 }
