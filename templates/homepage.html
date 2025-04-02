@@ -1,0 +1,38 @@
+<head>
+	<title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dudley People's School for Climate Justice</h1>   
+        <p>time portal</p>
+    </header>
+
+    <h2>Themes</h2>
+    <ul>{{range .Themes}}
+        <li>{{.Title}}</li>{{end}}
+    </ul>
+
+    <h2>Types</h2>
+    <ul>{{range .Types}}
+        <li>{{.Title}}</li>{{end}}
+    </ul>
+
+    <h2>Wander through our archive</h2>
+    <div>{{range .Images}}
+        <a href="images/{{.Filename}}"><img src="images/{{.Filename}}" alt="{{.AlternativeText}}" width="200"></a>{{end}}
+    </div>
+</body>
