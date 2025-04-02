@@ -1,7 +1,4 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go
+name: Deploy archive to GitHub Pages
 
 on:
   push:
@@ -30,12 +27,12 @@ jobs:
       with:
         go-version: '1.21'
 
-    - name: Build and generate site
-      run: |
-        go build -o archive ./cmd/archive
-        ./archive generate
+    - name: Build archive binary
+      run: go build -o archive ./cmd/archive
 
-  
+    - name: Generate archive
+      run: ./archive generate
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
         
