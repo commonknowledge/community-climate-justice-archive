@@ -31,7 +31,7 @@ jobs:
       run: go build -o archive ./cmd/archive
 
     - name: Generate archive
-      run: ./archive generate
+      run: ./archive
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
