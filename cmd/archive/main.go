@@ -4,7 +4,6 @@ package main
 import (
 	"bufio"
 	"community-climate-justice-archive/internal/generate"
-	"community-climate-justice-archive/internal/server"
 	"fmt"
 	"log"
 	"os"
@@ -49,13 +48,13 @@ func main() {
 	// A goroutine is a lightweight way of running a function in parallel with the main program.
 	// This allows the server to run concurrently with the main program.
 	// For more information see: https://go.dev/doc/effective_go#goroutines
-	go server.Serve()
+	// go server.Serve()
 
-	// Wait for input and then rebuild the archive when enter is pressed.
-	for {
-		waitForInput()
-		if err := regenerate(); err != nil {
-			log.Printf("Regeneration failed: %v", err)
-		}
-	}
+	// // Wait for input and then rebuild the archive when enter is pressed.
+	// for {
+	// 	waitForInput()
+	// 	if err := regenerate(); err != nil {
+	// 		log.Printf("Regeneration failed: %v", err)
+	// 	}
+	// }
 }
