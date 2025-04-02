@@ -26,3 +26,9 @@ go.work.sum
 
 # For the moment, we aren't commiting our SQLite database file, as we can't verify it has no user data in it
 airtable-export.db
+
+# For the moment, we aren't commiting our output files
+out/*
+
+# Ignore any CSV files that we generate for statistics
+*.csv
