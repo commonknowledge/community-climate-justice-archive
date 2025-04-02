@@ -10,33 +10,14 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"community-climate-justice-archive/data"
 )
 
-type Page struct {
-	Title       string
-	Description string
-	Themes      []Theme
-	Types       []Type
-	Images      []StoryImage
-}
-
-type Theme struct {
-	Title string
-}
-
-type Type struct {
-	Title string
-}
-
-type StoryImage struct {
-	Filename        string
-	AlternativeText string
-}
-
-func getThemes() []Theme {
+func getThemes() []data.Theme {
 	log.Println("Getting themes")
 
-	return []Theme{
+	return []data.Theme{
 		{
 			Title: "people",
 		},
@@ -52,10 +33,10 @@ func getThemes() []Theme {
 	}
 }
 
-func getImages() []StoryImage {
+func getImages() []data.StoryImage {
 	log.Println("Getting images")
 
-	var images []StoryImage
+	var images []data.StoryImage
 
 	files, err := os.ReadDir("images")
 	if err != nil {
@@ -72,7 +53,7 @@ func getImages() []StoryImage {
 			// Common image extensions
 			switch ext {
 			case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp":
-				images = append(images, StoryImage{Filename: filename, AlternativeText: filename})
+				images = append(images, data.StoryImage{Filename: filename, AlternativeText: filename})
 				processedCount++
 			}
 		}
@@ -86,10 +67,10 @@ func getImages() []StoryImage {
 	return images
 }
 
-func getTypes() []Type {
+func getTypes() []data.Type {
 	log.Println("Getting types")
 
-	return []Type{
+	return []data.Type{
 		{Title: "text"},
 		{Title: "image"},
 		{Title: "video"},
@@ -104,7 +85,7 @@ func writeHomePage() error {
 	types := getTypes()
 	images := getImages()
 
-	page := Page{
+	page := data.Page{
 		Title:       "Dudley People's School for Climate Justice – time portal",
 		Description: "The time portal for the Dudley People's School for Climate Justice",
 		Themes:      themes,
