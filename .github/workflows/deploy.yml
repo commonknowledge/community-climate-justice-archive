@@ -20,6 +20,8 @@ jobs:
       - name: Build and generate site
         run: |
           go build -o archive ./cmd/archive
+          pwd
+          ls -la
           # Run the binary to generate the static site
           ./archive
 
