@@ -1,3 +1,4 @@
+// Retrieves and processes images as required.
 package store
 
 import (
@@ -9,6 +10,9 @@ import (
 	"community-climate-justice-archive/data"
 )
 
+// GetImages retrieves all images from the images directory and returns them as a slice of StoryImage.
+// Intended for passing to HTML templates.
+// For the moment this is hardcoded, but we will use SQLite to populate this.
 func GetImages() []data.StoryImage {
 	log.Println("Getting images")
 
