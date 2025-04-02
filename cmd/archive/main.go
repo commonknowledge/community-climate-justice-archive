@@ -13,8 +13,7 @@ import (
 // regenerate builds the archive by taking the following steps:
 // - Getting the data from the database
 // - Getting the images from the images directory
-// - Adding this data to the templates to create the homepage
-// - Writing the homepage to disk
+// - Adding this data to the templates to create pages which are static HTML files, intially the homepage
 // - Copying the images to the output directory
 func regenerate() error {
 	log.Println("Starting build process")
