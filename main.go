@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -31,12 +30,16 @@ func writePage() error {
 	}
 	defer file.Close()
 
-	return tmpl.Execute(file, page)
+	err = tmpl.Execute(file, page)
+	if err != nil {
+		log.Fatal("error executing homepage template:", err)
+	}
+
+	log.Println("homepage output file written successfully")
+
+	return nil
 }
 
 func main() {
-	err := writePage()
-	if err != nil {
-		fmt.Println(err)
-	}
+	writePage()
 }
