@@ -45,6 +45,10 @@ func main() {
 	}
 
 	// Start a simple HTTP server to serve the archive on port 8080.
+	// The "go" keyword is used to run the server in a separate "goroutine".
+	// A goroutine is a lightweight way of running a function in parallel with the main program.
+	// This allows the server to run concurrently with the main program.
+	// For more information see: https://go.dev/doc/effective_go#goroutines
 	go server.Serve()
 
 	// Wait for input and then rebuild the archive when enter is pressed.
