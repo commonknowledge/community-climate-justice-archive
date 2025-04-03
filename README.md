@@ -20,7 +20,7 @@ In comparison to a more traditional database like PostgreSQL, SQLite is also mor
 
 ## Deployment
 
-The archive currently deploys to [GitHub Pages](https://pages.github.com/). 
+The archive currently deploys to [GitHub Pages](https://pages.github.com/). This is done on every commit to the `main` branch.
 
 The deployment process is encapsulated in a [GitHub Action](https://github.com/features/actions), the process of which is in `.github/workflows/deploy.yml`.
 
