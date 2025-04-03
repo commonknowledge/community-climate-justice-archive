@@ -42,7 +42,7 @@ func GetTypes() []data.Type {
 		}
 
 		if Type.Valid {
-			// First unmarshal into a string array since it's in format ["Tiny Things", "Care"]
+			// First unmarshal into a string array since it's in format ["Map", "Drawing", "Imagining"]
 			var typeStrings []string
 			if err := json.Unmarshal([]byte(Type.String), &typeStrings); err != nil {
 				log.Fatalf("Failed to unmarshal JSON: %v", err)
