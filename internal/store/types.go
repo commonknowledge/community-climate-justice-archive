@@ -25,7 +25,7 @@ func GetTypes() []data.Type {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT Types type FROM Stories")
+	rows, err := db.Query("SELECT Type FROM Stories")
 	if err != nil {
 		log.Fatalf("Failed to query types: %v", err)
 	}
@@ -35,21 +35,22 @@ func GetTypes() []data.Type {
 
 	for rows.Next() {
 		var (
-			Theme sql.NullString
+			Type sql.NullString
 		)
 		if err := rows.Scan(&Theme); err != nil {
+		if err := rows.Scan(&Type); err != nil {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
 
-		if Theme.Valid {
+		if Type.Valid {
 			// First unmarshal into a string array since it's in format ["Tiny Things", "Care"]
-			var themeStrings []string
-			if err := json.Unmarshal([]byte(Theme.String), &themeStrings); err != nil {
+			var typeStrings []string
+			if err := json.Unmarshal([]byte(Type.String), &typeStrings); err != nil {
 				log.Fatalf("Failed to unmarshal JSON: %v", err)
 			}
 
-			for _, themeStr := range themeStrings {
-				newType := data.Type{Title: themeStr, URL: strings.ToLower(themeStr)}
+			for _, typeStr := range typeStrings {
+				newType := data.Type{Title: typeStr, URL: strings.ToLower(typeStr)}
 				types = append(types, newType)
 			}
 		}
