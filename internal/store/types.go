@@ -157,9 +157,11 @@ func GetStoriesForType(typeTitle string) []data.Story {
 			&dto.InstaImage,
 			&dto.ImageData,
 		)
+
 		if err != nil {
 			log.Fatalf("Failed to scan story: %v", err)
 		}
+
 		stories = append(stories, dto.ToStory())
 	}
 
