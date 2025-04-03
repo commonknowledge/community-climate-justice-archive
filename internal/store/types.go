@@ -49,7 +49,8 @@ func GetTypes() []data.Type {
 			}
 
 			for _, themeStr := range themeStrings {
-				types = append(types, data.Type{Title: themeStr, URL: strings.ToLower(themeStr)})
+				newType := data.Type{Title: themeStr, URL: strings.ToLower(themeStr)}
+				types = append(types, newType)
 			}
 		}
 	}
