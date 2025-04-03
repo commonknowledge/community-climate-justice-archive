@@ -74,6 +74,48 @@ func CopyImagesToOutput() error {
 	return nil
 }
 
+func createTypeIndexOutputPathFromTitle(title string) string {
+	lowerCaseTitle := strings.ToLower(title)
+	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	return filepath.Join("out", "types", fileName)
+}
+
+func WriteTypesIndexes() error {
+	log.Println("Starting types generation")
+	types := store.GetTypes()
+
+	tmpl, err := template.ParseFiles("templates/type-index.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse types template: %w", err)
+	}
+
+	err = os.MkdirAll("out/types", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output types directory: %w", err)
+	}
+
+	for _, typeInQuestion := range types {
+		outputPath := createTypeIndexOutputPathFromTitle(typeInQuestion.Title)
+
+		log.Printf("Writing types %s to %s", typeInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		err = tmpl.Execute(file, typeInQuestion)
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote types to %s", outputPath)
+	}
+
+	return nil
+}
+
 // WriteHomePage generates the homepage HTML file and writes it to the out/ directory.
 func WriteHomePage() error {
 	log.Println("Starting homepage generation")
