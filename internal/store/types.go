@@ -4,6 +4,7 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
@@ -102,9 +103,16 @@ func GetStoriesForType(typeTitle string) []data.Story {
 
 	// Type is stored as JSON array in the database like this:
 	// ["Map", "Drawing", "Imagining"]
-	// But this is a string, not a genuine JSON array, so we can't use SQLite's JSON functions.
-	// So instead we do a contains check.
-	rows, err := db.Query("SELECT * FROM Stories WHERE Type LIKE ?", "%"+typeTitle+"%")
+	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
+	likePattern := fmt.Sprintf("%%%q%%", typeTitle)
+
+	query := `
+		SELECT *
+		FROM Stories
+		WHERE "Type" LIKE ?;
+	`
+
+	rows, err := db.Query(query, likePattern)
 
 	if err != nil {
 		log.Fatalf("Failed to query stories: %v", err)
