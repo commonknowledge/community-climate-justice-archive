@@ -25,7 +25,7 @@ func GetTypes() []data.Type {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT Themes type FROM stories")
+	rows, err := db.Query("SELECT Types type FROM Stories")
 	if err != nil {
 		log.Fatalf("Failed to query types: %v", err)
 	}
