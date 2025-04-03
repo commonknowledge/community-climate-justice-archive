@@ -74,12 +74,14 @@ func CopyImagesToOutput() error {
 	return nil
 }
 
+// createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
 func createTypeIndexOutputPathFromTitle(title string) string {
 	lowerCaseTitle := strings.ToLower(title)
 	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
 	return filepath.Join("out", "types", fileName)
 }
 
+// WriteTypesIndexes generates the type index pages and writes them to the out/types directory.
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
 	types := store.GetTypes()
