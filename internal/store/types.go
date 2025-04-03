@@ -104,7 +104,7 @@ func GetStoriesForType(typeTitle string) []data.Story {
 	// ["Map", "Drawing", "Imagining"]
 	// But this is a string, not a genuine JSON array, so we can't use SQLite's JSON functions.
 	// So instead we do a contains check.
-	rows, err := db.Query("SELECT * FROM Stories WHERE Themes LIKE ?", "%"+typeTitle+"%")
+	rows, err := db.Query("SELECT * FROM Stories WHERE Type LIKE ?", "%"+typeTitle+"%")
 
 	if err != nil {
 		log.Fatalf("Failed to query stories: %v", err)
