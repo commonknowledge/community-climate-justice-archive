@@ -47,7 +47,6 @@ func GetTypes() []data.Type {
 				log.Fatalf("Failed to unmarshal JSON: %v", err)
 			}
 
-			// Convert each theme string into a Type
 			for _, themeStr := range themeStrings {
 				types = append(types, data.Type{Title: themeStr})
 			}
