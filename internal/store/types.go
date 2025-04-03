@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -48,7 +49,7 @@ func GetTypes() []data.Type {
 			}
 
 			for _, themeStr := range themeStrings {
-				types = append(types, data.Type{Title: themeStr})
+				types = append(types, data.Type{Title: themeStr, URL: strings.ToLower(themeStr)})
 			}
 		}
 	}

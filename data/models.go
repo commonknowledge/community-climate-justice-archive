@@ -14,6 +14,7 @@ type Theme struct {
 
 type Type struct {
 	Title string
+	URL   string
 }
 
 type StoryImage struct {
