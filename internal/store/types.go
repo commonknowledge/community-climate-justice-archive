@@ -37,7 +37,6 @@ func GetTypes() []data.Type {
 		var (
 			Type sql.NullString
 		)
-		if err := rows.Scan(&Theme); err != nil {
 		if err := rows.Scan(&Type); err != nil {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
