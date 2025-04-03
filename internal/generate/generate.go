@@ -153,5 +153,6 @@ func WriteHomePage() error {
 	}
 
 	log.Printf("Successfully wrote homepage to %s", outputPath)
+
 	return nil
 }
