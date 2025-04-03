@@ -59,7 +59,6 @@ func main() {
 		go server.Serve()
 
 		log.Println("Development server running at http://localhost:8080")
-		log.Println("Press enter to rebuild the archive...")
 
 		// Wait for input and then rebuild the archive when enter is pressed.
 		for {
