@@ -8,6 +8,12 @@ type Page struct {
 	Images      []StoryImage
 }
 
+type TaxonomyIndexPage struct {
+	Title       string
+	Description string
+	Stories     []Story
+}
+
 type Theme struct {
 	Title string
 }
