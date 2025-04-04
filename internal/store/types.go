@@ -13,7 +13,7 @@ import (
 	"community-climate-justice-archive/data"
 )
 
-// StoryDTO is a data transfer object that handles NULL values from the database
+// StoryDTO is a data transfer object that handles NULL values from the database.
 type StoryDTO struct {
 	ID                      sql.NullString
 	CreatedTime             sql.NullString
@@ -50,7 +50,7 @@ type StoryDTO struct {
 	ImageData               []byte
 }
 
-// ToStory converts the DTO to a domain model Story
+// ToStory converts the DTO to a domain model Story.
 func (dto *StoryDTO) ToStory() data.Story {
 	return data.Story{
 		ID:                      dto.ID.String,
@@ -193,6 +193,7 @@ func GetTypes() []data.Type {
 		var (
 			Type sql.NullString
 		)
+
 		if err := rows.Scan(&Type); err != nil {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
