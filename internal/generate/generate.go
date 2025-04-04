@@ -102,12 +102,20 @@ func WriteTypesIndexes() error {
 		log.Printf("Writing types %s to %s", typeInQuestion.Title, outputPath)
 
 		file, err := os.Create(outputPath)
+
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
 		}
 		defer file.Close()
 
-		err = tmpl.Execute(file, typeInQuestion)
+		stories := store.GetStoriesForType(typeInQuestion.Title)
+
+		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+			Title:       typeInQuestion.Title,
+			Description: "A list of stories for the type " + typeInQuestion.Title,
+			Stories:     stories,
+		})
+
 		if err != nil {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
