@@ -31,6 +31,10 @@ func regenerate() error {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}
 
+	if err := generate.WriteThemesIndexes(); err != nil {
+		return fmt.Errorf("failed to write themes indexes: %v", err)
+	}
+
 	log.Println("Build process completed successfully")
 
 	return nil

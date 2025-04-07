@@ -81,6 +81,13 @@ func createTypeIndexOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "types", fileName)
 }
 
+// createThemeIndexOutputPathFromTitle creates a path to the output file for a type index page.
+func createThemeIndexOutputPathFromTitle(title string) string {
+	lowerCaseTitle := strings.ToLower(title)
+	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	return filepath.Join("out", "themes", fileName)
+}
+
 // WriteTypesIndexes generates the type index pages and writes them to the out/types directory.
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
@@ -113,6 +120,50 @@ func WriteTypesIndexes() error {
 		err = tmpl.Execute(file, data.TaxonomyIndexPage{
 			Title:       typeInQuestion.Title,
 			Description: "A list of stories for the type " + typeInQuestion.Title,
+			Stories:     stories,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote types to %s", outputPath)
+	}
+
+	return nil
+}
+
+func WriteThemesIndexes() error {
+	log.Println("Starting themes generation")
+	themes := store.GetThemes()
+
+	tmpl, err := template.ParseFiles("templates/theme-index.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse types template: %w", err)
+	}
+
+	err = os.MkdirAll("out/themes", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output types directory: %w", err)
+	}
+
+	for _, themeInQuestion := range themes {
+		outputPath := createThemeIndexOutputPathFromTitle(themeInQuestion.Title)
+
+		log.Printf("Writing types %s to %s", themeInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForTheme(themeInQuestion.Title)
+
+		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+			Title:       themeInQuestion.Title,
+			Description: "A list of stories for the theme " + themeInQuestion.Title,
 			Stories:     stories,
 		})
 
