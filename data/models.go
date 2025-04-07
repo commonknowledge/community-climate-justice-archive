@@ -7,7 +7,7 @@ type Page struct {
 	Description string
 	Themes      []Theme
 	Types       []Type
-	Images      []StoryImage
+	Stories     []Story
 }
 
 type TaxonomyIndexPage struct {
@@ -64,7 +64,6 @@ type Story struct {
 	InstaText               string
 	InstaCount              string
 	InstaImage              string
-	ImageData               []byte
 }
 
 // StoryDTO is a data transfer object that handles NULL values from the database.
