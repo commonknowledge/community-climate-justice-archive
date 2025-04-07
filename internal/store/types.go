@@ -13,82 +13,6 @@ import (
 	"community-climate-justice-archive/data"
 )
 
-// StoryDTO is a data transfer object that handles NULL values from the database.
-type StoryDTO struct {
-	ID                      sql.NullString
-	CreatedTime             sql.NullString
-	Finding                 sql.NullString
-	HighStExperiment        sql.NullString
-	WhatWasIsIf             sql.NullString
-	Image                   sql.NullString
-	SourceImage             sql.NullString
-	Location                sql.NullString
-	StartDateTime           sql.NullString
-	EndDateTime             sql.NullString
-	Season                  sql.NullString
-	Weather                 sql.NullString
-	StreetDetectoristClue   sql.NullString
-	Themes                  sql.NullString
-	Experience              sql.NullString
-	TimeSpan                sql.NullString
-	OtherComments           sql.NullString
-	Type                    sql.NullString
-	PersonFinder            sql.NullString
-	MapCache                sql.NullString
-	MapSize                 sql.NullString
-	Created                 sql.NullString
-	StreetDetectoristMapURL sql.NullString
-	OtherTheme              sql.NullString
-	OtherWeather            sql.NullString
-	ShareStatus             sql.NullString
-	PostDate                sql.NullString
-	TwitterText             sql.NullString
-	CharacterCount          sql.NullString
-	InstaText               sql.NullString
-	InstaCount              sql.NullString
-	InstaImage              sql.NullString
-	ImageData               []byte
-}
-
-// ToStory converts the DTO to a domain model Story.
-func (dto *StoryDTO) ToStory() data.Story {
-	return data.Story{
-		ID:                      dto.ID.String,
-		CreatedTime:             dto.CreatedTime.String,
-		Finding:                 dto.Finding.String,
-		HighStExperiment:        dto.HighStExperiment.String,
-		WhatWasIsIf:             dto.WhatWasIsIf.String,
-		Image:                   dto.Image.String,
-		SourceImage:             dto.SourceImage.String,
-		Location:                dto.Location.String,
-		StartDateTime:           dto.StartDateTime.String,
-		EndDateTime:             dto.EndDateTime.String,
-		Season:                  dto.Season.String,
-		Weather:                 dto.Weather.String,
-		StreetDetectoristClue:   dto.StreetDetectoristClue.String,
-		Themes:                  dto.Themes.String,
-		Experience:              dto.Experience.String,
-		TimeSpan:                dto.TimeSpan.String,
-		OtherComments:           dto.OtherComments.String,
-		Type:                    dto.Type.String,
-		PersonFinder:            dto.PersonFinder.String,
-		MapCache:                dto.MapCache.String,
-		MapSize:                 dto.MapSize.String,
-		Created:                 dto.Created.String,
-		StreetDetectoristMapURL: dto.StreetDetectoristMapURL.String,
-		OtherTheme:              dto.OtherTheme.String,
-		OtherWeather:            dto.OtherWeather.String,
-		ShareStatus:             dto.ShareStatus.String,
-		PostDate:                dto.PostDate.String,
-		TwitterText:             dto.TwitterText.String,
-		CharacterCount:          dto.CharacterCount.String,
-		InstaText:               dto.InstaText.String,
-		InstaCount:              dto.InstaCount.String,
-		InstaImage:              dto.InstaImage.String,
-		ImageData:               dto.ImageData,
-	}
-}
-
 // GetStoriesForType retrieves all stories for a given type from the database and returns them as a slice of Story.
 func GetStoriesForType(typeTitle string) []data.Story {
 	log.Println("Getting stories for type", typeTitle)
@@ -121,7 +45,7 @@ func GetStoriesForType(typeTitle string) []data.Story {
 
 	stories := []data.Story{}
 	for rows.Next() {
-		var dto StoryDTO
+		var dto data.StoryDTO
 		err := rows.Scan(
 			&dto.ID,
 			&dto.CreatedTime,
