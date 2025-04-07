@@ -1,0 +1,72 @@
+// Package store provides functions to store and retrieve stories from the database.
+package store
+
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3"
+
+	"community-climate-justice-archive/data"
+)
+
+func GetAllStories() []data.Story {
+	db, err := sql.Open("sqlite3", "airtable-export.db")
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM Stories")
+	if err != nil {
+		log.Fatalf("Failed to query stories: %v", err)
+	}
+	defer rows.Close()
+
+	stories := []data.Story{}
+	for rows.Next() {
+		var dto data.StoryDTO
+		err := rows.Scan(
+			&dto.ID,
+			&dto.CreatedTime,
+			&dto.Finding,
+			&dto.HighStExperiment,
+			&dto.WhatWasIsIf,
+			&dto.Image,
+			&dto.SourceImage,
+			&dto.Location,
+			&dto.StartDateTime,
+			&dto.EndDateTime,
+			&dto.Season,
+			&dto.Weather,
+			&dto.StreetDetectoristClue,
+			&dto.Themes,
+			&dto.Experience,
+			&dto.TimeSpan,
+			&dto.OtherComments,
+			&dto.Type,
+			&dto.PersonFinder,
+			&dto.MapCache,
+			&dto.MapSize,
+			&dto.Created,
+			&dto.StreetDetectoristMapURL,
+			&dto.OtherTheme,
+			&dto.OtherWeather,
+			&dto.ShareStatus,
+			&dto.PostDate,
+			&dto.TwitterText,
+			&dto.CharacterCount,
+			&dto.InstaText,
+			&dto.InstaCount,
+			&dto.InstaImage,
+		)
+
+		if err != nil {
+			log.Fatalf("Failed to scan story: %v", err)
+		}
+
+		stories = append(stories, dto.ToStory())
+	}
+
+	return stories
+}

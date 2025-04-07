@@ -182,14 +182,14 @@ func WriteHomePage() error {
 	log.Println("Starting homepage generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
-	images := store.GetImages()
+	stories := store.GetAllStories()
 
 	page := data.Page{
 		Title:       "Dudley People's School for Climate Justice – time portal",
 		Description: "The time portal for the Dudley People's School for Climate Justice",
 		Themes:      themes,
 		Types:       types,
-		Images:      images,
+		Stories:     stories,
 	}
 
 	tmpl, err := template.ParseFiles("templates/homepage.html")
