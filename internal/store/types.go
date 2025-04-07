@@ -1,4 +1,4 @@
-// Retrieves and processes types as required.
+// Retrieves and processes types from the database as required.
 package store
 
 import (
