@@ -4,31 +4,42 @@
     <style>
         body {
             font-family: 'Times New Roman', serif;
-            margin: 0;
-            padding: 0;
         }
+
         header {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            display: flex;
+            font-family: Arial, sans-serif;
+            justify-content: space-between;
+        }
+
+        header p {
+            text-transform: lowercase;
+        }
+
+        .taxonomy-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style-type: none;
+            text-transform: lowercase;
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Dudley People's School for Climate Justice</h1>   
-        <p>time portal</p>
+        <p>Time Portal</p>
     </header>
 
     <h2>Themes</h2>
-    <ul>{{range .Themes}}
-        <li>{{.Title}}</li>{{end}}
+    <ul class="taxonomy-list">{{range .Themes}}
+        <li><a href="themes/{{.URL}}.html">{{.Title}}</a></li>{{end}}
     </ul>
 
     <h2>Types</h2>
-    <ul>{{range .Types}}
-        <li>{{.Title}}</li>{{end}}
+    <ul class="taxonomy-list">{{range .Types}}
+        <li><a href="types/{{.URL}}.html">{{.Title}}</a></li>{{end}}
     </ul>
 
     <h2>Wander through our archive</h2>

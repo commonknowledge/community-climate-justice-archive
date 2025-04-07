@@ -14,7 +14,7 @@ import (
 // regenerate builds the archive by taking the following steps:
 // - Getting the data from the database
 // - Getting the images from the images directory
-// - Adding this data to the templates to create pages which are static HTML files, intially the homepage
+// - Adding this data to the templates to create pages which are static HTML files
 // - Copying the images to the output directory
 func regenerate() error {
 	log.Println("Starting build process")
@@ -27,7 +27,16 @@ func regenerate() error {
 		return fmt.Errorf("failed to copy images: %v", err)
 	}
 
+	if err := generate.WriteTypesIndexes(); err != nil {
+		return fmt.Errorf("failed to write types indexes: %v", err)
+	}
+
+	if err := generate.WriteThemesIndexes(); err != nil {
+		return fmt.Errorf("failed to write themes indexes: %v", err)
+	}
+
 	log.Println("Build process completed successfully")
+
 	return nil
 }
 
@@ -59,7 +68,6 @@ func main() {
 		go server.Serve()
 
 		log.Println("Development server running at http://localhost:8080")
-		log.Println("Press enter to rebuild the archive...")
 
 		// Wait for input and then rebuild the archive when enter is pressed.
 		for {

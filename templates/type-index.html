@@ -1,0 +1,25 @@
+<head>
+	<title>{{.Title}} Type</title>
+    <style>
+        .story {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{.Title}} - A type in the Dudley People's School for Climate Justice</h1>
+    <p>{{.Description}}</p>
+    <div>
+        {{range .Stories}}
+            <div class="story">
+                <div>{{.Finding}}</div>
+                <div>{{.Location}}</div>
+                <div>{{.StartDateTime}} - {{.EndDateTime}}</div>
+                <div>{{.Season}} {{.Weather}}</div>
+                <div>{{.StreetDetectoristClue}}</div>
+                <div>{{.Themes}}</div>
+                <div>{{.Experience}}</div>
+            </div>
+        {{end}}
+    </div>
+</body>
