@@ -101,7 +101,6 @@ type StoryDTO struct {
 	InstaText               sql.NullString
 	InstaCount              sql.NullString
 	InstaImage              sql.NullString
-	ImageData               []byte
 }
 
 // ToStory converts the DTO to a Story so we can use it in our own code.
@@ -139,6 +138,5 @@ func (dto *StoryDTO) ToStory() Story {
 		InstaText:               dto.InstaText.String,
 		InstaCount:              dto.InstaCount.String,
 		InstaImage:              dto.InstaImage.String,
-		ImageData:               dto.ImageData,
 	}
 }
