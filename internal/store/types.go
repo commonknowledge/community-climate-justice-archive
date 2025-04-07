@@ -79,7 +79,6 @@ func GetStoriesForType(typeTitle string) []data.Story {
 			&dto.InstaText,
 			&dto.InstaCount,
 			&dto.InstaImage,
-			&dto.ImageData,
 		)
 
 		if err != nil {

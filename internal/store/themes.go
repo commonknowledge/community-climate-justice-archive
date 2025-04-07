@@ -78,7 +78,6 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 			&dto.InstaText,
 			&dto.InstaCount,
 			&dto.InstaImage,
-			&dto.ImageData,
 		)
 
 		if err != nil {
