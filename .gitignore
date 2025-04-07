@@ -26,6 +26,7 @@ go.work.sum
 
 # For the moment, we aren't commiting our SQLite database file, as we can't verify it has no user data in it
 *.db
+!airtable-export.db
 
 # For the moment, we aren't commiting our output files
 out/*
