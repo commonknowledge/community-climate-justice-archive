@@ -24,23 +24,21 @@
             list-style-type: none;
             text-transform: lowercase;
         }
-
-        .stories-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .story img {
+            max-width: 300px;
+            height: auto;
         }
 
-        .story {
-            border: 1px solid #ccc;
-            padding: 10px;
-            width: 300px;
+        .stories-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
+            gap: 10px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Dudley People's School for Climate Justice</h1>   
+        <h1>Dudley People's School for Climate Justice</h1>
         <p>Time Portal</p>
     </header>
 
@@ -57,16 +55,12 @@
     <h2>Wander through our archive</h2>
     <div class="stories-list">{{range .Stories}}
         <div class="story">
-            <div>{{.Finding}}</div>
-            <div>{{.Location}}</div>
-            <div>{{.StartDateTime}} - {{.EndDateTime}}</div>
-            <div>{{.Season}} {{.Weather}}</div>
-            <div>{{.StreetDetectoristClue}}</div>
-            <div>{{.Themes}}</div>
-            <div>{{.Experience}}</div>
             {{with .GetStoryImage}}
+            {{ if .URL }}
             <img src="{{.URL}}" alt="{{.AlternativeText}}">
-            <div>{{.Type}} {{.Size}} {{.Width}} {{.Height}}</div>
+            {{ else }}
+            <div>No image</div>
+            {{ end }}
             {{end}}
         </div>{{end}}
     </div>
