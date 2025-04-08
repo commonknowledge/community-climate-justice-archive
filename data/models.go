@@ -113,9 +113,21 @@ func (s *Story) GetStoryImages() []StoryImage {
 	//     }
 	//   }
 	// ]
+	//
+	// In the Airtable dump this is in two columns:
+	// - Image
+	// - Source Image
+	//
+	// We need to combine them into a single slice of StoryImage structs.
 
 	var images []StoryImage
 	json.Unmarshal([]byte(s.Image), &images)
+
+	for i := range images {
+		images[i].URL = "/images/" + images[i].Filename
+	}
+
+	json.Unmarshal([]byte(s.SourceImage), &images)
 
 	for i := range images {
 		images[i].URL = "/images/" + images[i].Filename
