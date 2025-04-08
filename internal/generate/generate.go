@@ -133,6 +133,7 @@ func WriteTypesIndexes() error {
 	return nil
 }
 
+// WriteThemesIndexes generates the theme index pages and writes them to the out/themes directory.
 func WriteThemesIndexes() error {
 	log.Println("Starting themes generation")
 	themes := store.GetThemes()
