@@ -142,7 +142,7 @@ func calculateHash(data []byte) string {
 
 // DownloadFile retrieves an image from the given URL and saves it to both the filesystem
 // and database. It skips download if an identical image already exists.
-func DownloadFile(db *sql.DB, storyID string, url, filename string) error {
+func DownloadFile(storyID string, url, filename string) error {
 	var newFilePath = "images/" + filename
 
 	fmt.Printf("Downloading %s\n", filename)
@@ -174,7 +174,7 @@ func DownloadFile(db *sql.DB, storyID string, url, filename string) error {
 }
 
 func main() {
-	dbPath := "airtable-export.db"
+	dbPath := "airtable-export-new.db"
 
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		fmt.Println("Error: airtable-export.db does not exist. Please create it by exporting the Airtable database using the instructions in the README.")
@@ -187,13 +187,13 @@ func main() {
 		return
 	}
 
-	fmt.Println("At end of processing, found", len(results), "images in total")
+	fmt.Println("At end of processing, found", len(results), "images in total – beginning download process")
 
-	// for _, result := range results {
-	// 	err := DownloadFile(db, result.StoryID, result.Image.URL, result.Image.Filename)
+	for _, result := range results {
+		err := DownloadFile(result.StoryID, result.Image.URL, result.Image.Filename)
 
-	// 	if err != nil {
-	// 		fmt.Println("Error downloading file:", err)
-	// 	}
-	// }
+		if err != nil {
+			fmt.Println("Error downloading file:", err)
+		}
+	}
 }
