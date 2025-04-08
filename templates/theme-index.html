@@ -1,25 +1,33 @@
 <head>
-	<title>{{.Title}} Type</title>
+    <title>{{.Title}} Type</title>
     <style>
-        .story {
-            margin-bottom: 20px;
+        .story img {
+            max-width: 300px;
+            height: auto;
+        }
+
+        .stories-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
+            gap: 10px;
         }
     </style>
 </head>
+
 <body>
     <h1>{{.Title}} - A theme in the Dudley People's School for Climate Justice</h1>
     <p>{{.Description}}</p>
-    <div>
+    <div class="stories-list">
         {{range .Stories}}
-            <div class="story">
-                <div>{{.Finding}}</div>
-                <div>{{.Location}}</div>
-                <div>{{.StartDateTime}} - {{.EndDateTime}}</div>
-                <div>{{.Season}} {{.Weather}}</div>
-                <div>{{.StreetDetectoristClue}}</div>
-                <div>{{.Themes}}</div>
-                <div>{{.Experience}}</div>
-            </div>
+        <div class="story">
+            {{ with .GetStoryImage }}
+            {{ if .URL }}
+            <img src="{{.URL}}" alt="{{.AlternativeText}}">
+            {{ else }}
+            <div>No image</div>
+            {{ end }}
+            {{ end }}
+        </div>
         {{end}}
     </div>
 </body>
