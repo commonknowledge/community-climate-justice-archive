@@ -21,6 +21,7 @@ type Image struct {
 }
 
 // StoryImage associates a story ID with its image data and finding.
+// Finding represents the context or description of the image within the story.
 type StoryImage struct {
 	StoryID string
 	Image   Image
@@ -28,6 +29,8 @@ type StoryImage struct {
 }
 
 // FetchImagesFromDB retrieves all images from the database and returns them as StoryImage structs.
+// It queries both the "Image" and "Source Image" fields from the Stories table.
+// Returns a slice of StoryImage structs and any error encountered during the process.
 func FetchImagesFromDB(dbPath string) ([]StoryImage, error) {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -135,13 +138,15 @@ func FetchImagesFromDB(dbPath string) ([]StoryImage, error) {
 }
 
 // calculateHash returns a SHA-256 hash of the provided data as a hex string.
+// This is used to verify the integrity of downloaded images.
 func calculateHash(data []byte) string {
 	hash := sha256.Sum256(data)
 	return hex.EncodeToString(hash[:])
 }
 
-// DownloadFile retrieves an image from the given URL and saves it to both the filesystem
-// and database. It skips download if an identical image already exists.
+// DownloadFile retrieves an image from the given URL and saves it to the filesystem.
+// It downloads the image from the provided URL and saves it to the "images/" directory
+// with the specified filename. The storyID is used for logging purposes.
 func DownloadFile(storyID string, url, filename string) error {
 	var newFilePath = "images/" + filename
 
