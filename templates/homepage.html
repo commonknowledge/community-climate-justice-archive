@@ -24,6 +24,18 @@
             list-style-type: none;
             text-transform: lowercase;
         }
+
+        .stories-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .story {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 300px;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +55,19 @@
     </ul>
 
     <h2>Wander through our archive</h2>
-    <div>{{range .Images}}
-        <a href="images/{{.Filename}}"><img src="images/{{.Filename}}" alt="{{.AlternativeText}}" width="200"></a>{{end}}
+    <div class="stories-list">{{range .Stories}}
+        <div class="story">
+            <div>{{.Finding}}</div>
+            <div>{{.Location}}</div>
+            <div>{{.StartDateTime}} - {{.EndDateTime}}</div>
+            <div>{{.Season}} {{.Weather}}</div>
+            <div>{{.StreetDetectoristClue}}</div>
+            <div>{{.Themes}}</div>
+            <div>{{.Experience}}</div>
+            {{with .GetStoryImage}}
+            <img src="{{.URL}}" alt="{{.AlternativeText}}">
+            <div>{{.Type}} {{.Size}} {{.Width}} {{.Height}}</div>
+            {{end}}
+        </div>{{end}}
     </div>
 </body>
