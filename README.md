@@ -42,7 +42,7 @@ This takes a SQLite export of the Airtable database and downloads all of the ima
 3. Run the following command to export the table to a SQLite database:
 
 ```bash
-airtable-to-sqlite --personal-access-token <your-token> --table-id <your-table-id> --output airtable-export.db
+airtable-to-sqlite --personal-access-token <your-token> --output airtable-export.db <your-table-id>
 ```
 
 This will create a file called `airtable-export.db` in the current directory. The `dump-images-from-airtable` program expects this file to be present in the root of the repository.
