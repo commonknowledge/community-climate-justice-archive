@@ -1,5 +1,4 @@
-// Package generate provides asset copying functionality for the Dudley People's School for Climate Justice website.
-// This file contains functions for copying CSS and image files to the output directory.
+// assets.go contains functions for copying CSS and image files to the output directory at out/.
 package generate
 
 import (
