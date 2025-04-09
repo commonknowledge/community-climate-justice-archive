@@ -19,6 +19,10 @@ import (
 func regenerate() error {
 	log.Println("Starting build process")
 
+	if err := generate.WriteStories(); err != nil {
+		return fmt.Errorf("failed to write stories: %v", err)
+	}
+
 	if err := generate.WriteHomePage(); err != nil {
 		return fmt.Errorf("failed to write homepage: %v", err)
 	}

@@ -24,11 +24,66 @@
             list-style-type: none;
             text-transform: lowercase;
         }
+
+        .story img {
+            max-width: 300px;
+            height: auto;
+        }
+        
+        .stories-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
+            gap: 10px;
+            visibility: hidden;
+        }
+
+        .stories-list.visible {
+            visibility: visible;
+        }
     </style>
+    <script>
+        // Shuffle the stories list
+        // This contains a lot of optimisations to make this feel faster.
+        // It feels a bit propeller-headed to do this but overall makes the page feel more responsive.
+        function shuffleStories() {
+            // Cache the stories list element
+            const storiesList = document.querySelector('.stories-list');
+
+            // Use Array.prototype.slice.call for faster array creation from NodeList
+            const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
+            const len = stories.length;
+            
+            // Fisher-Yates shuffle in place
+            for (let i = len - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [stories[i], stories[j]] = [stories[j], stories[i]];
+            }
+
+            // Use DocumentFragment for batch operations
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < len; i++) {
+                fragment.appendChild(stories[i]);
+            }
+            
+            // Make visible before DOM update
+            storiesList.style.visibility = 'visible';
+
+            // Single DOM operation to replace all children
+            storiesList.textContent = '';
+            
+            storiesList.appendChild(fragment);
+        }
+
+        function pageLoaded() {
+            shuffleStories();
+        }
+
+        window.addEventListener('load', pageLoaded);
+    </script>
 </head>
 <body>
     <header>
-        <h1>Dudley People's School for Climate Justice</h1>   
+        <h1>Dudley People's School for Climate Justice</h1>
         <p>Time Portal</p>
     </header>
 
@@ -43,7 +98,16 @@
     </ul>
 
     <h2>Wander through our archive</h2>
-    <div>{{range .Images}}
-        <a href="images/{{.Filename}}"><img src="images/{{.Filename}}" alt="{{.AlternativeText}}" width="200"></a>{{end}}
+    <div class="stories-list">{{range .Stories}}
+        {{$story := .}}
+        <div class="story">
+            {{with .GetStoryImage}}
+            {{ if .URL }}
+            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+            {{ else }}
+            <div>No image</div>
+            {{ end }}
+            {{end}}
+        </div>{{end}}
     </div>
 </body>
