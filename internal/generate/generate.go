@@ -13,6 +13,7 @@ import (
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/store"
+	"community-climate-justice-archive/internal/util"
 )
 
 // CopyImagesToOutput copies all images from the images directory to the out/images directory.
@@ -90,9 +91,8 @@ func createThemeIndexOutputPathFromTitle(title string) string {
 
 // createStoryOutputPathFromFinding creates a path to the output file for a story page.
 func createStoryOutputPathFromFinding(finding string) string {
-	lowerCaseFinding := strings.ToLower(finding)
-	truncatedFinding := lowerCaseFinding[:10]
-	fileName := fmt.Sprintf("%s.html", truncatedFinding)
+	slug := util.Slugify(finding)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "stories", fileName)
 }
 
@@ -159,7 +159,7 @@ func WriteStories() error {
 	for _, storyInQuestion := range stories {
 		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
 
-		log.Printf("Writing types %s to %s", storyInQuestion.Finding, outputPath)
+		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
 
 		file, err := os.Create(outputPath)
 
@@ -178,7 +178,7 @@ func WriteStories() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote types to %s", outputPath)
+		log.Printf("Successfully wrote story to %s", outputPath)
 	}
 
 	return nil
