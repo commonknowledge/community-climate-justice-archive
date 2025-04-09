@@ -90,7 +90,7 @@ type Story struct {
 }
 
 // GetStoryImage returns the image for a story.
-func (s *Story) GetStoryImages() []StoryImage {
+func (s Story) GetStoryImages() []StoryImage {
 	// The image is stored as a following JSON blob format from Airtable:
 	// [
 	//   {
@@ -143,7 +143,7 @@ func (s *Story) GetStoryImages() []StoryImage {
 	return images
 }
 
-func (s *Story) GetStoryImage() StoryImage {
+func (s Story) GetStoryImage() StoryImage {
 	images := s.GetStoryImages()
 	if len(images) > 0 {
 		log.Println("Found", len(images), "images for story", images[0].URL)

@@ -4,5 +4,13 @@
 </head>
 
 <body>
-    <h1>{{.Title}} - A story in the Dudley People's School for Climate Justice</h1>
+    {{$story := .Story}}
+    {{with $story.GetStoryImage}}
+    {{if .URL}}
+    <img src="{{.URL}}" alt="{{.AlternativeText}}">
+    {{else}}
+    <div>No image</div>
+    {{end}}
+    {{end}}
+    <h1>{{.Title}}</h1>
 </body>
