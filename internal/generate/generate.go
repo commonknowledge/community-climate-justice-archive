@@ -141,6 +141,49 @@ func WriteTypesIndexes() error {
 	return nil
 }
 
+// WriteStories generates a story page for each story and writes them to the out/stories directory.
+func WriteStories() error {
+	log.Println("Starting story generation")
+	stories := store.GetAllStories()
+
+	tmpl, err := template.ParseFiles("templates/story.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse story template: %w", err)
+	}
+
+	err = os.MkdirAll("out/stories", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output stories directory: %w", err)
+	}
+
+	for _, storyInQuestion := range stories {
+		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
+
+		log.Printf("Writing types %s to %s", storyInQuestion.Finding, outputPath)
+
+		file, err := os.Create(outputPath)
+
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		err = tmpl.Execute(file, data.StoryPage{
+			Title:       storyInQuestion.Finding,
+			Description: "A story that says:" + storyInQuestion.Finding,
+			Story:       storyInQuestion,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote types to %s", outputPath)
+	}
+
+	return nil
+}
+
 // WriteThemesIndexes generates the theme index pages and writes them to the out/themes directory.
 func WriteThemesIndexes() error {
 	log.Println("Starting themes generation")
