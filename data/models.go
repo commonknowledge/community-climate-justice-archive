@@ -20,6 +20,12 @@ type TaxonomyIndexPage struct {
 	Stories     []Story
 }
 
+type StoryPage struct {
+	Title       string
+	Description string
+	Story       Story
+}
+
 type Theme struct {
 	Title string
 	URL   string
