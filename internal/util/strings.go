@@ -1,6 +1,7 @@
 package util
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -58,9 +59,7 @@ func Slugify(s string) string {
 	}, s)
 
 	// Replace multiple hyphens with single hyphen
-	for strings.Contains(s, "--") {
-		s = strings.ReplaceAll(s, "--", "-")
-	}
+	s = regexp.MustCompile(`-+`).ReplaceAllString(s, "-")
 
 	// Trim hyphens from start and end
 	return strings.Trim(s, "-")
