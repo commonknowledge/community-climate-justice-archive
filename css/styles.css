@@ -1,6 +1,7 @@
 /* Global styles */
 body {
     font-family: 'Times New Roman', serif;
+    background-color: #FFFBF9;
 }
 
 /* Header styles */
@@ -47,11 +48,17 @@ header p {
 
 /* Story page specific styles */
 .story-image {
-    max-width: 60vw;
+    width: 60rem;
     height: auto;
 }
 
 .story-details {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.story-image-container {
     display: flex;
     flex-direction: row;
     gap: 1rem;
