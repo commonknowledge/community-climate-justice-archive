@@ -86,6 +86,7 @@ type Story struct {
 	InstaText               string
 	InstaCount              string
 	InstaImage              string
+	URL                     string
 }
 
 // GetStoryImage returns the image for a story.
