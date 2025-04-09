@@ -5,10 +5,21 @@ import (
 	"database/sql"
 	"log"
 
+	"fmt"
+	"path/filepath"
+
 	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
+	"community-climate-justice-archive/internal/util"
 )
+
+// CreateStoryURLFromFinding creates a URL to the output file for a story page.
+func CreateStoryURLFromFinding(finding string) string {
+	slug := util.Slugify(finding)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("/stories", fileName)
+}
 
 func GetAllStories() []data.Story {
 	db, err := sql.Open("sqlite3", "airtable-export.db")
@@ -65,7 +76,11 @@ func GetAllStories() []data.Story {
 			log.Fatalf("Failed to scan story: %v", err)
 		}
 
-		stories = append(stories, dto.ToStory())
+		story := dto.ToStory()
+
+		story.URL = CreateStoryURLFromFinding(story.Finding)
+
+		stories = append(stories, story)
 	}
 
 	return stories
