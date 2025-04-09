@@ -20,9 +20,10 @@
     <div class="stories-list">
         {{range .Stories}}
         <div class="story">
+            {{$story := .}}
             {{ with .GetStoryImage }}
             {{ if .URL }}
-            <img src="{{.URL}}" alt="{{.AlternativeText}}">
+            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
             {{ else }}
             <div>No image</div>
             {{ end }}

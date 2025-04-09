@@ -24,7 +24,7 @@
             list-style-type: none;
             text-transform: lowercase;
         }
-        
+
         .story img {
             max-width: 300px;
             height: auto;
@@ -55,10 +55,11 @@
 
     <h2>Wander through our archive</h2>
     <div class="stories-list">{{range .Stories}}
+        {{$story := .}}
         <div class="story">
             {{with .GetStoryImage}}
             {{ if .URL }}
-            <img src="{{.URL}}" alt="{{.AlternativeText}}">
+            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
             {{ else }}
             <div>No image</div>
             {{ end }}

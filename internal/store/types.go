@@ -85,7 +85,10 @@ func GetStoriesForType(typeTitle string) []data.Story {
 			log.Fatalf("Failed to scan story: %v", err)
 		}
 
-		stories = append(stories, dto.ToStory())
+		story := dto.ToStory()
+		story.URL = CreateStoryURLFromFinding(story.Finding)
+
+		stories = append(stories, story)
 	}
 
 	return stories
