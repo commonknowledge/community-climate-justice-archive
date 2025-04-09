@@ -31,6 +31,10 @@ func regenerate() error {
 		return fmt.Errorf("failed to copy images: %v", err)
 	}
 
+	if err := generate.CopyCSSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy CSS: %v", err)
+	}
+
 	if err := generate.WriteTypesIndexes(); err != nil {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}

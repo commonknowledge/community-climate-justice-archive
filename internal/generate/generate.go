@@ -17,6 +17,40 @@ import (
 	"community-climate-justice-archive/internal/util"
 )
 
+// CopyCSSToOutput copies the CSS file to the out/css directory.
+func CopyCSSToOutput() error {
+	log.Println("Starting CSS copy process")
+
+	srcPath := "css/styles.css"
+	dstPath := "out/css/styles.css"
+
+	err := os.MkdirAll("out/css", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output CSS directory: %w", err)
+	}
+
+	src, err := os.Open(srcPath)
+	if err != nil {
+		return fmt.Errorf("failed to open source CSS file %s: %w", srcPath, err)
+	}
+	defer src.Close()
+
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return fmt.Errorf("failed to create destination CSS file %s: %w", dstPath, err)
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		return fmt.Errorf("failed to copy CSS file %s: %w", srcPath, err)
+	}
+
+	log.Printf("Successfully copied CSS file to %s", dstPath)
+
+	return nil
+}
+
 // CopyImagesToOutput copies all images from the images directory to the out/images directory.
 func CopyImagesToOutput() error {
 	log.Println("Starting image copy process")
