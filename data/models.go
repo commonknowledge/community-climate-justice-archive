@@ -24,6 +24,8 @@ type StoryPage struct {
 	Title       string
 	Description string
 	Story       Story
+	LastStory   Story
+	NextStory   Story
 }
 
 type Theme struct {

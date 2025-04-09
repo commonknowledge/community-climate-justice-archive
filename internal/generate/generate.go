@@ -97,7 +97,9 @@ func WriteStories() error {
 		return fmt.Errorf("failed to create output stories directory: %w", err)
 	}
 
-	for _, storyInQuestion := range stories {
+	totalStories := len(stories)
+
+	for i, storyInQuestion := range stories {
 		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
 
 		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
@@ -109,10 +111,30 @@ func WriteStories() error {
 		}
 		defer file.Close()
 
+		// Get previous story, wrapping to the end if at the beginning
+		var previousStory data.Story
+		if i > 0 {
+			previousStory = stories[i-1]
+		} else {
+			// If this is the first story, the previous is the last story
+			previousStory = stories[totalStories-1]
+		}
+
+		// Get next story, wrapping to the beginning if at the end
+		var nextStory data.Story
+		if i < totalStories-1 {
+			nextStory = stories[i+1]
+		} else {
+			// If this is the last story, the next is the first story
+			nextStory = stories[0]
+		}
+
 		err = tmpl.Execute(file, data.StoryPage{
 			Title:       storyInQuestion.Finding,
 			Description: "A story that says:" + storyInQuestion.Finding,
 			Story:       storyInQuestion,
+			LastStory:   previousStory,
+			NextStory:   nextStory,
 		})
 
 		if err != nil {
