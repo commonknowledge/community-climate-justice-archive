@@ -1,16 +1,92 @@
 <head>
     <title>{{.Title}} - A story in the Dudley People's School for Climate Justice</title>
     <meta name="description" content="{{.Description}}">
+    <style>
+        .story-image {
+            max-width: 60vw;
+            height: auto;
+        }
+    </style>
 </head>
 
 <body>
     {{$story := .Story}}
     {{with $story.GetStoryImage}}
     {{if .URL}}
-    <img src="{{.URL}}" alt="{{.AlternativeText}}">
+    <img class="story-image" src="{{.URL}}" alt="{{.AlternativeText}}">
     {{else}}
     <div>No image</div>
     {{end}}
     {{end}}
-    <h1>{{.Title}}</h1>
+    <div>
+        <h1>{{$story.Finding}}</h1>
+    </div>
+    <div class="story-metadata">
+        {{if or $story.StartDateTime $story.EndDateTime}}
+        <div>
+            <span>Date</span>
+            <span>{{$story.StartDateTime}}{{if $story.EndDateTime}} - {{$story.EndDateTime}}{{end}}</span>
+        </div>
+        {{end}}
+        {{if or $story.StartDateTime $story.EndDateTime}}
+        <div>
+            <span>Date</span>
+            <span>{{$story.StartDateTime}}{{if and $story.StartDateTime $story.EndDateTime}} - {{end}}{{$story.EndDateTime}}</span>
+        </div>
+        {{end}}
+        {{if $story.Location}}
+        <div>
+            <span>Location</span>
+            <span>{{$story.Location}}</span>
+        </div>
+        {{end}}
+        {{if $story.Season}}
+        <div>
+            <span>Season</span>
+            <span>{{$story.Season}}</span>
+        </div>
+        {{end}}
+        {{if $story.Weather}}
+        <div>
+            <span>Weather</span>
+            <span>{{$story.Weather}}</span>
+        </div>
+        {{end}}
+        {{if $story.StreetDetectoristClue}}
+        <div>
+            <span>Street Detectorist Clue</span>
+            <span>{{$story.StreetDetectoristClue}}</span>
+        </div>
+        {{end}}
+        {{if $story.Themes}}
+        <div>
+            <span>Themes</span>
+            <span>{{$story.Themes}}</span>
+        </div>
+        {{end}}
+        {{if $story.Experience}}
+        <div>
+            <span>Experience</span>
+            <span>{{$story.Experience}}</span>
+        </div>
+        {{end}}
+        {{if $story.TimeSpan}}
+        <div>
+            <span>Time Span</span>
+            <span>{{$story.TimeSpan}}</span>
+        </div>
+        {{end}}
+        {{if $story.OtherComments}}
+        <div>
+            <span>Other Comments</span>
+            <span>{{$story.OtherComments}}</span>
+        </div>
+        {{end}}
+        {{if $story.PersonFinder}}
+        <div>
+            <span>Person Finder</span>
+            <span>{{$story.PersonFinder}}</span>
+        </div>
+        {{end}}
+    </div>
 </body>
