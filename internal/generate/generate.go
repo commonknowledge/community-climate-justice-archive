@@ -88,6 +88,14 @@ func createThemeIndexOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "themes", fileName)
 }
 
+// createStoryOutputPathFromFinding creates a path to the output file for a story page.
+func createStoryOutputPathFromFinding(finding string) string {
+	lowerCaseFinding := strings.ToLower(finding)
+	truncatedFinding := lowerCaseFinding[:10]
+	fileName := fmt.Sprintf("%s.html", truncatedFinding)
+	return filepath.Join("out", "stories", fileName)
+}
+
 // WriteTypesIndexes generates the type index pages and writes them to the out/types directory.
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
