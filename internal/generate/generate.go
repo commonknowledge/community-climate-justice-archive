@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -235,6 +236,14 @@ func WriteHomePage() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	stories := store.GetAllStories()
+
+	// Only give the template the first 40 stories
+	stories = stories[:40]
+
+	// Shuffle the stories
+	rand.Shuffle(len(stories), func(i, j int) {
+		stories[i], stories[j] = stories[j], stories[i]
+	})
 
 	page := data.Page{
 		Title:       "Dudley People's School for Climate Justice – time portal",
