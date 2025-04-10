@@ -106,6 +106,13 @@ header p {
     color: #000;
 }
 
+.story-metadata-item-value.tags {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.55556rem;
+}
+
 .story-details {
     display: flex;
     flex-direction: row;
