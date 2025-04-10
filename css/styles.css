@@ -56,14 +56,18 @@ header p {
     font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 140%; /* 1.71111rem */
+    line-height: 140%;
+    /* 1.71111rem */
     letter-spacing: -0.01222rem;
 }
 
 /* Tag styles */
 
 /* A list of tags used on homepage and indexes for tags */
-.tag-list-header, .wander-through-archive-header, .theme-index-header {
+.tag-list-header,
+.wander-through-archive-header,
+.theme-index-header,
+.type-index-header {
     color: #000;
     font-family: "Times New Roman";
     font-size: 1.77778rem;
@@ -99,7 +103,8 @@ By default, this is a small tag for metadata in story views.
 */
 .tag {
     align-items: center;
-    background-color: #000; /* Default black, often overridden with dynamic colors using style attribute */
+    background-color: #000;
+    /* Default black, often overridden with dynamic colors using style attribute */
     color: #FFF;
     display: flex;
     font-family: Arial;
@@ -254,7 +259,7 @@ Stories are hidden by default until JavaScript randomizes them
     display: flex;
     flex-direction: column;
     gap: 0.27778rem;
-} 
+}
 
 .related-stories-container {
     display: flex;
@@ -262,6 +267,7 @@ Stories are hidden by default until JavaScript randomizes them
     gap: 6.66667rem;
     padding-left: 2.22222rem;
     padding-right: 2.22222rem;
+    margin-bottom: 6.66667rem;
 }
 
 .related-story-image {
@@ -287,7 +293,7 @@ Stories are hidden by default until JavaScript randomizes them
     font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 140%; /* 1.71111rem */
+    line-height: 140%;
     letter-spacing: -0.01222rem;
     text-transform: lowercase;
     margin-bottom: 1.11111rem;
@@ -303,12 +309,88 @@ Stories are hidden by default until JavaScript randomizes them
     flex-shrink: 0;
 }
 
-.theme-index-header {
+.theme-index-header,
+.type-index-header {
     margin-bottom: 4rem;
 }
 
-.theme-index-header .tag {
+.theme-index-header .tag,
+.type-index-header .tag {
     display: inline-block;
     margin-right: 1rem;
 }
 
+.theme-index-description,
+.type-index-description {
+    margin-bottom: 4rem;
+}
+
+footer {
+    padding: 5.55556rem 2.22222rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+footer address {
+    color: #000;
+
+    /* Small */
+    font-family: Arial;
+    font-size: 0.77778rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%; /* 1.08889rem */
+    letter-spacing: -0.00778rem;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+}
+
+.footer-content {
+    color: #000;
+    font-family: "Times New Roman";
+    font-size: 1.77778rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.03556rem;
+    width: 43.72222rem;
+}
+
+.footer-content div {
+    margin-bottom: 1.11111rem;
+}
+
+.compilation-information {
+    color: var(--Black, #000);
+    font-family: Arial;
+    font-size: 0.77778rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%; /* 1.08889rem */
+    letter-spacing: -0.00778rem;
+    margin-top: 2.22222rem;
+}
+
+.dashed-button {
+    align-items: center;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    color: var(--Black, #000);
+    display: flex;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    line-height: 140%; /* 1.71111rem */
+    padding: 0.27778rem 0.55556rem;
+    text-decoration: none;
+    width: max-content;
+}
