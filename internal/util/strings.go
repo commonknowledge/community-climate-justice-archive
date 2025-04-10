@@ -15,6 +15,8 @@ func TruncateString(s string, maxLength int) string {
 	return s[:maxLength]
 }
 
+// Slugify a string, downcasing it, removing special characters, and replacing spaces with hyphens.
+// For example, "Climate Change" becomes "climate-change".
 func Slugify(s string) string {
 	s = TruncateString(s, 100)
 
