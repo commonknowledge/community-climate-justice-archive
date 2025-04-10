@@ -119,9 +119,10 @@ func WriteTypesIndexes() error {
 		stories := store.GetStoriesForType(typeInQuestion.Title)
 
 		err = tmpl.Execute(file, data.TaxonomyIndexPage{
-			Title:       typeInQuestion.Title,
-			Description: "A list of stories for the type " + typeInQuestion.Title,
-			Stories:     stories,
+			Title:          typeInQuestion.Title,
+			Description:    "A list of stories for the type " + typeInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: typeInQuestion.Colour,
 		})
 
 		if err != nil {
@@ -244,9 +245,10 @@ func WriteThemesIndexes() error {
 		stories := store.GetStoriesForTheme(themeInQuestion.Title)
 
 		err = tmpl.Execute(file, data.TaxonomyIndexPage{
-			Title:       themeInQuestion.Title,
-			Description: "A list of stories for the theme " + themeInQuestion.Title,
-			Stories:     stories,
+			Title:          themeInQuestion.Title,
+			Description:    "A list of stories for the theme " + themeInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: themeInQuestion.Colour,
 		})
 
 		if err != nil {

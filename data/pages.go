@@ -10,9 +10,10 @@ type Page struct {
 }
 
 type TaxonomyIndexPage struct {
-	Title       string
-	Description string
-	Stories     []Story
+	Title          string
+	Description    string
+	Stories        []Story
+	TaxonomyColour string
 }
 
 type StoryPage struct {
