@@ -1,4 +1,8 @@
 /* Global styles */
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
@@ -8,26 +12,84 @@ body {
     overflow-x: hidden;
 }
 
+header.homepage {
+    margin-left: 1.11111rem;
+    margin-right: 1.11111rem;
+}
+
+.homepage-content {
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+}
+
 /* Header styles */
 header {
     align-items: center;
     display: flex;
     font-family: Arial, sans-serif;
     justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    color: var(--Black, #000);
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.01222rem;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
 }
 
 header p {
     text-transform: lowercase;
+    color: var(--Black, #000);
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%; /* 1.71111rem */
+    letter-spacing: -0.01222rem;
 }
 
 /* Tag styles */
 
 /* A list of tags used on homepage and indexes for tags */
+.tag-list-header, .wander-through-archive-header, .theme-index-header {
+    color: #000;
+    font-family: "Times New Roman";
+    font-size: 1.77778rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.03556rem;
+}
+
+.wander-through-archive-header {
+    margin-bottom: 4rem;
+}
+
 .tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     list-style-type: none;
+}
+
+.tag-list-container {
+    margin-bottom: 6.66667rem;
+}
+
+ul.tag-list {
+    padding-inline-start: 0;
 }
 
 /* 
@@ -76,17 +138,20 @@ A large tag - prominent version used on homepage and in taxonomy headers
     /* 
     A grid layout for collections of stories, which has a responsive 3-column layout.
 
-    The calc((100% - 20px) / 3) part ensures each column takes up one-third of the available space,
-    minus the total gap space (20px) divided among the columns. This prevents overflow due to gaps.
+    The calc((100% - 11.11112rem) / 3) part ensures each column takes up one-third of the available space,
+    minus the total gap space (11.11112rem) divided among the columns. This prevents overflow due to gaps.
     
     The minmax() function sets a size range - the minimum is either 100% (on very small screens) or
     our calculated third-width (on larger screens), and the maximum is 1fr.
     
     1fr means "1 fractional unit" - it's a flexible unit that divides up the remaining space.
     When used with repeat(auto-fill), it allows columns to grow/shrink fluidly while maintaining equal widths.
+
+    The gap property creates equal spacing between grid items both horizontally and vertically.
+    The 5.55556rem value creates consistent, proportional spacing that matches our design system.
     */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 11.11112rem) / 3)), 1fr));
+    gap: 5.55556rem;
 }
 
 /* Homepage specific styles */
@@ -237,3 +302,13 @@ Stories are hidden by default until JavaScript randomizes them
     padding: 0 1.82rem;
     flex-shrink: 0;
 }
+
+.theme-index-header {
+    margin-bottom: 4rem;
+}
+
+.theme-index-header .tag {
+    display: inline-block;
+    margin-right: 1rem;
+}
+

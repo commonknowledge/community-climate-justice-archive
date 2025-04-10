@@ -43,32 +43,38 @@
     </script>
 </head>
 <body>
-    <header>
+    <header class="homepage">
         <h1>Dudley People's School for Climate Justice</h1>
         <p>Time Portal</p>
     </header>
 
-    <h2>Themes</h2>
-    <ul class="tag-list">{{range .Themes}}
-        <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-    </ul>
+    <div class="homepage-content">
+        <div class="tag-list-container">
+            <h2 class="tag-list-header">Themes</h2>
+            <ul class="tag-list">{{range .Themes}}
+                <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
 
-    <h2>Types</h2>
-    <ul class="tag-list">{{range .Types}}
-        <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-    </ul>
+        <div class="tag-list-container">
+            <h2 class="tag-list-header">Types</h2>
+            <ul class="tag-list">{{range .Types}}
+                <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
 
-    <h2>Wander through our archive</h2>
-    <div class="stories-list homepage">{{range .Stories}}
-        {{$story := .}}
-        <div class="story">
-            {{with .GetStoryImage}}
-            {{ if .URL }}
-            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
-            {{ else }}
-            <div>No image</div>
-            {{ end }}
-            {{end}}
-        </div>{{end}}
+        <h2 class="wander-through-archive-header">Wander through our archive</h2>
+        <div class="stories-list homepage">{{range .Stories}}
+            {{$story := .}}
+            <div class="story">
+                {{with .GetStoryImage}}
+                {{ if .URL }}
+                <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                {{ else }}
+                <div>No image</div>
+                {{ end }}
+                {{end}}
+            </div>{{end}}
+        </div>
     </div>
 </body>
