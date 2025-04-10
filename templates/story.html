@@ -9,7 +9,7 @@
     {{with $story.GetStoryImage}}
     {{if .URL}}
     <div class="story-image-container">
-        <div>
+        <div class="story-nav-arrow">
             <a href="{{$.LastStory.URL}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
                     <path
@@ -19,7 +19,7 @@
             </a>
         </div>
         <img class="story-image" src="{{.URL}}" alt="{{.AlternativeText}}">
-        <div>
+        <div class="story-nav-arrow">
             <a href="{{$.NextStory.URL}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
                     <path
@@ -42,7 +42,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Type</span>
                 <span class="story-metadata-item-value tags">
-                    {{range $story.Type}}<a class="tag" href="{{.URL}}"style="background-color: {{.Colour}};">{{.Title}}</a>
+                    {{range $story.Type}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
