@@ -1,10 +1,45 @@
 package util
 
 import (
+	"log"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 )
+
+// FormatDate formats a date string to a human readable format.
+//
+// For example, "2025-03-10T10:00:00Z" becomes "Monday 10 March 2025".
+func FormatDate(dateString string) string {
+	if dateString == "" {
+		return ""
+	}
+
+	parsedTime, err := time.Parse(time.RFC3339, dateString)
+
+	if err != nil {
+		// Handle the error
+		log.Printf("Failed to parse date: %v", err)
+	}
+
+	// Go has an interesting way of formatting dates.
+	// https://pkg.go.dev/time#Time.Format
+	//
+	// You provide an example format of dates that you want to display, and it will format the date to match this.
+	//
+	// For example, "Monday 10 March 2006" as example format will display the date you give it in the same format.
+	//
+	// However, you need to use the reference time "Mon Jan 2 15:04:05 MST 2006" to structure this. Any other date won't work.
+	//
+	// This is a nice pragmatic language feature as remembering the formatting of dates in other languages is a pain.
+	// For example, to do the same in PHP, you'd have to do this:
+	//
+	// $date = date('l jS F Y', strtotime($dateString));
+	//
+	// Which is a pain!
+	return parsedTime.Format("Monday 2 January 2006")
+}
 
 // Safe way to truncate a string to maxLength characters
 func TruncateString(s string, maxLength int) string {
@@ -16,6 +51,7 @@ func TruncateString(s string, maxLength int) string {
 }
 
 // Slugify a string, downcasing it, removing special characters, and replacing spaces with hyphens.
+//
 // For example, "Climate Change" becomes "climate-change".
 func Slugify(s string) string {
 	s = TruncateString(s, 100)

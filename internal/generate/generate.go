@@ -180,6 +180,10 @@ func WriteStories() error {
 			nextStory = stories[0]
 		}
 
+		// Reformat the date fields to be more human readable
+		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
+		storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+
 		err = tmpl.Execute(file, data.StoryPage{
 			Title:       storyInQuestion.Finding,
 			Description: "A story that says:" + storyInQuestion.Finding,
