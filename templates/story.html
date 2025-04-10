@@ -42,7 +42,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Type</span>
                 <span class="story-metadata-item-value tags">
-                    {{range $story.Type}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                    {{range $story.Type}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
@@ -69,7 +69,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Weather</span>
                 <span class="story-metadata-item-value tags">
-                    {{ range $story.Weather }}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                    {{ range $story.Weather }}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
@@ -84,7 +84,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Themes</span>
                 <span class="story-metadata-item-value tags">
-                    {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                    {{range $story.Themes}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
@@ -121,7 +121,7 @@
         <div class="related-stories-item">
             <div class="related-stories-item-title">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
                 {{if .FirstMoreTaggedStories.Tag}}
-                <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
+                <a class="tag large" href="..{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
                 {{else}}
                 <span class="tag large">unknown</span>
                 {{end}}
@@ -132,7 +132,7 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
                     {{end}}
                 </div>
             {{end}}
@@ -155,7 +155,7 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
                     {{end}}
                 </div>
             {{end}}
@@ -178,7 +178,7 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
                     {{end}}
                 </div>
             {{end}}
