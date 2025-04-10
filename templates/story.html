@@ -40,62 +40,62 @@
         <div class="story-metadata">
             {{if or $story.StartDateTime $story.EndDateTime}}
             <div class="story-metadata-item">
-                <span>Date</span>
+                <span class="story-metadata-item-label">Date</span>
                 <span>{{$story.StartDateTime}}{{if $story.EndDateTime}} - {{$story.EndDateTime}}{{end}}</span>
             </div>
             {{end}}
             {{if $story.Location}}
             <div class="story-metadata-item">
-                <span>Location</span>
-                <span>{{$story.Location}}</span>
+                <span class="story-metadata-item-label">Location</span>
+                <span class="story-metadata-item-value">{{$story.Location}}</span>
             </div>
             {{end}}
             {{if $story.Season}}
             <div class="story-metadata-item">
-                <span>Season</span>
-                <span>{{$story.Season}}</span>
+                <span class="story-metadata-item-label">Season</span>
+                <span class="story-metadata-item-value">{{$story.Season}}</span>
             </div>
             {{end}}
             {{if $story.Weather}}
             <div class="story-metadata-item">
-                <span>Weather</span>
-                <span>{{$story.Weather}}</span>
+                <span class="story-metadata-item-label">Weather</span>
+                <span class="story-metadata-item-value">{{$story.Weather}}</span>
             </div>
             {{end}}
             {{if $story.StreetDetectoristClue}}
             <div class="story-metadata-item">
-                <span>Street Detectorist Clue</span>
-                <span>{{$story.StreetDetectoristClue}}</span>
+                <span class="story-metadata-item-label">Street Detectorist Clue</span>
+                <span class="story-metadata-item-value">{{$story.StreetDetectoristClue}}</span>
             </div>
             {{end}}
             {{if $story.Themes}}
             <div class="story-metadata-item">
-                <span>Themes</span>
-                <span>{{$story.Themes}}</span>
+                <span class="story-metadata-item-label">Themes</span>
+                <span class="story-metadata-item-value">{{$story.Themes}}</span>
             </div>
             {{end}}
             {{if $story.Experience}}
             <div class="story-metadata-item">
-                <span>Experience</span>
-                <span>{{$story.Experience}}</span>
+                <span class="story-metadata-item-label">Experience</span>
+                <span class="story-metadata-item-value">{{$story.Experience}}</span>
             </div>
             {{end}}
             {{if $story.TimeSpan}}
             <div class="story-metadata-item">
-                <span>Time Span</span>
-                <span>{{$story.TimeSpan}}</span>
+                <span class="story-metadata-item-label">Time Span</span>
+                <span class="story-metadata-item-value">{{$story.TimeSpan}}</span>
             </div>
             {{end}}
             {{if $story.OtherComments}}
             <div class="story-metadata-item">
-                <span>Other Comments</span>
-                <span>{{$story.OtherComments}}</span>
+                <span class="story-metadata-item-label">Other Comments</span>
+                <span class="story-metadata-item-value">{{$story.OtherComments}}</span>
             </div>
             {{end}}
             {{if $story.PersonFinder}}
             <div class="story-metadata-item">
-                <span>Person Finder</span>
-                <span>{{$story.PersonFinder}}</span>
+                <span class="story-metadata-item-label">Person Finder</span>
+                <span class="story-metadata-item-value">{{$story.PersonFinder}}</span>
             </div>
             {{end}}
         </div>
