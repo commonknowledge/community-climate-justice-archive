@@ -107,9 +107,9 @@ go run ./cmd/archive -d
 
 This will launch a development server at [http://localhost:8080](http://localhost:8080).
 
-#### Making changes
+## Making changes
 
-##### Styling in CSS
+### Styling in CSS
 
 Edit the file `css/styles.css`.
 
@@ -117,7 +117,7 @@ If you are running the archive in development mode, then the CSS will automatica
 
 When you've made your change, simply refresh the page to see the effect.
 
-##### Templating in HTML
+### Templating in HTML
 
 The HTML templates are located in the `templates` directory. 
 
@@ -134,7 +134,7 @@ Key template features include:
 - `{{if .SomeOtherThing}}...{{end}}` for making decisions and displaying different things based on these.
 - `{{range .Stories}}...{{end}}` for looping over a group of things, in the case of the archive mostly stories.
 
-#####  Template files overview
+####  Template files overview
 
 The archive templates should be straight forward to understand what they do, but to start you off, here is a brief description of each of them.
 
