@@ -2,7 +2,7 @@
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
-    font-size: 18px;
+    font-size: 18px; /* Base size - 1rem equals 18px */
 }
 
 /* Header styles */
@@ -17,6 +17,9 @@ header p {
     text-transform: lowercase;
 }
 
+/* Tag styles */
+
+/* A list of tags used on homepage and indexes for tags */
 .tag-list {
     display: flex;
     flex-wrap: wrap;
@@ -24,9 +27,13 @@ header p {
     list-style-type: none;
 }
 
+/* 
+A single tag - used for categories, themes, types, and weather
+By default, this is a small tag for metadata in story views.
+*/
 .tag {
     align-items: center;
-    background-color: #000;
+    background-color: #000; /* Default black, often overridden with dynamic colors using style attribute */
     color: #FFF;
     display: flex;
     font-family: Arial;
@@ -43,6 +50,9 @@ header p {
     width: fit-content;
 }
 
+/* 
+A large tag - prominent version used on homepage and in taxonomy headers
+*/
 .tag.large {
     font-size: 1.22222rem;
     justify-content: center;
@@ -56,17 +66,35 @@ header p {
     height: auto;
 }
 
+/* Grid layout for collections of stories */
 .stories-list {
     display: grid;
+    /* 
+    A grid layout for collections of stories, which has a responsive 3-column layout.
+    
+    The calc((100% - 20px) / 3) part ensures each column takes up one-third of the available space,
+    minus the total gap space (20px) divided among the columns. This prevents overflow due to gaps.
+    
+    The minmax() function sets a size range - the minimum is either 100% (on very small screens) or
+    our calculated third-width (on larger screens), and the maximum is 1fr.
+    
+    1fr means "1 fractional unit" - it's a flexible unit that divides up the remaining space.
+    When used with repeat(auto-fill), it allows columns to grow/shrink fluidly while maintaining equal widths.
+    */
     grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
     gap: 10px;
 }
 
 /* Homepage specific styles */
+
+/* 
+Stories are hidden by default until JavaScript randomizes them
+*/
 .stories-list.homepage {
     visibility: hidden;
 }
 
+/* Applied via Javascript after randomization completes */
 .stories-list.homepage.visible {
     visibility: visible;
 }
@@ -77,6 +105,7 @@ header p {
     height: auto;
 }
 
+/* Main story content text */
 .story-finding {
     font-family: 'Times New Roman', serif;
     font-size: 1rem;
@@ -85,8 +114,8 @@ header p {
     letter-spacing: -0.02rem;
 }
 
+/* Metadata items - date, location, themes, etc. */
 .story-metadata-item {
-    /* Small */
     font-family: Arial;
     font-size: 0.77778rem;
     font-style: normal;
@@ -95,16 +124,19 @@ header p {
     letter-spacing: -0.00778rem;
 }
 
+/* Metadata field labels (e.g., "Date", "Location") */
 .story-metadata-item-label {
     color: rgba(0, 0, 0, 0.50);
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+/* Metadata field values */
 .story-metadata-item-value {
     color: #000;
 }
 
+/* Container for tag-based metadata like themes and types */
 .story-metadata-item-value.tags {
     display: flex;
     flex-direction: row;
@@ -112,24 +144,28 @@ header p {
     gap: 0.55556rem;
 }
 
+/* Layout container for story content and metadata */
 .story-details {
     display: flex;
     flex-direction: row;
     gap: 1rem;
 }
 
+/* Container for story image and navigation arrows */
 .story-image-container {
     display: flex;
     flex-direction: row;
     gap: 1rem;
 }
 
+/* Container for all metadata items */
 .story-metadata {
     display: flex;
     flex-direction: column;
     gap: 1.11111rem;
 }
 
+/* Individual metadata item containing label and value */
 .story-metadata-item {
     display: flex;
     flex-direction: column;
