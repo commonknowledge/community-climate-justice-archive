@@ -1,66 +1,12 @@
+// Contains the Story struct that models stories in the archive and related functions, as part of the data package.
 package data
 
 import (
+	"community-climate-justice-archive/internal/util"
 	"database/sql"
 	"encoding/json"
 	"log"
-
-	"community-climate-justice-archive/internal/util"
 )
-
-type Page struct {
-	Title       string
-	Description string
-	Themes      []Theme
-	Types       []Type
-	Stories     []Story
-}
-
-type TaxonomyIndexPage struct {
-	Title       string
-	Description string
-	Stories     []Story
-}
-
-type StoryPage struct {
-	Title       string
-	Description string
-	Story       Story
-	LastStory   Story
-	NextStory   Story
-}
-
-type Theme struct {
-	Title string
-	URL   string
-}
-
-type Type struct {
-	Title string
-	URL   string
-}
-
-type Weather struct {
-	Title string
-	URL   string
-}
-
-type StoryImage struct {
-	Filename        string
-	AlternativeText string
-	Type            string
-	Size            int
-	Width           int
-	Height          int
-	URL             string
-	Thumbnails      map[string]Thumbnail
-}
-
-type Thumbnail struct {
-	URL    string
-	Width  int
-	Height int
-}
 
 type Story struct {
 	ID                      string
@@ -96,6 +42,17 @@ type Story struct {
 	InstaCount              string
 	InstaImage              string
 	URL                     string
+}
+
+type StoryImage struct {
+	Filename        string
+	AlternativeText string
+	Type            string
+	Size            int
+	Width           int
+	Height          int
+	URL             string
+	Thumbnails      map[string]Thumbnail
 }
 
 // GetStoryImage returns the image for a story.
