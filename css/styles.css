@@ -26,6 +26,31 @@ header p {
     text-transform: lowercase;
 }
 
+.tag {
+    align-items: center;
+    color: #FFF;
+    display: flex;
+    font-family: Arial;
+    font-size: 0.77778rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.00778rem;
+    line-height: 140%;
+    padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
+    text-decoration: none;
+    text-transform: lowercase;
+    width: fit-content;
+}
+
+.tag.large {
+    font-size: 1.22222rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    padding: 0.27778rem 0.55556rem;
+}
+
 /* Story and stories list styles */
 .story img {
     max-width: 300px;

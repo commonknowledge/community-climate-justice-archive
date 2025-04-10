@@ -131,7 +131,7 @@ func GetThemes() []data.Theme {
 			}
 
 			for _, themeStr := range themeStrings {
-				newTheme := data.Theme{Title: themeStr, URL: strings.ToLower(themeStr)}
+				newTheme := data.Theme{Title: themeStr, URL: strings.ToLower(themeStr), Colour: data.TitleToHexColor(themeStr)}
 				themes = append(themes, newTheme)
 			}
 		}

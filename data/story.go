@@ -3,9 +3,13 @@ package data
 
 import (
 	"community-climate-justice-archive/internal/util"
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
+	"math"
+	"math/rand"
 )
 
 type Story struct {
@@ -171,8 +175,9 @@ func (dto *StoryDTO) ToStory() Story {
 		// Convert string array to Theme structs, constructing the URL from the title.
 		for _, themeTitle := range themeStrings {
 			themes = append(themes, Theme{
-				Title: themeTitle,
-				URL:   "/themes/" + util.Slugify(themeTitle) + ".html",
+				Title:  themeTitle,
+				URL:    "/themes/" + util.Slugify(themeTitle) + ".html",
+				Colour: TitleToHexColor(themeTitle),
 			})
 		}
 	}
@@ -192,8 +197,9 @@ func (dto *StoryDTO) ToStory() Story {
 		// Convert string array to Type structs, constructing the URL from the title.
 		for _, typeTitle := range typeStrings {
 			types = append(types, Type{
-				Title: typeTitle,
-				URL:   "/types/" + util.Slugify(typeTitle) + ".html",
+				Title:  typeTitle,
+				URL:    "/types/" + util.Slugify(typeTitle) + ".html",
+				Colour: TitleToHexColor(typeTitle),
 			})
 		}
 	}
@@ -213,8 +219,9 @@ func (dto *StoryDTO) ToStory() Story {
 		// Convert string array to Weather structs, constructing the URL from the title.
 		for _, weatherTitle := range weatherStrings {
 			weather = append(weather, Weather{
-				Title: weatherTitle,
-				URL:   "/weather/" + util.Slugify(weatherTitle) + ".html",
+				Title:  weatherTitle,
+				URL:    "/weather/" + util.Slugify(weatherTitle) + ".html",
+				Colour: TitleToHexColor(weatherTitle),
 			})
 		}
 	}
@@ -253,4 +260,55 @@ func (dto *StoryDTO) ToStory() Story {
 		InstaCount:              dto.InstaCount.String,
 		InstaImage:              dto.InstaImage.String,
 	}
+}
+
+func TitleToHexColor(title string) string {
+	// Initialize random with title's hash for deterministic output
+	titleHash := sha256.Sum256([]byte(title))
+	seed := int64(titleHash[0]) | int64(titleHash[1])<<8 | int64(titleHash[2])<<16 | int64(titleHash[3])<<24
+	randomGenerator := rand.New(rand.NewSource(seed))
+
+	// Generate hue (0-360), saturation (60-100%), brightness (60-90%)
+	hueValue := randomGenerator.Float64() * 360
+	saturationValue := 60.0 + randomGenerator.Float64()*40.0
+	brightnessValue := 60.0 + randomGenerator.Float64()*30.0
+
+	// Convert HSB to RGB
+	redValue, greenValue, blueValue := hsbToRGB(hueValue, saturationValue, brightnessValue)
+
+	// Format as hex
+	return fmt.Sprintf("#%02x%02x%02x", redValue, greenValue, blueValue)
+}
+
+// hsbToRGB converts HSB (HSV) color values to RGB
+func hsbToRGB(hue, saturation, brightness float64) (uint8, uint8, uint8) {
+	saturationNormalized := saturation / 100
+	brightnessNormalized := brightness / 100
+
+	chroma := brightnessNormalized * saturationNormalized
+	secondComponent := chroma * (1 - math.Abs(math.Mod(hue/60, 2)-1))
+	matchValue := brightnessNormalized - chroma
+
+	var redComponent, greenComponent, blueComponent float64
+
+	switch {
+	case hue < 60:
+		redComponent, greenComponent, blueComponent = chroma, secondComponent, 0
+	case hue < 120:
+		redComponent, greenComponent, blueComponent = secondComponent, chroma, 0
+	case hue < 180:
+		redComponent, greenComponent, blueComponent = 0, chroma, secondComponent
+	case hue < 240:
+		redComponent, greenComponent, blueComponent = 0, secondComponent, chroma
+	case hue < 300:
+		redComponent, greenComponent, blueComponent = secondComponent, 0, chroma
+	default:
+		redComponent, greenComponent, blueComponent = chroma, 0, secondComponent
+	}
+
+	finalRed := uint8((redComponent + matchValue) * 255)
+	finalGreen := uint8((greenComponent + matchValue) * 255)
+	finalBlue := uint8((blueComponent + matchValue) * 255)
+
+	return finalRed, finalGreen, finalBlue
 }

@@ -132,7 +132,7 @@ func GetTypes() []data.Type {
 			}
 
 			for _, typeStr := range typeStrings {
-				newType := data.Type{Title: typeStr, URL: strings.ToLower(typeStr)}
+				newType := data.Type{Title: typeStr, URL: strings.ToLower(typeStr), Colour: data.TitleToHexColor(typeStr)}
 				types = append(types, newType)
 			}
 		}

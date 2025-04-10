@@ -50,12 +50,12 @@
 
     <h2>Themes</h2>
     <ul class="taxonomy-list">{{range .Themes}}
-        <li><a href="themes/{{.URL}}.html">{{.Title}}</a></li>{{end}}
+        <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
     </ul>
 
     <h2>Types</h2>
     <ul class="taxonomy-list">{{range .Types}}
-        <li><a href="types/{{.URL}}.html">{{.Title}}</a></li>{{end}}
+        <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
     </ul>
 
     <h2>Wander through our archive</h2>

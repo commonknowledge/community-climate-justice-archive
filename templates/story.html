@@ -42,7 +42,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Type</span>
                 <span class="story-metadata-item-value">
-                    {{range $story.Type}}<a href="{{.URL}}">{{.Title}}</a>
+                    {{range $story.Type}}<a class="tag" href="{{.URL}}"style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
@@ -69,7 +69,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Weather</span>
                 <span class="story-metadata-item-value">
-                    {{ range $story.Weather }}<a href="{{.URL}}">{{.Title}}</a>
+                    {{ range $story.Weather }}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
@@ -84,7 +84,7 @@
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Themes</span>
                 <span class="story-metadata-item-value">
-                    {{range $story.Themes}}<a href="{{.URL}}">{{.Title}}</a>
+                    {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                     {{end}}
                 </span>
             </div>
