@@ -134,11 +134,11 @@ If you are running the archive in development mode, press enter to regenerate th
 
 The archive templates should be straight forward to understand what they do, but to start you off, here is a brief description of each of them.
 
-- **homepage.html**: The main landing page.
-- **story.html**: Displays individual stories with their image, details (type, date, location, etc.), and related stories.
-- **theme-index.html**: Shows all stories related to a specific theme.
-- **type-index.html**: Shows all stories of a particular type.
-- **weather-index.html**: Shows all stories that were creating in a particular weather condition.
+- [**homepage.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/homepage.html): The main landing page.
+- [**story.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/story.html): Displays individual stories with their image, details (type, date, location, etc.), and related stories.
+- [**theme-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/theme-index.html): Shows all stories related to a specific theme.
+- [**type-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/type-index.html): Shows all stories of a particular type.
+- [**weather-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/weather-index.html): Shows all stories that were creating in a particular weather condition.
 
 
 
