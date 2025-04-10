@@ -159,8 +159,8 @@ Stories are hidden by default until JavaScript randomizes them
     margin-bottom: 6.66667rem;
     margin-top: 6.66667rem;
     justify-content: space-between;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+    padding-left: 2.22222rem;
+    padding-right: 2.22222rem;
 }
 
 /* Container for story image and navigation arrows */
@@ -195,8 +195,8 @@ Stories are hidden by default until JavaScript randomizes them
     display: flex;
     flex-direction: column;
     gap: 6.66667rem;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+    padding-left: 2.22222rem;
+    padding-right: 2.22222rem;
 }
 
 .related-story-image {
