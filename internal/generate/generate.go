@@ -143,6 +143,24 @@ func extractURLsAndMakeLinks(text string) string {
 	return re.ReplaceAllString(text, `<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>`)
 }
 
+func getTagType(tag interface{}) string {
+	if tag == nil {
+		return "unknown"
+	}
+
+	switch tag.(type) {
+	case data.Theme:
+		return "theme"
+	case data.Type:
+		return "type"
+	case data.Weather:
+		return "weather"
+	default:
+		log.Printf("Unknown tag type: %v", tag)
+		return "unknown"
+	}
+}
+
 // WriteStories generates a story page for each story and writes them to the out/stories directory.
 func WriteStories() error {
 	log.Println("Starting story generation")
@@ -197,12 +215,80 @@ func WriteStories() error {
 		// For the "Other Comments" field, we want to extract the URLs and make them links
 		storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)
 
+		// Chuck all the tagged story of things into a slice
+		var allTagsWeHave []interface{}
+
+		// Convert each tag type to []interface{} before appending
+		// We aren't doing this for weather tags, yet
+		for _, theme := range storyInQuestion.Themes {
+			allTagsWeHave = append(allTagsWeHave, theme)
+		}
+
+		for _, typeTag := range storyInQuestion.Type {
+			allTagsWeHave = append(allTagsWeHave, typeTag)
+		}
+
+		var firstTag interface{}
+		var firstMoreTaggedStories []data.Story
+
+		if len(allTagsWeHave) > 0 {
+			firstTag = allTagsWeHave[0]
+			firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, 5)
+		}
+
+		var secondMoreTaggedStories []data.Story
+		var thirdMoreTaggedStories []data.Story
+
+		var secondTag interface{}
+		var thirdTag interface{}
+
+		if len(allTagsWeHave) > 1 {
+			secondTag = allTagsWeHave[1]
+			secondMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, secondTag, 5)
+		}
+
+		if len(allTagsWeHave) > 2 {
+			thirdTag = allTagsWeHave[2]
+			thirdMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, thirdTag, 5)
+		}
+
+		var firstRelated data.RelatedStories
+		var secondRelated data.RelatedStories
+		var thirdRelated data.RelatedStories
+
+		if len(firstMoreTaggedStories) > 0 && firstTag != nil {
+			firstRelated = data.RelatedStories{
+				Tag:     firstTag,
+				TagType: getTagType(firstTag),
+				Stories: firstMoreTaggedStories,
+			}
+		}
+
+		if len(secondMoreTaggedStories) > 0 && secondTag != nil {
+			secondRelated = data.RelatedStories{
+				Tag:     secondTag,
+				TagType: getTagType(secondTag),
+				Stories: secondMoreTaggedStories,
+			}
+		}
+
+		if len(thirdMoreTaggedStories) > 0 && thirdTag != nil {
+			thirdRelated = data.RelatedStories{
+				Tag:     thirdTag,
+				TagType: getTagType(thirdTag),
+				Stories: thirdMoreTaggedStories,
+			}
+		}
+
 		err = tmpl.Execute(file, data.StoryPage{
-			Title:       storyInQuestion.Finding,
-			Description: "A story that says:" + storyInQuestion.Finding,
-			Story:       storyInQuestion,
-			LastStory:   previousStory,
-			NextStory:   nextStory,
+			Title:                   storyInQuestion.Finding,
+			Description:             "A story that says:" + storyInQuestion.Finding,
+			Story:                   storyInQuestion,
+			LastStory:               previousStory,
+			NextStory:               nextStory,
+			FirstMoreTaggedStories:  firstRelated,
+			SecondMoreTaggedStories: secondRelated,
+			ThirdMoreTaggedStories:  thirdRelated,
 		})
 
 		if err != nil {

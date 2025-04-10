@@ -115,4 +115,76 @@
             {{end}}
         </div>
     </div>
+
+    <div class="related-stories-container">
+        {{if .FirstMoreTaggedStories}}
+        <div class="related-stories-item">
+            <div class="related-stories-item-title">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
+                {{if .FirstMoreTaggedStories.Tag}}
+                <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
+                {{else}}
+                <span class="tag large">unknown</span>
+                {{end}}
+            </div>
+            {{if gt (len .FirstMoreTaggedStories.Stories) 0}}
+            <div class="related-stories">
+            {{range .FirstMoreTaggedStories.Stories}}
+                <div class="related-story">
+                    {{ $story := . }}
+                    {{ with .GetStoryImage}}
+                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    {{end}}
+                </div>
+            {{end}}
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+        {{if .SecondMoreTaggedStories}}
+        <div class="related-stories-item">
+            <div class="related-stories-item-title">More tagged with {{ .SecondMoreTaggedStories.TagType }} 
+                {{if .SecondMoreTaggedStories.Tag}}
+                <a class="tag large" href="{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
+                {{else}}
+                <span class="tag large">unknown</span>
+                {{end}}
+            </div>
+            {{if gt (len .SecondMoreTaggedStories.Stories) 0}}
+            <div class="related-stories">
+            {{range .SecondMoreTaggedStories.Stories}}
+                <div class="related-story">
+                    {{ $story := . }}
+                    {{ with .GetStoryImage}}
+                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    {{end}}
+                </div>
+            {{end}}
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+        {{if .ThirdMoreTaggedStories}}
+        <div class="related-stories-item">
+            <div class="related-stories-item-title">More tagged with {{ .ThirdMoreTaggedStories.TagType }} 
+                {{if .ThirdMoreTaggedStories.Tag}}
+                <a class="tag large" href="{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
+                {{else}}
+                <span class="tag large">unknown</span>
+                {{end}}
+            </div>
+            {{if gt (len .ThirdMoreTaggedStories.Stories) 0}}
+            <div class="related-stories">
+            {{range .ThirdMoreTaggedStories.Stories}}
+                <div class="related-story">
+                    {{ $story := . }}
+                    {{ with .GetStoryImage}}
+                    <a href="{{$story.URL}}"><img class="related-story-image" src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    {{end}}
+                </div>
+            {{end}}
+            </div>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
 </body>

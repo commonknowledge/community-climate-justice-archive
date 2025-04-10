@@ -16,10 +16,19 @@ type TaxonomyIndexPage struct {
 	TaxonomyColour string
 }
 
+type RelatedStories struct {
+	Tag     interface{} // Can be Theme, Type, or Weather
+	TagType string
+	Stories []Story
+}
+
 type StoryPage struct {
-	Title       string
-	Description string
-	Story       Story
-	LastStory   Story
-	NextStory   Story
+	Title                   string
+	Description             string
+	Story                   Story
+	LastStory               Story
+	NextStory               Story
+	FirstMoreTaggedStories  RelatedStories
+	SecondMoreTaggedStories RelatedStories
+	ThirdMoreTaggedStories  RelatedStories
 }

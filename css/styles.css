@@ -173,3 +173,42 @@ Stories are hidden by default until JavaScript randomizes them
     flex-direction: column;
     gap: 0.27778rem;
 } 
+
+.related-stories-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6.66667rem;
+}
+
+.related-story-image {
+    height: auto;
+    max-width: 8.33333rem;
+    object-fit: cover;
+}
+
+.related-stories {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5.56rem;
+}
+
+.related-story {
+    /* Ensure stories fill first positions when less than 5 */
+    grid-column: auto;
+}
+
+.related-stories-item-title {
+    color: #000;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%; /* 1.71111rem */
+    letter-spacing: -0.01222rem;
+    text-transform: lowercase;
+    margin-bottom: 1.11111rem;
+}
+
+.related-stories-item-title .tag {
+    display: inline-block;
+}
