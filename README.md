@@ -115,9 +115,15 @@ Edit the file `css/styles.css`.
 
 If you are running the archive in development mode, then the CSS will automatically be copied to the directory that the development webserver serves.
 
+When you've made your change, simply refresh the page to see the effect.
+
 ##### Templating in HTML
 
-The HTML templates are located in the `templates` directory. They use Go's standard `html/template` package syntax.
+The HTML templates are located in the `templates` directory. 
+
+If you are running the archive in development mode, press enter to regenerate the archive. Your changes in these HTML templates will then be picked up.
+
+Templates use Go's standard `html/template` package syntax.
 
 You can find documentation for Go's templating language at:
 - [html/template package documentation](https://pkg.go.dev/html/template)
@@ -125,10 +131,8 @@ You can find documentation for Go's templating language at:
 
 Key template features include:
 - `{{.Something}}` for outputting information that the main program gives to templates.
-- `{{if .SomeOtherThing}}...{{end}}` for making decisions and displaying different things based on these
+- `{{if .SomeOtherThing}}...{{end}}` for making decisions and displaying different things based on these.
 - `{{range .Stories}}...{{end}}` for looping over a group of things, in the case of the archive mostly stories.
-
-If you are running the archive in development mode, press enter to regenerate the archive. Your changes in these HTML templates will then be picked up.
 
 #####  Template files overview
 
