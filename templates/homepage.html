@@ -69,7 +69,7 @@
             <div class="story">
                 {{with .GetStoryImage}}
                 {{ if .URL }}
-                <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+                <a href=".{{$story.URL}}"><img src=".{{.URL}}" alt="{{.AlternativeText}}"></a>
                 {{ else }}
                 <div>No image</div>
                 {{ end }}
