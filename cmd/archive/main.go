@@ -98,7 +98,7 @@ func watchCSS() (*fsnotify.Watcher, error) {
 						if err := generate.CopyCSSToOutput(); err != nil {
 							log.Printf("Failed to copy CSS to output: %v", err)
 						} else {
-							log.Println("Successfully copied CSS to output")
+							log.Println("Successfully copied CSS to output – refresh your browser to see the changes...")
 						}
 					})
 				}
