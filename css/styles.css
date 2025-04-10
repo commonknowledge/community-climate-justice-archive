@@ -2,7 +2,8 @@
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
-    font-size: 18px; /* Base size - 1rem equals 18px */
+    /* Base size - 1rem equals 18px */
+    font-size: 18px;
 }
 
 /* Header styles */
@@ -29,6 +30,7 @@ header p {
 
 /* 
 A single tag - used for categories, themes, types, and weather
+
 By default, this is a small tag for metadata in story views.
 */
 .tag {
@@ -71,7 +73,7 @@ A large tag - prominent version used on homepage and in taxonomy headers
     display: grid;
     /* 
     A grid layout for collections of stories, which has a responsive 3-column layout.
-    
+
     The calc((100% - 20px) / 3) part ensures each column takes up one-third of the available space,
     minus the total gap space (20px) divided among the columns. This prevents overflow due to gaps.
     
