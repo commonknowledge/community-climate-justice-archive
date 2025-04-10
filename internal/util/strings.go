@@ -11,6 +11,11 @@ import (
 // FormatDate formats a date string to a human readable format.
 //
 // For example, "2025-03-10T10:00:00Z" becomes "Monday 10 March 2025".
+//
+// If the date string is empty, it returns an empty string.
+//
+// The database stores these in accordance with RFC3339 date format.
+// See https://www.rfc-editor.org/rfc/rfc3339 for the details of this.
 func FormatDate(dateString string) string {
 	if dateString == "" {
 		return ""
@@ -50,7 +55,7 @@ func TruncateString(s string, maxLength int) string {
 	return s[:maxLength]
 }
 
-// Slugify a string, downcasing it, removing special characters, and replacing spaces with hyphens.
+// Make a string into a slug for use in URLs: downcasing it, removing special characters, and replacing spaces with hyphens.
 //
 // For example, "Climate Change" becomes "climate-change".
 func Slugify(s string) string {
