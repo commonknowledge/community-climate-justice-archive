@@ -231,6 +231,11 @@ func WriteStories() error {
 		var firstTag interface{}
 		var firstMoreTaggedStories []data.Story
 
+		// Shuffle the tags
+		rand.Shuffle(len(allTagsWeHave), func(i, j int) {
+			allTagsWeHave[i], allTagsWeHave[j] = allTagsWeHave[j], allTagsWeHave[i]
+		})
+
 		if len(allTagsWeHave) > 0 {
 			firstTag = allTagsWeHave[0]
 			firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, 5)
