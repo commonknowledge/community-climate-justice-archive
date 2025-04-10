@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -133,6 +134,14 @@ func WriteTypesIndexes() error {
 	return nil
 }
 
+// extractURLsAndMakeLinks extracts URLs from a string and makes them links.
+//
+// These links open in a new tab.
+func extractURLsAndMakeLinks(text string) string {
+	re := regexp.MustCompile(`(https?:\/\/[^\s]+)`)
+	return re.ReplaceAllString(text, `<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>`)
+}
+
 // WriteStories generates a story page for each story and writes them to the out/stories directory.
 func WriteStories() error {
 	log.Println("Starting story generation")
@@ -183,6 +192,9 @@ func WriteStories() error {
 		// Reformat the date fields to be more human readable
 		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
 		storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+
+		// For the "Other Comments" field, we want to extract the URLs and make them links
+		storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)
 
 		err = tmpl.Execute(file, data.StoryPage{
 			Title:       storyInQuestion.Finding,
