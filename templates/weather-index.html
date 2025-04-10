@@ -1,0 +1,23 @@
+<head>
+    <title>{{.Title}} Type</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <h1>{{.Title}} - A type in the Dudley People's School for Climate Justice</h1>
+    <p>{{.Description}}</p>
+    <div class="stories-list">
+        {{range .Stories}}
+        <div class="story">
+            {{$story := .}}
+            {{ with .GetStoryImage }}
+            {{ if .URL }}
+            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
+            {{ else }}
+            <div>No image</div>
+            {{ end }}
+            {{ end }}
+        </div>
+        {{end}}
+    </div>
+</body>

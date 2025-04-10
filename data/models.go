@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+
+	"community-climate-justice-archive/internal/util"
 )
 
 type Page struct {
@@ -38,6 +40,11 @@ type Type struct {
 	URL   string
 }
 
+type Weather struct {
+	Title string
+	URL   string
+}
+
 type StoryImage struct {
 	Filename        string
 	AlternativeText string
@@ -67,13 +74,13 @@ type Story struct {
 	StartDateTime           string
 	EndDateTime             string
 	Season                  string
-	Weather                 string
 	StreetDetectoristClue   string
-	Themes                  string
+	Themes                  []Theme
 	Experience              string
 	TimeSpan                string
 	OtherComments           string
-	Type                    string
+	Type                    []Type
+	Weather                 []Weather
 	PersonFinder            string
 	MapCache                string
 	MapSize                 string
@@ -192,6 +199,69 @@ type StoryDTO struct {
 
 // ToStory converts the DTO to a Story so we can use it in our own code.
 func (dto *StoryDTO) ToStory() Story {
+	// Stories have themes, which are a JSON array of strings in the database, that looks like this:
+	// ["Climate Change", "Extreme Weather", "Social Justice"]
+	// We want to convert this into a slice of Theme structs so we can use it in our templates.
+	var themes []Theme
+
+	if dto.Themes.Valid {
+		var themeStrings []string
+		err := json.Unmarshal([]byte(dto.Themes.String), &themeStrings)
+		if err != nil {
+			log.Fatalf("Failed to unmarshal themes: %v", err)
+		}
+
+		// Convert string array to Theme structs, constructing the URL from the title.
+		for _, themeTitle := range themeStrings {
+			themes = append(themes, Theme{
+				Title: themeTitle,
+				URL:   "/themes/" + util.Slugify(themeTitle) + ".html",
+			})
+		}
+	}
+
+	// Stories have types, which are a JSON array of strings in the database, that looks like this:
+	// ["Collage", "Photograph", "Poem", "Text"]
+	// We want to convert this into a slice of Type structs so we can use it in our templates.
+	var types []Type
+
+	if dto.Type.Valid {
+		var typeStrings []string
+		err := json.Unmarshal([]byte(dto.Type.String), &typeStrings)
+		if err != nil {
+			log.Fatalf("Failed to unmarshal types: %v", err)
+		}
+
+		// Convert string array to Type structs, constructing the URL from the title.
+		for _, typeTitle := range typeStrings {
+			types = append(types, Type{
+				Title: typeTitle,
+				URL:   "/types/" + util.Slugify(typeTitle) + ".html",
+			})
+		}
+	}
+
+	// Stories have weather, which is a JSON array of strings in the database, that looks like this:
+	// ["Sunny", "Cloudy", "Rainy"]
+	// We want to convert this into a slice of Weather structs so we can use it in our templates.
+	var weather []Weather
+
+	if dto.Weather.Valid {
+		var weatherStrings []string
+		err := json.Unmarshal([]byte(dto.Weather.String), &weatherStrings)
+		if err != nil {
+			log.Fatalf("Failed to unmarshal types: %v", err)
+		}
+
+		// Convert string array to Weather structs, constructing the URL from the title.
+		for _, weatherTitle := range weatherStrings {
+			weather = append(weather, Weather{
+				Title: weatherTitle,
+				URL:   "/weather/" + util.Slugify(weatherTitle) + ".html",
+			})
+		}
+	}
+
 	return Story{
 		ID:                      dto.ID.String,
 		CreatedTime:             dto.CreatedTime.String,
@@ -204,13 +274,13 @@ func (dto *StoryDTO) ToStory() Story {
 		StartDateTime:           dto.StartDateTime.String,
 		EndDateTime:             dto.EndDateTime.String,
 		Season:                  dto.Season.String,
-		Weather:                 dto.Weather.String,
+		Weather:                 weather,
 		StreetDetectoristClue:   dto.StreetDetectoristClue.String,
-		Themes:                  dto.Themes.String,
+		Themes:                  themes,
 		Experience:              dto.Experience.String,
 		TimeSpan:                dto.TimeSpan.String,
 		OtherComments:           dto.OtherComments.String,
-		Type:                    dto.Type.String,
+		Type:                    types,
 		PersonFinder:            dto.PersonFinder.String,
 		MapCache:                dto.MapCache.String,
 		MapSize:                 dto.MapSize.String,

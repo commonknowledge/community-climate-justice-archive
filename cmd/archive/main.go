@@ -27,20 +27,24 @@ func regenerate() error {
 		return fmt.Errorf("failed to write homepage: %v", err)
 	}
 
-	if err := generate.CopyImagesToOutput(); err != nil {
-		return fmt.Errorf("failed to copy images: %v", err)
-	}
-
-	if err := generate.CopyCSSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy CSS: %v", err)
-	}
-
 	if err := generate.WriteTypesIndexes(); err != nil {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}
 
 	if err := generate.WriteThemesIndexes(); err != nil {
 		return fmt.Errorf("failed to write themes indexes: %v", err)
+	}
+
+	if err := generate.WriteWeatherIndexes(); err != nil {
+		return fmt.Errorf("failed to write weather indexes: %v", err)
+	}
+
+	if err := generate.CopyImagesToOutput(); err != nil {
+		return fmt.Errorf("failed to copy images: %v", err)
+	}
+
+	if err := generate.CopyCSSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy CSS: %v", err)
 	}
 
 	log.Println("Build process completed successfully")

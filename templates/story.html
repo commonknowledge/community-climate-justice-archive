@@ -38,6 +38,15 @@
             {{$story.Finding}}
         </div>
         <div class="story-metadata">
+            {{if $story.Type}}
+            <div class="story-metadata-item">
+                <span class="story-metadata-item-label">Type</span>
+                <span class="story-metadata-item-value">
+                    {{range $story.Type}}<a href="{{.URL}}">{{.Title}}</a>
+                    {{end}}
+                </span>
+            </div>
+            {{end}}
             {{if or $story.StartDateTime $story.EndDateTime}}
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Date</span>
@@ -59,7 +68,10 @@
             {{if $story.Weather}}
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Weather</span>
-                <span class="story-metadata-item-value">{{$story.Weather}}</span>
+                <span class="story-metadata-item-value">
+                    {{ range $story.Weather }}<a href="{{.URL}}">{{.Title}}</a>
+                    {{end}}
+                </span>
             </div>
             {{end}}
             {{if $story.StreetDetectoristClue}}
@@ -71,7 +83,10 @@
             {{if $story.Themes}}
             <div class="story-metadata-item">
                 <span class="story-metadata-item-label">Themes</span>
-                <span class="story-metadata-item-value">{{$story.Themes}}</span>
+                <span class="story-metadata-item-value">
+                    {{range $story.Themes}}<a href="{{.URL}}">{{.Title}}</a>
+                    {{end}}
+                </span>
             </div>
             {{end}}
             {{if $story.Experience}}

@@ -37,6 +37,57 @@ func createStoryOutputPathFromFinding(finding string) string {
 	return filepath.Join("out", "stories", fileName)
 }
 
+// createWeatherOutputPathFromTitle creates a path to the output file for a weather page.
+func createWeatherOutputPathFromTitle(title string) string {
+	lowerCaseTitle := strings.ToLower(title)
+	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	return filepath.Join("out", "weather", fileName)
+}
+
+// WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
+func WriteWeatherIndexes() error {
+	log.Println("Starting weather generation")
+	weathers := store.GetWeather()
+
+	tmpl, err := template.ParseFiles("templates/weather-index.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse weather template: %w", err)
+	}
+
+	err = os.MkdirAll("out/weather", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output weather directory: %w", err)
+	}
+
+	for _, weatherInQuestion := range weathers {
+		outputPath := createWeatherOutputPathFromTitle(weatherInQuestion.Title)
+
+		log.Printf("Writing weather %s to %s", weatherInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForWeather(weatherInQuestion.Title)
+
+		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+			Title:       weatherInQuestion.Title,
+			Description: "A list of stories for the weather " + weatherInQuestion.Title,
+			Stories:     stories,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote weather to %s", outputPath)
+	}
+
+	return nil
+}
+
 // WriteTypesIndexes generates the type index pages and writes them to the out/types directory.
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
