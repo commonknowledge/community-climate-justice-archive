@@ -49,12 +49,12 @@
     </header>
 
     <h2>Themes</h2>
-    <ul class="taxonomy-list">{{range .Themes}}
+    <ul class="tag-list">{{range .Themes}}
         <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
     </ul>
 
     <h2>Types</h2>
-    <ul class="taxonomy-list">{{range .Types}}
+    <ul class="tag-list">{{range .Types}}
         <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
     </ul>
 

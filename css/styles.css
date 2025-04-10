@@ -17,13 +17,11 @@ header p {
     text-transform: lowercase;
 }
 
-/* Taxonomy list styles */
-.taxonomy-list {
+.tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     list-style-type: none;
-    text-transform: lowercase;
 }
 
 .tag {
