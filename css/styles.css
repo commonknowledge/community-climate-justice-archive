@@ -1,8 +1,27 @@
-/* Global styles */
+/* 
+CSS for Dudley Community Climate Justice Archive
+
+The design system uses rem units for consistent scaling (1rem = 18px) and maintains
+a consistent spacing system based on multiples of 1.11111rem.
+
+For questions about specific CSS properties, visit:
+https://developer.mozilla.org/en-US/docs/Web/CSS
+*/
+
+/* Global Reset
+
+Ensures consistent box model behavior across all elements by including padding and border
+in width/height calculations. This makes element sizing more predictable.
+*/
 * {
     box-sizing: border-box;
 }
 
+/* Page Container
+
+The base styles for the entire page with a light cream background and classic
+serif font. Prevents horizontal scrolling and sets the base font size to 18px.
+*/
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
@@ -12,17 +31,28 @@ body {
     overflow-x: hidden;
 }
 
+/* Homepage Header
+
+The main navigation and title for the homepage.
+*/
 header.homepage {
     margin-left: 1.11111rem;
     margin-right: 1.11111rem;
 }
 
+/* Homepage Content
+
+The main content area of the homepage, including featured stories and navigation.
+*/
 .homepage-content {
     margin-left: 2.22222rem;
     margin-right: 2.22222rem;
 }
 
-/* Header styles */
+/* Main Header
+
+The site title and navigation elements that remain visible while scrolling.
+*/
 header {
     align-items: center;
     display: flex;
@@ -33,6 +63,10 @@ header {
     z-index: 100;
 }
 
+/* Header Title
+
+The main heading in the header.
+*/
 header h1 {
     color: var(--Black, #000);
     font-family: Arial;
@@ -49,6 +83,11 @@ header h1 {
     text-underline-position: from-font;
 }
 
+/* Header Paragraph
+
+Paragraph text in the header, matching the heading size but with lowercase
+text transformation.
+*/
 header p {
     text-transform: lowercase;
     color: var(--Black, #000);
@@ -57,13 +96,13 @@ header p {
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
-    /* 1.71111rem */
     letter-spacing: -0.01222rem;
 }
 
-/* Tag styles */
+/* Tag Headers
 
-/* A list of tags used on homepage and indexes for tags */
+Headers for tag-related sections in the archive, underwhich we display stories.
+*/
 .tag-list-header,
 .wander-through-archive-header,
 .theme-index-header,
@@ -77,10 +116,18 @@ header p {
     letter-spacing: -0.03556rem;
 }
 
+/* Wander Through Archive Header
+
+The header for the archive browsing section.
+*/
 .wander-through-archive-header {
     margin-bottom: 4rem;
 }
 
+/* Tag List Container
+
+Tags arranged in rows, wrapping to new lines as needed.
+*/
 .tag-list {
     display: flex;
     flex-wrap: wrap;
@@ -88,23 +135,29 @@ header p {
     list-style-type: none;
 }
 
+/* Tag List Wrapper
+
+The list of tags with consistent bottom margin.
+*/
 .tag-list-container {
     margin-bottom: 6.66667rem;
 }
 
+/* Unordered Tag List
+
+Unordered lists of tags don't have default list styling.
+*/
 ul.tag-list {
     padding-inline-start: 0;
 }
 
-/* 
-A single tag - used for categories, themes, types, and weather
+/* Individual Tag
 
-By default, this is a small tag for metadata in story views.
+A single tag look for categories, themes, types, and weather.
 */
 .tag {
     align-items: center;
     background-color: #000;
-    /* Default black, often overridden with dynamic colors using style attribute */
     color: #FFF;
     display: flex;
     font-family: Arial;
@@ -121,8 +174,9 @@ By default, this is a small tag for metadata in story views.
     width: fit-content;
 }
 
-/* 
-A large tag - prominent version used on homepage and in taxonomy headers
+/* Large Tag
+
+A more prominent version of the tag look used on the homepage and in headers.
 */
 .tag.large {
     font-size: 1.22222rem;
@@ -131,49 +185,51 @@ A large tag - prominent version used on homepage and in taxonomy headers
     padding: 0.27778rem 0.55556rem;
 }
 
-/* Story and stories list styles */
+/* Story Images
+
+Images within story content, limiting width while maintaining aspect ratio.
+*/
 .story img {
     max-width: 300px;
     height: auto;
 }
 
-/* Grid layout for collections of stories */
+/* Stories Grid
+
+A responsive 3-column layout for stories.
+*/
 .stories-list {
     display: grid;
     /* 
-    A grid layout for collections of stories, which has a responsive 3-column layout.
-
-    The calc((100% - 11.11112rem) / 3) part ensures each column takes up one-third of the available space,
-    minus the total gap space (11.11112rem) divided among the columns. This prevents overflow due to gaps.
-    
-    The minmax() function sets a size range - the minimum is either 100% (on very small screens) or
-    our calculated third-width (on larger screens), and the maximum is 1fr.
-    
-    1fr means "1 fractional unit" - it's a flexible unit that divides up the remaining space.
-    When used with repeat(auto-fill), it allows columns to grow/shrink fluidly while maintaining equal widths.
-
-    The gap property creates equal spacing between grid items both horizontally and vertically.
-    The 5.55556rem value creates consistent, proportional spacing that matches our design system.
+    Creates a responsive 3-column layout:
+    - auto-fill: Creates as many columns as will fit
+    - minmax: Sets minimum and maximum column widths
+    - calc: Calculates column width accounting for gaps
     */
     grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 11.11112rem) / 3)), 1fr));
     gap: 5.55556rem;
 }
 
-/* Homepage specific styles */
+/* Homepage Stories
 
-/* 
-Stories are hidden by default until JavaScript randomizes them
+Stories hidden by default until JavaScript randomizes them.
 */
 .stories-list.homepage {
     visibility: hidden;
 }
 
-/* Applied via Javascript after randomization completes */
+/* Visible Homepage Stories
+
+Stories after JavaScript randomization completes.
+*/
 .stories-list.homepage.visible {
     visibility: visible;
 }
 
-/* Story page specific styles */
+/* Story Image
+
+The main image for individual stories.
+*/
 .story-image {
     width: 100%;
     height: auto;
@@ -181,7 +237,10 @@ Stories are hidden by default until JavaScript randomizes them
     object-fit: contain;
 }
 
-/* Main story content text */
+/* Story Finding
+
+The main text content of a story.
+*/
 .story-finding {
     font-family: 'Times New Roman', serif;
     font-size: 1rem;
@@ -191,7 +250,10 @@ Stories are hidden by default until JavaScript randomizes them
     width: 32.22222rem;
 }
 
-/* Metadata items - date, location, themes, etc. */
+/* Story Metadata Item
+
+Individual metadata items for a story.
+*/
 .story-metadata-item {
     font-family: Arial;
     font-size: 0.77778rem;
@@ -201,19 +263,28 @@ Stories are hidden by default until JavaScript randomizes them
     letter-spacing: -0.00778rem;
 }
 
-/* Metadata field labels (e.g., "Date", "Location") */
+/* Story Metadata Label
+
+Labels for metadata fields (e.g., "Date", "Location").
+*/
 .story-metadata-item-label {
     color: rgba(0, 0, 0, 0.50);
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Metadata field values */
+/* Story Metadata Value
+
+Values for metadata fields.
+*/
 .story-metadata-item-value {
     color: #000;
 }
 
-/* Container for tag-based metadata like themes and types */
+/* Tag-based Metadata
+
+Tag-based metadata like themes and types.
+*/
 .story-metadata-item-value.tags {
     display: flex;
     flex-direction: row;
@@ -221,7 +292,10 @@ Stories are hidden by default until JavaScript randomizes them
     gap: 0.55556rem;
 }
 
-/* Layout container for story content and metadata */
+/* Story Details
+
+The main content and metadata for a story.
+*/
 .story-details {
     display: flex;
     flex-direction: row;
@@ -233,7 +307,10 @@ Stories are hidden by default until JavaScript randomizes them
     padding-right: 2.22222rem;
 }
 
-/* Container for story image and navigation arrows */
+/* Story Image Container
+
+The story image and navigation arrows.
+*/
 .story-image-container {
     display: flex;
     flex-direction: row;
@@ -246,7 +323,10 @@ Stories are hidden by default until JavaScript randomizes them
     overflow-x: hidden;
 }
 
-/* Container for all metadata items */
+/* Story Metadata
+
+All metadata items for a story.
+*/
 .story-metadata {
     display: flex;
     flex-direction: column;
@@ -254,13 +334,20 @@ Stories are hidden by default until JavaScript randomizes them
     width: 20.72222rem;
 }
 
-/* Individual metadata item containing label and value */
+/* Story Metadata Item
+
+A single metadata item with label and value.
+*/
 .story-metadata-item {
     display: flex;
     flex-direction: column;
     gap: 0.27778rem;
 }
 
+/* Related Stories Container
+
+The related stories section.
+*/
 .related-stories-container {
     display: flex;
     flex-direction: column;
@@ -270,23 +357,38 @@ Stories are hidden by default until JavaScript randomizes them
     margin-bottom: 6.66667rem;
 }
 
+/* Related Story Image
+
+Thumbnail images for related stories.
+*/
 .related-story-image {
     height: auto;
     max-width: 8.33333rem;
     object-fit: cover;
 }
 
+/* Related Stories Grid
+
+A grid of related stories.
+*/
 .related-stories {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 5.56rem;
 }
 
+/* Related Story Item
+
+A single related story in the grid.
+*/
 .related-story {
-    /* Ensure stories fill first positions when less than 5 */
     grid-column: auto;
 }
 
+/* Related Story Title
+
+The title of a related story.
+*/
 .related-stories-item-title {
     color: #000;
     font-family: Arial;
@@ -299,32 +401,55 @@ Stories are hidden by default until JavaScript randomizes them
     margin-bottom: 1.11111rem;
 }
 
+/* Related Story Title Tag
+
+Tags within related story titles.
+*/
 .related-stories-item-title .tag {
     display: inline-block;
 }
 
-/* Navigation arrow containers */
+/* Story Navigation Arrow
+
+Navigation arrows between stories.
+*/
 .story-nav-arrow {
     padding: 0 1.82rem;
     flex-shrink: 0;
 }
 
+/* Theme and Type Index Headers
+
+Headers for theme and type index pages.
+*/
 .theme-index-header,
 .type-index-header {
     margin-bottom: 4rem;
 }
 
+/* Theme and Type Index Tags
+
+Tags within theme and type index headers.
+*/
 .theme-index-header .tag,
 .type-index-header .tag {
     display: inline-block;
     margin-right: 1rem;
 }
 
+/* Theme and Type Index Descriptions
+
+Description text for theme and type index pages.
+*/
 .theme-index-description,
 .type-index-description {
     margin-bottom: 4rem;
 }
 
+/* Main Footer
+
+The site footer with contact information and additional content.
+*/
 footer {
     padding: 5.55556rem 2.22222rem;
     display: flex;
@@ -332,15 +457,17 @@ footer {
     justify-content: space-between;
 }
 
+/* Footer Address
+
+Contact information in the footer.
+*/
 footer address {
     color: #000;
-
-    /* Small */
     font-family: Arial;
     font-size: 0.77778rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 140%; /* 1.08889rem */
+    line-height: 140%;
     letter-spacing: -0.00778rem;
     text-decoration-line: underline;
     text-decoration-style: solid;
@@ -350,6 +477,10 @@ footer address {
     text-underline-position: from-font;
 }
 
+/* Footer Content
+
+The main content area in the footer.
+*/
 .footer-content {
     color: #000;
     font-family: "Times New Roman";
@@ -361,21 +492,33 @@ footer address {
     width: 43.72222rem;
 }
 
+/* Footer Content Paragraphs
+
+Paragraphs within the footer content.
+*/
 .footer-content div {
     margin-bottom: 1.11111rem;
 }
 
+/* Compilation Information
+
+Copyright and compilation information in the footer.
+*/
 .compilation-information {
     color: var(--Black, #000);
     font-family: Arial;
     font-size: 0.77778rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 140%; /* 1.08889rem */
+    line-height: 140%;
     letter-spacing: -0.00778rem;
     margin-top: 2.22222rem;
 }
 
+/* Dashed Button
+
+A button with a dashed border for navigation and actions.
+*/
 .dashed-button {
     align-items: center;
     background: #FFFBF9;
@@ -389,7 +532,7 @@ footer address {
     gap: 0.55556rem;
     justify-content: center;
     letter-spacing: -0.01222rem;
-    line-height: 140%; /* 1.71111rem */
+    line-height: 140%;
     padding: 0.27778rem 0.55556rem;
     text-decoration: none;
     width: max-content;
