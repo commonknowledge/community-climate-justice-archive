@@ -1,11 +1,6 @@
 // Contains the data models for the pages in the archive in the data package.
 package data
 
-type StoryJSON struct {
-	Title string
-	URL   string
-}
-
 type Page struct {
 	Title          string
 	Description    string

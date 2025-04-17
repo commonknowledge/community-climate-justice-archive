@@ -9,15 +9,15 @@
     </div>
     <p>Time Portal</p>
     <script>
-        window.stories = {{.StoriesJSON}};
+        window.storyUrls = {{.StoriesJSON}};
         (function() {
             const randomLink = document.querySelector('.random-story-link');
             if (!randomLink) return;
             
             function updateRandomLink() {
-                if (window.stories && window.stories.length > 0) {
-                    const randomStory = window.stories[Math.floor(Math.random() * window.stories.length)];
-                    randomLink.href = randomStory.URL;
+                if (window.storyUrls && window.storyUrls.length > 0) {
+                    const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
+                    randomLink.href = randomUrl;
                 }
             }
 

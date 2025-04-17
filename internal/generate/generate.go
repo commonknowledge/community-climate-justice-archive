@@ -65,17 +65,13 @@ func loadTemplates() (*template.Template, error) {
 	return tmpl, nil
 }
 
-// convertStoriesToJSON converts a slice of stories to a simplified JSON format
-// containing only the title and URL fields.
+// convertStoriesToJSON converts a slice of stories to a JSON array of URLs.
 func convertStoriesToJSON(stories []data.Story) (string, error) {
-	var simplifiedStories []data.StoryJSON
+	var urls []string
 	for _, story := range stories {
-		simplifiedStories = append(simplifiedStories, data.StoryJSON{
-			Title: story.Finding,
-			URL:   story.URL,
-		})
+		urls = append(urls, story.URL)
 	}
-	jsonData, err := json.Marshal(simplifiedStories)
+	jsonData, err := json.Marshal(urls)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal stories to JSON: %w", err)
 	}
