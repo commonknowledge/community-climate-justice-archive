@@ -65,6 +65,23 @@ func loadTemplates() (*template.Template, error) {
 	return tmpl, nil
 }
 
+// convertStoriesToJSON converts a slice of stories to a simplified JSON format
+// containing only the title and URL fields.
+func convertStoriesToJSON(stories []data.Story) (string, error) {
+	var simplifiedStories []data.StoryJSON
+	for _, story := range stories {
+		simplifiedStories = append(simplifiedStories, data.StoryJSON{
+			Title: story.Finding,
+			URL:   story.URL,
+		})
+	}
+	jsonData, err := json.Marshal(simplifiedStories)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal stories to JSON: %w", err)
+	}
+	return string(jsonData), nil
+}
+
 // WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
 func WriteWeatherIndexes() error {
 	log.Println("Starting weather generation")
@@ -72,9 +89,9 @@ func WriteWeatherIndexes() error {
 	allStories := store.GetAllStories()
 
 	// Convert stories to JSON
-	storiesJSON, err := json.Marshal(allStories)
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to marshal stories to JSON: %w", err)
+		return err
 	}
 
 	tmpl, err := loadTemplates()
@@ -109,7 +126,7 @@ func WriteWeatherIndexes() error {
 			Stories:        stories,
 			TaxonomyColour: weatherInQuestion.Colour,
 			RandomStoryURL: randomStory.URL,
-			StoriesJSON:    string(storiesJSON),
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -129,9 +146,9 @@ func WriteTypesIndexes() error {
 	allStories := store.GetAllStories()
 
 	// Convert stories to JSON
-	storiesJSON, err := json.Marshal(allStories)
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to marshal stories to JSON: %w", err)
+		return err
 	}
 
 	tmpl, err := loadTemplates()
@@ -166,7 +183,7 @@ func WriteTypesIndexes() error {
 			Stories:        stories,
 			TaxonomyColour: typeInQuestion.Colour,
 			RandomStoryURL: randomStory.URL,
-			StoriesJSON:    string(storiesJSON),
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -210,6 +227,12 @@ func WriteStories() error {
 	log.Println("Starting story generation")
 	stories := store.GetAllStories()
 
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(stories)
+	if err != nil {
+		return err
+	}
+
 	tmpl, err := loadTemplates()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
@@ -221,12 +244,6 @@ func WriteStories() error {
 	}
 
 	totalStories := len(stories)
-
-	// Convert stories to JSON
-	storiesJSON, err := json.Marshal(stories)
-	if err != nil {
-		return fmt.Errorf("failed to marshal stories to JSON: %w", err)
-	}
 
 	for i, storyInQuestion := range stories {
 		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
@@ -347,7 +364,7 @@ func WriteStories() error {
 			SecondMoreTaggedStories: secondRelated,
 			ThirdMoreTaggedStories:  thirdRelated,
 			RandomStoryURL:          randomStory.URL,
-			StoriesJSON:             string(storiesJSON),
+			StoriesJSON:             storiesJSON,
 		})
 
 		if err != nil {
@@ -367,9 +384,9 @@ func WriteThemesIndexes() error {
 	allStories := store.GetAllStories()
 
 	// Convert stories to JSON
-	storiesJSON, err := json.Marshal(allStories)
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to marshal stories to JSON: %w", err)
+		return err
 	}
 
 	tmpl, err := loadTemplates()
@@ -404,7 +421,7 @@ func WriteThemesIndexes() error {
 			Stories:        stories,
 			TaxonomyColour: themeInQuestion.Colour,
 			RandomStoryURL: randomStory.URL,
-			StoriesJSON:    string(storiesJSON),
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -436,9 +453,9 @@ func WriteHomePage() error {
 	randomStory := stories[rand.Intn(len(stories))]
 
 	// Convert stories to JSON
-	storiesJSON, err := json.Marshal(stories)
+	storiesJSON, err := convertStoriesToJSON(stories)
 	if err != nil {
-		return fmt.Errorf("failed to marshal stories to JSON: %w", err)
+		return err
 	}
 
 	page := data.Page{
@@ -448,7 +465,7 @@ func WriteHomePage() error {
 		Types:          types,
 		Stories:        stories,
 		RandomStoryURL: randomStory.URL,
-		StoriesJSON:    string(storiesJSON),
+		StoriesJSON:    storiesJSON,
 	}
 
 	tmpl, err := loadTemplates()
