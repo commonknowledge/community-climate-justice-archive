@@ -7,10 +7,9 @@
             <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
         </nav>
     </div>
-    <
     <p>Time Portal</p>
-   
     <script>
+        window.stories = {{.StoriesJSON}};
         (function() {
             const randomLink = document.querySelector('.random-story-link');
             if (!randomLink) return;
