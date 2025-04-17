@@ -106,7 +106,6 @@ Navigation buttons in the header.
 .header-nav {
     display: flex;
     gap: 20px;
-    margin-top: 20px;
 }
 
 .header-nav .dashed-button {
