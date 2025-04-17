@@ -45,14 +45,33 @@ func createWeatherOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "weather", fileName)
 }
 
+// loadTemplates loads all templates and partials needed by the application
+func loadTemplates() (*template.Template, error) {
+	tmpl := template.New("")
+
+	// Parse all HTML files in templates directory
+	tmpl, err := tmpl.ParseGlob("templates/*.html")
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse all partials
+	tmpl, err = tmpl.ParseGlob("templates/partials/*.html")
+	if err != nil {
+		return nil, err
+	}
+
+	return tmpl, nil
+}
+
 // WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
 func WriteWeatherIndexes() error {
 	log.Println("Starting weather generation")
 	weathers := store.GetWeather()
 
-	tmpl, err := template.ParseFiles("templates/weather-index.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse weather template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/weather", 0755)
@@ -73,7 +92,7 @@ func WriteWeatherIndexes() error {
 
 		stories := store.GetStoriesForWeather(weatherInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+		err = tmpl.ExecuteTemplate(file, "weather-index.html", data.TaxonomyIndexPage{
 			Title:       weatherInQuestion.Title,
 			Description: "A list of stories for the weather " + weatherInQuestion.Title,
 			Stories:     stories,
@@ -94,9 +113,9 @@ func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
 	types := store.GetTypes()
 
-	tmpl, err := template.ParseFiles("templates/type-index.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse types template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/types", 0755)
@@ -118,7 +137,7 @@ func WriteTypesIndexes() error {
 
 		stories := store.GetStoriesForType(typeInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+		err = tmpl.ExecuteTemplate(file, "type-index.html", data.TaxonomyIndexPage{
 			Title:          typeInQuestion.Title,
 			Description:    "A list of stories for the type " + typeInQuestion.Title,
 			Stories:        stories,
@@ -166,9 +185,9 @@ func WriteStories() error {
 	log.Println("Starting story generation")
 	stories := store.GetAllStories()
 
-	tmpl, err := template.ParseFiles("templates/story.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse story template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/stories", 0755)
@@ -285,7 +304,7 @@ func WriteStories() error {
 			}
 		}
 
-		err = tmpl.Execute(file, data.StoryPage{
+		err = tmpl.ExecuteTemplate(file, "story.html", data.StoryPage{
 			Title:                   storyInQuestion.Finding,
 			Description:             "A story that says:" + storyInQuestion.Finding,
 			Story:                   storyInQuestion,
@@ -311,9 +330,9 @@ func WriteThemesIndexes() error {
 	log.Println("Starting themes generation")
 	themes := store.GetThemes()
 
-	tmpl, err := template.ParseFiles("templates/theme-index.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse types template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/themes", 0755)
@@ -335,7 +354,7 @@ func WriteThemesIndexes() error {
 
 		stories := store.GetStoriesForTheme(themeInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+		err = tmpl.ExecuteTemplate(file, "theme-index.html", data.TaxonomyIndexPage{
 			Title:          themeInQuestion.Title,
 			Description:    "A list of stories for the theme " + themeInQuestion.Title,
 			Stories:        stories,
@@ -375,9 +394,9 @@ func WriteHomePage() error {
 		Stories:     stories,
 	}
 
-	tmpl, err := template.ParseFiles("templates/homepage.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse homepage template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	fileName := "index.html"
@@ -389,7 +408,7 @@ func WriteHomePage() error {
 	}
 	defer file.Close()
 
-	err = tmpl.Execute(file, page)
+	err = tmpl.ExecuteTemplate(file, "homepage.html", page)
 	if err != nil {
 		return fmt.Errorf("failed to execute template: %w", err)
 	}
