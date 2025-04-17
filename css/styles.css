@@ -99,6 +99,22 @@ header p {
     letter-spacing: -0.01222rem;
 }
 
+/* Header Navigation
+
+Navigation buttons in the header.
+*/
+.header-nav {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.header-nav .dashed-button {
+    height: 41px;
+    padding: 5px 10px;
+    text-transform: lowercase;
+}
+
 /* Tag Headers
 
 Headers for tag-related sections in the archive, underwhich we display stories.
