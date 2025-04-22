@@ -24,6 +24,10 @@ import (
 func regenerate() error {
 	log.Println("Starting build process")
 
+	if err := generate.ProcessImages(); err != nil {
+		return fmt.Errorf("failed to process images: %v", err)
+	}
+
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
 	}
