@@ -34,6 +34,3 @@ out/*
 
 # Ignore any CSV files that we generate for statistics
 *.csv
-
-# Ignore any webp files that we generate for images, for now
-images/*.webp
