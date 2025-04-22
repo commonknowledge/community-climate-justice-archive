@@ -19,7 +19,10 @@
                 </svg>
             </a>
         </div>
-        <img class="story-image" src="..{{.URL}}" alt="{{.AlternativeText}}">
+        <img 
+            class="story-image" 
+            src="..{{.URL}}" 
+            alt="{{.AlternativeText}}">
         <div class="story-nav-arrow">
             <a href="..{{$.NextStory.URL}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
@@ -133,7 +136,17 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}">
+                        <img 
+                            class="related-story-image" 
+                            src="..{{.ThumbURL}}" 
+                            srcset="
+                                ..{{.ThumbURL}} 300w,
+                                ..{{.MediumURL}} 800w
+                            "
+                            sizes="(max-width: 600px) 300px, 800px"
+                            alt="{{.AlternativeText}}">
+                    </a>
                     {{end}}
                 </div>
             {{end}}
@@ -156,7 +169,17 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}">
+                        <img 
+                            class="related-story-image" 
+                            src="..{{.ThumbURL}}" 
+                            srcset="
+                                ..{{.ThumbURL}} 300w,
+                                ..{{.MediumURL}} 800w
+                            "
+                            sizes="(max-width: 600px) 300px, 800px"
+                            alt="{{.AlternativeText}}">
+                    </a>
                     {{end}}
                 </div>
             {{end}}
@@ -179,7 +202,17 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}"><img class="related-story-image" src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
+                    <a href="..{{$story.URL}}">
+                        <img 
+                            class="related-story-image" 
+                            src="..{{.ThumbURL}}" 
+                            srcset="
+                                ..{{.ThumbURL}} 300w,
+                                ..{{.MediumURL}} 800w
+                            "
+                            sizes="(max-width: 600px) 300px, 800px"
+                            alt="{{.AlternativeText}}">
+                    </a>
                     {{end}}
                 </div>
             {{end}}
