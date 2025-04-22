@@ -13,9 +13,17 @@ import (
 	"image/jpeg"
 	"image/png"
 
+	"github.com/disintegration/imaging"
 	"github.com/kolesa-team/go-webp/encoder"
 	"github.com/kolesa-team/go-webp/webp"
 )
+
+// ImageSizes defines the different sizes we generate for each image
+var ImageSizes = map[string]int{
+	"thumb":  300,  // thumbnail size
+	"medium": 800,  // medium size
+	"large":  1200, // full size
+}
 
 // CopyCSSToOutput copies the CSS file to the out/css directory.
 func CopyCSSToOutput() error {
@@ -51,56 +59,66 @@ func CopyCSSToOutput() error {
 	return nil
 }
 
-func compressImage(srcPath, dstPath string) error {
-	ext := strings.ToLower(filepath.Ext(srcPath))
-
-	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
-		return fmt.Errorf("unsupported image format: %s", ext)
-	}
-
-	log.Printf("Beginning compression of image %s", srcPath)
-
+// compressImage creates multiple WebP versions of an image at different sizes
+func compressImage(srcPath string) error {
+	// Load original image
 	file, err := os.Open(srcPath)
 	if err != nil {
-		log.Fatalln(err)
+		return fmt.Errorf("failed to open image: %w", err)
 	}
-
 	defer file.Close()
 
+	// Decode original image
 	var img image.Image
-
-	if ext == ".jpg" || ext == ".jpeg" {
-		img, err = jpeg.Decode(file)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	} else if ext == ".png" {
+	ext := strings.ToLower(filepath.Ext(srcPath))
+	if ext == ".png" {
 		img, err = png.Decode(file)
-		if err != nil {
-			log.Fatalln(err)
+	} else if ext == ".jpg" || ext == ".jpeg" {
+		img, err = jpeg.Decode(file)
+	} else {
+		return fmt.Errorf("unsupported image format: %s", ext)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to decode image: %w", err)
+	}
+
+	// Create each size variant
+	for suffix, width := range ImageSizes {
+		// Calculate proportional height
+		bounds := img.Bounds()
+		ratio := float64(bounds.Dy()) / float64(bounds.Dx())
+		height := int(float64(width) * ratio)
+
+		// Resize image
+		resized := imaging.Resize(img, width, height, imaging.Lanczos)
+
+		// Create WebP with size suffix
+		baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
+		outPath := filepath.Join("images", fmt.Sprintf("%s_%s.webp", baseName, suffix))
+
+		// Skip if file already exists
+		if _, err := os.Stat(outPath); err == nil {
+			log.Printf("Skipping existing image: %s", outPath)
+			continue
 		}
+
+		output, err := os.Create(outPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file: %w", err)
+		}
+		defer output.Close()
+
+		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+		if err != nil {
+			return fmt.Errorf("failed to create encoder options: %w", err)
+		}
+
+		if err := webp.Encode(output, resized, options); err != nil {
+			return fmt.Errorf("failed to encode WebP: %w", err)
+		}
+
+		log.Printf("Created %s", outPath)
 	}
-
-	output, err := os.Create(dstPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer output.Close()
-
-	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
-	if err != nil {
-		log.Printf("Failed to create encoder options for image %s: %w", srcPath, err)
-		log.Fatalln(err)
-	}
-
-	log.Printf("Encoding image %s", dstPath)
-
-	if err := webp.Encode(output, img, options); err != nil {
-		log.Printf("Failed to encode image %s: %w", srcPath, err)
-		log.Fatalln(err)
-	}
-
-	log.Printf("Successfully encoded image %s", dstPath)
 
 	return nil
 }
@@ -127,18 +145,16 @@ func ProcessImages() error {
 			continue
 		}
 
-		// Create a new filename with the same name but with a new extension
-		compressedFilename := strings.TrimSuffix(filename, ext) + ".webp"
+		// Skip if it's already a WebP file
+		if ext == ".webp" {
+			log.Printf("Skipping WebP file: %s", filename)
+			continue
+		}
 
-		// Check if the compressed file already exists
-		if _, err := os.Stat(filepath.Join("images", compressedFilename)); os.IsNotExist(err) {
-			// Compress the image
-			err := compressImage(filepath.Join("images", filename), filepath.Join("images", compressedFilename))
-			if err != nil {
-				return fmt.Errorf("failed to compress image %s: %w", filename, err)
-			}
-		} else {
-			log.Printf("Skipping compressed image %s", compressedFilename)
+		// Process the image
+		err := compressImage(filepath.Join("images", filename))
+		if err != nil {
+			return fmt.Errorf("failed to process image %s: %w", filename, err)
 		}
 	}
 

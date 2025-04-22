@@ -13,7 +13,16 @@
             {{$story := .}}
             {{ with .GetStoryImage }}
             {{ if .URL }}
-            <a href="..{{$story.URL}}"><img src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
+            <a href="..{{$story.URL}}">
+                <img 
+                    src="..{{.ThumbURL}}" 
+                    srcset="
+                        ..{{.ThumbURL}} 300w,
+                        ..{{.MediumURL}} 800w
+                    "
+                    sizes="(max-width: 600px) 300px, 800px"
+                    alt="{{.AlternativeText}}">
+            </a>
             {{ else }}
             <div>No image</div>
             {{ end }}

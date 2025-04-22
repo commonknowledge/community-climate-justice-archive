@@ -59,6 +59,9 @@ type StoryImage struct {
 	Width           int
 	Height          int
 	URL             string
+	ThumbURL        string
+	MediumURL       string
+	LargeURL        string
 	Thumbnails      map[string]Thumbnail
 }
 
@@ -116,7 +119,11 @@ func (s Story) GetStoryImages() []StoryImage {
 			images[i].Type = "image/webp"
 		}
 
+		// Set URLs for different sizes
 		images[i].URL = "/images/" + images[i].Filename
+		images[i].ThumbURL = "/images/" + name + "_thumb.webp"
+		images[i].MediumURL = "/images/" + name + "_medium.webp"
+		images[i].LargeURL = "/images/" + name + "_large.webp"
 	}
 
 	json.Unmarshal([]byte(s.SourceImage), &images)
@@ -134,7 +141,11 @@ func (s Story) GetStoryImages() []StoryImage {
 			images[i].Type = "image/webp"
 		}
 
+		// Set URLs for different sizes
 		images[i].URL = "/images/" + images[i].Filename
+		images[i].ThumbURL = "/images/" + name + "_thumb.webp"
+		images[i].MediumURL = "/images/" + name + "_medium.webp"
+		images[i].LargeURL = "/images/" + name + "_large.webp"
 	}
 
 	return images
