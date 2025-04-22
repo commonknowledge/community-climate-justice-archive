@@ -306,11 +306,10 @@ func TitleToHexColor(title string) string {
 	seed := int64(titleHash[0]) | int64(titleHash[1])<<8 | int64(titleHash[2])<<16 | int64(titleHash[3])<<24
 	randomGenerator := rand.New(rand.NewSource(seed))
 
-	// Generate hue (0-360), saturation (70-100%), brightness (30-50%)
-	// These ranges ensure sufficient contrast with white text (WCAG 2.1 AA)
+	// Generate hue (0-360), saturation (60-100%), brightness (60-90%)
 	hueValue := randomGenerator.Float64() * 360
-	saturationValue := 70.0 + randomGenerator.Float64()*30.0
-	brightnessValue := 30.0 + randomGenerator.Float64()*20.0
+	saturationValue := 60.0 + randomGenerator.Float64()*40.0
+	brightnessValue := 60.0 + randomGenerator.Float64()*30.0
 
 	// Convert HSB to RGB
 	redValue, greenValue, blueValue := hsbToRGB(hueValue, saturationValue, brightnessValue)
