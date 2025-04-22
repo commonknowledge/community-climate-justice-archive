@@ -10,6 +10,9 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Story struct {
@@ -101,12 +104,36 @@ func (s Story) GetStoryImages() []StoryImage {
 	json.Unmarshal([]byte(s.Image), &images)
 
 	for i := range images {
+		// Split filename into name and extension
+		ext := filepath.Ext(images[i].Filename)
+		name := strings.TrimSuffix(images[i].Filename, ext)
+
+		// Check if WebP version exists
+		webpPath := filepath.Join("images", name+".webp")
+		if _, err := os.Stat(webpPath); err == nil {
+			// WebP version exists, use it
+			images[i].Filename = name + ".webp"
+			images[i].Type = "image/webp"
+		}
+
 		images[i].URL = "/images/" + images[i].Filename
 	}
 
 	json.Unmarshal([]byte(s.SourceImage), &images)
 
 	for i := range images {
+		// Split filename into name and extension
+		ext := filepath.Ext(images[i].Filename)
+		name := strings.TrimSuffix(images[i].Filename, ext)
+
+		// Check if WebP version exists
+		webpPath := filepath.Join("images", name+".webp")
+		if _, err := os.Stat(webpPath); err == nil {
+			// WebP version exists, use it
+			images[i].Filename = name + ".webp"
+			images[i].Type = "image/webp"
+		}
+
 		images[i].URL = "/images/" + images[i].Filename
 	}
 
