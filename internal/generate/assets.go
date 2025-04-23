@@ -13,9 +13,9 @@ import (
 	"image/jpeg"
 	"image/png"
 
+	"github.com/bep/gowebp/libwebp"
+	"github.com/bep/gowebp/libwebp/webpoptions"
 	"github.com/disintegration/imaging"
-	"github.com/kolesa-team/go-webp/encoder"
-	"github.com/kolesa-team/go-webp/webp"
 )
 
 // ImageSizes defines the different sizes we generate for each image
@@ -108,12 +108,11 @@ func compressImage(srcPath string) error {
 		}
 		defer output.Close()
 
-		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
-		if err != nil {
-			return fmt.Errorf("failed to create encoder options: %w", err)
-		}
-
-		if err := webp.Encode(output, resized, options); err != nil {
+		if err := libwebp.Encode(output, resized, webpoptions.EncodingOptions{
+			Quality:        75,
+			EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
+			UseSharpYuv:    true,
+		}); err != nil {
 			return fmt.Errorf("failed to encode WebP: %w", err)
 		}
 
