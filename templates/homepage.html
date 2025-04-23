@@ -1,53 +1,14 @@
 <head>
 	<title>{{.Title}}</title>
     <meta name="description" content="{{.Description}}">
-    <style>
-        body {
-            font-family: 'Times New Roman', serif;
-        }
-
-        header {
-            align-items: center;
-            display: flex;
-            font-family: Arial, sans-serif;
-            justify-content: space-between;
-        }
-
-        header p {
-            text-transform: lowercase;
-        }
-
-        .taxonomy-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            list-style-type: none;
-            text-transform: lowercase;
-        }
-
-        .story img {
-            max-width: 300px;
-            height: auto;
-        }
-        
-        .stories-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, calc((100% - 20px) / 3)), 1fr));
-            gap: 10px;
-            visibility: hidden;
-        }
-
-        .stories-list.visible {
-            visibility: visible;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/styles.css">
     <script>
         // Shuffle the stories list
         // This contains a lot of optimisations to make this feel faster.
         // It feels a bit propeller-headed to do this but overall makes the page feel more responsive.
         function shuffleStories() {
             // Cache the stories list element
-            const storiesList = document.querySelector('.stories-list');
+            const storiesList = document.querySelector('.stories-list.homepage');
 
             // Use Array.prototype.slice.call for faster array creation from NodeList
             const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
@@ -66,7 +27,7 @@
             }
             
             // Make visible before DOM update
-            storiesList.style.visibility = 'visible';
+            storiesList.classList.add('visible');
 
             // Single DOM operation to replace all children
             storiesList.textContent = '';
@@ -82,32 +43,55 @@
     </script>
 </head>
 <body>
-    <header>
+    <header class="homepage">
         <h1>Dudley People's School for Climate Justice</h1>
         <p>Time Portal</p>
     </header>
 
-    <h2>Themes</h2>
-    <ul class="taxonomy-list">{{range .Themes}}
-        <li><a href="themes/{{.URL}}.html">{{.Title}}</a></li>{{end}}
-    </ul>
+    <div class="homepage-content">
+        <div class="tag-list-container">
+            <h2 class="tag-list-header">Themes</h2>
+            <ul class="tag-list">{{range .Themes}}
+                <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
 
-    <h2>Types</h2>
-    <ul class="taxonomy-list">{{range .Types}}
-        <li><a href="types/{{.URL}}.html">{{.Title}}</a></li>{{end}}
-    </ul>
+        <div class="tag-list-container">
+            <h2 class="tag-list-header">Types</h2>
+            <ul class="tag-list">{{range .Types}}
+                <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
 
-    <h2>Wander through our archive</h2>
-    <div class="stories-list">{{range .Stories}}
-        {{$story := .}}
-        <div class="story">
-            {{with .GetStoryImage}}
-            {{ if .URL }}
-            <a href="{{$story.URL}}"><img src="{{.URL}}" alt="{{.AlternativeText}}"></a>
-            {{ else }}
-            <div>No image</div>
-            {{ end }}
-            {{end}}
-        </div>{{end}}
+        <h2 class="wander-through-archive-header">Wander through our archive</h2>
+        <div class="stories-list homepage">{{range .Stories}}
+            {{$story := .}}
+            <div class="story">
+                {{with .GetStoryImage}}
+                {{ if .URL }}
+                <a href=".{{$story.URL}}"><img src=".{{.URL}}" alt="{{.AlternativeText}}"></a>
+                {{ else }}
+                <div>No image</div>
+                {{ end }}
+                {{end}}
+            </div>{{end}}
+        </div>
     </div>
+    <footer>
+        <div class="footer-content">
+            <div>Dudley People's School for Climate Justice is an assemblage of community-led projects. The projects make it easier for people to learn from each other and connect with nature. Everyone is a teacher, and everyone is a learner. Using nature’s guidebook, place-based peer learning will lead to action for people, planet and the future.</div>
+            <a class="dashed-button" href="#">Learn more about the project</a>
+            <div class="compilation-information">
+                <div class="version">Version: Spring 2025</div>
+            </div>
+        </div>
+        <div class="address">
+            <address class="h-adr">
+                <span class="p-name">CoLab Dudley</span><br>
+                <span class="p-street-address">201a High Street</span><br>
+                <span class="p-locality">Dudley</span> 
+                <span class="p-postal-code">DY1 1QQ</span>
+            </address>
+        </div>
+    </footer>
 </body>

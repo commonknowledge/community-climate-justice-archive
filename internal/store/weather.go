@@ -1,4 +1,4 @@
-// Retrieves and processes types from the database as required.
+// Retrieves and processes weather from the database as required.
 package store
 
 import (
@@ -6,16 +6,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
+	"community-climate-justice-archive/internal/util"
 )
 
-// GetStoriesForType retrieves all stories for a given type from the database and returns them as a slice of Story.
-func GetStoriesForType(typeTitle string) []data.Story {
-	log.Println("Getting stories for type", typeTitle)
+// GetStoriesForWeather retrieves all stories for a given weather from the database and returns them as a slice of Story.
+func GetStoriesForWeather(weatherTitle string) []data.Story {
+	log.Println("Getting stories for weather", weatherTitle)
 
 	dbPath := "airtable-export.db"
 
@@ -25,15 +25,15 @@ func GetStoriesForType(typeTitle string) []data.Story {
 	}
 	defer db.Close()
 
-	// Type is stored as JSON array in the database like this:
-	// ["Map", "Drawing", "Imagining"]
+	// Weather is stored as JSON array in the database like this:
+	// ["Sunny", "Cloudy", "Rainy"]
 	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
-	likePattern := fmt.Sprintf("%%%q%%", typeTitle)
+	likePattern := fmt.Sprintf("%%%q%%", weatherTitle)
 
 	query := `
 		SELECT *
 		FROM Stories
-		WHERE "Type" LIKE ?;
+		WHERE "Weather" LIKE ?;
 	`
 
 	rows, err := db.Query(query, likePattern)
@@ -94,10 +94,10 @@ func GetStoriesForType(typeTitle string) []data.Story {
 	return stories
 }
 
-// GetTypes retrieves all types from the database and returns them as a slice of Type.
+// GetWeather retrieves all weather from the database and returns them as a slice of Weather.
 // Intended for passing to HTML templates.
-func GetTypes() []data.Type {
-	log.Println("Getting types")
+func GetWeather() []data.Weather {
+	log.Println("Getting weather")
 
 	dbPath := "airtable-export.db"
 
@@ -107,55 +107,58 @@ func GetTypes() []data.Type {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT Type FROM Stories")
+	rows, err := db.Query("SELECT Weather FROM Stories")
 	if err != nil {
-		log.Fatalf("Failed to query types: %v", err)
+		log.Fatalf("Failed to query weather: %v", err)
 	}
 	defer rows.Close()
 
-	var types []data.Type
+	var weathers []data.Weather
 
 	for rows.Next() {
 		var (
-			Type sql.NullString
+			Weather sql.NullString
 		)
 
-		if err := rows.Scan(&Type); err != nil {
+		if err := rows.Scan(&Weather); err != nil {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
 
-		if Type.Valid {
-			// First unmarshal into a string array since it's in format ["Map", "Drawing", "Imagining"]
-			var typeStrings []string
-			if err := json.Unmarshal([]byte(Type.String), &typeStrings); err != nil {
+		if Weather.Valid {
+			// First unmarshal into a string array since it's in format ["Sunny", "Cloudy", "Rainy"]
+			var weatherStrings []string
+			if err := json.Unmarshal([]byte(Weather.String), &weatherStrings); err != nil {
 				log.Fatalf("Failed to unmarshal JSON: %v", err)
 			}
 
-			for _, typeStr := range typeStrings {
-				newType := data.Type{Title: typeStr, URL: strings.ToLower(typeStr), Colour: data.TitleToHexColor(typeStr)}
-				types = append(types, newType)
+			for _, weatherStr := range weatherStrings {
+				newWeather := data.Weather{
+					Title: weatherStr,
+					URL:   "/weather/" + util.Slugify(weatherStr) + ".html",
+				}
+				weathers = append(weathers, newWeather)
 			}
 		}
 	}
 
-	log.Printf("Found %d types", len(types))
+	log.Printf("Found %d weather conditions", len(weathers))
 
-	types = uniqueTypes(types)
-	log.Printf("Found %d unique types", len(types))
+	weathers = uniqueWeather(weathers)
+	log.Printf("Found %d unique weather conditions", len(weathers))
 
-	return types
+	return weathers
 }
 
-// uniqueTypes returns a slice of unique types.
-func uniqueTypes(types []data.Type) []data.Type {
+// uniqueWeather returns a slice of unique weather conditions.
+func uniqueWeather(weathers []data.Weather) []data.Weather {
 	seen := make(map[string]bool)
-	unique := []data.Type{}
+	unique := []data.Weather{}
 
-	// Loop over the slice and only keep first occurrence of each type.
-	for _, t := range types {
-		if !seen[t.Title] {
-			seen[t.Title] = true
-			unique = append(unique, t)
+	// Loop over the slice and only keep first occurrence of each weather.
+	for _, w := range weathers {
+		if !seen[w.Title] {
+			seen[w.Title] = true
+			unique = append(unique, w)
 		}
 	}
 

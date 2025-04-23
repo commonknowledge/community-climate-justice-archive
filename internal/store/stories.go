@@ -4,6 +4,7 @@ package store
 import (
 	"database/sql"
 	"log"
+	"math/rand"
 
 	"fmt"
 	"path/filepath"
@@ -21,11 +22,55 @@ func CreateStoryURLFromFinding(finding string) string {
 	return filepath.Join("/stories", fileName)
 }
 
-func GetAllStories() []data.Story {
+func connectToDatabase() *sql.DB {
 	db, err := sql.Open("sqlite3", "airtable-export.db")
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
+
+	return db
+}
+
+// GetMoreTaggedStories gets the first 3 more tagged stories for a story.
+func GetMoreTaggedStories(story data.Story, tag interface{}, count int) []data.Story {
+	var stories []data.Story
+
+	switch tag := tag.(type) {
+	case data.Theme:
+		stories = GetStoriesForTheme(tag.Title)
+
+		// Randomly shuffle the stories
+		rand.Shuffle(len(stories), func(i, j int) {
+			stories[i], stories[j] = stories[j], stories[i]
+		})
+
+		if len(stories) < count {
+			return stories
+		}
+
+		return stories[:count]
+	case data.Type:
+		stories = GetStoriesForType(tag.Title)
+
+		// Randomly shuffle the stories
+		rand.Shuffle(len(stories), func(i, j int) {
+			stories[i], stories[j] = stories[j], stories[i]
+		})
+
+		if len(stories) < count {
+			return stories
+		}
+
+		return stories[:count]
+	default:
+		log.Fatalf("Unsupported tag type: %T", tag)
+	}
+
+	return stories
+}
+
+func GetAllStories() []data.Story {
+	db := connectToDatabase()
 	defer db.Close()
 
 	rows, err := db.Query("SELECT * FROM Stories")
