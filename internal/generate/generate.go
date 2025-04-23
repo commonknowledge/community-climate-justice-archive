@@ -3,6 +3,7 @@
 package generate
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -45,14 +46,53 @@ func createWeatherOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "weather", fileName)
 }
 
+// loadTemplates loads all templates and partials needed by the application
+func loadTemplates() (*template.Template, error) {
+	tmpl := template.New("")
+
+	// Parse all HTML files in templates directory
+	tmpl, err := tmpl.ParseGlob("templates/*.html")
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse all partials
+	tmpl, err = tmpl.ParseGlob("templates/partials/*.html")
+	if err != nil {
+		return nil, err
+	}
+
+	return tmpl, nil
+}
+
+// convertStoriesToJSON converts a slice of stories to a JSON array of URLs.
+func convertStoriesToJSON(stories []data.Story) (string, error) {
+	var urls []string
+	for _, story := range stories {
+		urls = append(urls, story.URL)
+	}
+	jsonData, err := json.Marshal(urls)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal stories to JSON: %w", err)
+	}
+	return string(jsonData), nil
+}
+
 // WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
 func WriteWeatherIndexes() error {
 	log.Println("Starting weather generation")
 	weathers := store.GetWeather()
+	allStories := store.GetAllStories()
 
-	tmpl, err := template.ParseFiles("templates/weather-index.html")
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to parse weather template: %w", err)
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/weather", 0755)
@@ -73,10 +113,16 @@ func WriteWeatherIndexes() error {
 
 		stories := store.GetStoriesForWeather(weatherInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
-			Title:       weatherInQuestion.Title,
-			Description: "A list of stories for the weather " + weatherInQuestion.Title,
-			Stories:     stories,
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "weather-index.html", data.TaxonomyIndexPage{
+			Title:          weatherInQuestion.Title,
+			Description:    "A list of stories for the weather " + weatherInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: weatherInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -93,10 +139,17 @@ func WriteWeatherIndexes() error {
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
 	types := store.GetTypes()
+	allStories := store.GetAllStories()
 
-	tmpl, err := template.ParseFiles("templates/type-index.html")
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to parse types template: %w", err)
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/types", 0755)
@@ -110,7 +163,6 @@ func WriteTypesIndexes() error {
 		log.Printf("Writing types %s to %s", typeInQuestion.Title, outputPath)
 
 		file, err := os.Create(outputPath)
-
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
 		}
@@ -118,11 +170,16 @@ func WriteTypesIndexes() error {
 
 		stories := store.GetStoriesForType(typeInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "type-index.html", data.TaxonomyIndexPage{
 			Title:          typeInQuestion.Title,
 			Description:    "A list of stories for the type " + typeInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: typeInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -166,9 +223,15 @@ func WriteStories() error {
 	log.Println("Starting story generation")
 	stories := store.GetAllStories()
 
-	tmpl, err := template.ParseFiles("templates/story.html")
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(stories)
 	if err != nil {
-		return fmt.Errorf("failed to parse story template: %w", err)
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/stories", 0755)
@@ -184,7 +247,6 @@ func WriteStories() error {
 		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
 
 		file, err := os.Create(outputPath)
-
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
 		}
@@ -207,6 +269,9 @@ func WriteStories() error {
 			// If this is the last story, the next is the first story
 			nextStory = stories[0]
 		}
+
+		// Select a random story for the random link
+		randomStory := stories[rand.Intn(len(stories))]
 
 		// Reformat the date fields to be more human readable
 		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
@@ -285,7 +350,7 @@ func WriteStories() error {
 			}
 		}
 
-		err = tmpl.Execute(file, data.StoryPage{
+		err = tmpl.ExecuteTemplate(file, "story.html", data.StoryPage{
 			Title:                   storyInQuestion.Finding,
 			Description:             "A story that says:" + storyInQuestion.Finding,
 			Story:                   storyInQuestion,
@@ -294,6 +359,8 @@ func WriteStories() error {
 			FirstMoreTaggedStories:  firstRelated,
 			SecondMoreTaggedStories: secondRelated,
 			ThirdMoreTaggedStories:  thirdRelated,
+			RandomStoryURL:          randomStory.URL,
+			StoriesJSON:             storiesJSON,
 		})
 
 		if err != nil {
@@ -310,10 +377,17 @@ func WriteStories() error {
 func WriteThemesIndexes() error {
 	log.Println("Starting themes generation")
 	themes := store.GetThemes()
+	allStories := store.GetAllStories()
 
-	tmpl, err := template.ParseFiles("templates/theme-index.html")
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
 	if err != nil {
-		return fmt.Errorf("failed to parse types template: %w", err)
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	err = os.MkdirAll("out/themes", 0755)
@@ -327,7 +401,6 @@ func WriteThemesIndexes() error {
 		log.Printf("Writing types %s to %s", themeInQuestion.Title, outputPath)
 
 		file, err := os.Create(outputPath)
-
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
 		}
@@ -335,11 +408,16 @@ func WriteThemesIndexes() error {
 
 		stories := store.GetStoriesForTheme(themeInQuestion.Title)
 
-		err = tmpl.Execute(file, data.TaxonomyIndexPage{
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "theme-index.html", data.TaxonomyIndexPage{
 			Title:          themeInQuestion.Title,
 			Description:    "A list of stories for the theme " + themeInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: themeInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
 		})
 
 		if err != nil {
@@ -367,17 +445,28 @@ func WriteHomePage() error {
 		stories[i], stories[j] = stories[j], stories[i]
 	})
 
-	page := data.Page{
-		Title:       "Dudley People's School for Climate Justice – time portal",
-		Description: "The time portal for the Dudley People's School for Climate Justice",
-		Themes:      themes,
-		Types:       types,
-		Stories:     stories,
+	// Select a random story for the initial random link
+	randomStory := stories[rand.Intn(len(stories))]
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(stories)
+	if err != nil {
+		return err
 	}
 
-	tmpl, err := template.ParseFiles("templates/homepage.html")
+	page := data.Page{
+		Title:          "Dudley People's School for Climate Justice – time portal",
+		Description:    "The time portal for the Dudley People's School for Climate Justice",
+		Themes:         themes,
+		Types:          types,
+		Stories:        stories,
+		RandomStoryURL: randomStory.URL,
+		StoriesJSON:    storiesJSON,
+	}
+
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse homepage template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	fileName := "index.html"
@@ -389,7 +478,7 @@ func WriteHomePage() error {
 	}
 	defer file.Close()
 
-	err = tmpl.Execute(file, page)
+	err = tmpl.ExecuteTemplate(file, "homepage.html", page)
 	if err != nil {
 		return fmt.Errorf("failed to execute template: %w", err)
 	}

@@ -1,0 +1,32 @@
+{{define "header"}}
+<header>
+    <div>
+        <h1>Dudley People's School for Climate Justice</h1>
+        <nav class="header-nav">
+            <a class="dashed-button" href="/">Wander</a>
+            <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
+        </nav>
+    </div>
+    <p>Time Portal</p>
+    <script>
+        window.storyUrls = {{.StoriesJSON}};
+        (function() {
+            const randomLink = document.querySelector('.random-story-link');
+            if (!randomLink) return;
+            
+            function updateRandomLink() {
+                if (window.storyUrls && window.storyUrls.length > 0) {
+                    const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
+                    randomLink.href = randomUrl;
+                }
+            }
+
+            updateRandomLink();
+            
+            randomLink.addEventListener('click', function(e) {
+                updateRandomLink();
+            });
+        })();
+    </script>
+</header>
+{{end}} 
