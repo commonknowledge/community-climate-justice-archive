@@ -61,14 +61,12 @@ func CopyCSSToOutput() error {
 
 // compressImage creates multiple WebP versions of an image at different sizes
 func compressImage(srcPath string) error {
-	// Load original image
 	file, err := os.Open(srcPath)
 	if err != nil {
 		return fmt.Errorf("failed to open image: %w", err)
 	}
 	defer file.Close()
 
-	// Decode original image
 	var img image.Image
 	ext := strings.ToLower(filepath.Ext(srcPath))
 	if ext == ".png" {
@@ -89,7 +87,6 @@ func compressImage(srcPath string) error {
 		ratio := float64(bounds.Dy()) / float64(bounds.Dx())
 		height := int(float64(width) * ratio)
 
-		// Resize image
 		resized := imaging.Resize(img, width, height, imaging.Lanczos)
 
 		// Create WebP with size suffix
@@ -138,15 +135,15 @@ func ProcessImages() error {
 		filename := file.Name()
 		ext := strings.ToLower(filepath.Ext(filename))
 
-		// Skip if the file is not a JPEG or PNG
-		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
-			log.Printf("Skipping non-image file: %s", filename)
-			continue
-		}
-
 		// Skip if it's already a WebP file
 		if ext == ".webp" {
 			log.Printf("Skipping WebP file: %s", filename)
+			continue
+		}
+
+		// Skip if the file is not a JPEG or PNG
+		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
+			log.Printf("Skipping non-image file: %s", filename)
 			continue
 		}
 
