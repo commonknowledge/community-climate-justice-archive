@@ -120,11 +120,18 @@ func compressImage(srcPath string) error {
 	mainPath := filepath.Join("images", filepath.Base(srcPath))
 	mainOutPath := filepath.Join("images/processed", filepath.Base(srcPath))
 
+	mainFile, err := os.Open(srcPath)
+	if err != nil {
+		return fmt.Errorf("failed to open image: %w", err)
+	}
+	defer mainFile.Close()
+
+	var mainImg image.Image
 	ext = strings.ToLower(filepath.Ext(mainPath))
 	if ext == ".png" {
-		img, err = png.Decode(file)
+		mainImg, err = png.Decode(mainFile)
 	} else if ext == ".jpg" || ext == ".jpeg" {
-		img, err = jpeg.Decode(file)
+		mainImg, err = jpeg.Decode(mainFile)
 	} else {
 		return fmt.Errorf("unsupported image format: %s", ext)
 	}
@@ -138,7 +145,7 @@ func compressImage(srcPath string) error {
 	}
 	defer output.Close()
 
-	if err := libwebp.Encode(output, img, webpoptions.EncodingOptions{
+	if err := libwebp.Encode(output, mainImg, webpoptions.EncodingOptions{
 		// Quality of 0 sets the image to lossless
 		Quality:        0,
 		EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
