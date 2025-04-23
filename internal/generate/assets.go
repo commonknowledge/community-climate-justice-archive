@@ -113,12 +113,14 @@ func compressImage(srcPath string) error {
 			return fmt.Errorf("failed to encode WebP: %w", err)
 		}
 
-		log.Printf("Created %s", outPath)
+		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
 	}
 
 	// Encode the main image, but with lossless quality
 	mainPath := filepath.Join("images", filepath.Base(srcPath))
-	mainOutPath := filepath.Join("images/processed", filepath.Base(srcPath))
+
+	mainBaseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
+	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", mainBaseName))
 
 	mainFile, err := os.Open(srcPath)
 	if err != nil {
@@ -154,7 +156,7 @@ func compressImage(srcPath string) error {
 		return fmt.Errorf("failed to encode WebP: %w", err)
 	}
 
-	log.Printf("Created %s", mainOutPath)
+	log.Printf("Created %s as WebP version of %s, the main image", mainOutPath, srcPath)
 
 	return nil
 }
