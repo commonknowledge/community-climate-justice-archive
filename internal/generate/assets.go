@@ -91,7 +91,7 @@ func compressImage(srcPath string) error {
 
 		// Create WebP with size suffix
 		baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
-		outPath := filepath.Join("images", fmt.Sprintf("%s_%s.webp", baseName, suffix))
+		outPath := filepath.Join("images/processed", fmt.Sprintf("%s_%s.webp", baseName, suffix))
 
 		// Skip if file already exists
 		if _, err := os.Stat(outPath); err == nil {
@@ -121,6 +121,11 @@ func compressImage(srcPath string) error {
 
 func ProcessImages() error {
 	log.Println("Starting image processing process")
+
+	err := os.MkdirAll("images/processed", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create resized images directory: %w", err)
+	}
 
 	files, err := os.ReadDir("images")
 	if err != nil {

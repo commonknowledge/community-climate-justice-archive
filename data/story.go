@@ -121,9 +121,9 @@ func (s Story) GetStoryImages() []StoryImage {
 
 		// Set URLs for different sizes
 		images[i].URL = "/images/" + images[i].Filename
-		images[i].ThumbURL = "/images/" + name + "_thumb.webp"
-		images[i].MediumURL = "/images/" + name + "_medium.webp"
-		images[i].LargeURL = "/images/" + name + "_large.webp"
+		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
+		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
+		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
 	}
 
 	json.Unmarshal([]byte(s.SourceImage), &images)
