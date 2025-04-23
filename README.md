@@ -2,7 +2,7 @@
 
 ## Status
 
-At the time of writing, this contains the first version of the archive, intended for release in Spring 2025.
+At the time of writing, this contains the first version of the archive. This is intended for release in Spring 2025.
 
 ## Technology Choices
 
