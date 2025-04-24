@@ -107,6 +107,8 @@ The site title and navigation elements that remain visible while scrolling.
 */
 header {
     font-family: Arial, sans-serif;
+    margin-left: 2.222222rem;
+    margin-right: 2.222222rem;
     position: sticky;
     top: 0;
     z-index: 100;
