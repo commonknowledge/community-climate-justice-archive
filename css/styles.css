@@ -218,6 +218,14 @@ A single tag look for categories, themes, types, and weather.
     width: fit-content;
 }
 
+.tag:hover {
+    /*
+    In general it is bad practice to use !important in CSS, but here we need to in order to override
+    the colour of the tag, which is set on the style attribute.
+    */
+    background: #000 !important;
+}
+
 /* 
 As we have a global link style, we need to override it for tags to retain the padding and margin.
 */
