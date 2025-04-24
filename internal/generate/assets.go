@@ -59,11 +59,10 @@ func CopyCSSToOutput() error {
 	return nil
 }
 
-// compressImage creates multiple WebP versions of an image at different sizes
-func compressImage(srcPath string) error {
+func readImage(srcPath string) (image.Image, error) {
 	file, err := os.Open(srcPath)
 	if err != nil {
-		return fmt.Errorf("failed to open image: %w", err)
+		return nil, fmt.Errorf("failed to open image: %w", err)
 	}
 	defer file.Close()
 
@@ -74,23 +73,34 @@ func compressImage(srcPath string) error {
 	} else if ext == ".jpg" || ext == ".jpeg" {
 		img, err = jpeg.Decode(file)
 	} else {
-		return fmt.Errorf("unsupported image format: %s", ext)
+		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to decode image: %w", err)
+		return nil, fmt.Errorf("failed to decode image: %w", err)
 	}
+
+	return img, nil
+}
+
+// compressImage creates multiple WebP versions of an image at different sizes
+func compressImage(srcPath string) error {
+	// Read the original image
+	originalImg, err := readImage(srcPath)
+	if err != nil {
+		return fmt.Errorf("failed to read image: %w", err)
+	}
+
+	// Get the base name without extension
+	baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 
 	// Create each size variant
 	for suffix, width := range ImageSizes {
-		// Calculate proportional height
-		bounds := img.Bounds()
+		// Calculate proportional height to maintain aspect ratio
+		bounds := originalImg.Bounds()
 		ratio := float64(bounds.Dy()) / float64(bounds.Dx())
 		height := int(float64(width) * ratio)
 
-		resized := imaging.Resize(img, width, height, imaging.Lanczos)
-
-		// Create WebP with size suffix
-		baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
+		// Create the output path
 		outPath := filepath.Join("images/processed", fmt.Sprintf("%s_%s.webp", baseName, suffix))
 
 		// Skip if file already exists
@@ -99,6 +109,10 @@ func compressImage(srcPath string) error {
 			continue
 		}
 
+		// Resize the image
+		resized := imaging.Resize(originalImg, width, height, imaging.Lanczos)
+
+		// Create and encode the WebP file
 		output, err := os.Create(outPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file: %w", err)
@@ -116,48 +130,32 @@ func compressImage(srcPath string) error {
 		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
 	}
 
-	// Encode the main image, but with lossless quality
-	mainPath := filepath.Join("images", filepath.Base(srcPath))
+	// Create the main WebP version (original size)
+	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", baseName))
 
-	mainBaseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
-	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", mainBaseName))
-
-	mainFile, err := os.Open(srcPath)
-	if err != nil {
-		return fmt.Errorf("failed to open image: %w", err)
-	}
-	defer mainFile.Close()
-
-	var mainImg image.Image
-	ext = strings.ToLower(filepath.Ext(mainPath))
-	if ext == ".png" {
-		mainImg, err = png.Decode(mainFile)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		mainImg, err = jpeg.Decode(mainFile)
-	} else {
-		return fmt.Errorf("unsupported image format: %s", ext)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to decode image: %w", err)
+	// Skip if file already exists
+	if _, err := os.Stat(mainOutPath); err == nil {
+		log.Printf("Skipping existing main image: %s", mainOutPath)
+		return nil
 	}
 
+	// Create and encode the main WebP file
 	output, err := os.Create(mainOutPath)
 	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
+		return fmt.Errorf("failed to create main output file: %w", err)
 	}
 	defer output.Close()
 
-	if err := libwebp.Encode(output, mainImg, webpoptions.EncodingOptions{
-		// Quality of 0 sets the image to lossless
-		Quality:        0,
+	// Encode the main image, but with lossless quality
+	if err := libwebp.Encode(output, originalImg, webpoptions.EncodingOptions{
+		Quality:        0, // Lossless
 		EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
 		UseSharpYuv:    true,
 	}); err != nil {
-		return fmt.Errorf("failed to encode WebP: %w", err)
+		return fmt.Errorf("failed to encode main WebP: %w", err)
 	}
 
-	log.Printf("Created %s as WebP version of %s, the main image", mainOutPath, srcPath)
-
+	log.Printf("Created %s as main WebP version of %s", mainOutPath, srcPath)
 	return nil
 }
 
