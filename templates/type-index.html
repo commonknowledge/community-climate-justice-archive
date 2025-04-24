@@ -1,5 +1,8 @@
+<!DOCTYPE html>
+<html lang="en-GB">
 <head>
     <title>{{.Title}} Type</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 
@@ -13,7 +16,16 @@
             {{$story := .}}
             {{ with .GetStoryImage }}
             {{ if .URL }}
-            <a href="..{{$story.URL}}"><img src="..{{.URL}}" alt="{{.AlternativeText}}"></a>
+            <a href="..{{$story.URL}}">
+                <img 
+                    src="..{{.ThumbURL}}" 
+                    srcset="
+                        ..{{.ThumbURL}} 300w,
+                        ..{{.MediumURL}} 800w
+                    "
+                    sizes="(max-width: 600px) 300px, 800px"
+                    alt="{{.AlternativeText}}">
+            </a>
             {{ else }}
             <div>No image</div>
             {{ end }}
@@ -23,3 +35,4 @@
     </div>
     {{template "footer" .}}
 </body>
+</html>

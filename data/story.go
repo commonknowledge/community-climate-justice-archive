@@ -10,6 +10,9 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Story struct {
@@ -56,6 +59,9 @@ type StoryImage struct {
 	Width           int
 	Height          int
 	URL             string
+	ThumbURL        string
+	MediumURL       string
+	LargeURL        string
 	Thumbnails      map[string]Thumbnail
 }
 
@@ -101,13 +107,45 @@ func (s Story) GetStoryImages() []StoryImage {
 	json.Unmarshal([]byte(s.Image), &images)
 
 	for i := range images {
-		images[i].URL = "/images/" + images[i].Filename
+		// Split filename into name and extension
+		ext := filepath.Ext(images[i].Filename)
+		name := strings.TrimSuffix(images[i].Filename, ext)
+
+		// Check if WebP version exists
+		webpPath := filepath.Join("images", name+".webp")
+		if _, err := os.Stat(webpPath); err == nil {
+			// WebP version exists, use it
+			images[i].Filename = name + ".webp"
+			images[i].Type = "image/webp"
+		}
+
+		// Set URLs for different sizes
+		images[i].URL = "/images/processed/" + name + ".webp"
+		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
+		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
+		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
 	}
 
 	json.Unmarshal([]byte(s.SourceImage), &images)
 
 	for i := range images {
-		images[i].URL = "/images/" + images[i].Filename
+		// Split filename into name and extension
+		ext := filepath.Ext(images[i].Filename)
+		name := strings.TrimSuffix(images[i].Filename, ext)
+
+		// Check if WebP version exists
+		webpPath := filepath.Join("images", name+".webp")
+		if _, err := os.Stat(webpPath); err == nil {
+			// WebP version exists, use it
+			images[i].Filename = name + ".webp"
+			images[i].Type = "image/webp"
+		}
+
+		// Set URLs for different sizes
+		images[i].URL = "/images/processed/" + name + ".webp"
+		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
+		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
+		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
 	}
 
 	return images
