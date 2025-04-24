@@ -218,11 +218,17 @@ A single tag look for categories, themes, types, and weather.
     width: fit-content;
 }
 
+/* Hover State for Tag
+
+In general it is bad practice to use !important in CSS, but here we need to in order to override
+the colour of the tag, which is set on the style attribute, because this is the only way to attach
+colour to the element tag when we inject it into the template.
+
+Like this:
+<a href="#" class="tag" style="background: #000;">Tag</a>
+*/
 .tag:hover {
-    /*
-    In general it is bad practice to use !important in CSS, but here we need to in order to override
-    the colour of the tag, which is set on the style attribute.
-    */
+
     background: #000 !important;
 }
 
