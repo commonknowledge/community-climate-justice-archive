@@ -42,6 +42,13 @@ a:hover {
     background: #FFFF99;
 }
 
+/* 
+Don't apply the background on hover in other contexts.
+*/
+.related-story a:hover, .story a:hover, .story-nav-arrow a:hover {
+    background: none;
+}
+
 /* Homepage Header
 
 The main navigation and title for the homepage.
@@ -234,10 +241,6 @@ Images within story content, limiting width while maintaining aspect ratio.
 .story img {
     max-width: 300px;
     height: auto;
-}
-
-.story a:hover {
-    background: none;
 }
 
 /* Stories Grid
