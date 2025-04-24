@@ -75,13 +75,16 @@ The main content area of the homepage, including featured stories and navigation
 The site title and navigation elements that remain visible while scrolling.
 */
 header {
-    align-items: center;
-    display: flex;
     font-family: Arial, sans-serif;
-    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* Header Title

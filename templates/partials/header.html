@@ -1,13 +1,13 @@
 {{define "header"}}
 <header>
-    <div>
+    <div class="main-header">
         <h1><a href="/">Dudley People's School for Climate Justice</a></h1>
-        <nav class="header-nav">
-            <a class="dashed-button" href="/">Wander</a>
-            <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
-        </nav>
+        <p>Time Portal</p>
     </div>
-    <p>Time Portal</p>
+    <nav class="header-nav">
+        <a class="dashed-button" href="/">Wander</a>
+        <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
+    </nav>
 </header>
 <script>
     window.storyUrls = {{.StoriesJSON}};
