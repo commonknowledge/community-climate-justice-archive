@@ -31,6 +31,11 @@ body {
     overflow-x: hidden;
 }
 
+a:hover {
+    background: #FFFF99;
+    padding: 5px;
+}
+
 /* Homepage Header
 
 The main navigation and title for the homepage.
@@ -551,4 +556,10 @@ A button with a dashed border for navigation and actions.
     padding: 0.27778rem 0.55556rem;
     text-decoration: none;
     width: max-content;
+}
+
+.dashed-button:hover {
+    border: 2px solid #000;
+    background: none;
+    padding: 0.27778rem 0.55556rem;
 }
