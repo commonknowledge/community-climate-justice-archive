@@ -31,9 +31,15 @@ body {
     overflow-x: hidden;
 }
 
+a {
+    color: #000;
+    background-color: transparent;
+    padding: 5px;
+    margin: -5px;
+}
+
 a:hover {
     background: #FFFF99;
-    padding: 5px;
 }
 
 /* Homepage Header
@@ -202,6 +208,14 @@ A single tag look for categories, themes, types, and weather.
     width: fit-content;
 }
 
+/* 
+As we have a global link style, we need to override it for tags to retain the padding and margin.
+*/
+a.tag {
+    margin: 0; 
+    padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
+}
+
 /* Large Tag
 
 A more prominent version of the tag look used on the homepage and in headers.
@@ -220,6 +234,10 @@ Images within story content, limiting width while maintaining aspect ratio.
 .story img {
     max-width: 300px;
     height: auto;
+}
+
+.story a:hover {
+    background: none;
 }
 
 /* Stories Grid
