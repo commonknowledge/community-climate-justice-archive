@@ -295,7 +295,7 @@ The main text content of a story.
 */
 .story-finding {
     font-family: 'Times New Roman', serif;
-    font-size: 1rem;
+    font-size: 1.22222rem;
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.02rem;
@@ -308,7 +308,7 @@ Individual metadata items for a story.
 */
 .story-metadata-item {
     font-family: Arial;
-    font-size: 0.77778rem;
+    font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
@@ -320,6 +320,7 @@ Individual metadata items for a story.
 Labels for metadata fields (e.g., "Date", "Location").
 */
 .story-metadata-item-label {
+    font-size: 0.88889rem;
     color: rgba(0, 0, 0, 0.50);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -342,6 +343,10 @@ Tag-based metadata like themes and types.
     flex-direction: row;
     flex-wrap: wrap;
     gap: 0.55556rem;
+}
+
+.story-metadata-item-value.tags .tag {
+    font-size: 1.22222rem;
 }
 
 /* Story Details
@@ -520,7 +525,7 @@ Contact information in the footer.
 footer address {
     color: #000;
     font-family: Arial;
-    font-size: 22px;
+    font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
