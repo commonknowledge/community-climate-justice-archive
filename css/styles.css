@@ -361,15 +361,15 @@ The main content and metadata for a story.
 The story image and navigation arrows.
 */
 .story-image-container {
+    align-items: center;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    width: 100%;
-    max-width: 100vw;
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    max-width: 100vw;
     overflow-x: hidden;
+    padding: 0;
+    width: 100%;
 }
 
 /* Story Metadata
