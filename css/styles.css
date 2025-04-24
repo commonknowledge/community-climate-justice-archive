@@ -346,14 +346,18 @@ Tag-based metadata like themes and types.
 The main content and metadata for a story.
 */
 .story-details {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    margin-bottom: 6.66667rem;
-    margin-top: 6.66667rem;
     justify-content: space-between;
-    padding-left: 2.22222rem;
-    padding-right: 2.22222rem;
+    margin-bottom: 60px;
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+    margin-top: 60px;
+    padding-bottom: 60px;
+    padding-top: 60px;
 }
 
 /* Story Image Container
