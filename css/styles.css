@@ -34,21 +34,52 @@ body {
     overflow-x: hidden;
 }
 
+/* Base link style - no hover effect */
 a {
     color: #000;
-    background-color: transparent;
-    padding: 5px;
-    margin: -5px;
 }
 
-a:hover {
+/* This applies a relatively complex hover effect for links, where a yellow box surrounds the link when hovered over.
+
+We could do this with the padding attribute, but this causes the link to move with a jump when hovered over, as the padding is added in.
+
+Instead we use the pseudo-element to create a yellow box that surrounds the link when hovered over using the inset property.
+
+The z-index property makes sure this box is always under the link.
+
+We don't want this hover effect to apply everywhere, so we turn it off on specific classes.
+*/
+
+/* Apply hover effect only to content links */
+.story-finding a,
+.story-metadata a:not(.tag),
+.footer-content a,
+header h1 a {
+    position: relative;
+}
+
+.story-finding a::before,
+.story-metadata a:not(.tag)::before,
+.footer-content a::before,
+header h1 a::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    background: transparent;
+    z-index: -1;
+}
+
+.story-finding a:hover::before,
+.story-metadata a:not(.tag):hover::before,
+.footer-content a:hover::before,
+header h1 a:hover::before {
     background: #FFFF99;
 }
 
-/* 
-Don't apply the background on hover in other contexts.
-*/
-.related-story a:hover, .story a:hover, .story-nav-arrow a:hover {
+/* These links don't get the hover effect */
+.related-story a:hover,
+.story a:hover,
+.story-nav-arrow a:hover {
     background: none;
 }
 
