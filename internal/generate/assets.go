@@ -59,11 +59,10 @@ func CopyCSSToOutput() error {
 	return nil
 }
 
-// compressImage creates multiple WebP versions of an image at different sizes
-func compressImage(srcPath string) error {
+func readImage(srcPath string) (image.Image, error) {
 	file, err := os.Open(srcPath)
 	if err != nil {
-		return fmt.Errorf("failed to open image: %w", err)
+		return nil, fmt.Errorf("failed to open image: %w", err)
 	}
 	defer file.Close()
 
@@ -74,23 +73,34 @@ func compressImage(srcPath string) error {
 	} else if ext == ".jpg" || ext == ".jpeg" {
 		img, err = jpeg.Decode(file)
 	} else {
-		return fmt.Errorf("unsupported image format: %s", ext)
+		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to decode image: %w", err)
+		return nil, fmt.Errorf("failed to decode image: %w", err)
 	}
+
+	return img, nil
+}
+
+// compressImage creates multiple WebP versions of an image at different sizes
+func compressImage(srcPath string) error {
+	// Read the original image
+	originalImg, err := readImage(srcPath)
+	if err != nil {
+		return fmt.Errorf("failed to read image: %w", err)
+	}
+
+	// Get the base name without extension
+	baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 
 	// Create each size variant
 	for suffix, width := range ImageSizes {
-		// Calculate proportional height
-		bounds := img.Bounds()
+		// Calculate proportional height to maintain aspect ratio
+		bounds := originalImg.Bounds()
 		ratio := float64(bounds.Dy()) / float64(bounds.Dx())
 		height := int(float64(width) * ratio)
 
-		resized := imaging.Resize(img, width, height, imaging.Lanczos)
-
-		// Create WebP with size suffix
-		baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
+		// Create the output path
 		outPath := filepath.Join("images/processed", fmt.Sprintf("%s_%s.webp", baseName, suffix))
 
 		// Skip if file already exists
@@ -99,6 +109,10 @@ func compressImage(srcPath string) error {
 			continue
 		}
 
+		// Resize the image
+		resized := imaging.Resize(originalImg, width, height, imaging.Lanczos)
+
+		// Create and encode the WebP file
 		output, err := os.Create(outPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file: %w", err)
@@ -116,48 +130,32 @@ func compressImage(srcPath string) error {
 		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
 	}
 
-	// Encode the main image, but with lossless quality
-	mainPath := filepath.Join("images", filepath.Base(srcPath))
+	// Create the main WebP version (original size)
+	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", baseName))
 
-	mainBaseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
-	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", mainBaseName))
-
-	mainFile, err := os.Open(srcPath)
-	if err != nil {
-		return fmt.Errorf("failed to open image: %w", err)
-	}
-	defer mainFile.Close()
-
-	var mainImg image.Image
-	ext = strings.ToLower(filepath.Ext(mainPath))
-	if ext == ".png" {
-		mainImg, err = png.Decode(mainFile)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		mainImg, err = jpeg.Decode(mainFile)
-	} else {
-		return fmt.Errorf("unsupported image format: %s", ext)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to decode image: %w", err)
+	// Skip if file already exists
+	if _, err := os.Stat(mainOutPath); err == nil {
+		log.Printf("Skipping existing main image: %s", mainOutPath)
+		return nil
 	}
 
+	// Create and encode the main WebP file
 	output, err := os.Create(mainOutPath)
 	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
+		return fmt.Errorf("failed to create main output file: %w", err)
 	}
 	defer output.Close()
 
-	if err := libwebp.Encode(output, mainImg, webpoptions.EncodingOptions{
-		// Quality of 0 sets the image to lossless
-		Quality:        0,
+	// Encode the main image, but with lossless quality
+	if err := libwebp.Encode(output, originalImg, webpoptions.EncodingOptions{
+		Quality:        0, // Lossless
 		EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
 		UseSharpYuv:    true,
 	}); err != nil {
-		return fmt.Errorf("failed to encode WebP: %w", err)
+		return fmt.Errorf("failed to encode main WebP: %w", err)
 	}
 
-	log.Printf("Created %s as WebP version of %s, the main image", mainOutPath, srcPath)
-
+	log.Printf("Created %s as main WebP version of %s", mainOutPath, srcPath)
 	return nil
 }
 
@@ -208,55 +206,70 @@ func ProcessImages() error {
 func CopyImagesToOutput() error {
 	log.Println("Starting image copy process")
 
+	// Create the output directory for images
 	err := os.MkdirAll("out/images", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output images directory: %w", err)
 	}
 
-	files, err := os.ReadDir("images")
-	if err != nil {
-		return fmt.Errorf("failed to read images directory: %w", err)
-	}
-
+	// Walk through the images directory recursively
 	copyCount := 0
 	skippedCount := 0
-	for _, file := range files {
-		if file.IsDir() {
-			continue
+	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
 		}
 
-		filename := file.Name()
-		ext := strings.ToLower(filepath.Ext(filename))
+		// Calculate the relative path within the images directory
+		relativePath, err := filepath.Rel("images", path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path: %w", err)
+		}
+
+		// Create the destination path
+		destinationPath := filepath.Join("out/images", relativePath)
+
+		if info.IsDir() {
+			// Create the directory in the output path
+			if err := os.MkdirAll(destinationPath, 0755); err != nil {
+				return fmt.Errorf("failed to create destination directory: %w", err)
+			}
+			return nil
+		}
 
 		// Only copy image files
+		ext := strings.ToLower(filepath.Ext(path))
 		switch ext {
 		case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp":
-			srcPath := filepath.Join("images", filename)
-			dstPath := filepath.Join("out/images", filename)
-
-			src, err := os.Open(srcPath)
+			// Copy the file
+			sourceFile, err := os.Open(path)
 			if err != nil {
-				return fmt.Errorf("failed to open source image %s: %w", srcPath, err)
+				return fmt.Errorf("failed to open source image %s: %w", path, err)
 			}
-			defer src.Close()
+			defer sourceFile.Close()
 
-			dst, err := os.Create(dstPath)
+			destinationFile, err := os.Create(destinationPath)
 			if err != nil {
-				return fmt.Errorf("failed to create destination image %s: %w", dstPath, err)
+				return fmt.Errorf("failed to create destination image %s: %w", destinationPath, err)
 			}
-			defer dst.Close()
+			defer destinationFile.Close()
 
-			_, err = io.Copy(dst, src)
-			if err != nil {
-				return fmt.Errorf("failed to copy image %s: %w", filename, err)
+			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+				return fmt.Errorf("failed to copy image %s: %w", path, err)
 			}
 
 			copyCount++
-			log.Printf("Copied %s", filename)
+			log.Printf("Copied %s", relativePath)
 		default:
 			skippedCount++
-			log.Printf("Skipped non-image file: %s", filename)
+			log.Printf("Skipped non-image file: %s", path)
 		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking images directory: %w", err)
 	}
 
 	log.Printf("Successfully copied %d images to output directory (skipped %d non-image files)", copyCount, skippedCount)
