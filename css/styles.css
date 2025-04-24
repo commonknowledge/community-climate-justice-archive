@@ -17,6 +17,11 @@ in width/height calculations. This makes element sizing more predictable.
     box-sizing: border-box;
 }
 
+html {
+    /* Base size - 1rem equals 18px */
+    font-size: 18px;
+}
+
 /* Page Container
 
 The base styles for the entire page with a light cream background and classic
@@ -25,8 +30,6 @@ serif font. Prevents horizontal scrolling and sets the base font size to 18px.
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
-    /* Base size - 1rem equals 18px */
-    font-size: 18px;
     max-width: 100vw;
     overflow-x: hidden;
 }
