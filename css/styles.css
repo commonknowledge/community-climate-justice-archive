@@ -119,6 +119,14 @@ Navigation buttons in the header.
     text-transform: lowercase;
 }
 
+/* Header Navigation Button Hover State 
+
+Repeats the padding to prevent the button from moving when we hover over it.
+*/
+.header-nav .dashed-button:hover {
+    padding: 5px 10px;
+}
+
 /* Tag Headers
 
 Headers for tag-related sections in the archive, underwhich we display stories.
