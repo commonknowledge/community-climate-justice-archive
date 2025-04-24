@@ -208,55 +208,70 @@ func ProcessImages() error {
 func CopyImagesToOutput() error {
 	log.Println("Starting image copy process")
 
+	// Create the output directory for images
 	err := os.MkdirAll("out/images", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output images directory: %w", err)
 	}
 
-	files, err := os.ReadDir("images")
-	if err != nil {
-		return fmt.Errorf("failed to read images directory: %w", err)
-	}
-
+	// Walk through the images directory recursively
 	copyCount := 0
 	skippedCount := 0
-	for _, file := range files {
-		if file.IsDir() {
-			continue
+	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
 		}
 
-		filename := file.Name()
-		ext := strings.ToLower(filepath.Ext(filename))
+		// Calculate the relative path within the images directory
+		relativePath, err := filepath.Rel("images", path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path: %w", err)
+		}
+
+		// Create the destination path
+		destinationPath := filepath.Join("out/images", relativePath)
+
+		if info.IsDir() {
+			// Create the directory in the output path
+			if err := os.MkdirAll(destinationPath, 0755); err != nil {
+				return fmt.Errorf("failed to create destination directory: %w", err)
+			}
+			return nil
+		}
 
 		// Only copy image files
+		ext := strings.ToLower(filepath.Ext(path))
 		switch ext {
 		case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp":
-			srcPath := filepath.Join("images", filename)
-			dstPath := filepath.Join("out/images", filename)
-
-			src, err := os.Open(srcPath)
+			// Copy the file
+			sourceFile, err := os.Open(path)
 			if err != nil {
-				return fmt.Errorf("failed to open source image %s: %w", srcPath, err)
+				return fmt.Errorf("failed to open source image %s: %w", path, err)
 			}
-			defer src.Close()
+			defer sourceFile.Close()
 
-			dst, err := os.Create(dstPath)
+			destinationFile, err := os.Create(destinationPath)
 			if err != nil {
-				return fmt.Errorf("failed to create destination image %s: %w", dstPath, err)
+				return fmt.Errorf("failed to create destination image %s: %w", destinationPath, err)
 			}
-			defer dst.Close()
+			defer destinationFile.Close()
 
-			_, err = io.Copy(dst, src)
-			if err != nil {
-				return fmt.Errorf("failed to copy image %s: %w", filename, err)
+			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+				return fmt.Errorf("failed to copy image %s: %w", path, err)
 			}
 
 			copyCount++
-			log.Printf("Copied %s", filename)
+			log.Printf("Copied %s", relativePath)
 		default:
 			skippedCount++
-			log.Printf("Skipped non-image file: %s", filename)
+			log.Printf("Skipped non-image file: %s", path)
 		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking images directory: %w", err)
 	}
 
 	log.Printf("Successfully copied %d images to output directory (skipped %d non-image files)", copyCount, skippedCount)
