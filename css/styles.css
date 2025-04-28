@@ -17,6 +17,11 @@ in width/height calculations. This makes element sizing more predictable.
     box-sizing: border-box;
 }
 
+html {
+    /* Base size - 1rem equals 18px */
+    font-size: 18px;
+}
+
 /* Page Container
 
 The base styles for the entire page with a light cream background and classic
@@ -25,10 +30,57 @@ serif font. Prevents horizontal scrolling and sets the base font size to 18px.
 body {
     background-color: #FFFBF9;
     font-family: 'Times New Roman', serif;
-    /* Base size - 1rem equals 18px */
-    font-size: 18px;
     max-width: 100vw;
     overflow-x: hidden;
+}
+
+/* Base link style - no hover effect */
+a {
+    color: #000;
+}
+
+/* This applies a relatively complex hover effect for links, where a yellow box surrounds the link when hovered over.
+
+We could do this with the padding attribute, but this causes the link to move with a jump when hovered over, as the padding is added in.
+
+Instead we use the pseudo-element to create a yellow box that surrounds the link when hovered over using the inset property.
+
+The z-index property makes sure this box is always under the link.
+
+We don't want this hover effect to apply everywhere, so we turn it off on specific classes.
+*/
+
+/* Apply hover effect only to content links */
+.story-finding a,
+.story-metadata a:not(.tag),
+.footer-content a,
+header h1 a {
+    position: relative;
+}
+
+.story-finding a::before,
+.story-metadata a:not(.tag)::before,
+.footer-content a::before,
+header h1 a::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    background: transparent;
+    z-index: -1;
+}
+
+.story-finding a:hover::before,
+.story-metadata a:not(.tag):hover::before,
+.footer-content a:hover::before,
+header h1 a:hover::before {
+    background: #FFFF99;
+}
+
+/* These links don't get the hover effect */
+.related-story a:hover,
+.story a:hover,
+.story-nav-arrow a:hover {
+    background: none;
 }
 
 /* Homepage Header
@@ -54,13 +106,18 @@ The main content area of the homepage, including featured stories and navigation
 The site title and navigation elements that remain visible while scrolling.
 */
 header {
-    align-items: center;
-    display: flex;
     font-family: Arial, sans-serif;
-    justify-content: space-between;
+    margin-left: 2.222222rem;
+    margin-right: 2.222222rem;
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* Header Title
@@ -112,6 +169,14 @@ Navigation buttons in the header.
     height: 41px;
     padding: 5px 10px;
     text-transform: lowercase;
+}
+
+/* Header Navigation Button Hover State 
+
+Repeats the padding to prevent the button from moving when we hover over it.
+*/
+.header-nav .dashed-button:hover {
+    padding: 5px 10px;
 }
 
 /* Tag Headers
@@ -189,6 +254,28 @@ A single tag look for categories, themes, types, and weather.
     width: fit-content;
 }
 
+/* Hover State for Tag
+
+In general it is bad practice to use !important in CSS, but here we need to in order to override
+the colour of the tag, which is set on the style attribute, because this is the only way to attach
+colour to the element tag when we inject it into the template.
+
+Like this:
+<a href="#" class="tag" style="background: #000;">Tag</a>
+*/
+.tag:hover {
+
+    background: #000 !important;
+}
+
+/* 
+As we have a global link style, we need to override it for tags to retain the padding and margin.
+*/
+a.tag {
+    margin: 0; 
+    padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
+}
+
 /* Large Tag
 
 A more prominent version of the tag look used on the homepage and in headers.
@@ -258,7 +345,7 @@ The main text content of a story.
 */
 .story-finding {
     font-family: 'Times New Roman', serif;
-    font-size: 1rem;
+    font-size: 1.22222rem;
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.02rem;
@@ -271,7 +358,7 @@ Individual metadata items for a story.
 */
 .story-metadata-item {
     font-family: Arial;
-    font-size: 0.77778rem;
+    font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
@@ -283,6 +370,7 @@ Individual metadata items for a story.
 Labels for metadata fields (e.g., "Date", "Location").
 */
 .story-metadata-item-label {
+    font-size: 0.88889rem;
     color: rgba(0, 0, 0, 0.50);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -307,19 +395,27 @@ Tag-based metadata like themes and types.
     gap: 0.55556rem;
 }
 
+.story-metadata-item-value.tags .tag {
+    font-size: 1.22222rem;
+}
+
 /* Story Details
 
 The main content and metadata for a story.
 */
 .story-details {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    margin-bottom: 6.66667rem;
-    margin-top: 6.66667rem;
     justify-content: space-between;
-    padding-left: 2.22222rem;
-    padding-right: 2.22222rem;
+    margin-bottom: 60px;
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+    margin-top: 60px;
+    padding-bottom: 60px;
+    padding-top: 60px;
 }
 
 /* Story Image Container
@@ -327,15 +423,15 @@ The main content and metadata for a story.
 The story image and navigation arrows.
 */
 .story-image-container {
+    align-items: center;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    width: 100%;
-    max-width: 100vw;
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    max-width: 100vw;
     overflow-x: hidden;
+    padding: 0;
+    width: 100%;
 }
 
 /* Story Metadata
@@ -479,7 +575,7 @@ Contact information in the footer.
 footer address {
     color: #000;
     font-family: Arial;
-    font-size: 0.77778rem;
+    font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
@@ -551,4 +647,10 @@ A button with a dashed border for navigation and actions.
     padding: 0.27778rem 0.55556rem;
     text-decoration: none;
     width: max-content;
+}
+
+.dashed-button:hover {
+    border: 2px solid #000;
+    background: none;
+    padding: 0.27778rem 0.55556rem;
 }
