@@ -31,10 +31,10 @@
                     <img data-src="..{{.URL}}" alt="" class="popup-img">
                     <div class="story-popup-text">
                         <div class="story-popup-text-finding">
-                            {{$story.Finding}}
-                            <p>
-                                <a href="{{$story.URL}}">View story</a>
-                            </p>
+                            <span class="story-popup-text-finding-content">
+                                {{$story.Finding}}
+                            </span>
+                            <a href="{{$story.URL}}" class="story-popup-view-link">View story</a>
                         </div>
                         <div class="story-popup-text-tags">
                             {{if $story.Type}}
