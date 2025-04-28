@@ -1,70 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-GB">
+
 <head>
     <title>{{.Title}} Theme</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../css/styles.css">
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const storyImageContainers = document.querySelectorAll('.story-image-container');
-
-            if (storyImageContainers.length === 0) {
-                console.log('Could not find story containers');
-            }
-
-            storyImageContainers.forEach(container => {
-                container.addEventListener('click', event => {
-                    event.preventDefault();
-
-                    // Close any open popups
-                    const openStoryPopups = document.querySelectorAll('.story-popup[data-story-open="true"]');
-
-                    if (openStoryPopups.length > 0) {
-                        console.log('Closing all open story popups');
-                        openStoryPopups.forEach(popup => {
-                            popup.style.display = 'none';
-                            popup.dataset.storyOpen = false;
-                        });
-                    }
-
-                    console.log(`Opening popup for story ${container.dataset.storyId}`);
-                    const storyPopup = document.querySelector(`[data-story-popup-id="${container.dataset.storyId}"]`)
-
-                    if (!storyPopup) {
-                        console.log(`Could not find story popup for story ${container.dataset.storyId}`);
-                    }
-
-                    storyPopup.style.display = 'block';
-                    storyPopup.dataset.storyOpen = true;
-                });
-            });
-        });
-    </script>
-    <style>
-        .story-popup {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            height: 200px;
-        }
-
-        .story-popup-text {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: white;
-            padding: 10px;
-        }
-    </style>
+    {{template "grid-code" .}}
 </head>
 
 <body>
     {{template "header" .}}
-    <h1 class="theme-index-header"><span class="tag large" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>A theme in the Dudley People's School for Climate Justice</h1>
+    <h1 class="theme-index-header"><span class="tag large"
+            style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>A theme in the Dudley People's School for
+        Climate Justice</h1>
     <p class="theme-index-description">{{.Description}}</p>
     <div class="stories-list">
         {{range .Stories}}
@@ -73,18 +21,37 @@
             {{ with .GetStoryImage }}
             {{ if .URL }}
             <a class="story-image-container" href="..{{$story.URL}}" data-story-id="{{$story.ID}}">
-                <img 
-                    src="..{{.ThumbURL}}" 
-                    srcset="
+                <img src="..{{.ThumbURL}}" srcset="
                         ..{{.ThumbURL}} 300w,
                         ..{{.MediumURL}} 800w
-                    "
-                    sizes="(max-width: 600px) 300px, 800px"
-                    alt="{{.AlternativeText}}">
+                    " sizes="(max-width: 600px) 300px, 800px" alt="{{.AlternativeText}}">
             </a>
             <div class="story-popup" data-story-popup-id="{{$story.ID}}">
-                <img src="..{{.MediumURL}}" alt="">
-                <div class="story-popup-text">{{$story.Finding}}</div>
+                <div class="story-popup-container">
+                    <img data-src="..{{.URL}}" alt="" class="popup-img">
+                    <div class="story-popup-text">
+                        <div class="story-popup-text-finding">
+                            {{$story.Finding}}
+                            <p>
+                                <a href="{{$story.URL}}">View story</a>
+                            </p>
+                        </div>
+                        <div class="story-popup-text-tags">
+                            {{if $story.Type}}
+                                {{range $story.Type}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                                {{end}}
+                            {{end}}
+                            {{if $story.Weather}}
+                                {{range $story.Weather}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                                {{end}}
+                            {{end}}
+                            {{if $story.Themes}}
+                                {{range $story.Themes}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                                {{end}}
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
             </div>
             {{ else }}
             <div>No image</div>
@@ -95,4 +62,5 @@
     </div>
     {{template "footer" .}}
 </body>
+
 </html>

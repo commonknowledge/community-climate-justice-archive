@@ -1,0 +1,44 @@
+{{define "grid-code"}}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const storyImageContainers = document.querySelectorAll('.story-image-container');
+
+        if (storyImageContainers.length === 0) {
+            console.log('Could not find story containers');
+        }
+
+        storyImageContainers.forEach(container => {
+            container.addEventListener('click', event => {
+                event.preventDefault();
+
+                // Close any open popups
+                const openStoryPopups = document.querySelectorAll('.story-popup[data-story-open="true"]');
+
+                if (openStoryPopups.length > 0) {
+                    console.log('Closing all open story popups');
+                    openStoryPopups.forEach(popup => {
+                        popup.style.display = 'none';
+                        popup.dataset.storyOpen = false;
+                    });
+                }
+
+                console.log(`Opening popup for story ${container.dataset.storyId}`);
+                const storyPopup = document.querySelector(`[data-story-popup-id="${container.dataset.storyId}"]`)
+
+                if (!storyPopup) {
+                    console.log(`Could not find story popup for story ${container.dataset.storyId}`);
+                }
+
+                // Lazy-load the popup image
+                const img = storyPopup.querySelector('.popup-img');
+                if (img && !img.src) {
+                    img.src = img.dataset.src;
+                }
+
+                storyPopup.style.display = 'block';
+                storyPopup.dataset.storyOpen = true;
+            });
+        });
+    });
+</script>
+{{end}}
