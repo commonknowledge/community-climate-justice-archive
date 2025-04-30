@@ -10,6 +10,9 @@ require (
 )
 
 require (
+	github.com/joelseq/sqliteadmin-go v0.2.0 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb // indirect
 	golang.org/x/sys v0.32.0 // indirect
 )
