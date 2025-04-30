@@ -34,6 +34,3 @@ out/*
 
 # Ignore any CSV files that we generate for statistics
 *.csv
-
-# Temporarily ignore all files we generate
-images/processed/*
