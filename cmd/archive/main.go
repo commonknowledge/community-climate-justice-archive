@@ -61,6 +61,38 @@ func regenerate() error {
 	return nil
 }
 
+func hotRegenerate() error {
+	log.Println("Starting partial build process")
+
+	if err := generate.WriteStories(); err != nil {
+		return fmt.Errorf("failed to write stories: %v", err)
+	}
+
+	if err := generate.WriteHomePage(); err != nil {
+		return fmt.Errorf("failed to write homepage: %v", err)
+	}
+
+	if err := generate.WriteTypesIndexes(); err != nil {
+		return fmt.Errorf("failed to write types indexes: %v", err)
+	}
+
+	if err := generate.WriteThemesIndexes(); err != nil {
+		return fmt.Errorf("failed to write themes indexes: %v", err)
+	}
+
+	if err := generate.WriteWeatherIndexes(); err != nil {
+		return fmt.Errorf("failed to write weather indexes: %v", err)
+	}
+
+	if err := generate.CopyCSSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy CSS: %v", err)
+	}
+
+	log.Println("Partial build process completed successfully")
+
+	return nil
+}
+
 // watchCSS sets up a file watcher for the CSS directory and copies the CSS when changes are detected.
 func watchCSS() (*fsnotify.Watcher, error) {
 	log.Println("Setting up CSS watcher...")
@@ -171,8 +203,8 @@ func main() {
 		// Wait for input and then rebuild the archive when enter is pressed.
 		for {
 			waitForInput()
-			if err := regenerate(); err != nil {
-				log.Printf("Regeneration failed: %v", err)
+			if err := hotRegenerate(); err != nil {
+				log.Printf("Hot regeneration failed: %v", err)
 			}
 		}
 	}
