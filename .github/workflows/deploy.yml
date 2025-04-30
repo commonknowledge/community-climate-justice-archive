@@ -34,7 +34,7 @@ jobs:
       run: go build -o archive ./cmd/archive
 
     - name: Generate archive
-      run: ./archive
+      run: ./archive -skip-images
 
     - name: Setup GitHub Pages
       uses: actions/configure-pages@v4

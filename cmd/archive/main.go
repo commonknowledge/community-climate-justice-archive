@@ -21,11 +21,13 @@ import (
 // - Getting the images from the images directory
 // - Adding this data to the templates to create pages which are static HTML files
 // - Copying the images to the output directory
-func regenerate() error {
+func regenerate(skipImages bool) error {
 	log.Println("Starting build process")
 
-	if err := generate.ProcessImages(); err != nil {
-		return fmt.Errorf("failed to process images: %v", err)
+	if !skipImages {
+		if err := generate.ProcessImages(); err != nil {
+			return fmt.Errorf("failed to process images: %v", err)
+		}
 	}
 
 	if err := generate.WriteStories(); err != nil {
@@ -173,10 +175,16 @@ func waitForInput() {
 func main() {
 	devMode := flag.Bool("development", false, "Run in development mode with live reload")
 	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
+	skipImages := flag.Bool("skip-images", false, "Skip image processing and generation")
+	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
 	flag.Parse()
 
+	if *skipImages {
+		log.Println("Skipping image processing and generation")
+	}
+
 	// Build the archive.
-	if err := regenerate(); err != nil {
+	if err := regenerate(*skipImages); err != nil {
 		log.Fatalf("Initial build failed: %v", err)
 	}
 
