@@ -36,8 +36,42 @@
             storiesList.appendChild(fragment);
         }
 
+        function rotateWhatIfs() {
+            const items = document.querySelectorAll('.what-if-rotation-item');
+            let currentIndex = 0;
+
+            function showNext() {
+                const nextIndex = (currentIndex + 1) % items.length;
+                
+                // Remove hide from next item but keep it faded out
+                items[nextIndex].classList.remove('hide');
+                items[nextIndex].classList.add('fade-out');
+                
+                // Small delay to ensure the above changes are processed
+                requestAnimationFrame(() => {
+                    // Start fading out current while fading in next
+                    items[currentIndex].classList.add('fade-out');
+                    items[nextIndex].classList.remove('fade-out');
+                    
+                    // After transition completes, hide the old item
+                    // The transition is 2.5 seconds, matching the fade out time in the CSS
+                    setTimeout(() => {
+                        items[currentIndex].classList.add('hide');
+                        currentIndex = nextIndex;
+                    }, 2500);
+                });
+            }
+
+            // Show first item
+            items[0].classList.remove('hide', 'fade-out');
+            
+            // Rotate every 7 seconds - allows for full transition + ~4.5s of clear reading time
+            setInterval(showNext, 7000);
+        }
+
         function pageLoaded() {
             shuffleStories();
+            rotateWhatIfs();
         }
 
         window.addEventListener('load', pageLoaded);
@@ -47,6 +81,26 @@
     {{template "header" .}}
 
     <div class="homepage-content">
+        <div class="what-if-rotation">
+            <div class="what-if-rotation-item">
+                <div class="what-if-rotation-item-title">What if...</div>
+                <div class="what-if-rotation-item-text">
+                    people could develop deep connections with the places they live or work in: connections that invite care, relationships with life, and learning through creative doing that deepens the climate resilience of that place? 
+                </div>
+            </div>
+            <div class="what-if-rotation-item hide">
+                <div class="what-if-rotation-item-title">What if...</div>
+                <div class="what-if-rotation-item-text">
+                    there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?
+                </div>
+            </div>
+            <div class="what-if-rotation-item hide">
+                <div class="what-if-rotation-item-title">What if...</div>
+                <div class="what-if-rotation-item-text">
+                    this archive was built to last 100 years, passing these knowledges down through generations?
+                </div>
+            </div>
+        </div>
         <div class="homepage-collage">
             <img src="images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
         </div>

@@ -667,6 +667,64 @@ Copyright and compilation information in the footer.
     display: block;
 }
 
+.what-if-rotation {
+    margin-top: 80px;
+    position: relative;
+    min-height: 200px;
+    max-width: 900px;
+}
+
+.what-if-rotation-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    visibility: visible;
+}
+
+.what-if-rotation-item.hide {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.what-if-rotation-item-text {
+    opacity: 1;
+    transition: opacity 2.5s cubic-bezier(0.4, 0, 0.6, 1);
+    position: absolute;
+    width: 100%;
+}
+
+.what-if-rotation-item.hide .what-if-rotation-item-text {
+    opacity: 0;
+}
+
+.what-if-rotation-item.fade-out .what-if-rotation-item-text {
+    opacity: 0;
+}
+
+.what-if-rotation-item-title {
+    width: fit-content;
+    height: 47px;
+    gap: 10px;
+    padding: 5px;
+    background: #FFFF99;
+    font-family: Times New Roman;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: -2%;
+    margin-bottom: 5px;
+}
+
+.what-if-rotation-item-text {
+    font-family: Times New Roman;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: -2%;
+}
+
 /* Dashed Button
 
 A button with a dashed border for navigation and actions.
