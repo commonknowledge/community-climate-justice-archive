@@ -287,6 +287,22 @@ A more prominent version of the tag look used on the homepage and in headers.
     padding: 0.27778rem 0.55556rem;
 }
 
+.tag.medium {
+    font-family: Arial;
+    gap: 10px;
+    height: 41;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    width: 82;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -1%;
+    line-height: 140%;
+    text-transform: lowercase;
+}
+
 /* Story Images
 
 Images within story content, limiting width while maintaining aspect ratio.
@@ -530,13 +546,29 @@ Navigation arrows between stories.
     flex-shrink: 0;
 }
 
+.standard-margins {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
 /* Theme and Type Index Headers
 
 Headers for theme and type index pages.
 */
 .theme-index-header,
-.type-index-header {
+.type-index-header,
+.weather-index-header
+{
     margin-bottom: 4rem;
+    font-family: Arial;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 140%;
+    letter-spacing: -1%;
+    text-transform: lowercase;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-top: 20px;
 }
 
 /* Theme and Type Index Tags
@@ -544,18 +576,10 @@ Headers for theme and type index pages.
 Tags within theme and type index headers.
 */
 .theme-index-header .tag,
-.type-index-header .tag {
+.type-index-header .tag,
+.weather-index-header .tag {
     display: inline-block;
     margin-right: 1rem;
-}
-
-/* Theme and Type Index Descriptions
-
-Description text for theme and type index pages.
-*/
-.theme-index-description,
-.type-index-description {
-    margin-bottom: 4rem;
 }
 
 /* Main Footer

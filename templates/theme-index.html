@@ -10,11 +10,8 @@
 
 <body>
     {{template "header" .}}
-    <h1 class="theme-index-header"><span class="tag large"
-            style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>A theme in the Dudley People's School for
-        Climate Justice</h1>
-    <p class="theme-index-description">{{.Description}}</p>
-    <div class="stories-list">
+    <div class="theme-index-header">Items tagged: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
+    <div class="stories-list standard-margins">
         {{range .Stories}}
         <div class="story">
             {{$story := .}}
