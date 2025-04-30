@@ -651,6 +651,22 @@ Copyright and compilation information in the footer.
     margin-top: 2.22222rem;
 }
 
+.homepage-collage {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.homepage-collage img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    display: block;
+}
+
 /* Dashed Button
 
 A button with a dashed border for navigation and actions.
