@@ -4,33 +4,14 @@
     <title>{{.Title}} Type</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../css/styles.css">
+    {{template "grid-code" .}}
 </head>
 
 <body>
     {{template "header" .}}
     <div class="theme-index-header">Items tagged: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
     <div class="stories-list standard-margins">
-        {{range .Stories}}
-        <div class="story">
-            {{$story := .}}
-            {{ with .GetStoryImage }}
-            {{ if .URL }}
-            <a href="..{{$story.URL}}">
-                <img 
-                    src="..{{.ThumbURL}}" 
-                    srcset="
-                        ..{{.ThumbURL}} 300w,
-                        ..{{.MediumURL}} 800w
-                    "
-                    sizes="(max-width: 600px) 300px, 800px"
-                    alt="{{.AlternativeText}}">
-            </a>
-            {{ else }}
-            <div>No image</div>
-            {{ end }}
-            {{ end }}
-        </div>
-        {{end}}
+        {{template "stories-list" .}}
     </div>
     {{template "footer" .}}
 </body>

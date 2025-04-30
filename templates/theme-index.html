@@ -12,50 +12,7 @@
     {{template "header" .}}
     <div class="theme-index-header">Items tagged: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
     <div class="stories-list standard-margins">
-        {{range .Stories}}
-        <div class="story">
-            {{$story := .}}
-            {{ with .GetStoryImage }}
-            {{ if .URL }}
-            <a class="story-image-container" href="..{{$story.URL}}" data-story-id="{{$story.ID}}">
-                <img src="..{{.ThumbURL}}" srcset="
-                        ..{{.ThumbURL}} 300w,
-                        ..{{.MediumURL}} 800w
-                    " sizes="(max-width: 600px) 300px, 800px" alt="{{.AlternativeText}}">
-            </a>
-            <div class="story-popup" data-story-popup-id="{{$story.ID}}">
-                <div class="story-popup-container">
-                    <img data-src="..{{.URL}}" alt="" class="popup-img">
-                    <div class="story-popup-text">
-                        <div class="story-popup-text-finding">
-                            <span class="story-popup-text-finding-content">
-                                {{$story.Finding}}
-                            </span>
-                            <a href="{{$story.URL}}" class="story-popup-view-link">View story</a>
-                        </div>
-                        <div class="story-popup-text-tags">
-                            {{if $story.Type}}
-                                {{range $story.Type}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                                {{end}}
-                            {{end}}
-                            {{if $story.Weather}}
-                                {{range $story.Weather}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                                {{end}}
-                            {{end}}
-                            {{if $story.Themes}}
-                                {{range $story.Themes}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                                {{end}}
-                            {{end}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{ else }}
-            <div>No image</div>
-            {{ end }}
-            {{ end }}
-        </div>
-        {{end}}
+        {{template "stories-list" .}}
     </div>
     {{template "footer" .}}
 </body>
