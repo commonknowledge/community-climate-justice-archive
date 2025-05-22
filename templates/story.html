@@ -14,7 +14,7 @@
     {{if .URL}}
     <div class="story-image-container">
         <div class="story-nav-arrow">
-            <a href="..{{$.LastStory.URL}}">
+            <a href="{{$.LastStory.URL}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
                     <path
                         d="M42.6395 11.57C43.1195 11.8233 43.3595 12.1433 43.3595 12.53C43.3595 12.9167 43.1195 13.2367 42.6395 13.49H5.96945L6.10945 13.63C9.40945 16.1633 11.5695 19.3967 12.5895 23.33C12.7828 24.0367 12.8795 24.4367 12.8795 24.53C12.8795 24.8833 12.5428 25.06 11.8695 25.06C11.4895 25.06 11.2428 25.02 11.1295 24.94C11.0161 24.86 10.9295 24.66 10.8695 24.34C10.8028 24.1133 10.7361 23.84 10.6695 23.52C10.0961 21.1867 9.00279 19.1067 7.38945 17.28C5.76945 15.46 3.82279 14.1 1.54945 13.2C1.06945 13.0067 0.782786 12.83 0.689453 12.67C0.689453 12.2567 0.97612 11.9867 1.54945 11.86C3.82279 10.96 5.76945 9.6 7.38945 7.78C9.00279 5.95333 10.0961 3.87333 10.6695 1.54C10.7028 1.44 10.7361 1.29667 10.7695 1.11C10.8028 0.916667 10.8261 0.786668 10.8395 0.720001C10.8595 0.660001 10.8928 0.563334 10.9395 0.43C10.9861 0.303334 11.0428 0.216667 11.1095 0.17C11.1695 0.123333 11.2628 0.0833345 11.3895 0.0500011C11.5228 0.0166678 11.6828 0 11.8695 0C12.5428 0 12.8795 0.176667 12.8795 0.530001C12.8795 0.623334 12.7828 1.02333 12.5895 1.73C11.6295 5.53667 9.46945 8.77 6.10945 11.43L5.96945 11.57H42.6395Z"
@@ -22,12 +22,12 @@
                 </svg>
             </a>
         </div>
-        <img 
-            class="story-image" 
-            src="..{{.LargeURL}}" 
+        <img
+            class="story-image"
+            src="{{.LargeURL}}"
             alt="{{.AlternativeText}}">
         <div class="story-nav-arrow">
-            <a href="..{{$.NextStory.URL}}">
+            <a href="{{$.NextStory.URL}}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
                     <path
                         d="M1.35945 13.49C0.912786 13.2633 0.689453 12.9433 0.689453 12.53C0.689453 12.1167 0.912786 11.7967 1.35945 11.57H38.0795C35.8061 9.87667 34.0461 7.83 32.7995 5.43C31.9995 3.89 31.4728 2.37 31.2195 0.870001C31.2195 0.803334 31.2095 0.736667 31.1895 0.67C31.1761 0.61 31.1695 0.563334 31.1695 0.530001C31.1695 0.176667 31.4895 0 32.1295 0C32.5095 0 32.7561 0.0400008 32.8695 0.120001C32.9828 0.200001 33.0728 0.383333 33.1395 0.67C33.2328 1.31 33.4061 1.96667 33.6595 2.64C34.3661 4.78667 35.5361 6.7 37.1695 8.38C38.8028 10.06 40.7061 11.2667 42.8795 12C43.1661 12.1 43.3095 12.2767 43.3095 12.53C43.3095 12.7833 43.1661 12.96 42.8795 13.06C40.7061 13.7933 38.8028 15 37.1695 16.68C35.5361 18.36 34.3661 20.2733 33.6595 22.42C33.4395 23.0933 33.2661 23.7333 33.1395 24.34C33.0728 24.66 32.9828 24.86 32.8695 24.94C32.7561 25.02 32.5095 25.06 32.1295 25.06C31.4561 25.06 31.1195 24.8833 31.1195 24.53C31.1195 24.4367 31.2161 24.0367 31.4095 23.33C32.4028 19.33 34.6261 16.05 38.0795 13.49H1.35945Z"
@@ -101,7 +101,7 @@
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Type</span>
                     <span class="story-metadata-item-value tags">
-                        {{range $story.Type}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{range $story.Type}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                         {{end}}
                     </span>
                 </div>
@@ -110,7 +110,7 @@
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Weather</span>
                     <span class="story-metadata-item-value tags">
-                        {{ range $story.Weather }}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{ range $story.Weather }}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                         {{end}}
                     </span>
                 </div>
@@ -119,7 +119,7 @@
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Themes</span>
                     <span class="story-metadata-item-value tags">
-                        {{range $story.Themes}}<a class="tag" href="..{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                         {{end}}
                     </span>
                 </div>
@@ -133,7 +133,7 @@
         <div class="related-stories-item">
             <div class="related-stories-item-title">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
                 {{if .FirstMoreTaggedStories.Tag}}
-                <a class="tag large" href="..{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
+                <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
                 {{else}}
                 <span class="tag large">unknown</span>
                 {{end}}
@@ -144,13 +144,13 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}">
+                    <a href="{{$story.URL}}">
                         <img 
                             class="related-story-image" 
-                            src="..{{.ThumbURL}}" 
+                            src="{{.ThumbURL}}" 
                             srcset="
-                                ..{{.ThumbURL}} 300w,
-                                ..{{.MediumURL}} 800w
+                                {{.ThumbURL}} 300w,
+                                {{.MediumURL}} 800w
                             "
                             sizes="(max-width: 600px) 300px, 800px"
                             alt="{{.AlternativeText}}">
@@ -166,7 +166,7 @@
         <div class="related-stories-item">
             <div class="related-stories-item-title">More tagged with {{ .SecondMoreTaggedStories.TagType }} 
                 {{if .SecondMoreTaggedStories.Tag}}
-                <a class="tag large" href="..{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
+                <a class="tag large" href="{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
                 {{else}}
                 <span class="tag large">unknown</span>
                 {{end}}
@@ -177,13 +177,13 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}">
+                    <a href="{{$story.URL}}">
                         <img 
                             class="related-story-image" 
-                            src="..{{.ThumbURL}}" 
+                            src="{{.ThumbURL}}" 
                             srcset="
-                                ..{{.ThumbURL}} 300w,
-                                ..{{.MediumURL}} 800w
+                                {{.ThumbURL}} 300w,
+                                {{.MediumURL}} 800w
                             "
                             sizes="(max-width: 600px) 300px, 800px"
                             alt="{{.AlternativeText}}">
@@ -199,7 +199,7 @@
         <div class="related-stories-item">
             <div class="related-stories-item-title">More tagged with {{ .ThirdMoreTaggedStories.TagType }} 
                 {{if .ThirdMoreTaggedStories.Tag}}
-                <a class="tag large" href="..{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
+                <a class="tag large" href="{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
                 {{else}}
                 <span class="tag large">unknown</span>
                 {{end}}
@@ -210,13 +210,13 @@
                 <div class="related-story">
                     {{ $story := . }}
                     {{ with .GetStoryImage}}
-                    <a href="..{{$story.URL}}">
+                    <a href="{{$story.URL}}">
                         <img 
                             class="related-story-image" 
-                            src="..{{.ThumbURL}}" 
+                            src="{{.ThumbURL}}" 
                             srcset="
-                                ..{{.ThumbURL}} 300w,
-                                ..{{.MediumURL}} 800w
+                                {{.ThumbURL}} 300w,
+                                {{.MediumURL}} 800w
                             "
                             sizes="(max-width: 600px) 300px, 800px"
                             alt="{{.AlternativeText}}">

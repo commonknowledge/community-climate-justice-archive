@@ -2,7 +2,7 @@
 	<title>Dudley People's School for Climate Justice – time portal</title>
     <meta name="description" content="The time portal for the Dudley People's School for Climate Justice">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
     <script>
         // Shuffle the stories list
         // This contains a lot of optimisations to make this feel faster.
@@ -102,19 +102,19 @@
             </div>
         </div>
         <div class="homepage-collage">
-            <img src="images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+            <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
         </div>
         <div class="tag-list-container">
             <h2 class="tag-list-header">Themes</h2>
             <ul class="tag-list">{{range .Themes}}
-                <li><a class="tag large" href="themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                <li><a class="tag large" href="/themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
             </ul>
         </div>
 
         <div class="tag-list-container">
             <h2 class="tag-list-header">Types</h2>
             <ul class="tag-list">{{range .Types}}
-                <li><a class="tag large" href="types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                <li><a class="tag large" href="/types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
             </ul>
         </div>
 
@@ -124,12 +124,12 @@
             <div class="story">
                 {{with .GetStoryImage}}
                 {{ if .URL }}
-                <a href=".{{$story.URL}}">
+                <a href="{{$story.URL}}">
                     <img 
-                        src=".{{.ThumbURL}}" 
+                        src="{{.ThumbURL}}" 
                         srcset="
-                            .{{.ThumbURL}} 300w,
-                            .{{.MediumURL}} 800w
+                            {{.ThumbURL}} 300w,
+                            {{.MediumURL}} 800w
                         "
                         sizes="(max-width: 600px) 300px, 800px"
                         alt="{{.AlternativeText}}">
