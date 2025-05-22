@@ -1,11 +1,11 @@
 {{define "header"}}
 <header>
     <div class="main-header">
-        <h1><a href="https://commonknowledge.github.io/community-climate-justice-archive/">Dudley People's School for Climate Justice</a></h1>
+        <h1><a href="/">Dudley People's School for Climate Justice</a></h1>
         <p>Time Portal</p>
     </div>
     <nav class="header-nav">
-        <a class="dashed-button" href="https://commonknowledge.github.io/community-climate-justice-archive/#wander-through-archive">Wander</a>
+        <a class="dashed-button" href="/#wander-through-archive">Wander</a>
         <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
     </nav>
 </header>
@@ -18,7 +18,7 @@
         function updateRandomLink() {
             if (window.storyUrls && window.storyUrls.length > 0) {
                 const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
-                randomLink.href = 'https://commonknowledge.github.io/community-climate-justice-archive/' + randomUrl;
+                randomLink.href = '/' + randomUrl;
             }
         }
 
