@@ -3,7 +3,6 @@ package store
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strings"
 
@@ -17,7 +16,7 @@ import (
 func GetStoriesForType(typeTitle string) []data.Story {
 	log.Println("Getting stories for type", typeTitle)
 
-	dbPath := "airtable-export.db"
+	dbPath := "nocodb.sqlite"
 
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -25,18 +24,20 @@ func GetStoriesForType(typeTitle string) []data.Story {
 	}
 	defer db.Close()
 
-	// Type is stored as JSON array in the database like this:
-	// ["Map", "Drawing", "Imagining"]
-	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
-	likePattern := fmt.Sprintf("%%%q%%", typeTitle)
-
+	// Type is stored as a comma-separated string in the database like this:
+	// Map,Drawing,Imagining
+	// We search for typeTitle as a whole word in the comma-separated list.
 	query := `
 		SELECT *
-		FROM Stories
-		WHERE "Type" LIKE ?;
+		FROM nc_9dus___Stories
+		WHERE ("Type" = ? OR "Type" LIKE ? OR "Type" LIKE ? OR "Type" LIKE ?);
 	`
+	arg1 := typeTitle               // Exact match: e.g., "Map"
+	arg2 := typeTitle + ",%"        // Starts with: e.g., "Map,%"
+	arg3 := "%," + typeTitle        // Ends with: e.g., "%,Map"
+	arg4 := "%," + typeTitle + ",%" // Contains: e.g., "%,Map,%"
 
-	rows, err := db.Query(query, likePattern)
+	rows, err := db.Query(query, arg1, arg2, arg3, arg4)
 
 	if err != nil {
 		log.Fatalf("Failed to query stories: %v", err)
