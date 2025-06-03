@@ -65,90 +65,87 @@ type StoryImage struct {
 	Thumbnails      map[string]Thumbnail
 }
 
-// GetStoryImage returns the image for a story.
+// NocoDBAttachment defines the structure of an image attachment from NocoDB.
+type NocoDBAttachment struct {
+	Path     string `json:"path"`
+	Title    string `json:"title"`
+	MimeType string `json:"mimetype"`
+	Size     int    `json:"size"`
+	Width    int    `json:"width"`
+	Height   int    `json:"height"`
+	ID       string `json:"id"`
+}
+
+// GetStoryImages returns the image(s) for a story, adapted for NocoDB and new URL structure.
 func (s Story) GetStoryImages() []StoryImage {
-	// The image is stored as a following JSON blob format from Airtable:
-	// [
-	//   {
-	//     "id": "attENPLcNOsEdYP5E",
-	//     "width": 3252,
-	//     "height": 2193,
-	//     "url": "https://v5.airtableusercontent.com/...",
-	//     "filename": "Michelle Gartside Model 5.png",
-	//     "size": 7205950,
-	//     "type": "image/png",
-	//     "thumbnails": {
-	//       "small": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 53,
-	//         "height": 36
-	//       },
-	//       "large": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 759,
-	//         "height": 512
-	//       },
-	//       "full": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 3000,
-	//         "height": 3000
-	//       }
-	//     }
-	//   }
-	// ]
-	//
-	// In the Airtable dump this is in two columns:
-	// - Image
-	// - Source Image
-	//
-	// We need to combine them into a single slice of StoryImage structs.
+	var allNocoDBAttachments []NocoDBAttachment
+	var currentAttachments []NocoDBAttachment
 
-	var images []StoryImage
-	json.Unmarshal([]byte(s.Image), &images)
-
-	for i := range images {
-		// Split filename into name and extension
-		ext := filepath.Ext(images[i].Filename)
-		name := strings.TrimSuffix(images[i].Filename, ext)
-
-		// Check if WebP version exists
-		webpPath := filepath.Join("images", name+".webp")
-		if _, err := os.Stat(webpPath); err == nil {
-			// WebP version exists, use it
-			images[i].Filename = name + ".webp"
-			images[i].Type = "image/webp"
+	// Process s.Image
+	if s.Image != "" && s.Image != "[]" {
+		err := json.Unmarshal([]byte(s.Image), &currentAttachments)
+		if err != nil {
+			log.Printf("Error unmarshalling Story.Image JSON: %v. JSON: %s", err, s.Image)
+		} else {
+			allNocoDBAttachments = append(allNocoDBAttachments, currentAttachments...)
 		}
-
-		// Set URLs for different sizes
-		images[i].URL = "/images/processed/" + name + ".webp"
-		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
-		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
-		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
 	}
 
-	json.Unmarshal([]byte(s.SourceImage), &images)
-
-	for i := range images {
-		// Split filename into name and extension
-		ext := filepath.Ext(images[i].Filename)
-		name := strings.TrimSuffix(images[i].Filename, ext)
-
-		// Check if WebP version exists
-		webpPath := filepath.Join("images", name+".webp")
-		if _, err := os.Stat(webpPath); err == nil {
-			// WebP version exists, use it
-			images[i].Filename = name + ".webp"
-			images[i].Type = "image/webp"
+	// Process s.SourceImage
+	if s.SourceImage != "" && s.SourceImage != "[]" {
+		currentAttachments = nil
+		err := json.Unmarshal([]byte(s.SourceImage), &currentAttachments)
+		if err != nil {
+			log.Printf("Error unmarshalling Story.SourceImage JSON: %v. JSON: %s", err, s.SourceImage)
+		} else {
+			allNocoDBAttachments = append(allNocoDBAttachments, currentAttachments...)
 		}
-
-		// Set URLs for different sizes
-		images[i].URL = "/images/processed/" + name + ".webp"
-		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
-		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
-		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
 	}
 
-	return images
+	var resultImages []StoryImage
+	for _, nocoAtt := range allNocoDBAttachments {
+		if nocoAtt.Title == "" {
+			continue
+		}
+
+		originalFilename := nocoAtt.Title
+		ext := filepath.Ext(originalFilename)
+		baseName := strings.TrimSuffix(originalFilename, ext)
+
+		storyImg := StoryImage{
+			Filename:        originalFilename,
+			AlternativeText: nocoAtt.Title,
+			Type:            nocoAtt.MimeType,
+			Size:            nocoAtt.Size,
+			Width:           nocoAtt.Width,
+			Height:          nocoAtt.Height,
+			Thumbnails:      make(map[string]Thumbnail),
+		}
+
+		originalImageURL := "/images/" + originalFilename
+		storyImg.URL = originalImageURL
+		storyImg.ThumbURL = originalImageURL
+		storyImg.MediumURL = originalImageURL
+		storyImg.LargeURL = originalImageURL
+
+		webPFileName := baseName + ".webp"
+		localWebPCheckPath := filepath.Join("out", "images", "processed", webPFileName)
+
+		if _, err := os.Stat(localWebPCheckPath); err == nil {
+			storyImg.Filename = webPFileName
+			storyImg.Type = "image/webp"
+			storyImg.URL = "/images/processed/" + webPFileName
+			storyImg.ThumbURL = "/images/processed/" + baseName + "_thumb.webp"
+			storyImg.MediumURL = "/images/processed/" + baseName + "_medium.webp"
+			storyImg.LargeURL = "/images/processed/" + baseName + "_large.webp"
+		} else {
+			log.Printf("WebP version not found at %s for %s, using original.", localWebPCheckPath, originalFilename)
+		}
+
+		resultImages = append(resultImages, storyImg)
+	}
+
+	return resultImages
 }
 
 func (s Story) GetStoryImage() StoryImage {
