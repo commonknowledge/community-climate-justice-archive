@@ -17,11 +17,9 @@ import (
 func GetStoriesForTheme(themeTitle string) []data.Story {
 	log.Println("Getting stories for theme", themeTitle)
 
-	dbPath := "airtable-export.db"
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+	db := ConnectToDatabase() // Use the centralized connection function
+	if db == nil {
+		log.Fatalf("Failed to connect to the database")
 	}
 	defer db.Close()
 

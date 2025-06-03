@@ -17,35 +17,36 @@ import (
 func GetStoriesForWeather(weatherTitle string) []data.Story {
 	log.Println("Getting stories for weather", weatherTitle)
 
-	dbPath := "airtable-export.db"
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+	db := ConnectToDatabase() // Use the centralized connection function
+	if db == nil {
+		log.Fatalf("Failed to connect to the database")
 	}
 	defer db.Close()
 
-	// Weather is stored as JSON array in the database like this:
-	// ["Sunny", "Cloudy", "Rainy"]
-	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
-	likePattern := fmt.Sprintf("%%%q%%", weatherTitle)
-
+	// Weather is stored as a comma-separated string in the database.
+	// We search for weatherTitle as a whole word in the comma-separated list.
 	query := `
 		SELECT *
-		FROM Stories
-		WHERE "Weather" LIKE ?;
+		FROM %s
+		WHERE ("Weather" = ? OR "Weather" LIKE ? OR "Weather" LIKE ? OR "Weather" LIKE ?);
 	`
+	formattedQuery := fmt.Sprintf(query, StoriesTable()) // Use StoriesTable()
 
-	rows, err := db.Query(query, likePattern)
+	arg1 := weatherTitle               // Exact match
+	arg2 := weatherTitle + ",%"        // Starts with
+	arg3 := "%," + weatherTitle        // Ends with
+	arg4 := "%," + weatherTitle + ",%" // Contains
 
+	rows, err := db.Query(formattedQuery, arg1, arg2, arg3, arg4)
 	if err != nil {
-		log.Fatalf("Failed to query stories: %v", err)
+		log.Fatalf("Failed to query stories for weather %s: %v", weatherTitle, err)
 	}
 	defer rows.Close()
 
 	stories := []data.Story{}
 	for rows.Next() {
 		var dto data.StoryDTO
+		// Ensure this Scan call matches the StoryDTO structure and order exactly (36 fields)
 		err := rows.Scan(
 			&dto.ID,
 			&dto.CreatedAt,
@@ -86,7 +87,7 @@ func GetStoriesForWeather(weatherTitle string) []data.Story {
 		)
 
 		if err != nil {
-			log.Fatalf("Failed to scan story in GetStoriesForWeather: %v", err)
+			log.Fatalf("Failed to scan story in GetStoriesForWeather: %v. Check column count and order.", err)
 		}
 
 		story := dto.ToStory()
@@ -98,72 +99,56 @@ func GetStoriesForWeather(weatherTitle string) []data.Story {
 	return stories
 }
 
-// GetWeather retrieves all weather from the database and returns them as a slice of Weather.
-// Intended for passing to HTML templates.
+// GetWeather retrieves all unique weather conditions from the database.
 func GetWeather() []data.Weather {
 	log.Println("Getting weather")
 
-	dbPath := "airtable-export.db"
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+	db := ConnectToDatabase()
+	if db == nil {
+		log.Fatalf("Failed to connect to the database for GetWeather")
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT Weather FROM Stories")
+	query := fmt.Sprintf("SELECT Weather FROM %s", StoriesTable())
+	rows, err := db.Query(query)
 	if err != nil {
 		log.Fatalf("Failed to query weather: %v", err)
 	}
 	defer rows.Close()
 
 	var weathers []data.Weather
+	seen := make(map[string]bool) // For deduplication
 
 	for rows.Next() {
-		var (
-			Weather sql.NullString
-		)
-
-		if err := rows.Scan(&Weather); err != nil {
-			log.Fatalf("Failed to scan row: %v", err)
+		var weatherStr sql.NullString
+		if err := rows.Scan(&weatherStr); err != nil {
+			log.Fatalf("Failed to scan weather string: %v", err)
 		}
 
-		if Weather.Valid && Weather.String != "" {
-			// Weather conditions are now comma-separated: "Condition1,Condition2,Condition3"
-			weatherStrings := strings.Split(Weather.String, ",")
-
-			for _, weatherStr := range weatherStrings {
-				trimmedWeatherStr := strings.TrimSpace(weatherStr)
-				newWeather := data.Weather{
-					Title:  trimmedWeatherStr,
-					URL:    "/weather/" + util.Slugify(trimmedWeatherStr) + ".html",
-					Colour: data.TitleToHexColor(trimmedWeatherStr),
+		if weatherStr.Valid && weatherStr.String != "" {
+			weatherItems := strings.Split(weatherStr.String, ",")
+			for _, weatherTitle := range weatherItems {
+				trimmedTitle := strings.TrimSpace(weatherTitle)
+				if trimmedTitle == "" {
+					continue
 				}
-				weathers = append(weathers, newWeather)
+				if !seen[trimmedTitle] {
+					seen[trimmedTitle] = true
+					newWeather := data.Weather{
+						Title:  trimmedTitle,
+						URL:    "/weather/" + util.Slugify(trimmedTitle) + ".html",
+						Colour: data.TitleToHexColor(trimmedTitle),
+					}
+					weathers = append(weathers, newWeather)
+				}
 			}
 		}
 	}
 
-	log.Printf("Found %d weather conditions", len(weathers))
-
-	weathers = uniqueWeather(weathers)
-	log.Printf("Found %d unique weather conditions", len(weathers))
-
-	return weathers
-}
-
-// uniqueWeather returns a slice of unique weather conditions.
-func uniqueWeather(weathers []data.Weather) []data.Weather {
-	seen := make(map[string]bool)
-	unique := []data.Weather{}
-
-	// Loop over the slice and only keep first occurrence of each weather.
-	for _, w := range weathers {
-		if !seen[w.Title] {
-			seen[w.Title] = true
-			unique = append(unique, w)
-		}
+	if err = rows.Err(); err != nil { // Check for errors during iteration
+		log.Fatalf("Error iterating weather rows: %v", err)
 	}
 
-	return unique
+	log.Printf("Found %d unique weather conditions", len(weathers))
+	return weathers
 }
