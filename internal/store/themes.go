@@ -3,7 +3,6 @@ package store
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
+	"community-climate-justice-archive/internal/util"
 )
 
 // GetStoriesForTheme retrieves all stories for a given theme from the database and returns them as a slice of Story.
@@ -47,37 +47,41 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 		var dto data.StoryDTO
 		err := rows.Scan(
 			&dto.ID,
-			&dto.CreatedTime,
+			&dto.CreatedAt,
+			&dto.UpdatedAt,
+			&dto.CreatedBy,
+			&dto.UpdatedBy,
+			&dto.NCOrder,
+			&dto.NCRecordID,
+			&dto.NCRecordHash,
 			&dto.Finding,
-			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
-			&dto.Image,
-			&dto.SourceImage,
 			&dto.Location,
 			&dto.StartDateTime,
 			&dto.EndDateTime,
-			&dto.Season,
 			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
 			&dto.MapCache,
 			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
+			&dto.Type,
+			&dto.Image,
+			&dto.SourceImage,
+			&dto.StreetDetectoristClue,
+			&dto.Season,
+			&dto.Themes,
+			&dto.HighStExperiment,
+			&dto.Experience,
+			&dto.PersonFinderImaginerStreetDetectorist,
+			&dto.IfYouWouldLikeToFillOutAStreetDetectorist,
+			&dto.TimeSpan,
 			&dto.OtherTheme,
 			&dto.OtherWeather,
+			&dto.OtherCommentsSources,
+			&dto.WhatWasIsIf,
 			&dto.ShareStatus,
 			&dto.PostDate,
 			&dto.TwitterText,
-			&dto.CharacterCount,
 			&dto.InstaText,
-			&dto.InstaCount,
 			&dto.InstaImage,
+			&dto.Created,
 		)
 
 		if err != nil {
@@ -123,15 +127,12 @@ func GetThemes() []data.Theme {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
 
-		if Themes.Valid {
-			// First unmarshal into a string array since it's in format ["Theme1", "Theme2", "Theme3"]
-			var themeStrings []string
-			if err := json.Unmarshal([]byte(Themes.String), &themeStrings); err != nil {
-				log.Fatalf("Failed to unmarshal JSON: %v", err)
-			}
+		if Themes.Valid && Themes.String != "" {
+			themeStrings := strings.Split(Themes.String, ",")
 
 			for _, themeStr := range themeStrings {
-				newTheme := data.Theme{Title: themeStr, URL: strings.ToLower(themeStr), Colour: data.TitleToHexColor(themeStr)}
+				trimmedThemeStr := strings.TrimSpace(themeStr)
+				newTheme := data.Theme{Title: trimmedThemeStr, URL: "/themes/" + util.Slugify(trimmedThemeStr) + ".html", Colour: data.TitleToHexColor(trimmedThemeStr)}
 				themes = append(themes, newTheme)
 			}
 		}

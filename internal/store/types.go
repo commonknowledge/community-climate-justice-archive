@@ -3,7 +3,6 @@ package store
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
+	"community-climate-justice-archive/internal/util"
 )
 
 // GetStoriesForType retrieves all stories for a given type from the database and returns them as a slice of Story.
@@ -48,37 +48,41 @@ func GetStoriesForType(typeTitle string) []data.Story {
 		var dto data.StoryDTO
 		err := rows.Scan(
 			&dto.ID,
-			&dto.CreatedTime,
+			&dto.CreatedAt,
+			&dto.UpdatedAt,
+			&dto.CreatedBy,
+			&dto.UpdatedBy,
+			&dto.NCOrder,
+			&dto.NCRecordID,
+			&dto.NCRecordHash,
 			&dto.Finding,
-			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
-			&dto.Image,
-			&dto.SourceImage,
 			&dto.Location,
 			&dto.StartDateTime,
 			&dto.EndDateTime,
-			&dto.Season,
 			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
 			&dto.MapCache,
 			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
+			&dto.Type,
+			&dto.Image,
+			&dto.SourceImage,
+			&dto.StreetDetectoristClue,
+			&dto.Season,
+			&dto.Themes,
+			&dto.HighStExperiment,
+			&dto.Experience,
+			&dto.PersonFinderImaginerStreetDetectorist,
+			&dto.IfYouWouldLikeToFillOutAStreetDetectorist,
+			&dto.TimeSpan,
 			&dto.OtherTheme,
 			&dto.OtherWeather,
+			&dto.OtherCommentsSources,
+			&dto.WhatWasIsIf,
 			&dto.ShareStatus,
 			&dto.PostDate,
 			&dto.TwitterText,
-			&dto.CharacterCount,
 			&dto.InstaText,
-			&dto.InstaCount,
 			&dto.InstaImage,
+			&dto.Created,
 		)
 
 		if err != nil {
@@ -124,15 +128,13 @@ func GetTypes() []data.Type {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
 
-		if Type.Valid {
-			// First unmarshal into a string array since it's in format ["Map", "Drawing", "Imagining"]
-			var typeStrings []string
-			if err := json.Unmarshal([]byte(Type.String), &typeStrings); err != nil {
-				log.Fatalf("Failed to unmarshal JSON: %v", err)
-			}
+		if Type.Valid && Type.String != "" {
+			// Types are now comma-separated: "Type1,Type2,Type3"
+			typeStrings := strings.Split(Type.String, ",")
 
 			for _, typeStr := range typeStrings {
-				newType := data.Type{Title: typeStr, URL: strings.ToLower(typeStr), Colour: data.TitleToHexColor(typeStr)}
+				trimmedTypeStr := strings.TrimSpace(typeStr)
+				newType := data.Type{Title: trimmedTypeStr, URL: "/types/" + util.Slugify(trimmedTypeStr) + ".html", Colour: data.TitleToHexColor(trimmedTypeStr)}
 				types = append(types, newType)
 			}
 		}

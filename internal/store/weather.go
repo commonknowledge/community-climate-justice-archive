@@ -3,9 +3,9 @@ package store
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -48,37 +48,41 @@ func GetStoriesForWeather(weatherTitle string) []data.Story {
 		var dto data.StoryDTO
 		err := rows.Scan(
 			&dto.ID,
-			&dto.CreatedTime,
+			&dto.CreatedAt,
+			&dto.UpdatedAt,
+			&dto.CreatedBy,
+			&dto.UpdatedBy,
+			&dto.NCOrder,
+			&dto.NCRecordID,
+			&dto.NCRecordHash,
 			&dto.Finding,
-			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
-			&dto.Image,
-			&dto.SourceImage,
 			&dto.Location,
 			&dto.StartDateTime,
 			&dto.EndDateTime,
-			&dto.Season,
 			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
 			&dto.MapCache,
 			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
+			&dto.Type,
+			&dto.Image,
+			&dto.SourceImage,
+			&dto.StreetDetectoristClue,
+			&dto.Season,
+			&dto.Themes,
+			&dto.HighStExperiment,
+			&dto.Experience,
+			&dto.PersonFinderImaginerStreetDetectorist,
+			&dto.IfYouWouldLikeToFillOutAStreetDetectorist,
+			&dto.TimeSpan,
 			&dto.OtherTheme,
 			&dto.OtherWeather,
+			&dto.OtherCommentsSources,
+			&dto.WhatWasIsIf,
 			&dto.ShareStatus,
 			&dto.PostDate,
 			&dto.TwitterText,
-			&dto.CharacterCount,
 			&dto.InstaText,
-			&dto.InstaCount,
 			&dto.InstaImage,
+			&dto.Created,
 		)
 
 		if err != nil {
@@ -124,17 +128,16 @@ func GetWeather() []data.Weather {
 			log.Fatalf("Failed to scan row: %v", err)
 		}
 
-		if Weather.Valid {
-			// First unmarshal into a string array since it's in format ["Sunny", "Cloudy", "Rainy"]
-			var weatherStrings []string
-			if err := json.Unmarshal([]byte(Weather.String), &weatherStrings); err != nil {
-				log.Fatalf("Failed to unmarshal JSON: %v", err)
-			}
+		if Weather.Valid && Weather.String != "" {
+			// Weather conditions are now comma-separated: "Condition1,Condition2,Condition3"
+			weatherStrings := strings.Split(Weather.String, ",")
 
 			for _, weatherStr := range weatherStrings {
+				trimmedWeatherStr := strings.TrimSpace(weatherStr)
 				newWeather := data.Weather{
-					Title: weatherStr,
-					URL:   "/weather/" + util.Slugify(weatherStr) + ".html",
+					Title:  trimmedWeatherStr,
+					URL:    "/weather/" + util.Slugify(trimmedWeatherStr) + ".html",
+					Colour: data.TitleToHexColor(trimmedWeatherStr),
 				}
 				weathers = append(weathers, newWeather)
 			}
