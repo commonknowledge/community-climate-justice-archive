@@ -85,7 +85,7 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 		)
 
 		if err != nil {
-			log.Fatalf("Failed to scan story: %v", err)
+			log.Fatalf("Failed to scan story in GetStoriesForTheme: %v", err)
 		}
 
 		story := dto.ToStory()

@@ -86,7 +86,7 @@ func GetStoriesForWeather(weatherTitle string) []data.Story {
 		)
 
 		if err != nil {
-			log.Fatalf("Failed to scan story: %v", err)
+			log.Fatalf("Failed to scan story in GetStoriesForWeather: %v", err)
 		}
 
 		story := dto.ToStory()

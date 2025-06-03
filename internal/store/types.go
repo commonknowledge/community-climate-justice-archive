@@ -86,7 +86,7 @@ func GetStoriesForType(typeTitle string) []data.Story {
 		)
 
 		if err != nil {
-			log.Fatalf("Failed to scan story: %v", err)
+			log.Fatalf("Failed to scan story in GetStoriesForType: %v", err)
 		}
 
 		story := dto.ToStory()
