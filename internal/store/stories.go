@@ -69,11 +69,15 @@ func GetMoreTaggedStories(story data.Story, tag interface{}, count int) []data.S
 	return stories
 }
 
+func StoriesTable() string {
+	return "nc_9dus___Stories"
+}
+
 func GetAllStories() []data.Story {
 	db := connectToDatabase()
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM Stories")
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", StoriesTable()))
 	if err != nil {
 		log.Fatalf("Failed to query stories: %v", err)
 	}
@@ -84,37 +88,41 @@ func GetAllStories() []data.Story {
 		var dto data.StoryDTO
 		err := rows.Scan(
 			&dto.ID,
-			&dto.CreatedTime,
+			&dto.CreatedAt,
+			&dto.UpdatedAt,
+			&dto.CreatedBy,
+			&dto.UpdatedBy,
+			&dto.NCOrder,
+			&dto.NCRecordID,
+			&dto.NCRecordHash,
 			&dto.Finding,
-			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
-			&dto.Image,
-			&dto.SourceImage,
 			&dto.Location,
 			&dto.StartDateTime,
 			&dto.EndDateTime,
-			&dto.Season,
 			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
 			&dto.MapCache,
 			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
+			&dto.Type,
+			&dto.Image,
+			&dto.SourceImage,
+			&dto.StreetDetectoristClue,
+			&dto.Season,
+			&dto.Themes,
+			&dto.HighStExperiment,
+			&dto.Experience,
+			&dto.PersonFinderImaginerStreetDetectorist,
+			&dto.IfYouWouldLikeToFillOutAStreetDetectorist,
+			&dto.TimeSpan,
 			&dto.OtherTheme,
 			&dto.OtherWeather,
+			&dto.OtherCommentsSources,
+			&dto.WhatWasIsIf,
 			&dto.ShareStatus,
 			&dto.PostDate,
 			&dto.TwitterText,
-			&dto.CharacterCount,
 			&dto.InstaText,
-			&dto.InstaCount,
 			&dto.InstaImage,
+			&dto.Created,
 		)
 
 		if err != nil {
