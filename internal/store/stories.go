@@ -22,7 +22,9 @@ func CreateStoryURLFromFinding(finding string) string {
 	return filepath.Join("/stories", fileName)
 }
 
-func connectToDatabase() *sql.DB {
+// ConnectToDatabase establishes a connection to the SQLite database.
+// It uses "nocodb.sqlite" as the database file.
+func ConnectToDatabase() *sql.DB {
 	db, err := sql.Open("sqlite3", "nocodb.sqlite")
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
@@ -74,7 +76,7 @@ func StoriesTable() string {
 }
 
 func GetAllStories() []data.Story {
-	db := connectToDatabase()
+	db := ConnectToDatabase()
 	defer db.Close()
 
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", StoriesTable()))
