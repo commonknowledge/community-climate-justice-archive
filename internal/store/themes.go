@@ -23,20 +23,24 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 	}
 	defer db.Close()
 
-	// Themes are stored as JSON array in the database like this:
-	// ["Theme1", "Theme2", "Theme3"]
-	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
-	likePattern := fmt.Sprintf("%%%q%%", themeTitle)
-
+	// Themes are stored as a comma-separated string in the database.
+	// We search for themeTitle as a whole word in the comma-separated list.
 	query := `
 		SELECT *
-		FROM Stories
-		WHERE "Themes" LIKE ?;
+		FROM %s
+		WHERE ("Themes" = ? OR "Themes" LIKE ? OR "Themes" LIKE ? OR "Themes" LIKE ?);
 	`
+	// Use StoriesTable() to get the correct table name
+	formattedQuery := fmt.Sprintf(query, StoriesTable())
 
-	rows, err := db.Query(query, likePattern)
+	arg1 := themeTitle               // Exact match
+	arg2 := themeTitle + ",%"        // Starts with
+	arg3 := "%," + themeTitle        // Ends with
+	arg4 := "%," + themeTitle + ",%" // Contains
+
+	rows, err := db.Query(formattedQuery, arg1, arg2, arg3, arg4)
 	if err != nil {
-		log.Fatalf("Failed to query stories: %v", err)
+		log.Fatalf("Failed to query stories for theme %s: %v", themeTitle, err)
 	}
 	defer rows.Close()
 
@@ -83,11 +87,11 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 		)
 
 		if err != nil {
-			log.Fatalf("Failed to scan story in GetStoriesForTheme: %v", err)
+			log.Fatalf("Failed to scan story in GetStoriesForTheme: %v. Check column count and order.", err)
 		}
 
 		story := dto.ToStory()
-		story.URL = CreateStoryURLFromFinding(story.Finding)
+		story.URL = CreateStoryURLFromFinding(story.Finding) // CreateStoryURLFromFinding is in stories.go
 
 		stories = append(stories, story)
 	}
@@ -95,67 +99,56 @@ func GetStoriesForTheme(themeTitle string) []data.Story {
 	return stories
 }
 
-// GetThemes retrieves all themes from the database and returns them as a slice of Theme.
-// Intended for passing to HTML templates.
+// GetThemes retrieves all unique themes from the database.
 func GetThemes() []data.Theme {
 	log.Println("Getting themes")
 
-	dbPath := "airtable-export.db"
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+	db := ConnectToDatabase()
+	if db == nil {
+		log.Fatalf("Failed to connect to the database for GetThemes")
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT Themes FROM Stories")
+	query := fmt.Sprintf("SELECT Themes FROM %s", StoriesTable())
+	rows, err := db.Query(query)
 	if err != nil {
 		log.Fatalf("Failed to query themes: %v", err)
 	}
 	defer rows.Close()
 
 	var themes []data.Theme
+	seen := make(map[string]bool) // For deduplication
 
 	for rows.Next() {
-		var (
-			Themes sql.NullString
-		)
-
-		if err := rows.Scan(&Themes); err != nil {
-			log.Fatalf("Failed to scan row: %v", err)
+		var themesStr sql.NullString
+		if err := rows.Scan(&themesStr); err != nil {
+			log.Fatalf("Failed to scan themes string: %v", err)
 		}
 
-		if Themes.Valid && Themes.String != "" {
-			themeStrings := strings.Split(Themes.String, ",")
-
-			for _, themeStr := range themeStrings {
-				trimmedThemeStr := strings.TrimSpace(themeStr)
-				newTheme := data.Theme{Title: trimmedThemeStr, URL: "/themes/" + util.Slugify(trimmedThemeStr) + ".html", Colour: data.TitleToHexColor(trimmedThemeStr)}
-				themes = append(themes, newTheme)
+		if themesStr.Valid && themesStr.String != "" {
+			themeItems := strings.Split(themesStr.String, ",")
+			for _, themeTitle := range themeItems {
+				trimmedTitle := strings.TrimSpace(themeTitle)
+				if trimmedTitle == "" {
+					continue
+				}
+				if !seen[trimmedTitle] {
+					seen[trimmedTitle] = true
+					newTheme := data.Theme{
+						Title:  trimmedTitle,
+						URL:    "/themes/" + util.Slugify(trimmedTitle) + ".html",
+						Colour: data.TitleToHexColor(trimmedTitle),
+					}
+					themes = append(themes, newTheme)
+				}
 			}
 		}
 	}
 
-	log.Printf("Found %d themes", len(themes))
-
-	themes = uniqueThemes(themes)
-	log.Printf("Found %d unique themes", len(themes))
-
-	return themes
-}
-
-// uniqueThemes returns a slice of unique themes.
-func uniqueThemes(themes []data.Theme) []data.Theme {
-	seen := make(map[string]bool)
-	unique := []data.Theme{}
-
-	// Loop over the slice and only keep first occurrence of each theme.
-	for _, t := range themes {
-		if !seen[t.Title] {
-			seen[t.Title] = true
-			unique = append(unique, t)
-		}
+	if err = rows.Err(); err != nil { // Check for errors during iteration
+		log.Fatalf("Error iterating theme rows: %v", err)
 	}
 
-	return unique
+	log.Printf("Found %d unique themes", len(themes))
+	return themes
 }
