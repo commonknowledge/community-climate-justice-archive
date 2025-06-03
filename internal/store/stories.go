@@ -23,7 +23,7 @@ func CreateStoryURLFromFinding(finding string) string {
 }
 
 func connectToDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", "airtable-export.db")
+	db, err := sql.Open("sqlite3", "nocodb.sqlite")
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}
