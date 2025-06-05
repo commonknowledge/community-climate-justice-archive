@@ -104,43 +104,104 @@ func (s Story) GetStoryImages() []StoryImage {
 
 	var resultImages []StoryImage
 	for _, nocoAtt := range allNocoDBAttachments {
-		if nocoAtt.Title == "" {
+		var nocoDBLocalFilePath string
+		if nocoAtt.Path != "" {
+			if strings.HasPrefix(nocoAtt.Path, "download/") {
+				nocoDBLocalFilePath = strings.Replace(nocoAtt.Path, "download/", "nc/uploads/", 1)
+			} else {
+				// If path doesn't start with "download/", assume it's a usable path or becomes one for the build process.
+				// The build process (Phase 1) needs to be able to source the image from this path.
+				log.Printf("NocoDBAttachment path '%s' (for attachment with Title: '%s') does not start with 'download/'. Using path as is for nocoDBLocalFilePath. Ensure build process can source from this.", nocoAtt.Path, nocoAtt.Title)
+				nocoDBLocalFilePath = nocoAtt.Path
+			}
+		}
+
+		if nocoDBLocalFilePath == "" {
+			log.Printf("Warning: NocoDBAttachment.Path is empty for attachment with Title '%s'. Skipping this image.", nocoAtt.Title)
 			continue
 		}
 
-		originalFilename := nocoAtt.Title
-		ext := filepath.Ext(originalFilename)
-		baseName := strings.TrimSuffix(originalFilename, ext)
+		baseOriginalFilename := filepath.Base(nocoDBLocalFilePath)
+		if baseOriginalFilename == "." || baseOriginalFilename == "/" {
+			log.Printf("Warning: Invalid base filename derived from nocoDBLocalFilePath '%s' (for attachment with Title '%s'). Skipping this image.", nocoDBLocalFilePath, nocoAtt.Title)
+			continue
+		}
+		webPBaseName := strings.TrimSuffix(baseOriginalFilename, filepath.Ext(baseOriginalFilename))
 
 		storyImg := StoryImage{
-			Filename:        originalFilename,
-			AlternativeText: nocoAtt.Title,
-			Type:            nocoAtt.MimeType,
+			AlternativeText: nocoAtt.Title, // Title is solely for Alt Text
 			Size:            nocoAtt.Size,
 			Width:           nocoAtt.Width,
 			Height:          nocoAtt.Height,
 			Thumbnails:      make(map[string]Thumbnail),
 		}
 
-		originalImageURL := "/images/" + originalFilename
-		storyImg.URL = originalImageURL
-		storyImg.ThumbURL = originalImageURL
-		storyImg.MediumURL = originalImageURL
-		storyImg.LargeURL = originalImageURL
+		// Filesystem paths for checking existence (relative to project root)
+		mainWebPLocalPath := filepath.Join("out", "images", "processed", webPBaseName+".webp")
+		thumbWebPLocalPath := filepath.Join("out", "images", "processed", webPBaseName+"_thumb.webp")
+		mediumWebPLocalPath := filepath.Join("out", "images", "processed", webPBaseName+"_medium.webp")
+		largeWebPLocalPath := filepath.Join("out", "images", "processed", webPBaseName+"_large.webp")
+		// Original file local path (after potential copy by build step 1.A)
+		// originalFileLocalPath := filepath.Join("out", "images", baseOriginalFilename)
 
-		webPFileName := baseName + ".webp"
-		localWebPCheckPath := filepath.Join("out", "images", "processed", webPFileName)
-
-		if _, err := os.Stat(localWebPCheckPath); err == nil {
-			storyImg.Filename = webPFileName
-			storyImg.Type = "image/webp"
-			storyImg.URL = "/images/processed/" + webPFileName
-			storyImg.ThumbURL = "/images/processed/" + baseName + "_thumb.webp"
-			storyImg.MediumURL = "/images/processed/" + baseName + "_medium.webp"
-			storyImg.LargeURL = "/images/processed/" + baseName + "_large.webp"
-		} else {
-			log.Printf("WebP version not found at %s for %s, using original.", localWebPCheckPath, originalFilename)
+		mainWebPExists := false
+		if _, err := os.Stat(mainWebPLocalPath); err == nil {
+			mainWebPExists = true
 		}
+
+		thumbWebPExists := false
+		if _, err := os.Stat(thumbWebPLocalPath); err == nil {
+			thumbWebPExists = true
+		}
+
+		mediumWebPExists := false
+		if _, err := os.Stat(mediumWebPLocalPath); err == nil {
+			mediumWebPExists = true
+		}
+
+		largeWebPExists := false
+		if _, err := os.Stat(largeWebPLocalPath); err == nil {
+			largeWebPExists = true
+		}
+
+		if mainWebPExists {
+			storyImg.Filename = webPBaseName + ".webp"
+			storyImg.Type = "image/webp"
+			storyImg.URL = "/images/processed/" + webPBaseName + ".webp"
+		} else {
+			storyImg.Filename = baseOriginalFilename
+			storyImg.Type = nocoAtt.MimeType
+			storyImg.URL = "/images/" + baseOriginalFilename
+			// Log if original is also missing in out/images, for diagnostics during build.
+			// This check assumes build step 1.A (copying original to out/images) has run.
+			// if _, err := os.Stat(originalFileLocalPath); os.IsNotExist(err) {
+			//  log.Printf("Warning: Neither main WebP nor original image found at expected 'out/' locations for %s (checked %s and %s)", baseOriginalFilename, mainWebPLocalPath, originalFileLocalPath)
+			// }
+		}
+
+		if thumbWebPExists {
+			storyImg.ThumbURL = "/images/processed/" + webPBaseName + "_thumb.webp"
+			storyImg.Thumbnails["thumb"] = Thumbnail{URL: storyImg.ThumbURL} // Assuming Thumbnail struct has URL field
+		} else {
+			storyImg.ThumbURL = storyImg.URL // Fallback to main URL
+		}
+
+		if mediumWebPExists {
+			storyImg.MediumURL = "/images/processed/" + webPBaseName + "_medium.webp"
+			storyImg.Thumbnails["medium"] = Thumbnail{URL: storyImg.MediumURL}
+		} else {
+			storyImg.MediumURL = storyImg.URL // Fallback to main URL
+		}
+
+		if largeWebPExists {
+			storyImg.LargeURL = "/images/processed/" + webPBaseName + "_large.webp"
+			storyImg.Thumbnails["large"] = Thumbnail{URL: storyImg.LargeURL}
+		} else {
+			storyImg.LargeURL = storyImg.URL // Fallback to main URL
+		}
+
+		// Log the determined image details for debugging if needed
+		// log.Printf("Processed StoryImage: Filename: %s, URL: %s, ThumbURL: %s", storyImg.Filename, storyImg.URL, storyImg.ThumbURL)
 
 		resultImages = append(resultImages, storyImg)
 	}
@@ -151,7 +212,6 @@ func (s Story) GetStoryImages() []StoryImage {
 func (s Story) GetStoryImage() StoryImage {
 	images := s.GetStoryImages()
 	if len(images) > 0 {
-		log.Println("Found", len(images), "images for story", images[0].URL)
 		return images[0]
 	}
 	return StoryImage{}

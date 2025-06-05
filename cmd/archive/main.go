@@ -3,9 +3,9 @@ package main
 
 import (
 	"bufio"
-
 	"community-climate-justice-archive/internal/generate"
 	"community-climate-justice-archive/internal/server"
+	"community-climate-justice-archive/internal/store"
 	"flag"
 	"fmt"
 	"log"
@@ -17,45 +17,62 @@ import (
 )
 
 // regenerate builds the archive by taking the following steps:
-// - Getting the data from the database
-// - Getting the images from the images directory
-// - Adding this data to the templates to create pages which are static HTML files
-// - Copying the images to the output directory
 func regenerate(skipImages bool) error {
 	log.Println("Starting build process")
 
+	// 1. Fetch all stories
+	allStories := store.GetAllStories() // This function log.Fatals on error
+
+	// 2. Conditionally process NocoDB images (WebP generation into local images/processed/)
 	if !skipImages {
-		if err := generate.ProcessImages(); err != nil {
-			return fmt.Errorf("failed to process images: %v", err)
+		log.Println("Processing NocoDB images into WebP versions (output to images/processed/)...")
+		if err := generate.ProcessNocoDBImages(allStories); err != nil {
+			return fmt.Errorf("failed to process NocoDB images into WebP: %v", err)
 		}
+	} else {
+		log.Println("WebP image processing skipped due to -skip-images flag.")
 	}
 
+	// 3. Copy NocoDB original images to out/images/
+	if err := generate.CopyNocoDBImagesToOutput(allStories); err != nil {
+		return fmt.Errorf("failed to copy NocoDB original images: %v", err)
+	}
+
+	// 4. Copy local 'images/' directory (which now includes 'images/processed/') to 'out/images/'
+	if err := generate.CopyImagesToOutput(); err != nil {
+		return fmt.Errorf("failed to copy local 'images/' directory to output: %v", err)
+	}
+
+	// 5. Copy CSS assets
+	if err := generate.CopyCSSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy CSS: %v", err)
+	}
+
+	// 6. Page Generation Steps
+	log.Println("Starting page generation...")
+	// WriteStories fetches its own stories
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
 	}
 
+	// WriteHomePage fetches its own stories/data
 	if err := generate.WriteHomePage(); err != nil {
 		return fmt.Errorf("failed to write homepage: %v", err)
 	}
 
+	// WriteTypesIndexes fetches its own stories/data
 	if err := generate.WriteTypesIndexes(); err != nil {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}
 
+	// WriteThemesIndexes fetches its own stories/data
 	if err := generate.WriteThemesIndexes(); err != nil {
 		return fmt.Errorf("failed to write themes indexes: %v", err)
 	}
 
+	// WriteWeatherIndexes fetches its own stories/data
 	if err := generate.WriteWeatherIndexes(); err != nil {
 		return fmt.Errorf("failed to write weather indexes: %v", err)
-	}
-
-	if err := generate.CopyImagesToOutput(); err != nil {
-		return fmt.Errorf("failed to copy images: %v", err)
-	}
-
-	if err := generate.CopyCSSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy CSS: %v", err)
 	}
 
 	log.Println("Build process completed successfully")
@@ -65,6 +82,10 @@ func regenerate(skipImages bool) error {
 
 func hotRegenerate() error {
 	log.Println("Starting partial build process")
+
+	// Note: Image processing (CopyNocoDBImagesToOutput, ProcessNocoDBImages, CopyImagesToOutput)
+	// is usually skipped in hotRegenerate for speed, unless specifically triggered or found necessary.
+	// If content changes trigger image changes, a full regenerate might be better.
 
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
