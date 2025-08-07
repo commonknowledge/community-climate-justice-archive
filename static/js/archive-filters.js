@@ -453,7 +453,7 @@ class ArchiveFilters {
         
         // Apply the same color as the dropdown option
         tag.style.backgroundColor = color;
-        tag.style.color = this.getContrastColor(color);
+        tag.style.color = '#ffffff';
         
         tag.innerHTML = `
             ${value}
