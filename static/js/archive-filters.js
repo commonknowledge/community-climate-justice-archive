@@ -92,8 +92,15 @@ class ArchiveFilters {
         sortedOptions.forEach(option => {
             const tagButton = document.createElement('button');
             tagButton.className = 'filter-tag-option';
-            tagButton.style.backgroundColor = option.color;
-            tagButton.style.color = this.getContrastColor(option.color);
+            
+            // Get color - use default if empty
+            let color = option.color;
+            if (!color || color === '') {
+                color = this.getDefaultColor(option.title, filterType);
+            }
+            
+            tagButton.style.backgroundColor = color;
+            tagButton.style.color = this.getContrastColor(color);
             tagButton.textContent = option.title;
             tagButton.dataset.value = option.title;
             tagButton.dataset.filterType = filterType;
@@ -106,6 +113,57 @@ class ArchiveFilters {
             
             contentElement.appendChild(tagButton);
         });
+    }
+    
+    // Helper function to get default colors when none are provided
+    getDefaultColor(title, filterType) {
+        if (filterType === 'weather') {
+            // Assign sensible colors for weather conditions
+            const weatherColors = {
+                'sunny': '#FFD700',       // Gold
+                'cloudy': '#87CEEB',      // Sky blue
+                'rainy': '#4682B4',       // Steel blue
+                'overcast': '#708090',    // Slate gray
+                'pouring': '#191970',     // Midnight blue
+                'drizzly': '#6495ED',     // Cornflower blue
+                'wet': '#4169E1',         // Royal blue
+                'damp': '#5F9EA0',        // Cadet blue
+                'grey': '#A9A9A9',        // Dark gray
+                'foggy': '#D3D3D3',       // Light gray
+                'dark': '#2F4F4F',        // Dark slate gray
+                'cold': '#B0E0E6',        // Powder blue
+                'warm': '#FFA500',        // Orange
+                'hot': '#FF6347',         // Tomato
+                'mild': '#98FB98',        // Pale green
+                'cool': '#ADD8E6',        // Light blue
+                'dry': '#F5DEB3',         // Wheat
+                'chilled': '#E0FFFF',     // Light cyan
+                'evening': '#483D8B',     // Dark slate blue
+                'dank': '#556B2F',        // Dark olive green
+                'fairy rain': '#E6E6FA',  // Lavender
+                'slight breeze': '#F0F8FF', // Alice blue
+                'might rain later': '#9370DB' // Medium purple
+            };
+            
+            // Try exact match first
+            const lowerTitle = title.toLowerCase();
+            if (weatherColors[lowerTitle]) {
+                return weatherColors[lowerTitle];
+            }
+            
+            // Try partial matches for compound weather descriptions
+            for (const [key, color] of Object.entries(weatherColors)) {
+                if (lowerTitle.includes(key)) {
+                    return color;
+                }
+            }
+            
+            // Default weather color
+            return '#87CEEB'; // Sky blue
+        }
+        
+        // Default color for other filter types
+        return '#666666'; // Dark gray
     }
     
     // Helper function to determine if text should be black or white based on background
@@ -203,6 +261,9 @@ class ArchiveFilters {
         this.applyFilters();
         this.updateURL();
         this.updateActiveFiltersDisplay();
+        
+        // Close the dropdown after selection
+        this.closeAllDropdowns();
     }
     
     updateDropdownDisplay() {
@@ -266,8 +327,13 @@ class ArchiveFilters {
             // Clear existing stories
             this.elements.storiesContainer.innerHTML = '';
             
-            // Render initial batch of stories
-            this.renderStoriesBatch(0, this.storiesPerPage);
+            if (this.filteredStories.length === 0) {
+                // Show friendly no results message
+                this.elements.storiesContainer.appendChild(this.createNoResultsElement());
+            } else {
+                // Render initial batch of stories
+                this.renderStoriesBatch(0, this.storiesPerPage);
+            }
             
             // Remove loading state
             this.elements.storiesContainer.classList.remove('filtering');
@@ -309,6 +375,20 @@ class ArchiveFilters {
         return storyDiv;
     }
     
+    createNoResultsElement() {
+        const noResultsDiv = document.createElement('div');
+        noResultsDiv.className = 'no-results';
+        noResultsDiv.innerHTML = `
+            <div class="no-results-content">
+                <h3>No stories found</h3>
+                <p>We couldn't find any stories matching your current filters.</p>
+                <p>Try adjusting your search criteria or <button type="button" onclick="window.archiveFilters.clearAllFilters()" class="clear-link">clear all filters</button> to explore the full archive.</p>
+            </div>
+        `;
+        
+        return noResultsDiv;
+    }
+    
     updateFilterCount() {
         if (!this.elements.filterCount) return;
         
@@ -316,9 +396,9 @@ class ArchiveFilters {
         const filtered = this.filteredStories.length;
         
         if (filtered === total) {
-            this.elements.filterCount.textContent = `Showing all ${total} stories`;
+            this.elements.filterCount.textContent = '';
         } else {
-            this.elements.filterCount.textContent = `Showing ${filtered} of ${total} stories`;
+            this.elements.filterCount.textContent = `${filtered} of ${total} stories`;
         }
     }
     
@@ -360,6 +440,21 @@ class ArchiveFilters {
     createActiveFilterTag(value, filterType) {
         const tag = document.createElement('button');
         tag.className = 'active-filter-tag';
+        
+        // Find the original color for this filter option
+        let color = '#666666'; // Default color
+        if (this.filterData) {
+            const filterOptions = this.filterData[filterType];
+            const option = filterOptions.find(opt => opt.title === value);
+            if (option) {
+                color = option.color || this.getDefaultColor(option.title, filterType);
+            }
+        }
+        
+        // Apply the same color as the dropdown option
+        tag.style.backgroundColor = color;
+        tag.style.color = this.getContrastColor(color);
+        
         tag.innerHTML = `
             ${value}
             <span class="active-filter-remove" aria-label="Remove filter">×</span>
@@ -491,5 +586,5 @@ class ArchiveFilters {
 
 // Initialize the archive filters when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new ArchiveFilters();
+    window.archiveFilters = new ArchiveFilters();
 });

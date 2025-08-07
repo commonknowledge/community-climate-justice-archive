@@ -365,33 +365,32 @@ Shows currently applied filters as removable tags.
 .active-filter-tag {
     display: inline-flex;
     align-items: center;
-    background: #000;
-    color: #FFFBF9;
     font-family: Arial, sans-serif;
     font-size: 0.88889rem;
     padding: 0.22222rem 0.44444rem;
     gap: 0.33333rem;
     border: none;
     cursor: pointer;
+    /* Background and color set dynamically via JavaScript */
 }
 
 .active-filter-tag:hover {
-    background: #333;
+    opacity: 0.8;
 }
 
 .active-filter-remove {
     background: none;
     border: none;
-    color: #FFFBF9;
     cursor: pointer;
     font-size: 1.11111rem;
     line-height: 1;
     padding: 0;
     margin: 0;
+    /* Color inherited from parent tag for good contrast */
 }
 
 .active-filter-remove:hover {
-    color: #ccc;
+    opacity: 0.7;
 }
 
 /* Filter Loading State */
@@ -411,6 +410,51 @@ Shows currently applied filters as removable tags.
 
 .filter-loading.visible {
     display: block;
+}
+
+/* No Results Message */
+.no-results {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 20rem;
+    padding: 2.22222rem;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    text-align: center;
+}
+
+.no-results-content h3 {
+    font-family: Arial, sans-serif;
+    font-size: 1.66667rem;
+    font-weight: 400;
+    margin-bottom: 1.11111rem;
+    color: #000;
+}
+
+.no-results-content p {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 0.55556rem;
+    color: #666;
+    max-width: 28rem;
+}
+
+.no-results-content .clear-link {
+    background: none;
+    border: none;
+    color: #000;
+    text-decoration: underline;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.no-results-content .clear-link:hover {
+    text-decoration: none;
 }
 
 /* Responsive Filter Layout */
@@ -450,6 +494,15 @@ Shows currently applied filters as removable tags.
     .active-filters-label {
         margin-right: 0;
         margin-bottom: 0.33333rem;
+    }
+    
+    .no-results {
+        min-height: 15rem;
+        padding: 1.11111rem;
+    }
+    
+    .no-results-content h3 {
+        font-size: 1.33333rem;
     }
 }
 
