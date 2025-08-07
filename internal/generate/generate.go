@@ -78,6 +78,168 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 	return string(jsonData), nil
 }
 
+// StoryData represents a story with all necessary data for filtering
+type StoryData struct {
+	ID            string     `json:"id"`
+	Finding       string     `json:"finding"`
+	URL           string     `json:"url"`
+	Location      string     `json:"location"`
+	StartDateTime string     `json:"startDateTime"`
+	EndDateTime   string     `json:"endDateTime"`
+	Season        string     `json:"season"`
+	Experience    string     `json:"experience"`
+	TimeSpan      string     `json:"timeSpan"`
+	Themes        []string   `json:"themes"`
+	Types         []string   `json:"types"`
+	Weather       []string   `json:"weather"`
+	Image         StoryImage `json:"image"`
+}
+
+// StoryImage represents the image data for a story
+type StoryImage struct {
+	URL       string `json:"url"`
+	ThumbURL  string `json:"thumbUrl"`
+	MediumURL string `json:"mediumUrl"`
+	LargeURL  string `json:"largeUrl"`
+	Alt       string `json:"alt"`
+}
+
+// FilterData represents all the data needed for client-side filtering
+type FilterData struct {
+	Themes  []FilterOption `json:"themes"`
+	Types   []FilterOption `json:"types"`
+	Weather []FilterOption `json:"weather"`
+	Stories []StoryData    `json:"stories"`
+}
+
+// FilterOption represents a filter option with title and count
+type FilterOption struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+	Count int    `json:"count"`
+	Color string `json:"color"`
+}
+
+// convertStoriesToFilterData converts stories to comprehensive filter data
+func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather) (string, error) {
+	// Create story data
+	storyData := make([]StoryData, len(stories))
+	for i, story := range stories {
+		image := story.GetStoryImage()
+
+		// Extract theme titles
+		themeNames := make([]string, len(story.Themes))
+		for j, theme := range story.Themes {
+			themeNames[j] = theme.Title
+		}
+
+		// Extract type titles
+		typeNames := make([]string, len(story.Type))
+		for j, typ := range story.Type {
+			typeNames[j] = typ.Title
+		}
+
+		// Extract weather titles
+		weatherNames := make([]string, len(story.Weather))
+		for j, w := range story.Weather {
+			weatherNames[j] = w.Title
+		}
+
+		storyData[i] = StoryData{
+			ID:            story.ID,
+			Finding:       story.Finding,
+			URL:           story.URL,
+			Location:      story.Location,
+			StartDateTime: story.StartDateTime,
+			EndDateTime:   story.EndDateTime,
+			Season:        story.Season,
+			Experience:    story.Experience,
+			TimeSpan:      story.TimeSpan,
+			Themes:        themeNames,
+			Types:         typeNames,
+			Weather:       weatherNames,
+			Image: StoryImage{
+				URL:       image.URL,
+				ThumbURL:  image.ThumbURL,
+				MediumURL: image.MediumURL,
+				LargeURL:  image.LargeURL,
+				Alt:       image.AlternativeText,
+			},
+		}
+	}
+
+	// Create filter options with counts
+	themeOptions := make([]FilterOption, len(themes))
+	for i, theme := range themes {
+		count := 0
+		for _, story := range stories {
+			for _, storyTheme := range story.Themes {
+				if storyTheme.Title == theme.Title {
+					count++
+					break
+				}
+			}
+		}
+		themeOptions[i] = FilterOption{
+			Title: theme.Title,
+			URL:   theme.URL,
+			Count: count,
+			Color: theme.Colour,
+		}
+	}
+
+	typeOptions := make([]FilterOption, len(types))
+	for i, typ := range types {
+		count := 0
+		for _, story := range stories {
+			for _, storyType := range story.Type {
+				if storyType.Title == typ.Title {
+					count++
+					break
+				}
+			}
+		}
+		typeOptions[i] = FilterOption{
+			Title: typ.Title,
+			URL:   typ.URL,
+			Count: count,
+			Color: typ.Colour,
+		}
+	}
+
+	weatherOptions := make([]FilterOption, len(weather))
+	for i, w := range weather {
+		count := 0
+		for _, story := range stories {
+			for _, storyWeather := range story.Weather {
+				if storyWeather.Title == w.Title {
+					count++
+					break
+				}
+			}
+		}
+		weatherOptions[i] = FilterOption{
+			Title: w.Title,
+			URL:   w.URL,
+			Count: count,
+			Color: w.Colour,
+		}
+	}
+
+	filterData := FilterData{
+		Themes:  themeOptions,
+		Types:   typeOptions,
+		Weather: weatherOptions,
+		Stories: storyData,
+	}
+
+	jsonData, err := json.Marshal(filterData)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal filter data to JSON: %w", err)
+	}
+	return string(jsonData), nil
+}
+
 // WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
 func WriteWeatherIndexes() error {
 	log.Println("Starting weather generation")
@@ -430,15 +592,47 @@ func WriteThemesIndexes() error {
 	return nil
 }
 
+// WriteFilterData generates a comprehensive JSON file with all filter data for client-side filtering
+func WriteFilterData() error {
+	log.Println("Starting filter data generation")
+	themes := store.GetThemes()
+	types := store.GetTypes()
+	weather := store.GetWeather()
+	allStories := store.GetAllStories()
+
+	// Convert to filter data JSON
+	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather)
+	if err != nil {
+		return err
+	}
+
+	fileName := "filter-data.json"
+	outputPath := filepath.Join("out", fileName)
+
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create filter data file %s: %w", outputPath, err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(filterDataJSON)
+	if err != nil {
+		return fmt.Errorf("failed to write filter data: %w", err)
+	}
+
+	log.Printf("Successfully wrote filter data to %s", outputPath)
+	return nil
+}
+
 // WriteHomePage generates the homepage HTML file and writes it to the out/ directory.
 func WriteHomePage() error {
 	log.Println("Starting homepage generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
-	stories := store.GetAllStories()
+	allStories := store.GetAllStories()
 
-	// Only give the template the first 40 stories
-	stories = stories[:40]
+	// Only give the template the first 40 stories for initial display
+	stories := allStories[:40]
 
 	// Shuffle the stories
 	rand.Shuffle(len(stories), func(i, j int) {
@@ -448,7 +642,7 @@ func WriteHomePage() error {
 	// Select a random story for the initial random link
 	randomStory := stories[rand.Intn(len(stories))]
 
-	// Convert stories to JSON
+	// Convert stories to JSON (keep existing functionality)
 	storiesJSON, err := convertStoriesToJSON(stories)
 	if err != nil {
 		return err
