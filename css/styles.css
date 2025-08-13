@@ -111,7 +111,8 @@ header {
     margin-right: 2.222222rem;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 101;
+    padding: 1.11111rem 0;
 }
 
 .main-header {
@@ -237,7 +238,7 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
     align-items: center;
     cursor: pointer;
     letter-spacing: -0.01222rem;
-    text-transform: lowercase;
+    line-height: 1.4;
 }
 
 .filter-dropdown-button:hover {
@@ -340,10 +341,10 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
 
 /* Active Filters Display
 
-Shows currently applied filters as removable tags.
+Shows currently applied filters as removable tags below the filter controls.
 */
 .active-filters {
-    margin-bottom: 1.66667rem;
+    margin: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -459,8 +460,29 @@ Shows currently applied filters as removable tags.
     text-decoration: none;
 }
 
+/* Stories Container Spacing */
+.archive .stories-list {
+    margin-top: 2.22222rem;
+    padding: 0 2.22222rem;
+}
+
 /* Responsive Filter Layout */
 @media (max-width: 768px) {
+    .archive-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0 1.11111rem;
+    }
+    
+    .archive-filters-container {
+        padding: 1rem 1.11111rem;
+    }
+    
+    .archive .stories-list {
+        padding: 0 1.11111rem;
+    }
+    
     .archive-filters {
         flex-direction: column;
         align-items: stretch;
@@ -1140,12 +1162,68 @@ A button with a dashed border for navigation and actions.
     text-align: right;
 }
 
+/* Archive Header with Count and Clear Filters */
+.archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 2.22222rem;
+}
+
+.archive-header-title {
+    color: #000;
+    font-family: "Times New Roman", serif;
+    font-size: 2.88889rem;
+    font-weight: 400;
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.05778rem;
+}
+
+.clear-filters-button-top {
+    background: #FFFBF9;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    /* Hidden by default, shown when filters are active */
+    display: none;
+    align-items: center;
+    gap: 0.27778rem;
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    text-decoration: underline;
+    padding: 0.27778rem 0.55556rem;
+    letter-spacing: -0.01222rem;
+}
+
+.clear-filters-button-top.visible {
+    display: flex;
+}
+
+.clear-filters-button-top:hover {
+    opacity: 0.7;
+}
+
+.clear-filters-icon {
+    font-size: 1.33333rem;
+    font-weight: bold;
+}
+
+/* Sticky Filter Container */
+.archive-filters-container {
+    position: sticky;
+    top: 5.88889rem;
+    z-index: 100;
+    padding: 1.66667rem 2.22222rem;
+}
+
 /* Archive Filters */
 .archive-filters {
     display: flex;
-    gap: 1rem;
+    gap: 2.22222rem; /* 40px from Figma spacing */
     align-items: center;
-    margin: 2rem 0;
+    margin: 0 0 1.11111rem 0;
     flex-wrap: wrap;
 }
 
