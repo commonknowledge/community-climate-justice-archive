@@ -42,39 +42,6 @@
             storiesList.appendChild(fragment);
         }
 
-        function rotateWhatIfs() {
-            const items = document.querySelectorAll('.what-if-rotation-item');
-            let currentIndex = 0;
-
-            function showNext() {
-                const nextIndex = (currentIndex + 1) % items.length;
-                
-                // Remove hide from next item but keep it faded out
-                items[nextIndex].classList.remove('hide');
-                items[nextIndex].classList.add('fade-out');
-                
-                // Small delay to ensure the above changes are processed
-                requestAnimationFrame(() => {
-                    // Start fading out current while fading in next
-                    items[currentIndex].classList.add('fade-out');
-                    items[nextIndex].classList.remove('fade-out');
-                    
-                    // After transition completes, hide the old item
-                    // The transition is 2.5 seconds, matching the fade out time in the CSS
-                    setTimeout(() => {
-                        items[currentIndex].classList.add('hide');
-                        currentIndex = nextIndex;
-                    }, 2500);
-                });
-            }
-
-            // Show first item
-            items[0].classList.remove('hide', 'fade-out');
-            
-            // Rotate every 7 seconds - allows for full transition + ~4.5s of clear reading time
-            setInterval(showNext, 7000);
-        }
-
         function pageLoaded() {
             shuffleStories();
         }
