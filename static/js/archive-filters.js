@@ -38,7 +38,8 @@ class ArchiveFilters {
             filterCount: document.getElementById('filter-count'),
             activeFilters: document.getElementById('active-filters'),
             activeFiltersList: document.getElementById('active-filters-list'),
-            storiesContainer: document.getElementById('stories-container')
+            storiesContainer: document.getElementById('stories-container'),
+            totalCount: document.getElementById('total-count')
         };
         
         // Verify all elements exist
@@ -390,15 +391,21 @@ class ArchiveFilters {
     }
     
     updateFilterCount() {
-        if (!this.elements.filterCount) return;
-        
         const total = this.filterData ? this.filterData.stories.length : 0;
         const filtered = this.filteredStories.length;
         
-        if (filtered === total) {
-            this.elements.filterCount.textContent = '';
-        } else {
-            this.elements.filterCount.textContent = `${filtered} of ${total} stories`;
+        // Update the main total count in the header
+        if (this.elements.totalCount) {
+            this.elements.totalCount.textContent = filtered;
+        }
+        
+        // Update the filter count display
+        if (this.elements.filterCount) {
+            if (filtered === total) {
+                this.elements.filterCount.textContent = '';
+            } else {
+                this.elements.filterCount.textContent = `${filtered} of ${total} stories`;
+            }
         }
     }
     

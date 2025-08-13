@@ -101,6 +101,15 @@ The main content area of the homepage, including featured stories and navigation
     margin-right: 2.22222rem;
 }
 
+/* Wander Page Content
+
+The main content area of the wander page, matching homepage padding.
+*/
+.main-content.wander {
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+}
+
 /* Main Header
 
 The site title and navigation elements that remain visible while scrolling.
@@ -284,8 +293,8 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
 }
 
 .filter-tag-option {
-    display: block;
-    width: 100%;
+    display: inline-block;
+    width: fit-content;
     padding: 0.27778rem 0.55556rem;
     margin-bottom: 0.27778rem;
     border: none;
