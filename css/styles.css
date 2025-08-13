@@ -634,7 +634,7 @@ A responsive 3-column layout for stories.
 
 Stories hidden by default until JavaScript randomizes them.
 */
-.stories-list.homepage {
+.stories-list.homepage, .stories-list.wander {
     visibility: hidden;
 }
 
@@ -642,7 +642,7 @@ Stories hidden by default until JavaScript randomizes them.
 
 Stories after JavaScript randomization completes.
 */
-.stories-list.homepage.visible {
+.stories-list.homepage.visible, .stories-list.wander.visible {
     visibility: visible;
 }
 
@@ -1137,4 +1137,124 @@ A button with a dashed border for navigation and actions.
 
 .story-popup-text-tags {
     text-align: right;
+}
+
+/* Archive Filters */
+.archive-filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.clear-filters-button {
+    align-items: center;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    color: var(--Black, #000);
+    display: flex;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    line-height: 140%;
+    padding: 0.27778rem 0.55556rem;
+    text-decoration: none;
+    width: max-content;
+    cursor: pointer;
+}
+
+.clear-filters-button:hover {
+    border: 2px solid #000;
+    background: none;
+    padding: 0.27778rem 0.55556rem;
+}
+
+.filter-count {
+    font-family: Arial;
+    font-size: 1rem;
+    color: #666;
+}
+
+.filter-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-dropdown-button {
+    align-items: center;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    color: var(--Black, #000);
+    display: flex;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    line-height: 140%;
+    padding: 0.27778rem 0.55556rem;
+    text-decoration: none;
+    width: max-content;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.filter-dropdown-button:hover {
+    border: 2px solid #000;
+    background: none;
+}
+
+.filter-dropdown.open .filter-dropdown-button {
+    border: 2px solid #000;
+    background: none;
+}
+
+.filter-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #FFFBF9;
+    border: 2px solid #000;
+    border-top: none;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+}
+
+.filter-dropdown.open .filter-dropdown-content {
+    display: block;
+}
+
+.filter-tag-option {
+    display: flex;
+    align-items: center;
+    padding: 0.55556rem;
+    cursor: pointer;
+    font-family: Arial;
+    font-size: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-tag-option:hover {
+    background-color: #f5f5f5;
+}
+
+.filter-tag-option.selected {
+    background-color: #e6f3ff;
 }

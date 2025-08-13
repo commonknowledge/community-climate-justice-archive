@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <script>
+        // Shuffle the stories list
+        // This contains a lot of optimisations to make this feel faster.
+        // It feels a bit propeller-headed to do this but overall makes the page feel more responsive.
+        function shuffleStories() {
+            // Cache the stories list element
+            const storiesList = document.querySelector('.stories-list.wander');
+
+            // Use Array.prototype.slice.call for faster array creation from NodeList
+            const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
+            const len = stories.length;
+            
+            // Fisher-Yates shuffle in place
+            for (let i = len - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [stories[i], stories[j]] = [stories[j], stories[i]];
+            }
+
+            // Use DocumentFragment for batch operations
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < len; i++) {
+                fragment.appendChild(stories[i]);
+            }
+            
+            // Make visible before DOM update
+            storiesList.classList.add('visible');
+
+            // Single DOM operation to replace all children
+            storiesList.textContent = '';
+            
+            storiesList.appendChild(fragment);
+        }
+
+        function rotateWhatIfs() {
+            const items = document.querySelectorAll('.what-if-rotation-item');
+            let currentIndex = 0;
+
+            function showNext() {
+                const nextIndex = (currentIndex + 1) % items.length;
+                
+                // Remove hide from next item but keep it faded out
+                items[nextIndex].classList.remove('hide');
+                items[nextIndex].classList.add('fade-out');
+                
+                // Small delay to ensure the above changes are processed
+                requestAnimationFrame(() => {
+                    // Start fading out current while fading in next
+                    items[currentIndex].classList.add('fade-out');
+                    items[nextIndex].classList.remove('fade-out');
+                    
+                    // After transition completes, hide the old item
+                    // The transition is 2.5 seconds, matching the fade out time in the CSS
+                    setTimeout(() => {
+                        items[currentIndex].classList.add('hide');
+                        currentIndex = nextIndex;
+                    }, 2500);
+                });
+            }
+
+            // Show first item
+            items[0].classList.remove('hide', 'fade-out');
+            
+            // Rotate every 7 seconds - allows for full transition + ~4.5s of clear reading time
+            setInterval(showNext, 7000);
+        }
+
+        function pageLoaded() {
+            shuffleStories();
+        }
+
+        window.addEventListener('load', pageLoaded);
+    </script>
+</head>
+
+<body>
+    {{template "header" .}}
+
+    <main class="main-content wander">
+        <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive</h2>
+        
+        <div class="stories-list wander">
+            {{template "stories-list" .}}
+        </div>
+    </main>
+
+    {{template "footer" .}}
+</body>
+
+</html>
