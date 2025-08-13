@@ -1179,6 +1179,7 @@ A button with a dashed border for navigation and actions.
     align-items: center;
     margin-bottom: 2rem;
     padding: 0 2.22222rem;
+    padding-top: 40px;
 }
 
 .archive-header-title {
