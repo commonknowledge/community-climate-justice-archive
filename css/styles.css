@@ -319,10 +319,11 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
 .filter-tag-option.selected::after {
     content: '✓';
     position: absolute;
-    right: 0.55556rem;
+    right: -1.11111rem;
     top: 50%;
     transform: translateY(-50%);
     font-weight: bold;
+    color: #000;
 }
 
 .filter-actions {
