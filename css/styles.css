@@ -127,17 +127,19 @@ The main heading in the header.
 header h1 {
     color: var(--Black, #000);
     font-family: Arial;
-    font-size: 1.22222rem;
+    font-size: 22px;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
-    letter-spacing: -0.01222rem;
-    text-decoration-line: underline;
-    text-decoration-style: solid;
-    text-decoration-skip-ink: auto;
-    text-decoration-thickness: auto;
-    text-underline-offset: auto;
-    text-underline-position: from-font;
+    letter-spacing: -0.22px;
+}
+
+header h1 a {
+    text-decoration: none;
+}
+
+header h1 a:hover {
+    text-decoration: underline;
 }
 
 /* Header Paragraph
@@ -566,7 +568,6 @@ Like this:
 <a href="#" class="tag" style="background: #000;">Tag</a>
 */
 .tag:hover {
-
     background: #000 !important;
 }
 
