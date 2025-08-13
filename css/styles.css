@@ -1322,7 +1322,6 @@ A button with a dashed border for navigation and actions.
 
 .filter-dropdown.open .filter-dropdown-button {
     border: 2px solid #000;
-    background: none;
 }
 
 .filter-dropdown-content {
@@ -1330,7 +1329,6 @@ A button with a dashed border for navigation and actions.
     position: absolute;
     background-color: #FFFBF9;
     border: 2px solid #000;
-    border-top: none;
     min-width: 200px;
     max-height: 300px;
     overflow-y: auto;
