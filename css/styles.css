@@ -1216,6 +1216,7 @@ A button with a dashed border for navigation and actions.
     top: 5.88889rem;
     z-index: 100;
     padding: 1.66667rem 2.22222rem;
+    padding-top: 0;
 }
 
 /* Archive Filters */
