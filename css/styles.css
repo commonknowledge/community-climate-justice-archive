@@ -208,6 +208,17 @@ Headers for tag-related sections in the archive, underwhich we display stories.
     letter-spacing: -0.03556rem;
 }
 
+.wander-through-archive-header {
+    margin-top: 40px;
+    color: #000;
+    font-family: "Times New Roman";
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.64px;
+}
+
 /* Wander Through Archive Header
 
 The header for the archive browsing section.
