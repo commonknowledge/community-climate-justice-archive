@@ -717,9 +717,9 @@ func WriteArchivePage() error {
 		StoriesJSON:    storiesJSON,
 	}
 
-	tmpl, err := template.ParseFiles("templates/archive.html", "templates/partials/header.html", "templates/partials/footer.html", "templates/partials/stories-list.html")
+	tmpl, err := loadTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to parse archive template: %w", err)
+		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
 	file, err := os.Create("out/archive.html")
@@ -728,7 +728,7 @@ func WriteArchivePage() error {
 	}
 	defer file.Close()
 
-	err = tmpl.Execute(file, page)
+	err = tmpl.ExecuteTemplate(file, "archive.html", page)
 	if err != nil {
 		return fmt.Errorf("failed to execute archive template: %w", err)
 	}
