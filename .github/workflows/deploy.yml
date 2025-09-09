@@ -35,15 +35,3 @@ jobs:
 
     - name: Generate archive
       run: ./archive -skip-images
-
-    - name: Setup GitHub Pages
-      uses: actions/configure-pages@v4
-        
-    - name: Upload artifact within GitHub Pages
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: './out'
-          
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4

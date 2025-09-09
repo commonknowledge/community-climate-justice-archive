@@ -275,3 +275,58 @@ func CopyImagesToOutput() error {
 	log.Printf("Successfully copied %d images to output directory (skipped %d non-image files)", copyCount, skippedCount)
 	return nil
 }
+
+// CopyJSToOutput copies JavaScript files to the out/js directory.
+func CopyJSToOutput() error {
+	log.Println("Starting JavaScript copy process")
+
+	err := os.MkdirAll("out/js", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output JS directory: %w", err)
+	}
+
+	// Copy all JS files from static/js
+	jsFiles, err := os.ReadDir("static/js")
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Println("No static/js directory found, skipping JS copy")
+			return nil
+		}
+		return fmt.Errorf("failed to read static/js directory: %w", err)
+	}
+
+	for _, file := range jsFiles {
+		if file.IsDir() {
+			continue
+		}
+
+		filename := file.Name()
+		if !strings.HasSuffix(filename, ".js") {
+			continue
+		}
+
+		srcPath := filepath.Join("static/js", filename)
+		dstPath := filepath.Join("out/js", filename)
+
+		src, err := os.Open(srcPath)
+		if err != nil {
+			return fmt.Errorf("failed to open source JS file %s: %w", srcPath, err)
+		}
+		defer src.Close()
+
+		dst, err := os.Create(dstPath)
+		if err != nil {
+			return fmt.Errorf("failed to create destination JS file %s: %w", dstPath, err)
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, src)
+		if err != nil {
+			return fmt.Errorf("failed to copy JS file %s: %w", srcPath, err)
+		}
+
+		log.Printf("Successfully copied JS file to %s", dstPath)
+	}
+
+	return nil
+}

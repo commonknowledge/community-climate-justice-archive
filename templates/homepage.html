@@ -76,6 +76,7 @@
 
         window.addEventListener('load', pageLoaded);
     </script>
+    <script src="/js/archive-filters.js"></script>
 </head>
 <body>
     {{template "header" .}}
@@ -119,7 +120,52 @@
         </div>
 
         <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive</h2>
-        <div class="stories-list homepage">{{range .Stories}}
+        
+        <!-- Filter Controls -->
+        <div class="archive-filters" id="archive-filters">
+            <div class="filter-dropdown" id="theme-dropdown">
+                <button class="filter-dropdown-button" id="theme-button">
+                    <span>themes</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="filter-dropdown-content" id="theme-content">
+                    <!-- Theme tags will be populated here -->
+                </div>
+            </div>
+            
+            <div class="filter-dropdown" id="type-dropdown">
+                <button class="filter-dropdown-button" id="type-button">
+                    <span>types</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="filter-dropdown-content" id="type-content">
+                    <!-- Type tags will be populated here -->
+                </div>
+            </div>
+            
+            <div class="filter-dropdown" id="weather-dropdown">
+                <button class="filter-dropdown-button" id="weather-button">
+                    <span>weather</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="filter-dropdown-content" id="weather-content">
+                    <!-- Weather tags will be populated here -->
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button id="clear-filters" class="dashed-button clear-filters-btn">Clear all</button>
+                <div id="filter-count" class="filter-count"></div>
+            </div>
+        </div>
+        
+        <!-- Active Filters Display -->
+        <div id="active-filters" class="active-filters" style="display: none;">
+            <span class="active-filters-label">Active filters:</span>
+            <div id="active-filters-list" class="active-filters-list"></div>
+        </div>
+        
+        <div class="stories-list homepage" id="stories-container">{{range .Stories}}
             {{$story := .}}
             <div class="story">
                 {{with .GetStoryImage}}

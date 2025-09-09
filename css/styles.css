@@ -101,6 +101,15 @@ The main content area of the homepage, including featured stories and navigation
     margin-right: 2.22222rem;
 }
 
+/* Wander Page Content
+
+The main content area of the wander page, matching homepage padding.
+*/
+.main-content.wander {
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+}
+
 /* Main Header
 
 The site title and navigation elements that remain visible while scrolling.
@@ -111,7 +120,8 @@ header {
     margin-right: 2.222222rem;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 101;
+    padding: 1.11111rem 0;
 }
 
 .main-header {
@@ -127,17 +137,19 @@ The main heading in the header.
 header h1 {
     color: var(--Black, #000);
     font-family: Arial;
-    font-size: 1.22222rem;
+    font-size: 22px;
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
-    letter-spacing: -0.01222rem;
-    text-decoration-line: underline;
-    text-decoration-style: solid;
-    text-decoration-skip-ink: auto;
-    text-decoration-thickness: auto;
-    text-underline-offset: auto;
-    text-underline-position: from-font;
+    letter-spacing: -0.22px;
+}
+
+header h1 a {
+    text-decoration: none;
+}
+
+header h1 a:hover {
+    text-decoration: underline;
 }
 
 /* Header Paragraph
@@ -196,12 +208,347 @@ Headers for tag-related sections in the archive, underwhich we display stories.
     letter-spacing: -0.03556rem;
 }
 
+.wander-through-archive-header {
+    margin-top: 40px;
+    color: #000;
+    font-family: "Times New Roman";
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: -0.64px;
+}
+
 /* Wander Through Archive Header
 
 The header for the archive browsing section.
 */
 .wander-through-archive-header {
-    margin-bottom: 4rem;
+    margin-bottom: 1.66667rem;
+}
+
+/* Archive Filters
+
+Filter controls for browsing the archive with custom dropdowns matching Figma design.
+*/
+.archive-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.11111rem;
+    margin-bottom: 2.22222rem;
+    align-items: flex-start;
+}
+
+.filter-dropdown {
+    position: relative;
+    min-width: 200px;
+}
+
+.filter-dropdown-button {
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    color: #000;
+    padding: 0.27778rem 0.55556rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    letter-spacing: -0.01222rem;
+    line-height: 1.4;
+}
+
+.filter-dropdown-button:hover {
+    border-style: solid;
+}
+
+.filter-dropdown-button:focus {
+    outline: none;
+    border-style: solid;
+}
+
+.dropdown-arrow {
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.filter-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown.open .filter-dropdown-button {
+    border-style: solid;
+    border-bottom: none;
+}
+
+.filter-dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #FFFBF9;
+    border: 2px solid #000;
+    border-top: none;
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0.55556rem;
+}
+
+.filter-dropdown.open .filter-dropdown-content {
+    display: block;
+}
+
+.filter-tag-option {
+    display: inline-block;
+    width: fit-content;
+    padding: 0.27778rem 0.55556rem;
+    margin-bottom: 0.27778rem;
+    border: none;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    letter-spacing: -0.01222rem;
+    text-transform: lowercase;
+    text-align: center;
+    transition: opacity 0.2s ease;
+}
+
+.filter-tag-option:hover {
+    opacity: 0.8;
+}
+
+.filter-tag-option.selected {
+    position: relative;
+}
+
+.filter-tag-option.selected::after {
+    content: '✓';
+    position: absolute;
+    right: -1.11111rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #000;
+}
+
+.filter-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55556rem;
+    min-width: 120px;
+    margin-top: 0.27778rem;
+}
+
+.clear-filters-btn {
+    font-size: 1rem;
+    padding: 0.33333rem 0.66667rem;
+    white-space: nowrap;
+}
+
+.filter-count {
+    font-family: Arial, sans-serif;
+    font-size: 0.88889rem;
+    color: #666;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Active Filters Display
+
+Shows currently applied filters as removable tags below the filter controls.
+*/
+.active-filters {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55556rem;
+}
+
+.active-filters-label {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    color: #000;
+    font-weight: 400;
+    margin-right: 0.55556rem;
+}
+
+.active-filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.33333rem;
+}
+
+.active-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 0.88889rem;
+    padding: 0.22222rem 0.44444rem;
+    gap: 0.33333rem;
+    border: none;
+    cursor: pointer;
+    /* Background and color set dynamically via JavaScript */
+}
+
+.active-filter-tag:hover {
+    opacity: 0.8;
+}
+
+.active-filter-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.11111rem;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+    /* Color inherited from parent tag for good contrast */
+}
+
+.active-filter-remove:hover {
+    opacity: 0.7;
+}
+
+/* Filter Loading State */
+.stories-list.filtering {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.filter-loading {
+    display: none;
+    font-family: Arial, sans-serif;
+    font-size: 0.88889rem;
+    color: #666;
+    text-align: center;
+    padding: 1.11111rem;
+}
+
+.filter-loading.visible {
+    display: block;
+}
+
+/* No Results Message */
+.no-results {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 20rem;
+    padding: 2.22222rem;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    text-align: center;
+}
+
+.no-results-content h3 {
+    font-family: Arial, sans-serif;
+    font-size: 1.66667rem;
+    font-weight: 400;
+    margin-bottom: 1.11111rem;
+    color: #000;
+}
+
+.no-results-content p {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 0.55556rem;
+    color: #666;
+    max-width: 28rem;
+}
+
+.no-results-content .clear-link {
+    background: none;
+    border: none;
+    color: #000;
+    text-decoration: underline;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.no-results-content .clear-link:hover {
+    text-decoration: none;
+}
+
+/* Stories Container Spacing */
+.archive .stories-list {
+    margin-top: 2.22222rem;
+    padding: 0 2.22222rem;
+}
+
+/* Responsive Filter Layout */
+@media (max-width: 768px) {
+    .archive-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0 1.11111rem;
+    }
+    
+    .archive-filters-container {
+        padding: 1rem 1.11111rem;
+    }
+    
+    .archive .stories-list {
+        padding: 0 1.11111rem;
+    }
+    
+    .archive-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-dropdown {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .filter-dropdown-content {
+        max-height: 300px;
+    }
+    
+    .filter-tag-option {
+        font-size: 1.11111rem;
+        padding: 0.33333rem 0.55556rem;
+    }
+    
+    .filter-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.55556rem;
+        width: 100%;
+    }
+    
+    .active-filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .active-filters-label {
+        margin-right: 0;
+        margin-bottom: 0.33333rem;
+    }
+    
+    .no-results {
+        min-height: 15rem;
+        padding: 1.11111rem;
+    }
+    
+    .no-results-content h3 {
+        font-size: 1.33333rem;
+    }
 }
 
 /* Tag List Container
@@ -264,7 +611,6 @@ Like this:
 <a href="#" class="tag" style="background: #000;">Tag</a>
 */
 .tag:hover {
-
     background: #000 !important;
 }
 
@@ -332,7 +678,7 @@ A responsive 3-column layout for stories.
 
 Stories hidden by default until JavaScript randomizes them.
 */
-.stories-list.homepage {
+.stories-list.homepage, .stories-list.wander {
     visibility: hidden;
 }
 
@@ -340,7 +686,7 @@ Stories hidden by default until JavaScript randomizes them.
 
 Stories after JavaScript randomization completes.
 */
-.stories-list.homepage.visible {
+.stories-list.homepage.visible, .stories-list.wander.visible {
     visibility: visible;
 }
 
@@ -835,4 +1181,180 @@ A button with a dashed border for navigation and actions.
 
 .story-popup-text-tags {
     text-align: right;
+}
+
+/* Archive Header with Count and Clear Filters */
+.archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 2.22222rem;
+    padding-top: 40px;
+}
+
+.archive-header-title {
+    color: #000;
+    font-family: "Times New Roman", serif;
+    font-size: 2.88889rem;
+    font-weight: 400;
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.05778rem;
+}
+
+.clear-filters-button-top {
+    background: #FFFBF9;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    /* Hidden by default, shown when filters are active */
+    display: none;
+    align-items: center;
+    gap: 0.27778rem;
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    text-decoration: underline;
+    padding: 0.27778rem 0.55556rem;
+    letter-spacing: -0.01222rem;
+}
+
+.clear-filters-button-top.visible {
+    display: flex;
+}
+
+.clear-filters-button-top:hover {
+    opacity: 0.7;
+}
+
+.clear-filters-icon {
+    font-size: 1.33333rem;
+    font-weight: bold;
+}
+
+/* Sticky Filter Container */
+.archive-filters-container {
+    position: sticky;
+    top: 5.88889rem;
+    z-index: 100;
+    padding: 1.66667rem 2.22222rem;
+    padding-top: 0;
+}
+
+/* Archive Filters */
+.archive-filters {
+    display: flex;
+    gap: 2.22222rem; /* 40px from Figma spacing */
+    align-items: center;
+    margin: 0 0 1.11111rem 0;
+    flex-wrap: wrap;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.clear-filters-button {
+    align-items: center;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    color: var(--Black, #000);
+    display: flex;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    line-height: 140%;
+    padding: 0.27778rem 0.55556rem;
+    text-decoration: none;
+    width: max-content;
+    cursor: pointer;
+}
+
+.clear-filters-button:hover {
+    border: 2px solid #000;
+    background: none;
+    padding: 0.27778rem 0.55556rem;
+}
+
+.filter-count {
+    font-family: Arial;
+    font-size: 1rem;
+    color: #666;
+}
+
+.filter-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-dropdown-button {
+    align-items: center;
+    background: #FFFBF9;
+    border: 2px dashed #000;
+    color: var(--Black, #000);
+    display: flex;
+    font-family: Arial;
+    font-size: 1.22222rem;
+    font-style: normal;
+    font-weight: 400;
+    gap: 0.55556rem;
+    justify-content: center;
+    letter-spacing: -0.01222rem;
+    line-height: 140%;
+    padding: 0.27778rem 0.55556rem;
+    text-decoration: none;
+    width: max-content;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.filter-dropdown-button:hover {
+    border: 2px solid #000;
+    background: none;
+}
+
+.filter-dropdown.open .filter-dropdown-button {
+    border: 2px solid #000;
+}
+
+.filter-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #FFFBF9;
+    border: 2px solid #000;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+}
+
+.filter-dropdown.open .filter-dropdown-content {
+    display: block;
+}
+
+.filter-tag-option {
+    display: flex;
+    align-items: center;
+    padding: 0.55556rem;
+    cursor: pointer;
+    font-family: Arial;
+    font-size: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-tag-option:hover {
+    background-color: #f5f5f5;
+}
+
+.filter-tag-option.selected {
+    background-color: #e6f3ff;
 }

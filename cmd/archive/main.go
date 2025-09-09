@@ -38,6 +38,18 @@ func regenerate(skipImages bool) error {
 		return fmt.Errorf("failed to write homepage: %v", err)
 	}
 
+	if err := generate.WriteWanderPage(); err != nil {
+		return fmt.Errorf("failed to write wander page: %v", err)
+	}
+
+	if err := generate.WriteArchivePage(); err != nil {
+		return fmt.Errorf("failed to write archive page: %v", err)
+	}
+
+	if err := generate.WriteFilterData(); err != nil {
+		return fmt.Errorf("failed to write filter data: %v", err)
+	}
+
 	if err := generate.WriteTypesIndexes(); err != nil {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}
@@ -58,6 +70,10 @@ func regenerate(skipImages bool) error {
 		return fmt.Errorf("failed to copy CSS: %v", err)
 	}
 
+	if err := generate.CopyJSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy JavaScript: %v", err)
+	}
+
 	log.Println("Build process completed successfully")
 
 	return nil
@@ -74,6 +90,18 @@ func hotRegenerate() error {
 		return fmt.Errorf("failed to write homepage: %v", err)
 	}
 
+	if err := generate.WriteWanderPage(); err != nil {
+		return fmt.Errorf("failed to write wander page: %v", err)
+	}
+
+	if err := generate.WriteArchivePage(); err != nil {
+		return fmt.Errorf("failed to write archive page: %v", err)
+	}
+
+	if err := generate.WriteFilterData(); err != nil {
+		return fmt.Errorf("failed to write filter data: %v", err)
+	}
+
 	if err := generate.WriteTypesIndexes(); err != nil {
 		return fmt.Errorf("failed to write types indexes: %v", err)
 	}
@@ -88,6 +116,10 @@ func hotRegenerate() error {
 
 	if err := generate.CopyCSSToOutput(); err != nil {
 		return fmt.Errorf("failed to copy CSS: %v", err)
+	}
+
+	if err := generate.CopyJSToOutput(); err != nil {
+		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
 	log.Println("Partial build process completed successfully")
