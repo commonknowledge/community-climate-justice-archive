@@ -23,6 +23,9 @@
         // Global timeout tracking to prevent race conditions
         let globalHideTimeout = null;
 
+        // Helper to coerce dataset boolean values
+        const isOpen = (popup) => popup.dataset.storyOpen === 'true';
+
         function closeAllPopups() {
             // Clear any pending hide timeout
             if (globalHideTimeout) {
@@ -61,7 +64,7 @@
         function hidePopup(storyId) {
             const storyPopup = popupCache.get(storyId);
             
-            if (storyPopup && storyPopup.dataset.storyOpen === 'true') {
+            if (storyPopup && isOpen(storyPopup)) {
                 storyPopup.style.display = 'none';
                 storyPopup.dataset.storyOpen = false;
             }
