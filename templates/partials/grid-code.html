@@ -1,42 +1,133 @@
 {{define "grid-code"}}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const HOVER_SHOW_DELAY = 150;
+        const HOVER_HIDE_DELAY = 100;
+
         const storyImageContainers = document.querySelectorAll('.story-image-container');
+        const storyPopups = document.querySelectorAll('.story-popup');
 
         if (storyImageContainers.length === 0) {
             console.log('Could not find story containers');
         }
 
+        // Cache popup references for better performance
+        const popupCache = new Map();
+        storyPopups.forEach(popup => {
+            const storyId = popup.dataset.storyPopupId;
+            if (storyId) {
+                popupCache.set(storyId, popup);
+            }
+        });
+
+        // Global timeout tracking to prevent race conditions
+        let globalHideTimeout = null;
+
+        function closeAllPopups() {
+            // Clear any pending hide timeout
+            if (globalHideTimeout) {
+                clearTimeout(globalHideTimeout);
+                globalHideTimeout = null;
+            }
+
+            const openStoryPopups = document.querySelectorAll('.story-popup[data-story-open="true"]');
+            openStoryPopups.forEach(popup => {
+                popup.style.display = 'none';
+                popup.dataset.storyOpen = false;
+            });
+        }
+
+        function showPopup(container) {
+            const storyId = container.dataset.storyId;
+            console.log(`Opening popup for story ${storyId}`);
+
+            const storyPopup = popupCache.get(storyId);
+
+            if (!storyPopup) {
+                console.log(`Could not find story popup for story ${storyId}`);
+                return;
+            }
+
+            // Lazy-load the popup image
+            const img = storyPopup.querySelector('.popup-img');
+            if (img && !img.src) {
+                img.src = img.dataset.src;
+            }
+
+            storyPopup.style.display = 'block';
+            storyPopup.dataset.storyOpen = true;
+        }
+
+        function hidePopup(storyId) {
+            const storyPopup = popupCache.get(storyId);
+            
+            if (storyPopup && storyPopup.dataset.storyOpen === 'true') {
+                storyPopup.style.display = 'none';
+                storyPopup.dataset.storyOpen = false;
+            }
+        }
+
         storyImageContainers.forEach(container => {
-            container.addEventListener('click', event => {
-                event.preventDefault();
+            let hoverTimeout = null;
 
-                // Close any open popups
-                const openStoryPopups = document.querySelectorAll('.story-popup[data-story-open="true"]');
-
-                if (openStoryPopups.length > 0) {
-                    console.log('Closing all open story popups');
-                    openStoryPopups.forEach(popup => {
-                        popup.style.display = 'none';
-                        popup.dataset.storyOpen = false;
-                    });
+            // Show popup on hover
+            container.addEventListener('mouseenter', () => {
+                // Clear any existing timeouts
+                if (hoverTimeout) {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = null;
                 }
-
-                console.log(`Opening popup for story ${container.dataset.storyId}`);
-                const storyPopup = document.querySelector(`[data-story-popup-id="${container.dataset.storyId}"]`)
-
-                if (!storyPopup) {
-                    console.log(`Could not find story popup for story ${container.dataset.storyId}`);
+                if (globalHideTimeout) {
+                    clearTimeout(globalHideTimeout);
+                    globalHideTimeout = null;
                 }
+                
+                // Close other popups first
+                closeAllPopups();
+                
+                // Show popup after delay
+                hoverTimeout = setTimeout(() => {
+                    showPopup(container);
+                    hoverTimeout = null;
+                }, HOVER_SHOW_DELAY);
+            });
 
-                // Lazy-load the popup image
-                const img = storyPopup.querySelector('.popup-img');
-                if (img && !img.src) {
-                    img.src = img.dataset.src;
+            // Hide popup on hover leave
+            container.addEventListener('mouseleave', () => {
+                // Clear the show timeout if still pending
+                if (hoverTimeout) {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = null;
                 }
+                
+                // Schedule hide after delay
+                const storyId = container.dataset.storyId;
+                globalHideTimeout = setTimeout(() => {
+                    hidePopup(storyId);
+                    globalHideTimeout = null;
+                }, HOVER_HIDE_DELAY);
+            });
+        });
 
-                storyPopup.style.display = 'block';
-                storyPopup.dataset.storyOpen = true;
+        // Handle popup hover to keep it open when hovering over the popup itself
+        storyPopups.forEach(popup => {
+            // Keep popup open when hovering over it
+            popup.addEventListener('mouseenter', () => {
+                // Cancel any pending hide timeout
+                if (globalHideTimeout) {
+                    clearTimeout(globalHideTimeout);
+                    globalHideTimeout = null;
+                }
+                popup.dataset.storyOpen = true;
+            });
+
+            // Hide popup when leaving it
+            popup.addEventListener('mouseleave', () => {
+                globalHideTimeout = setTimeout(() => {
+                    popup.style.display = 'none';
+                    popup.dataset.storyOpen = false;
+                    globalHideTimeout = null;
+                }, HOVER_HIDE_DELAY);
             });
         });
     });
