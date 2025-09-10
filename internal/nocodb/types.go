@@ -12,40 +12,40 @@ import (
 
 // NocoDBStoryDTO represents a story record from NocoDB API
 type NocoDBStoryDTO struct {
-	ID                      interface{} `json:"ID"`
-	CreatedTime             interface{} `json:"CreatedTime"`
-	Finding                 interface{} `json:"Finding"`
-	HighStExperiment        interface{} `json:"High St Experiment"`
+	ID                      interface{} `json:"Id"`
+	CreatedTime             interface{} `json:"CreatedAt"`
+	Finding                 interface{} `json:"Title"`
+	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
 	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
-	StartDateTime           interface{} `json:"Start date and time"`
-	EndDateTime             interface{} `json:"End date and time"`
+	StartDateTime           interface{} `json:"Dated created / experienced"`
+	EndDateTime             interface{} `json:"Date added to the archive"`
 	Season                  interface{} `json:"Season"`
 	Weather                 interface{} `json:"Weather"`
-	StreetDetectoristClue   interface{} `json:"Street Detectorist Clue"`
+	StreetDetectoristClue   interface{} `json:"If you would like to fill out a Street Detectorist map, you can download it here:"`
 	Themes                  interface{} `json:"Themes"`
-	Experience              interface{} `json:"Experience"`
-	TimeSpan                interface{} `json:"Time span"`
+	Experience              interface{} `json:"Description"`
+	TimeSpan                interface{} `json:"Scale of permanence"`
 	InspiredBy              interface{} `json:"Inspired by"`
 	HasInspired             interface{} `json:"Has inspired"`
-	OtherComments           interface{} `json:"Other comments / sources"`
+	OtherComments           interface{} `json:"Description"`
 	Type                    interface{} `json:"Type"`
-	PersonFinder            interface{} `json:"Person / Finder / Imaginer / Street Detectorist"`
+	PersonFinder            interface{} `json:"Gifted or co-created by…"`
 	MapCache                interface{} `json:"Map Cache"`
 	MapSize                 interface{} `json:"Map Size"`
-	Created                 interface{} `json:"Created"`
+	Created                 interface{} `json:"CreatedAt"`
 	StreetDetectoristMapURL interface{} `json:"StreetDetectoristMapURL"`
-	OtherTheme              interface{} `json:"OtherTheme"`
-	OtherWeather            interface{} `json:"OtherWeather"`
-	ShareStatus             interface{} `json:"ShareStatus"`
-	PostDate                interface{} `json:"PostDate"`
-	TwitterText             interface{} `json:"TwitterText"`
+	OtherTheme              interface{} `json:"Other theme"`
+	OtherWeather            interface{} `json:"Other weather"`
+	ShareStatus             interface{} `json:"Share Status"`
+	PostDate                interface{} `json:"Post date"`
+	TwitterText             interface{} `json:"Twitter text"`
 	CharacterCount          interface{} `json:"CharacterCount"`
-	InstaText               interface{} `json:"InstaText"`
+	InstaText               interface{} `json:"Insta text"`
 	InstaCount              interface{} `json:"InstaCount"`
-	InstaImage              interface{} `json:"InstaImage"`
+	InstaImage              interface{} `json:"Insta image"`
 }
 
 // ToStory converts a NocoDB record map to a Story struct
