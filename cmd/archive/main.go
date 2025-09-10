@@ -213,6 +213,12 @@ func main() {
 
 	// Load configuration from environment variables and .env file
 	config.LoadConfig()
+
+	// Initialize the data adapter based on configuration
+	if err := store.InitializeAdapter(); err != nil {
+		log.Fatalf("Failed to initialize data adapter: %v", err)
+	}
+
 	if *skipImages {
 		log.Println("Skipping image processing and generation")
 	}
