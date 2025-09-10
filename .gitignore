@@ -40,3 +40,6 @@ out/
 out-*/
 *.db-journal
 .env
+
+# WebP encoding failure log
+webp_failures.log
