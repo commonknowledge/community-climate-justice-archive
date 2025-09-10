@@ -211,6 +211,8 @@ func main() {
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
 	flag.Parse()
 
+	// Load configuration from environment variables and .env file
+	config.LoadConfig()
 	if *skipImages {
 		log.Println("Skipping image processing and generation")
 	}
