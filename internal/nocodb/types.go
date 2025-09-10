@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"community-climate-justice-archive/data"
@@ -312,7 +313,7 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 	return weather, nil
 }
 
-// ParseImagesFromNocoDB parses images from NocoDB field (complex JSON objects)
+// ParseImagesFromNocoDB parses images from NocoDB field and converts to expected JSON format
 func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 	if imageField == nil {
 		return "", nil
@@ -320,35 +321,141 @@ func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 
 	switch v := imageField.(type) {
 	case string:
-		// Already a string, return as-is
-		return v, nil
+		// If it's already a JSON string (from SQLite), return as-is
+		if strings.TrimSpace(v) == "" {
+			return "", nil
+		}
+		if strings.HasPrefix(strings.TrimSpace(v), "[") {
+			return v, nil
+		}
+		// Single filename string - convert to expected JSON format
+		return convertSingleFilenameToJSON(v), nil
 	case []interface{}:
 		// NocoDB returns images as array of objects with metadata
-		// For now, we'll extract the first image's path or signedPath
-		if len(v) > 0 {
-			if imageObj, ok := v[0].(map[string]interface{}); ok {
-				// Try to get the path or signedPath
+		// Convert to the JSON format expected by GetStoryImages()
+		var storyImages []map[string]interface{}
+
+		for _, item := range v {
+			if imageObj, ok := item.(map[string]interface{}); ok {
+				// Extract filename from path, signedPath, or title
+				var filename string
 				if path, exists := imageObj["path"]; exists {
-					return toString(path), nil
+					filename = extractFilenameFromPath(toString(path))
+				} else if signedPath, exists := imageObj["signedPath"]; exists {
+					filename = extractFilenameFromPath(toString(signedPath))
+				} else if title, exists := imageObj["title"]; exists {
+					filename = toString(title)
 				}
-				if signedPath, exists := imageObj["signedPath"]; exists {
-					return toString(signedPath), nil
-				}
-				if title, exists := imageObj["title"]; exists {
-					return toString(title), nil
+
+				if filename != "" {
+					// Clean NocoDB suffixes from the filename
+					cleanFilename := cleanNocoDBFilename(filename)
+
+					// Create StoryImage-compatible object
+					storyImage := map[string]interface{}{
+						"filename": cleanFilename,
+						"url":      "",           // Will be set by GetStoryImages()
+						"type":     "image/jpeg", // Default, will be corrected later
+						"size":     0,
+						"width":    0,
+						"height":   0,
+					}
+					storyImages = append(storyImages, storyImage)
 				}
 			}
 		}
-		// If we can't extract individual image, return JSON representation
-		jsonBytes, err := json.Marshal(v)
-		if err != nil {
+
+		if len(storyImages) > 0 {
+			jsonBytes, err := json.Marshal(storyImages)
+			if err != nil {
+				return "", err
+			}
+			return string(jsonBytes), nil
+		}
+		return "", nil
+	default:
+		// Try to convert to string and handle
+		str := toString(v)
+		if str == "" {
 			return "", nil
 		}
-		return string(jsonBytes), nil
-	default:
-		// Try to convert to string
-		return toString(v), nil
+		return convertSingleFilenameToJSON(str), nil
 	}
+}
+
+// Helper function to convert a single filename to the expected JSON format
+func convertSingleFilenameToJSON(filename string) string {
+	if filename == "" {
+		return ""
+	}
+
+	// Clean NocoDB suffixes from the filename
+	cleanFilename := cleanNocoDBFilename(filename)
+
+	storyImage := map[string]interface{}{
+		"filename": cleanFilename,
+		"url":      "",           // Will be set by GetStoryImages()
+		"type":     "image/jpeg", // Default, will be corrected later
+		"size":     0,
+		"width":    0,
+		"height":   0,
+	}
+
+	jsonBytes, _ := json.Marshal([]map[string]interface{}{storyImage})
+	return string(jsonBytes)
+}
+
+// Helper function to extract filename from a file path
+func extractFilenameFromPath(path string) string {
+	if path == "" {
+		return ""
+	}
+
+	// Extract filename from path like "download/2025/06/02/abc123/filename.jpg"
+	parts := strings.Split(path, "/")
+	filename := path
+	if len(parts) > 0 {
+		filename = parts[len(parts)-1]
+	}
+
+	// NocoDB adds suffixes like "_N5ojs" to filenames, we need to remove them
+	// Pattern: "filename_XXXXX.ext" -> "filename.ext"
+	return cleanNocoDBFilename(filename)
+}
+
+// Helper function to clean NocoDB-generated filename suffixes
+func cleanNocoDBFilename(filename string) string {
+	if filename == "" {
+		return ""
+	}
+
+	// Get file extension
+	ext := filepath.Ext(filename)
+	nameWithoutExt := strings.TrimSuffix(filename, ext)
+
+	// Look for pattern like "_N5ojs" at the end (underscore + 5 alphanumeric chars)
+	// This matches NocoDB's pattern for duplicate file handling
+	lastUnderscore := strings.LastIndex(nameWithoutExt, "_")
+	if lastUnderscore != -1 {
+		suffix := nameWithoutExt[lastUnderscore+1:]
+		// Check if suffix looks like NocoDB's pattern (5-6 alphanumeric chars)
+		if len(suffix) >= 4 && len(suffix) <= 6 && isAlphanumeric(suffix) {
+			// Remove the NocoDB suffix
+			nameWithoutExt = nameWithoutExt[:lastUnderscore]
+		}
+	}
+
+	return nameWithoutExt + ext
+}
+
+// Helper function to check if a string contains only alphanumeric characters
+func isAlphanumeric(s string) bool {
+	for _, r := range s {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')) {
+			return false
+		}
+	}
+	return true
 }
 
 // toString safely converts an interface{} to string
