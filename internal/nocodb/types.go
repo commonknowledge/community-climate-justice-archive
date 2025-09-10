@@ -15,24 +15,26 @@ type NocoDBStoryDTO struct {
 	ID                      interface{} `json:"ID"`
 	CreatedTime             interface{} `json:"CreatedTime"`
 	Finding                 interface{} `json:"Finding"`
-	HighStExperiment        interface{} `json:"HighStExperiment"`
-	WhatWasIsIf             interface{} `json:"WhatWasIsIf"`
+	HighStExperiment        interface{} `json:"High St Experiment"`
+	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
-	SourceImage             interface{} `json:"SourceImage"`
+	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
-	StartDateTime           interface{} `json:"StartDateTime"`
-	EndDateTime             interface{} `json:"EndDateTime"`
+	StartDateTime           interface{} `json:"Start date and time"`
+	EndDateTime             interface{} `json:"End date and time"`
 	Season                  interface{} `json:"Season"`
 	Weather                 interface{} `json:"Weather"`
-	StreetDetectoristClue   interface{} `json:"StreetDetectoristClue"`
+	StreetDetectoristClue   interface{} `json:"Street Detectorist Clue"`
 	Themes                  interface{} `json:"Themes"`
 	Experience              interface{} `json:"Experience"`
-	TimeSpan                interface{} `json:"TimeSpan"`
-	OtherComments           interface{} `json:"OtherComments"`
+	TimeSpan                interface{} `json:"Time span"`
+	InspiredBy              interface{} `json:"Inspired by"`
+	HasInspired             interface{} `json:"Has inspired"`
+	OtherComments           interface{} `json:"Other comments / sources"`
 	Type                    interface{} `json:"Type"`
-	PersonFinder            interface{} `json:"PersonFinder"`
-	MapCache                interface{} `json:"MapCache"`
-	MapSize                 interface{} `json:"MapSize"`
+	PersonFinder            interface{} `json:"Person / Finder / Imaginer / Street Detectorist"`
+	MapCache                interface{} `json:"Map Cache"`
+	MapSize                 interface{} `json:"Map Size"`
 	Created                 interface{} `json:"Created"`
 	StreetDetectoristMapURL interface{} `json:"StreetDetectoristMapURL"`
 	OtherTheme              interface{} `json:"OtherTheme"`
@@ -91,6 +93,8 @@ func NocoDBRecordToStory(record map[string]interface{}) (data.Story, error) {
 		Themes:                  themes,
 		Experience:              toString(dto.Experience),
 		TimeSpan:                toString(dto.TimeSpan),
+		InspiredBy:              toString(dto.InspiredBy),
+		HasInspired:             toString(dto.HasInspired),
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
