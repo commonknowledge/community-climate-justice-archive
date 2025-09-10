@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/util"
@@ -83,8 +84,8 @@ func NocoDBRecordToStory(record map[string]interface{}) (data.Story, error) {
 		Finding:                 toString(dto.Finding),
 		HighStExperiment:        toString(dto.HighStExperiment),
 		WhatWasIsIf:             toString(dto.WhatWasIsIf),
-		Image:                   toString(dto.Image),
-		SourceImage:             toString(dto.SourceImage),
+		Image:                   func() string { img, _ := ParseImagesFromNocoDB(dto.Image); return img }(),
+		SourceImage:             func() string { img, _ := ParseImagesFromNocoDB(dto.SourceImage); return img }(),
 		Location:                toString(dto.Location),
 		StartDateTime:           toString(dto.StartDateTime),
 		EndDateTime:             toString(dto.EndDateTime),
@@ -149,10 +150,15 @@ func ParseThemesFromNocoDB(themesField interface{}) ([]data.Theme, error) {
 		if v == "" {
 			return []data.Theme{}, nil
 		}
-		// Try to parse as JSON array
+		// NocoDB returns themes as comma-separated string: "Tiny Things,Care,Control"
+		// First try to parse as JSON array (for backwards compatibility)
 		if err := json.Unmarshal([]byte(v), &themeStrings); err != nil {
-			// If not JSON, treat as single theme
-			themeStrings = []string{v}
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			themeStrings = strings.Split(v, ",")
+			// Trim whitespace from each theme
+			for i, theme := range themeStrings {
+				themeStrings[i] = strings.TrimSpace(theme)
+			}
 		}
 	case []interface{}:
 		// Convert interface slice to string slice
@@ -168,7 +174,11 @@ func ParseThemesFromNocoDB(themesField interface{}) ([]data.Theme, error) {
 		str := toString(v)
 		if str != "" {
 			if err := json.Unmarshal([]byte(str), &themeStrings); err != nil {
-				themeStrings = []string{str}
+				// If not JSON, treat as comma-separated string
+				themeStrings = strings.Split(str, ",")
+				for i, theme := range themeStrings {
+					themeStrings[i] = strings.TrimSpace(theme)
+				}
 			}
 		}
 	}
@@ -201,8 +211,13 @@ func ParseTypesFromNocoDB(typesField interface{}) ([]data.Type, error) {
 		if v == "" {
 			return []data.Type{}, nil
 		}
+		// NocoDB returns types as comma-separated string
 		if err := json.Unmarshal([]byte(v), &typeStrings); err != nil {
-			typeStrings = []string{v}
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			typeStrings = strings.Split(v, ",")
+			for i, typeStr := range typeStrings {
+				typeStrings[i] = strings.TrimSpace(typeStr)
+			}
 		}
 	case []interface{}:
 		for _, item := range v {
@@ -216,7 +231,11 @@ func ParseTypesFromNocoDB(typesField interface{}) ([]data.Type, error) {
 		str := toString(v)
 		if str != "" {
 			if err := json.Unmarshal([]byte(str), &typeStrings); err != nil {
-				typeStrings = []string{str}
+				// If not JSON, treat as comma-separated string
+				typeStrings = strings.Split(str, ",")
+				for i, typeStr := range typeStrings {
+					typeStrings[i] = strings.TrimSpace(typeStr)
+				}
 			}
 		}
 	}
@@ -249,8 +268,13 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 		if v == "" {
 			return []data.Weather{}, nil
 		}
+		// NocoDB returns weather as comma-separated string
 		if err := json.Unmarshal([]byte(v), &weatherStrings); err != nil {
-			weatherStrings = []string{v}
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			weatherStrings = strings.Split(v, ",")
+			for i, weatherStr := range weatherStrings {
+				weatherStrings[i] = strings.TrimSpace(weatherStr)
+			}
 		}
 	case []interface{}:
 		for _, item := range v {
@@ -264,7 +288,11 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 		str := toString(v)
 		if str != "" {
 			if err := json.Unmarshal([]byte(str), &weatherStrings); err != nil {
-				weatherStrings = []string{str}
+				// If not JSON, treat as comma-separated string
+				weatherStrings = strings.Split(str, ",")
+				for i, weatherStr := range weatherStrings {
+					weatherStrings[i] = strings.TrimSpace(weatherStr)
+				}
 			}
 		}
 	}
@@ -282,6 +310,45 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 	}
 
 	return weather, nil
+}
+
+// ParseImagesFromNocoDB parses images from NocoDB field (complex JSON objects)
+func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
+	if imageField == nil {
+		return "", nil
+	}
+
+	switch v := imageField.(type) {
+	case string:
+		// Already a string, return as-is
+		return v, nil
+	case []interface{}:
+		// NocoDB returns images as array of objects with metadata
+		// For now, we'll extract the first image's path or signedPath
+		if len(v) > 0 {
+			if imageObj, ok := v[0].(map[string]interface{}); ok {
+				// Try to get the path or signedPath
+				if path, exists := imageObj["path"]; exists {
+					return toString(path), nil
+				}
+				if signedPath, exists := imageObj["signedPath"]; exists {
+					return toString(signedPath), nil
+				}
+				if title, exists := imageObj["title"]; exists {
+					return toString(title), nil
+				}
+			}
+		}
+		// If we can't extract individual image, return JSON representation
+		jsonBytes, err := json.Marshal(v)
+		if err != nil {
+			return "", nil
+		}
+		return string(jsonBytes), nil
+	default:
+		// Try to convert to string
+		return toString(v), nil
+	}
 }
 
 // toString safely converts an interface{} to string
