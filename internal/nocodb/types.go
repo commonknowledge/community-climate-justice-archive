@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"community-climate-justice-archive/data"
+	"community-climate-justice-archive/internal/config"
 	"community-climate-justice-archive/internal/util"
 )
 
@@ -314,6 +316,7 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 }
 
 // ParseImagesFromNocoDB parses images from NocoDB field and converts to expected JSON format
+// Downloads missing images from NocoDB if they don't exist locally
 func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 	if imageField == nil {
 		return "", nil
@@ -337,23 +340,34 @@ func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 
 		for _, item := range v {
 			if imageObj, ok := item.(map[string]interface{}); ok {
-				// Extract filename from path, signedPath, or title
+				// Extract filename and download path from NocoDB object
 				var filename string
-				if path, exists := imageObj["path"]; exists {
-					filename = extractFilenameFromPath(toString(path))
-				} else if signedPath, exists := imageObj["signedPath"]; exists {
-					filename = extractFilenameFromPath(toString(signedPath))
-				} else if title, exists := imageObj["title"]; exists {
+				var downloadPath string
+
+				if title, exists := imageObj["title"]; exists {
 					filename = toString(title)
+				}
+				if path, exists := imageObj["path"]; exists {
+					downloadPath = toString(path)
 				}
 
 				if filename != "" {
-					// Clean NocoDB suffixes from the filename
-					cleanFilename := cleanNocoDBFilename(filename)
+					// Use original filename since we're downloading images now
+					// No need to clean NocoDB suffixes anymore
+					
+					// Check if we need to download the image
+					localImagePath := filepath.Join("images", filename)
+					if config.AppConfig.UseNocoDB && downloadPath != "" && !fileExists(localImagePath) {
+						err := downloadImageFromNocoDB(downloadPath, localImagePath)
+						if err != nil {
+							log.Printf("Warning: failed to download image %s: %v", filename, err)
+							// Continue anyway, image might be available elsewhere
+						}
+					}
 
 					// Create StoryImage-compatible object
 					storyImage := map[string]interface{}{
-						"filename": cleanFilename,
+						"filename": filename,
 						"url":      "",           // Will be set by GetStoryImages()
 						"type":     "image/jpeg", // Default, will be corrected later
 						"size":     0,
@@ -389,11 +403,11 @@ func convertSingleFilenameToJSON(filename string) string {
 		return ""
 	}
 
-	// Clean NocoDB suffixes from the filename
-	cleanFilename := cleanNocoDBFilename(filename)
+	// Use original filename since we're downloading images now
+	// No need to clean NocoDB suffixes anymore
 
 	storyImage := map[string]interface{}{
-		"filename": cleanFilename,
+		"filename": filename,
 		"url":      "",           // Will be set by GetStoryImages()
 		"type":     "image/jpeg", // Default, will be corrected later
 		"size":     0,
@@ -418,44 +432,11 @@ func extractFilenameFromPath(path string) string {
 		filename = parts[len(parts)-1]
 	}
 
-	// NocoDB adds suffixes like "_N5ojs" to filenames, we need to remove them
-	return cleanNocoDBFilename(filename)
+	// Return original filename since we're downloading images now
+	// No need to clean NocoDB suffixes anymore
+	return filename
 }
 
-// Helper function to clean NocoDB-generated filename suffixes
-func cleanNocoDBFilename(filename string) string {
-	if filename == "" {
-		return ""
-	}
-
-	// Get file extension
-	ext := filepath.Ext(filename)
-	nameWithoutExt := strings.TrimSuffix(filename, ext)
-
-	// Look for pattern like "_N5ojs" at the end (underscore + 4-6 alphanumeric chars)
-	// This matches NocoDB's pattern for duplicate file handling
-	lastUnderscore := strings.LastIndex(nameWithoutExt, "_")
-	if lastUnderscore != -1 {
-		suffix := nameWithoutExt[lastUnderscore+1:]
-		// Check if suffix looks like NocoDB's pattern (4-6 alphanumeric chars)
-		if len(suffix) >= 4 && len(suffix) <= 6 && isAlphanumeric(suffix) {
-			// Remove the NocoDB suffix
-			nameWithoutExt = nameWithoutExt[:lastUnderscore]
-		}
-	}
-
-	return nameWithoutExt + ext
-}
-
-// Helper function to check if a string contains only alphanumeric characters
-func isAlphanumeric(s string) bool {
-	for _, r := range s {
-		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')) {
-			return false
-		}
-	}
-	return true
-}
 
 // toString safely converts an interface{} to string
 func toString(v interface{}) string {
@@ -471,6 +452,8 @@ func toString(v interface{}) string {
 			return ""
 		}
 		return *val
+	case fmt.Stringer:
+		return val.String()
 	default:
 		return fmt.Sprintf("%v", val)
 	}
@@ -483,4 +466,22 @@ func createStoryURLFromFinding(finding string) string {
 	}
 	slug := util.Slugify(finding)
 	return fmt.Sprintf("/stories/%s.html", slug)
+}
+
+// Helper function to check if a file exists
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
+}
+
+// downloadImageFromNocoDB downloads an image from NocoDB to the local images directory
+func downloadImageFromNocoDB(downloadPath, localPath string) error {
+	// We need access to a NocoDB client to download
+	// For now, create a temporary client - in a real implementation you might pass this as a parameter
+	client, err := NewClient()
+	if err != nil {
+		return fmt.Errorf("failed to create NocoDB client: %w", err)
+	}
+
+	return client.DownloadAttachment(downloadPath, localPath)
 }

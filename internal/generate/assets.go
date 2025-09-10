@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"image/jpeg"
 	"image/png"
@@ -23,6 +24,30 @@ var ImageSizes = map[string]int{
 	"thumb":  300,  // thumbnail size
 	"medium": 800,  // medium size
 	"large":  1200, // full size
+}
+
+// logWebPFailure logs WebP encoding failures to a file instead of crashing
+func logWebPFailure(imagePath string, err error) {
+	errorLog := "webp_failures.log"
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	errorMessage := fmt.Sprintf("[%s] Failed to encode WebP for %s: %v\n", timestamp, imagePath, err)
+	
+	// Append to log file
+	file, openErr := os.OpenFile(errorLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if openErr != nil {
+		log.Printf("Warning: Could not open WebP failure log file: %v", openErr)
+		log.Printf("Original WebP error for %s: %v", imagePath, err)
+		return
+	}
+	defer file.Close()
+	
+	if _, writeErr := file.WriteString(errorMessage); writeErr != nil {
+		log.Printf("Warning: Could not write to WebP failure log: %v", writeErr)
+		log.Printf("Original WebP error for %s: %v", imagePath, err)
+		return
+	}
+	
+	log.Printf("Warning: WebP encoding failed for %s (logged to %s): %v", imagePath, errorLog, err)
 }
 
 // CopyCSSToOutput copies the CSS file to the out/css directory.
@@ -124,7 +149,10 @@ func compressImage(srcPath string) error {
 			EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
 			UseSharpYuv:    true,
 		}); err != nil {
-			return fmt.Errorf("failed to encode WebP: %w", err)
+			logWebPFailure(outPath, err)
+			output.Close() // Close the file before removing it
+			os.Remove(outPath) // Clean up the incomplete file
+			continue // Skip this size variant but continue with others
 		}
 
 		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
@@ -152,7 +180,10 @@ func compressImage(srcPath string) error {
 		EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
 		UseSharpYuv:    true,
 	}); err != nil {
-		return fmt.Errorf("failed to encode main WebP: %w", err)
+		logWebPFailure(mainOutPath, err)
+		output.Close() // Close the file before removing it
+		os.Remove(mainOutPath) // Clean up the incomplete file
+		return nil // Continue processing other images instead of crashing
 	}
 
 	log.Printf("Created %s as main WebP version of %s", mainOutPath, srcPath)
@@ -195,7 +226,9 @@ func ProcessImages() error {
 		// Process the image
 		err := compressImage(filepath.Join("images", filename))
 		if err != nil {
-			return fmt.Errorf("failed to process image %s: %w", filename, err)
+			log.Printf("Warning: Failed to process image %s: %v", filename, err)
+			// Continue processing other images instead of stopping
+			continue
 		}
 	}
 

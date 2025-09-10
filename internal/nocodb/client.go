@@ -3,7 +3,11 @@ package nocodb
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
 
 	"community-climate-justice-archive/internal/config"
 
@@ -166,6 +170,57 @@ func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface
 	log.Printf("Server-side filtering found %d records for field %s containing %s",
 		len(allFilteredRecords), field, value)
 	return allFilteredRecords, nil
+}
+
+// DownloadAttachment downloads a file from NocoDB using the path from attachment data
+func (c *Client) DownloadAttachment(imagePath, outputPath string) error {
+	// Construct the full URL
+	downloadURL := config.AppConfig.NocoDBEndpoint + "/" + imagePath
+
+	log.Printf("Downloading image from NocoDB: %s -> %s", downloadURL, outputPath)
+
+	// Create HTTP request
+	req, err := http.NewRequest("GET", downloadURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Add authentication header
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+
+	// Make the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to download file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP error downloading %s: %d", downloadURL, resp.StatusCode)
+	}
+
+	// Create output directory if needed
+	outputDir := filepath.Dir(outputPath)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", outputDir, err)
+	}
+
+	// Create output file
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", outputPath, err)
+	}
+	defer file.Close()
+
+	// Copy the downloaded content
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to write file %s: %w", outputPath, err)
+	}
+
+	log.Printf("Successfully downloaded image: %s", outputPath)
+	return nil
 }
 
 // recordContainsValue checks if a record's field contains the specified value
