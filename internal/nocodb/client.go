@@ -105,22 +105,18 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	return allRecords, nil
 }
 
-// GetFilteredRecords retrieves records filtered by a field containing a value
-// This mimics the SQLite LIKE '%value%' functionality for JSON array fields
+// GetFilteredRecords retrieves records filtered by a field containing a value using client-side filtering
+// This uses the cached records from GetAllRecords() for fast filtering
 func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface{}, error) {
-	if c.table == nil {
-		return nil, fmt.Errorf("table not initialized")
-	}
+	log.Printf("Starting client-side filtering for field %s containing %s...", field, value)
 
-	log.Printf("Starting filtered retrieval for field %s containing %s...", field, value)
-
-	// Try client-side filtering first (faster for small datasets)
-	log.Printf("Trying client-side filtering first...")
+	// Get all records from cache
 	allRecords, err := c.GetAllRecords()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all records for client-side filtering: %w", err)
 	}
 
+	// Filter records client-side
 	var filteredRecords []map[string]interface{}
 	for _, record := range allRecords {
 		if recordContainsValue(record, field, value) {
@@ -130,46 +126,7 @@ func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface
 
 	log.Printf("Client-side filtering found %d records for field %s containing %s",
 		len(filteredRecords), field, value)
-
-	// If we found results with client-side filtering, return them
-	if len(filteredRecords) > 0 {
-		return filteredRecords, nil
-	}
-
-	// If no results from client-side, try server-side filtering as fallback
-	log.Printf("No results from client-side filtering, trying server-side filtering...")
-
-	var allFilteredRecords []map[string]interface{}
-	limit := 100
-	offset := 0
-
-	for {
-		response, err := c.table.ListRecords().
-			WhereIsLike(field, "%"+value+"%").
-			Limit(limit).
-			Offset(offset).
-			Execute()
-
-		if err != nil {
-			log.Printf("Server-side filtering also failed: %v", err)
-			// Return empty results if both methods fail
-			return []map[string]interface{}{}, nil
-		}
-
-		allFilteredRecords = append(allFilteredRecords, response.List...)
-		log.Printf("Retrieved %d server-filtered records in this batch (total so far: %d)",
-			len(response.List), len(allFilteredRecords))
-
-		if len(response.List) < limit {
-			log.Printf("Reached end of server-filtered records (batch had fewer than limit)")
-			break
-		}
-		offset += limit
-	}
-
-	log.Printf("Server-side filtering found %d records for field %s containing %s",
-		len(allFilteredRecords), field, value)
-	return allFilteredRecords, nil
+	return filteredRecords, nil
 }
 
 // DownloadAttachment downloads a file from NocoDB using the path from attachment data
