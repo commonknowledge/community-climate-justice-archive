@@ -4,8 +4,10 @@ package main
 import (
 	"bufio"
 
+	"community-climate-justice-archive/internal/config"
 	"community-climate-justice-archive/internal/generate"
 	"community-climate-justice-archive/internal/server"
+	"community-climate-justice-archive/internal/store"
 	"flag"
 	"fmt"
 	"log"
@@ -72,6 +74,10 @@ func regenerate(skipImages bool) error {
 
 	if err := generate.CopyJSToOutput(); err != nil {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
+	}
+
+	if err := generate.WriteTestPage(); err != nil {
+		return fmt.Errorf("failed to write test page: %v", err)
 	}
 
 	log.Println("Build process completed successfully")
