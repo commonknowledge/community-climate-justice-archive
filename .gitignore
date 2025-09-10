@@ -34,4 +34,9 @@ out/*
 
 # Ignore any CSV files that we generate for statistics
 *.csv
+
+# Build directories
+out/
 out-*/
+*.db-journal
+.env
