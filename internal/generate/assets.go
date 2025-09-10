@@ -31,7 +31,7 @@ func logWebPFailure(imagePath string, err error) {
 	errorLog := "webp_failures.log"
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	errorMessage := fmt.Sprintf("[%s] Failed to encode WebP for %s: %v\n", timestamp, imagePath, err)
-	
+
 	// Append to log file
 	file, openErr := os.OpenFile(errorLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if openErr != nil {
@@ -40,13 +40,13 @@ func logWebPFailure(imagePath string, err error) {
 		return
 	}
 	defer file.Close()
-	
+
 	if _, writeErr := file.WriteString(errorMessage); writeErr != nil {
 		log.Printf("Warning: Could not write to WebP failure log: %v", writeErr)
 		log.Printf("Original WebP error for %s: %v", imagePath, err)
 		return
 	}
-	
+
 	log.Printf("Warning: WebP encoding failed for %s (logged to %s): %v", imagePath, errorLog, err)
 }
 
@@ -150,9 +150,9 @@ func compressImage(srcPath string) error {
 			UseSharpYuv:    true,
 		}); err != nil {
 			logWebPFailure(outPath, err)
-			output.Close() // Close the file before removing it
+			output.Close()     // Close the file before removing it
 			os.Remove(outPath) // Clean up the incomplete file
-			continue // Skip this size variant but continue with others
+			continue           // Skip this size variant but continue with others
 		}
 
 		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
@@ -181,9 +181,9 @@ func compressImage(srcPath string) error {
 		UseSharpYuv:    true,
 	}); err != nil {
 		logWebPFailure(mainOutPath, err)
-		output.Close() // Close the file before removing it
+		output.Close()         // Close the file before removing it
 		os.Remove(mainOutPath) // Clean up the incomplete file
-		return nil // Continue processing other images instead of crashing
+		return nil             // Continue processing other images instead of crashing
 	}
 
 	log.Printf("Created %s as main WebP version of %s", mainOutPath, srcPath)

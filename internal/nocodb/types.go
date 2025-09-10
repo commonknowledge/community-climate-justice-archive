@@ -354,7 +354,7 @@ func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 				if filename != "" {
 					// Use original filename since we're downloading images now
 					// No need to clean NocoDB suffixes anymore
-					
+
 					// Check if we need to download the image
 					localImagePath := filepath.Join("images", filename)
 					if config.AppConfig.UseNocoDB && downloadPath != "" && !fileExists(localImagePath) {
@@ -436,7 +436,6 @@ func extractFilenameFromPath(path string) string {
 	// No need to clean NocoDB suffixes anymore
 	return filename
 }
-
 
 // toString safely converts an interface{} to string
 func toString(v interface{}) string {
