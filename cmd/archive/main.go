@@ -26,6 +26,11 @@ import (
 func regenerate(skipImages bool) error {
 	log.Println("Starting build process")
 
+	// Warm the cache by getting all stories first - this ensures all subsequent operations are fast
+	log.Println("Warming cache by fetching all stories...")
+	allStories := store.GetAllStories()
+	log.Printf("Cache warmed with %d stories", len(allStories))
+
 	// Commented out for now while we debug the NocoDB connection
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {
@@ -88,6 +93,11 @@ func regenerate(skipImages bool) error {
 
 func hotRegenerate() error {
 	log.Println("Starting partial build process")
+
+	// Warm the cache by getting all stories first - this ensures all subsequent operations are fast
+	log.Println("Warming cache by fetching all stories...")
+	allStories := store.GetAllStories()
+	log.Printf("Cache warmed with %d stories", len(allStories))
 
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
