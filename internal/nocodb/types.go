@@ -419,7 +419,6 @@ func extractFilenameFromPath(path string) string {
 	}
 
 	// NocoDB adds suffixes like "_N5ojs" to filenames, we need to remove them
-	// Pattern: "filename_XXXXX.ext" -> "filename.ext"
 	return cleanNocoDBFilename(filename)
 }
 
@@ -433,12 +432,12 @@ func cleanNocoDBFilename(filename string) string {
 	ext := filepath.Ext(filename)
 	nameWithoutExt := strings.TrimSuffix(filename, ext)
 
-	// Look for pattern like "_N5ojs" at the end (underscore + 5 alphanumeric chars)
+	// Look for pattern like "_N5ojs" at the end (underscore + 4-6 alphanumeric chars)
 	// This matches NocoDB's pattern for duplicate file handling
 	lastUnderscore := strings.LastIndex(nameWithoutExt, "_")
 	if lastUnderscore != -1 {
 		suffix := nameWithoutExt[lastUnderscore+1:]
-		// Check if suffix looks like NocoDB's pattern (5-6 alphanumeric chars)
+		// Check if suffix looks like NocoDB's pattern (4-6 alphanumeric chars)
 		if len(suffix) >= 4 && len(suffix) <= 6 && isAlphanumeric(suffix) {
 			// Remove the NocoDB suffix
 			nameWithoutExt = nameWithoutExt[:lastUnderscore]

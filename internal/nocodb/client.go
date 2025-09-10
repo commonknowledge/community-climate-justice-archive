@@ -12,8 +12,10 @@ import (
 
 // Client wraps the NocoDB client with our configuration
 type Client struct {
-	client *nocodbgo.Client
-	table  *nocodbgo.Table
+	client        *nocodbgo.Client
+	table         *nocodbgo.Table
+	cachedRecords []map[string]interface{} // Cache for all records
+	cacheLoaded   bool                     // Flag to track if cache is loaded
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables
@@ -44,16 +46,24 @@ func NewClient() (*Client, error) {
 }
 
 // GetAllRecords retrieves all records from the configured table using pagination
+// Uses caching to avoid repeated API calls
 func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	if c.table == nil {
 		return nil, fmt.Errorf("table not initialized")
 	}
 
+	// Return cached records if available
+	if c.cacheLoaded {
+		log.Printf("Returning %d cached records", len(c.cachedRecords))
+		return c.cachedRecords, nil
+	}
+
+	// Fetch records from API and cache them
 	var allRecords []map[string]interface{}
 	limit := 100 // Records per page
 	offset := 0
 
-	log.Printf("Starting paginated retrieval of all records from NocoDB...")
+	log.Printf("Starting paginated retrieval of all records from NocoDB (cache miss)...")
 
 	for {
 		log.Printf("Fetching records with limit=%d, offset=%d", limit, offset)
@@ -83,7 +93,11 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 		offset += limit
 	}
 
-	log.Printf("Successfully retrieved all %d records from NocoDB using pagination", len(allRecords))
+	// Cache the results
+	c.cachedRecords = allRecords
+	c.cacheLoaded = true
+
+	log.Printf("Successfully retrieved and cached all %d records from NocoDB", len(allRecords))
 	return allRecords, nil
 }
 
@@ -94,12 +108,36 @@ func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface
 		return nil, fmt.Errorf("table not initialized")
 	}
 
-	// Try NocoDB's LIKE filter first, with pagination
+	log.Printf("Starting filtered retrieval for field %s containing %s...", field, value)
+
+	// Try client-side filtering first (faster for small datasets)
+	log.Printf("Trying client-side filtering first...")
+	allRecords, err := c.GetAllRecords()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all records for client-side filtering: %w", err)
+	}
+
+	var filteredRecords []map[string]interface{}
+	for _, record := range allRecords {
+		if recordContainsValue(record, field, value) {
+			filteredRecords = append(filteredRecords, record)
+		}
+	}
+
+	log.Printf("Client-side filtering found %d records for field %s containing %s",
+		len(filteredRecords), field, value)
+
+	// If we found results with client-side filtering, return them
+	if len(filteredRecords) > 0 {
+		return filteredRecords, nil
+	}
+
+	// If no results from client-side, try server-side filtering as fallback
+	log.Printf("No results from client-side filtering, trying server-side filtering...")
+
 	var allFilteredRecords []map[string]interface{}
 	limit := 100
 	offset := 0
-
-	log.Printf("Starting paginated filtered retrieval for field %s containing %s...", field, value)
 
 	for {
 		response, err := c.table.ListRecords().
@@ -109,40 +147,23 @@ func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface
 			Execute()
 
 		if err != nil {
-			// Fallback to getting all records and filtering locally
-			log.Printf("NocoDB filtering failed, falling back to local filtering: %v", err)
-			allRecords, err := c.GetAllRecords()
-			if err != nil {
-				return nil, err
-			}
-
-			var filteredRecords []map[string]interface{}
-			for _, record := range allRecords {
-				if recordContainsValue(record, field, value) {
-					filteredRecords = append(filteredRecords, record)
-				}
-			}
-			log.Printf("Filtered %d records for field %s containing %s using local filtering",
-				len(filteredRecords), field, value)
-			return filteredRecords, nil
+			log.Printf("Server-side filtering also failed: %v", err)
+			// Return empty results if both methods fail
+			return []map[string]interface{}{}, nil
 		}
 
-		// Add this batch to our collection
 		allFilteredRecords = append(allFilteredRecords, response.List...)
-
-		log.Printf("Retrieved %d filtered records in this batch (total so far: %d)",
+		log.Printf("Retrieved %d server-filtered records in this batch (total so far: %d)",
 			len(response.List), len(allFilteredRecords))
 
-		// If we got fewer records than the limit, we've reached the end
 		if len(response.List) < limit {
+			log.Printf("Reached end of server-filtered records (batch had fewer than limit)")
 			break
 		}
-
-		// Move to the next page
 		offset += limit
 	}
 
-	log.Printf("Successfully filtered %d records for field %s containing %s using NocoDB filtering",
+	log.Printf("Server-side filtering found %d records for field %s containing %s",
 		len(allFilteredRecords), field, value)
 	return allFilteredRecords, nil
 }
