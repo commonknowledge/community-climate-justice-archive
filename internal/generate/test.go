@@ -38,9 +38,9 @@ type TestPageData struct {
 	GeneratedAt string
 }
 
-// WriteTestPage generates a test page showing raw data from the current data source
+// WriteTestPage generates a test page showing raw data from the current data source.
 // This is primarily intended for debugging NocoDB connections, so we skip generation
-// when using SQLite to avoid unnecessary overhead in normal builds
+// when using SQLite to avoid unnecessary overhead in normal builds.
 func WriteTestPage() error {
 	// Skip test page generation if NocoDB is not enabled
 	if !config.AppConfig.UseNocoDB {
