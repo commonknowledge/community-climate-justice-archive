@@ -31,6 +31,8 @@ type Story struct {
 	Themes                  []Theme
 	Experience              string
 	TimeSpan                string
+	InspiredBy              string // New field from CSV: "Inspired by"
+	HasInspired             string // New field from CSV: "Has inspired"
 	OtherComments           string
 	Type                    []Type
 	Weather                 []Weather
@@ -178,6 +180,8 @@ type StoryDTO struct {
 	Themes                  sql.NullString
 	Experience              sql.NullString
 	TimeSpan                sql.NullString
+	InspiredBy              sql.NullString
+	HasInspired             sql.NullString
 	OtherComments           sql.NullString
 	Type                    sql.NullString
 	PersonFinder            sql.NullString
@@ -281,6 +285,8 @@ func (dto *StoryDTO) ToStory() Story {
 		Themes:                  themes,
 		Experience:              dto.Experience.String,
 		TimeSpan:                dto.TimeSpan.String,
+		InspiredBy:              dto.InspiredBy.String,
+		HasInspired:             dto.HasInspired.String,
 		OtherComments:           dto.OtherComments.String,
 		Type:                    types,
 		PersonFinder:            dto.PersonFinder.String,
