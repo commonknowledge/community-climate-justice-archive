@@ -76,8 +76,8 @@ func regenerate(skipImages bool) error {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
-	if err := generate.WriteTestPage(); err != nil {
-		return fmt.Errorf("failed to write test page: %v", err)
+	if err := generate.WriteNocoDBTestPage(); err != nil {
+		return fmt.Errorf("failed to write NocoDB test page: %v", err)
 	}
 
 	log.Println("Build process completed successfully")
