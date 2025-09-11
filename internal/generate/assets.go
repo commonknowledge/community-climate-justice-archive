@@ -227,7 +227,6 @@ func ProcessImages() error {
 		err := compressImage(filepath.Join("images", filename))
 		if err != nil {
 			log.Printf("Warning: Failed to process image %s: %v", filename, err)
-			// Continue processing other images instead of stopping
 			continue
 		}
 	}
