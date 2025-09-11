@@ -18,8 +18,8 @@ import (
 type Client struct {
 	client        *nocodbgo.Client
 	table         *nocodbgo.Table
-	cachedRecords []map[string]interface{} // Cache for all records
-	cacheLoaded   bool                     // Flag to track if cache is loaded
+	cachedRecords []map[string]interface{}
+	cacheLoaded   bool
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables
