@@ -4,8 +4,10 @@ package main
 import (
 	"bufio"
 
+	"community-climate-justice-archive/internal/config"
 	"community-climate-justice-archive/internal/generate"
 	"community-climate-justice-archive/internal/server"
+	"community-climate-justice-archive/internal/store"
 	"flag"
 	"fmt"
 	"log"
@@ -16,13 +18,16 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// regenerate builds the archive by taking the following steps:
+// generateArchive builds the archive by taking the following steps:
 // - Getting the data from the database
 // - Getting the images from the images directory
 // - Adding this data to the templates to create pages which are static HTML files
 // - Copying the images to the output directory
-func regenerate(skipImages bool) error {
+func generateArchive(skipImages bool) error {
 	log.Println("Starting build process")
+
+	// Warm the cache to ensure all subsequent operations are fast
+	store.WarmCache()
 
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {
@@ -74,6 +79,10 @@ func regenerate(skipImages bool) error {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
+	if err := generate.WriteNocoDBTestPage(); err != nil {
+		return fmt.Errorf("failed to write NocoDB test page: %v", err)
+	}
+
 	log.Println("Build process completed successfully")
 
 	return nil
@@ -81,6 +90,9 @@ func regenerate(skipImages bool) error {
 
 func hotRegenerate() error {
 	log.Println("Starting partial build process")
+
+	// Warm the cache to ensure all subsequent operations are fast
+	store.WarmCache()
 
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
@@ -198,7 +210,7 @@ func watchCSS() (*fsnotify.Watcher, error) {
 
 // waitForInput waits for input and then rebuilds the archive when enter is pressed.
 func waitForInput() {
-	log.Println("Press enter to regenerate the archive...")
+	log.Println("Press enter to generate the archive...")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadRune()
 }
@@ -211,12 +223,20 @@ func main() {
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
 	flag.Parse()
 
+	// Load configuration from environment variables and .env file
+	config.LoadConfig()
+
+	// Initialize the data adapter based on configuration
+	if err := store.InitializeAdapter(); err != nil {
+		log.Fatalf("Failed to initialize data adapter: %v", err)
+	}
+
 	if *skipImages {
 		log.Println("Skipping image processing and generation")
 	}
 
 	// Build the archive.
-	if err := regenerate(*skipImages); err != nil {
+	if err := generateArchive(*skipImages); err != nil {
 		log.Fatalf("Initial build failed: %v", err)
 	}
 

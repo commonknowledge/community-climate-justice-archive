@@ -21,11 +21,23 @@ func FormatDate(dateString string) string {
 		return ""
 	}
 
+	// Try parsing with RFC3339 format first (SQLite format)
 	parsedTime, err := time.Parse(time.RFC3339, dateString)
+
+	if err != nil {
+		// Try parsing with NocoDB format: "2006-01-02 15:04:05-07:00"
+		parsedTime, err = time.Parse("2006-01-02 15:04:05-07:00", dateString)
+	}
+
+	if err != nil {
+		// Try parsing with NocoDB format with +00:00: "2006-01-02 15:04:05+00:00"
+		parsedTime, err = time.Parse("2006-01-02 15:04:05+00:00", dateString)
+	}
 
 	if err != nil {
 		// Handle the error
 		log.Printf("Failed to parse date: %v", err)
+		return dateString // Return original string if parsing fails
 	}
 
 	// Go has an interesting way of formatting dates.

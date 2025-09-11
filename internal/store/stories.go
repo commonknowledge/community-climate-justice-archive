@@ -70,63 +70,10 @@ func GetMoreTaggedStories(story data.Story, tag interface{}, count int) []data.S
 }
 
 func GetAllStories() []data.Story {
-	db := connectToDatabase()
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM Stories")
+	adapter := GetAdapter()
+	stories, err := adapter.GetAllStories()
 	if err != nil {
-		log.Fatalf("Failed to query stories: %v", err)
+		log.Fatalf("Failed to get all stories: %v", err)
 	}
-	defer rows.Close()
-
-	stories := []data.Story{}
-	for rows.Next() {
-		var dto data.StoryDTO
-		err := rows.Scan(
-			&dto.ID,
-			&dto.CreatedTime,
-			&dto.Finding,
-			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
-			&dto.Image,
-			&dto.SourceImage,
-			&dto.Location,
-			&dto.StartDateTime,
-			&dto.EndDateTime,
-			&dto.Season,
-			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
-			&dto.MapCache,
-			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
-			&dto.OtherTheme,
-			&dto.OtherWeather,
-			&dto.ShareStatus,
-			&dto.PostDate,
-			&dto.TwitterText,
-			&dto.CharacterCount,
-			&dto.InstaText,
-			&dto.InstaCount,
-			&dto.InstaImage,
-		)
-
-		if err != nil {
-			log.Fatalf("Failed to scan story: %v", err)
-		}
-
-		story := dto.ToStory()
-
-		story.URL = CreateStoryURLFromFinding(story.Finding)
-
-		stories = append(stories, story)
-	}
-
 	return stories
 }

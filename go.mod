@@ -5,7 +5,9 @@ go 1.24.2
 require (
 	github.com/bep/gowebp v0.4.0
 	github.com/disintegration/imaging v1.6.2
+	github.com/eduardolat/nocodbgo v0.1.3
 	github.com/fsnotify/fsnotify v1.9.0
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.27
 )
 
