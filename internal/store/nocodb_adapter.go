@@ -202,5 +202,15 @@ func (n *NocoDBAdapter) DropCache() error {
 	return nil
 }
 
+// GetTableColumns retrieves the column information for the NocoDB table
+func (n *NocoDBAdapter) GetTableColumns() ([]nocodb.TableColumn, error) {
+	return n.client.GetTableColumns()
+}
+
+// GetColumnNames retrieves just the column names for the NocoDB table
+func (n *NocoDBAdapter) GetColumnNames() ([]string, error) {
+	return n.client.GetColumnNames()
+}
+
 // Helper functions that need to be exposed from nocodb package
 // We'll need to create these as exported functions in the nocodb package

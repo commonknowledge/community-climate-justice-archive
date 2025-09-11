@@ -2,6 +2,7 @@
 package nocodb
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -251,4 +252,88 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+// TableColumn represents a column in a NocoDB table
+type TableColumn struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	Type  string `json:"uidt"`
+	// Add other column properties as needed
+}
+
+// TableInfo represents table metadata from NocoDB
+type TableInfo struct {
+	ID      string        `json:"id"`
+	Title   string        `json:"title"`
+	Columns []TableColumn `json:"columns"`
+}
+
+// GetTableColumns retrieves the columns information for the configured table
+// using the NocoDB Meta API
+func (c *Client) GetTableColumns() ([]TableColumn, error) {
+	if c.table == nil {
+		return nil, fmt.Errorf("table not initialized")
+	}
+
+	// Construct the Meta API URL for table info
+	metaURL := fmt.Sprintf("%s/api/v2/meta/tables/%s",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID)
+
+	log.Printf("Fetching table columns from Meta API: %s", metaURL)
+
+	// Create HTTP request
+	req, err := http.NewRequest("GET", metaURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Add authentication header
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Accept", "application/json")
+
+	// Make the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch table metadata: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP error fetching table metadata: %d", resp.StatusCode)
+	}
+
+	// Read response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Parse JSON response
+	var tableInfo TableInfo
+	if err := json.Unmarshal(body, &tableInfo); err != nil {
+		return nil, fmt.Errorf("failed to parse table metadata JSON: %w", err)
+	}
+
+	log.Printf("Successfully retrieved %d columns for table '%s'",
+		len(tableInfo.Columns), tableInfo.Title)
+
+	return tableInfo.Columns, nil
+}
+
+// GetColumnNames returns just the column names for easier usage
+func (c *Client) GetColumnNames() ([]string, error) {
+	columns, err := c.GetTableColumns()
+	if err != nil {
+		return nil, err
+	}
+
+	var columnNames []string
+	for _, col := range columns {
+		columnNames = append(columnNames, col.Title)
+	}
+
+	return columnNames, nil
 }
