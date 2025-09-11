@@ -150,9 +150,9 @@ func compressImage(srcPath string) error {
 			UseSharpYuv:    true,
 		}); err != nil {
 			logWebPFailure(outPath, err)
-			output.Close()     // Close the file before removing it
-			os.Remove(outPath) // Clean up the incomplete file
-			continue           // Skip this size variant but continue with others
+			output.Close()
+			os.Remove(outPath)
+			continue
 		}
 
 		log.Printf("Created %s as WebP version of %s", outPath, srcPath)
@@ -181,9 +181,9 @@ func compressImage(srcPath string) error {
 		UseSharpYuv:    true,
 	}); err != nil {
 		logWebPFailure(mainOutPath, err)
-		output.Close()         // Close the file before removing it
-		os.Remove(mainOutPath) // Clean up the incomplete file
-		return nil             // Continue processing other images instead of crashing
+		output.Close()
+		os.Remove(mainOutPath)
+		return nil
 	}
 
 	log.Printf("Created %s as main WebP version of %s", mainOutPath, srcPath)
