@@ -31,8 +31,8 @@ type Story struct {
 	Themes                  []Theme
 	Experience              string
 	TimeSpan                string
-	InspiredBy              string // New field from CSV: "Inspired by"
-	HasInspired             string // New field from CSV: "Has inspired"
+	InspiredBy              string
+	HasInspired             string
 	OtherComments           string
 	Type                    []Type
 	Weather                 []Weather

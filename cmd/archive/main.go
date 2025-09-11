@@ -31,7 +31,6 @@ func regenerate(skipImages bool) error {
 	allStories := store.GetAllStories()
 	log.Printf("Cache warmed with %d stories", len(allStories))
 
-	// Commented out for now while we debug the NocoDB connection
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {
 			return fmt.Errorf("failed to process images: %v", err)
