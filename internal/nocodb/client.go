@@ -180,6 +180,13 @@ func (c *Client) DownloadAttachment(imagePath, outputPath string) error {
 	return nil
 }
 
+// DropCache clears the cached records, forcing fresh retrieval on next call
+func (c *Client) DropCache() {
+	c.cachedRecords = nil
+	c.cacheLoaded = false
+	log.Println("NocoDB cache dropped")
+}
+
 // recordContainsValue checks if a record's field contains the specified value
 // Handles both string fields and JSON array fields
 func recordContainsValue(record map[string]interface{}, field, value string) bool {

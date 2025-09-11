@@ -196,5 +196,11 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 	return stories, nil
 }
 
+// DropCache clears any cached data in the NocoDB client
+func (n *NocoDBAdapter) DropCache() error {
+	n.client.DropCache()
+	return nil
+}
+
 // Helper functions that need to be exposed from nocodb package
 // We'll need to create these as exported functions in the nocodb package

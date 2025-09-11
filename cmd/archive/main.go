@@ -18,18 +18,16 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// regenerate builds the archive by taking the following steps:
+// generateArchive builds the archive by taking the following steps:
 // - Getting the data from the database
 // - Getting the images from the images directory
 // - Adding this data to the templates to create pages which are static HTML files
 // - Copying the images to the output directory
-func regenerate(skipImages bool) error {
+func generateArchive(skipImages bool) error {
 	log.Println("Starting build process")
 
-	// Warm the cache by getting all stories first - this ensures all subsequent operations are fast
-	log.Println("Warming cache by fetching all stories...")
-	allStories := store.GetAllStories()
-	log.Printf("Cache warmed with %d stories", len(allStories))
+	// Warm the cache to ensure all subsequent operations are fast
+	store.WarmCache()
 
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {
@@ -93,10 +91,8 @@ func regenerate(skipImages bool) error {
 func hotRegenerate() error {
 	log.Println("Starting partial build process")
 
-	// Warm the cache by getting all stories first - this ensures all subsequent operations are fast
-	log.Println("Warming cache by fetching all stories...")
-	allStories := store.GetAllStories()
-	log.Printf("Cache warmed with %d stories", len(allStories))
+	// Warm the cache to ensure all subsequent operations are fast
+	store.WarmCache()
 
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
@@ -214,7 +210,7 @@ func watchCSS() (*fsnotify.Watcher, error) {
 
 // waitForInput waits for input and then rebuilds the archive when enter is pressed.
 func waitForInput() {
-	log.Println("Press enter to regenerate the archive...")
+	log.Println("Press enter to generate the archive...")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadRune()
 }
@@ -240,7 +236,7 @@ func main() {
 	}
 
 	// Build the archive.
-	if err := regenerate(*skipImages); err != nil {
+	if err := generateArchive(*skipImages); err != nil {
 		log.Fatalf("Initial build failed: %v", err)
 	}
 

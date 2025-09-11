@@ -315,3 +315,10 @@ func (s *SQLiteAdapter) scanStories(rows *sql.Rows) ([]data.Story, error) {
 
 	return stories, nil
 }
+
+// DropCache is a no-op for SQLite since it doesn't use caching
+func (s *SQLiteAdapter) DropCache() error {
+	// SQLite adapter doesn't use caching, so nothing to drop
+	log.Println("SQLite adapter cache drop requested (no-op)")
+	return nil
+}

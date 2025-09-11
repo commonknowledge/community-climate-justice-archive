@@ -31,6 +31,9 @@ type DataAdapter interface {
 
 	// GetWeather retrieves all unique weather conditions
 	GetWeather() ([]data.Weather, error)
+
+	// DropCache clears any cached data to force fresh retrieval
+	DropCache() error
 }
 
 // Global adapter instance
@@ -59,4 +62,12 @@ func GetAdapter() DataAdapter {
 		currentAdapter = &SQLiteAdapter{}
 	}
 	return currentAdapter
+}
+
+// WarmCache pre-loads all stories to warm up any caching mechanisms
+// This ensures subsequent operations are fast by triggering cache population
+func WarmCache() {
+	log.Println("Warming cache by fetching all stories...")
+	allStories := GetAllStories()
+	log.Printf("Cache warmed with %d stories", len(allStories))
 }
