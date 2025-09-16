@@ -129,47 +129,41 @@
     </div>
     
     <div class="story-connections">
+        {{if $story.InspiredBy}}
         <div class="story-connections-section">
             <h2 class="story-connections-title">Inspired by</h2>
             <div class="story-connections-grid">
-                <a href="#" class="big-button">
-                    <div class="big-button-image" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e0e0e0%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2212%22 fill=%22%23666%22>Image</text></svg>');"></div>
+                {{range $story.InspiredBy}}
+                <a href="{{.URL}}" class="big-button">
+                    {{if .Image}}
+                    <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
+                    {{end}}
                     <div class="big-button-content">
-                        <p class="big-button-title">Air pollution origami</p>
+                        <p class="big-button-title">{{.Finding}}</p>
                     </div>
                 </a>
-                <a href="#" class="big-button">
-                    <div class="big-button-content">
-                        <p class="big-button-title">Wet grass smell</p>
-                    </div>
-                </a>
+                {{end}}
             </div>
         </div>
+        {{end}}
         
+        {{if $story.HasInspired}}
         <div class="story-connections-section">
-            <h2 class="story-connections-title">Contributed to</h2>
+            <h2 class="story-connections-title">Has inspired</h2>
             <div class="story-connections-grid">
-                <a href="#" class="big-button">
-                    <div class="big-button-image" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e0e0e0%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2212%22 fill=%22%23666%22>Image</text></svg>');"></div>
+                {{range $story.HasInspired}}
+                <a href="{{.URL}}" class="big-button">
+                    {{if .Image}}
+                    <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
+                    {{end}}
                     <div class="big-button-content">
-                        <p class="big-button-title">Archeology of water</p>
-                        <p class="big-button-description">A strategy for living alongside food production A critical part of the climate crisis is the degradation of soil, leading to scientists predicting the UK has approximately 100 harvests left of stable crop production. As an attempt to address the problem this project will explore the possibility of integrating sustainable agriculture into an urban setting, reducing the strain on agricultural land, reducing food miles and widening city biodiversity.</p>
+                        <p class="big-button-title">{{.Finding}}</p>
                     </div>
                 </a>
-                <a href="#" class="big-button">
-                    <div class="big-button-image" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e0e0e0%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2212%22 fill=%22%23666%22>Image</text></svg>');"></div>
-                    <div class="big-button-content">
-                        <p class="big-button-description">This gift aims to address the disconnect between Dudley and its industrial history. Once "the capital of the Black Country", its high street now looks like any other.</p>
-                    </div>
-                </a>
-                <a href="#" class="big-button">
-                    <div class="big-button-image" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e0e0e0%22/><text x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2212%22 fill=%22%23666%22>Image</text></svg>');"></div>
-                    <div class="big-button-content">
-                        <p class="big-button-title">Dudley's canopy</p>
-                    </div>
-                </a>
+                {{end}}
             </div>
         </div>
+        {{end}}
     </div>
 
     <div class="related-stories-container">

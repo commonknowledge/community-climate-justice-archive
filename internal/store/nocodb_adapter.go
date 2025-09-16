@@ -179,7 +179,7 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 	var stories []data.Story
 
 	for _, record := range records {
-		story, err := nocodb.NocoDBRecordToStory(record)
+		story, err := nocodb.NocoDBRecordToStoryWithClient(record, n.client)
 		if err != nil {
 			log.Printf("Warning: failed to convert record to story: %v", err)
 			continue

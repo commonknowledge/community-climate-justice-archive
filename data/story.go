@@ -15,6 +15,14 @@ import (
 	"strings"
 )
 
+type StoryConnection struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Finding string `json:"finding"`
+	Image   string `json:"image"`
+	URL     string `json:"url"`
+}
+
 type Story struct {
 	ID                      string
 	CreatedTime             string
@@ -31,8 +39,8 @@ type Story struct {
 	Themes                  []Theme
 	Experience              string
 	TimeSpan                string
-	InspiredBy              string
-	HasInspired             string
+	InspiredBy              []StoryConnection
+	HasInspired             []StoryConnection
 	OtherComments           string
 	Type                    []Type
 	Weather                 []Weather
@@ -285,8 +293,8 @@ func (dto *StoryDTO) ToStory() Story {
 		Themes:                  themes,
 		Experience:              dto.Experience.String,
 		TimeSpan:                dto.TimeSpan.String,
-		InspiredBy:              dto.InspiredBy.String,
-		HasInspired:             dto.HasInspired.String,
+		InspiredBy:              parseStoryConnectionsFromString(dto.InspiredBy.String),
+		HasInspired:             parseStoryConnectionsFromString(dto.HasInspired.String),
 		OtherComments:           dto.OtherComments.String,
 		Type:                    types,
 		PersonFinder:            dto.PersonFinder.String,
@@ -355,4 +363,22 @@ func hsbToRGB(hue, saturation, brightness float64) (uint8, uint8, uint8) {
 	finalBlue := uint8((blueComponent + matchValue) * 255)
 
 	return finalRed, finalGreen, finalBlue
+}
+
+// parseStoryConnectionsFromString converts a string to StoryConnection slice
+// This is a fallback for SQLite data that doesn't have proper relationships
+func parseStoryConnectionsFromString(connectionStr string) []StoryConnection {
+	if connectionStr == "" {
+		return []StoryConnection{}
+	}
+
+	// For SQLite, we only have the title/finding as a string
+	// Create a basic connection
+	connection := StoryConnection{
+		Title:   connectionStr,
+		Finding: connectionStr,
+		URL:     "/stories/" + util.Slugify(connectionStr) + ".html",
+	}
+
+	return []StoryConnection{connection}
 }
