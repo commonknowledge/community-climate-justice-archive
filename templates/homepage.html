@@ -173,9 +173,13 @@
             // Highlight the hovered link
             hoveredLink.classList.add('highlighted');
             
+            // Get canvas-relative coordinates (not viewport coordinates)
+            const canvas = document.getElementById('connections-canvas');
+            const canvasRect = canvas.getBoundingClientRect();
             const hoveredRect = hoveredLink.getBoundingClientRect();
-            const hoveredX = hoveredRect.left + hoveredRect.width / 2;
-            const hoveredY = hoveredRect.top + hoveredRect.height / 2;
+            
+            const hoveredX = (hoveredRect.left - canvasRect.left) + hoveredRect.width / 2;
+            const hoveredY = (hoveredRect.top - canvasRect.top) + hoveredRect.height / 2;
             
             // Draw connections to "inspired by" stories (dashed lines)
             inspiredBy.forEach(targetId => {
@@ -204,9 +208,14 @@
 
         function drawConnectionLine(fromX, fromY, toElement, connectionType) {
             const connectionLines = document.querySelector('.connection-lines');
+            
+            // Convert target element coordinates to canvas-relative coordinates
+            const canvas = document.getElementById('connections-canvas');
+            const canvasRect = canvas.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
-            const toX = toRect.left + toRect.width / 2;
-            const toY = toRect.top + toRect.height / 2;
+            
+            const toX = (toRect.left - canvasRect.left) + toRect.width / 2;
+            const toY = (toRect.top - canvasRect.top) + toRect.height / 2;
             
             
             if (connectionType === 'inspired-by') {
