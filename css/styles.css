@@ -1400,7 +1400,6 @@ A button with a dashed border for navigation and actions.
  * Large button-like cards used for "Inspired by" and "Contributed to" sections.
  */
 .big-button {
-    background: #FAF6F0;
     border: 2px dashed #000;
     display: flex;
     gap: 1.11111rem;
@@ -1416,7 +1415,6 @@ A button with a dashed border for navigation and actions.
 
 .big-button:hover {
     border-style: solid;
-    background: #FAF6F0;
 }
 
 .big-button-image {
