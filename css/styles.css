@@ -1443,6 +1443,11 @@ A button with a dashed border for navigation and actions.
     letter-spacing: -0.01222rem;
     color: #000;
     margin: 0 0 0.33333rem 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
 }
 
 .big-button-description {
