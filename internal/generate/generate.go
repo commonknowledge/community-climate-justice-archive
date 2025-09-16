@@ -744,6 +744,9 @@ func WriteHomePage() error {
 	types := store.GetTypes()
 	allStories := store.GetAllStories()
 
+	// Get connected stories for the connections view (max 20)
+	connectedStories := store.GetStoriesWithConnections(20)
+
 	// Only give the template the first 40 stories for initial display
 	stories := allStories[:40]
 
@@ -762,13 +765,14 @@ func WriteHomePage() error {
 	}
 
 	page := data.Page{
-		Title:          "Dudley People's School for Climate Justice – time portal",
-		Description:    "The time portal for the Dudley People's School for Climate Justice",
-		Themes:         themes,
-		Types:          types,
-		Stories:        stories,
-		RandomStoryURL: randomStory.URL,
-		StoriesJSON:    storiesJSON,
+		Title:            "Dudley People's School for Climate Justice – time portal",
+		Description:      "The time portal for the Dudley People's School for Climate Justice",
+		Themes:           themes,
+		Types:            types,
+		Stories:          stories,
+		ConnectedStories: connectedStories,
+		RandomStoryURL:   randomStory.URL,
+		StoriesJSON:      storiesJSON,
 	}
 
 	tmpl, err := loadTemplates()

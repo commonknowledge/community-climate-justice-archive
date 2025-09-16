@@ -77,10 +77,228 @@
         window.addEventListener('load', pageLoaded);
     </script>
     <script src="/js/archive-filters.js"></script>
+    <script>
+        // Connections View JavaScript
+        function initializeConnectionsView() {
+            const connectionsView = document.getElementById('connections-view');
+            const connectionLines = document.querySelector('.connection-lines');
+            const scatteredLinks = document.querySelectorAll('.story-link-scattered');
+            
+            if (!connectionsView || !connectionLines || !scatteredLinks.length) {
+                return;
+            }
+
+            // Position the links using scattered coordinates
+            positionScatteredImages(scatteredLinks);
+
+            scatteredLinks.forEach(link => {
+                const image = link.querySelector('.story-image-scattered');
+                link.addEventListener('mouseenter', () => showConnections(image, link));
+                link.addEventListener('mouseleave', () => hideConnections());
+            });
+        }
+
+        function positionScatteredImages(elements) {
+            // Spread images across the large 3000x2000 canvas
+            const positions = [
+                { x: 120, y: 150, width: 220, height: 220 },
+                { x: 480, y: 100, width: 200, height: 200 },
+                { x: 820, y: 180, width: 240, height: 240 },
+                { x: 1200, y: 80, width: 210, height: 210 },
+                { x: 1580, y: 220, width: 230, height: 230 },
+                { x: 1950, y: 120, width: 200, height: 200 },
+                { x: 2320, y: 180, width: 220, height: 220 },
+                { x: 2680, y: 140, width: 210, height: 210 },
+                
+                { x: 200, y: 520, width: 210, height: 210 },
+                { x: 580, y: 480, width: 240, height: 240 },
+                { x: 950, y: 520, width: 220, height: 220 },
+                { x: 1320, y: 580, width: 200, height: 200 },
+                { x: 1690, y: 460, width: 230, height: 230 },
+                { x: 2060, y: 540, width: 200, height: 200 },
+                { x: 2430, y: 500, width: 220, height: 220 },
+                { x: 2750, y: 520, width: 210, height: 210 },
+                
+                { x: 80, y: 880, width: 230, height: 230 },
+                { x: 450, y: 820, width: 220, height: 220 },
+                { x: 820, y: 860, width: 210, height: 210 },
+                { x: 1180, y: 920, width: 240, height: 240 },
+                { x: 1550, y: 800, width: 200, height: 200 },
+                { x: 1920, y: 880, width: 220, height: 220 },
+                { x: 2290, y: 840, width: 230, height: 230 },
+                { x: 2620, y: 900, width: 210, height: 210 },
+                
+                { x: 250, y: 1250, width: 220, height: 220 },
+                { x: 620, y: 1200, width: 230, height: 230 },
+                { x: 990, y: 1280, width: 210, height: 210 },
+                { x: 1360, y: 1220, width: 220, height: 220 },
+                { x: 1730, y: 1300, width: 200, height: 200 },
+                { x: 2100, y: 1240, width: 240, height: 240 },
+                { x: 2470, y: 1280, width: 210, height: 210 },
+                
+                { x: 150, y: 1620, width: 200, height: 200 },
+                { x: 520, y: 1580, width: 240, height: 240 },
+                { x: 890, y: 1640, width: 220, height: 220 },
+                { x: 1260, y: 1600, width: 210, height: 210 },
+                { x: 1630, y: 1680, width: 230, height: 230 },
+                { x: 2000, y: 1620, width: 200, height: 200 },
+                { x: 2370, y: 1660, width: 220, height: 220 },
+                { x: 2700, y: 1640, width: 210, height: 210 }
+            ];
+
+            elements.forEach((element, index) => {
+                const pos = positions[index] || positions[index % positions.length];
+                element.style.left = pos.x + 'px';
+                element.style.top = pos.y + 'px';
+                element.style.width = pos.width + 'px';
+                element.style.height = pos.height + 'px';
+            });
+        }
+
+        function showConnections(hoveredImage, hoveredLink) {
+            const connectionLines = document.querySelector('.connection-lines');
+            const storyId = hoveredImage.dataset.storyId;
+            const inspiredBy = hoveredImage.dataset.inspiredBy.split(',').filter(id => id.trim());
+            const hasInspired = hoveredImage.dataset.hasInspired.split(',').filter(id => id.trim());
+            
+            
+            // Clear existing lines
+            connectionLines.innerHTML = '';
+            
+            // Remove all existing highlights
+            document.querySelectorAll('.story-link-scattered').forEach(link => {
+                link.classList.remove('connected', 'highlighted');
+            });
+            
+            // Highlight the hovered link
+            hoveredLink.classList.add('highlighted');
+            
+            const hoveredRect = hoveredLink.getBoundingClientRect();
+            const hoveredX = hoveredRect.left + hoveredRect.width / 2;
+            const hoveredY = hoveredRect.top + hoveredRect.height / 2;
+            
+            // Draw connections to "inspired by" stories (dashed lines)
+            inspiredBy.forEach(targetId => {
+                const targetImage = document.querySelector(`[data-story-id="${targetId.trim()}"]`);
+                if (targetImage) {
+                    const targetLink = targetImage.closest('.story-link-scattered');
+                    if (targetLink) {
+                        targetLink.classList.add('connected');
+                        drawConnectionLine(hoveredX, hoveredY, targetLink, 'inspired-by');
+                    }
+                }
+            });
+            
+            // Draw connections to "has inspired" stories (wiggly lines)
+            hasInspired.forEach(targetId => {
+                const targetImage = document.querySelector(`[data-story-id="${targetId.trim()}"]`);
+                if (targetImage) {
+                    const targetLink = targetImage.closest('.story-link-scattered');
+                    if (targetLink) {
+                        targetLink.classList.add('connected');
+                        drawConnectionLine(hoveredX, hoveredY, targetLink, 'has-inspired');
+                    }
+                }
+            });
+        }
+
+        function drawConnectionLine(fromX, fromY, toElement, connectionType) {
+            const connectionLines = document.querySelector('.connection-lines');
+            const toRect = toElement.getBoundingClientRect();
+            const toX = toRect.left + toRect.width / 2;
+            const toY = toRect.top + toRect.height / 2;
+            
+            
+            if (connectionType === 'inspired-by') {
+                // Dashed line for "inspired by"
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromX);
+                line.setAttribute('y1', fromY);
+                line.setAttribute('x2', toX);
+                line.setAttribute('y2', toY);
+                line.setAttribute('stroke', '#000');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-dasharray', '8,4');
+                connectionLines.appendChild(line);
+            } else {
+                // Wiggly path for "has inspired"
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                
+                // Create a wiggly path
+                const dx = toX - fromX;
+                const dy = toY - fromY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const segments = Math.floor(distance / 20); // Create wave every 20px
+                
+                let pathData = `M ${fromX} ${fromY}`;
+                
+                for (let i = 1; i <= segments; i++) {
+                    const t = i / segments;
+                    const x = fromX + dx * t;
+                    const y = fromY + dy * t;
+                    
+                    // Add sine wave perpendicular to line direction
+                    const perpX = -dy / distance;
+                    const perpY = dx / distance;
+                    const waveAmount = Math.sin(t * Math.PI * 4) * 8; // 4 waves, amplitude 8px
+                    
+                    const waveX = x + perpX * waveAmount;
+                    const waveY = y + perpY * waveAmount;
+                    
+                    pathData += ` L ${waveX} ${waveY}`;
+                }
+                
+                path.setAttribute('d', pathData);
+                path.setAttribute('stroke', '#000');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                connectionLines.appendChild(path);
+            }
+        }
+
+        function hideConnections() {
+            const connectionLines = document.querySelector('.connection-lines');
+            connectionLines.innerHTML = '';
+            
+            // Remove all highlights
+            document.querySelectorAll('.story-link-scattered').forEach(link => {
+                link.classList.remove('connected', 'highlighted');
+            });
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeConnectionsView);
+    </script>
     {{template "grid-code" .}}
 </head>
 <body>
     {{template "header" .}}
+
+    <!-- Connections View -->
+    <div class="connections-view" id="connections-view">
+        <div class="connections-canvas" id="connections-canvas">
+            <svg class="connection-lines"></svg>
+            
+            {{range $index, $story := .ConnectedStories}}
+            {{$storyImage := $story.GetStoryImage}}
+            {{if $storyImage.URL}}
+            <a href="{{$story.URL}}" class="story-link-scattered">
+                <img 
+                    class="story-image-scattered" 
+                    src="{{$storyImage.ThumbURL}}"
+                    alt="{{$story.Finding}}"
+                    data-story-id="{{$story.ID}}"
+                    data-story-title="{{$story.Finding}}"
+                    data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
+                    data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
+                    data-index="{{$index}}"
+                    loading="lazy"
+                />
+            </a>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
 
     <div class="homepage-content">
         <div class="what-if-rotation">

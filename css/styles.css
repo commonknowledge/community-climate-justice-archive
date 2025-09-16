@@ -1483,3 +1483,99 @@ A button with a dashed border for navigation and actions.
         max-width: none;
     }
 }
+
+/* Connections View
+ *
+ * Interactive scattered layout for showing story connections on homepage
+ */
+.connections-view {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #FAF6F0;
+    overflow: auto;
+    scroll-behavior: smooth;
+}
+
+.connections-view::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.connections-view::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.connections-view::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.connections-view::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.connections-canvas {
+    position: relative;
+    width: 3000px;
+    height: 2000px;
+    background: #FAF6F0;
+}
+
+.connection-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3000px;
+    height: 2000px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.story-link-scattered {
+    position: absolute;
+    display: block;
+    text-decoration: none;
+    z-index: 10;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.story-link-scattered:hover {
+    transform: scale(1.05);
+    z-index: 20;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.story-image-scattered {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.story-link-scattered.connected {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.story-link-scattered.highlighted {
+    transform: scale(1.1);
+    z-index: 30;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation override for connections view */
+.connections-view + .homepage-content {
+    display: none;
+}
+
+/* Show homepage content when connections view is hidden */
+.connections-view.hidden + .homepage-content {
+    display: block;
+}
+
+.connections-view.hidden {
+    display: none;
+}

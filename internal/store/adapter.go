@@ -14,6 +14,9 @@ type DataAdapter interface {
 	// GetAllStories retrieves all stories from the data source
 	GetAllStories() ([]data.Story, error)
 
+	// GetStoriesWithConnections retrieves stories that have InspiredBy or HasInspired relationships
+	GetStoriesWithConnections(limit int) ([]data.Story, error)
+
 	// GetStoriesForTheme retrieves stories filtered by theme
 	GetStoriesForTheme(themeTitle string) ([]data.Story, error)
 
