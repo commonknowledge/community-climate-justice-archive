@@ -1529,14 +1529,14 @@ A button with a dashed border for navigation and actions.
     width: 3000px;
     height: 2000px;
     pointer-events: none;
-    z-index: 1;
+    z-index: 5;
 }
 
 .story-link-scattered {
     position: absolute;
     display: block;
     text-decoration: none;
-    z-index: 10;
+    z-index: 2;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1545,7 +1545,7 @@ A button with a dashed border for navigation and actions.
 
 .story-link-scattered:hover {
     transform: scale(1.05);
-    z-index: 20;
+    z-index: 2;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
@@ -1558,11 +1558,12 @@ A button with a dashed border for navigation and actions.
 
 .story-link-scattered.connected {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 10;
 }
 
 .story-link-scattered.highlighted {
     transform: scale(1.1);
-    z-index: 30;
+    z-index: 10;
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
 }
 
