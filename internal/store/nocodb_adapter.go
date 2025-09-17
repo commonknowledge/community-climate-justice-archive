@@ -48,6 +48,64 @@ func (n *NocoDBAdapter) GetStoriesForTheme(themeTitle string) ([]data.Story, err
 	return n.convertRecordsToStories(records)
 }
 
+// GetStoriesWithConnections retrieves stories that have InspiredBy or HasInspired relationships from NocoDB
+// and includes all their connection targets to ensure lines can be drawn
+func (n *NocoDBAdapter) GetStoriesWithConnections(limit int) ([]data.Story, error) {
+	allStories, err := n.GetAllStories()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all stories: %w", err)
+	}
+
+	// Create a map for fast lookup
+	storyMap := make(map[string]data.Story)
+	for _, story := range allStories {
+		storyMap[story.ID] = story
+	}
+
+	// First, find stories with connections
+	var primaryConnectedStories []data.Story
+	for _, story := range allStories {
+		if len(story.InspiredBy) > 0 || len(story.HasInspired) > 0 {
+			primaryConnectedStories = append(primaryConnectedStories, story)
+			if len(primaryConnectedStories) >= limit {
+				break
+			}
+		}
+	}
+
+	// Now add all their connection targets to ensure lines can be drawn
+	storySet := make(map[string]data.Story)
+
+	// Add primary connected stories
+	for _, story := range primaryConnectedStories {
+		storySet[story.ID] = story
+	}
+
+	// Add all their connection targets
+	for _, story := range primaryConnectedStories {
+		// Add InspiredBy targets
+		for _, connection := range story.InspiredBy {
+			if targetStory, exists := storyMap[connection.ID]; exists {
+				storySet[connection.ID] = targetStory
+			}
+		}
+		// Add HasInspired targets
+		for _, connection := range story.HasInspired {
+			if targetStory, exists := storyMap[connection.ID]; exists {
+				storySet[connection.ID] = targetStory
+			}
+		}
+	}
+
+	// Convert back to slice
+	var result []data.Story
+	for _, story := range storySet {
+		result = append(result, story)
+	}
+
+	return result, nil
+}
+
 // GetStoriesForType retrieves stories filtered by type from NocoDB
 func (n *NocoDBAdapter) GetStoriesForType(typeTitle string) ([]data.Story, error) {
 	log.Println("Getting stories for type", typeTitle)
@@ -179,7 +237,7 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 	var stories []data.Story
 
 	for _, record := range records {
-		story, err := nocodb.NocoDBRecordToStory(record)
+		story, err := nocodb.NocoDBRecordToStoryWithClient(record, n.client)
 		if err != nil {
 			log.Printf("Warning: failed to convert record to story: %v", err)
 			continue

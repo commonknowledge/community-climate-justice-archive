@@ -723,7 +723,6 @@ The main content and metadata for a story.
 */
 .story-details {
     border-top: 1px solid #000;
-    border-bottom: 1px solid #000;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1357,4 +1356,227 @@ A button with a dashed border for navigation and actions.
 
 .filter-tag-option.selected {
     background-color: #e6f3ff;
+}
+
+/* Inspired By and Contributed To Sections
+ *
+ * New sections that appear at the bottom of story pages showing related content.
+ */
+.story-connections {
+    border-bottom: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+    gap: 4.44444rem;
+    margin-bottom: 6.66667rem;
+    padding-bottom: 60px;
+    margin-left: 2.22222rem;
+    margin-right: 2.22222rem;
+}
+
+.story-connections-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2.22222rem;
+}
+
+.story-connections-title {
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.01222rem;
+    margin: 0;
+}
+
+.story-connections-grid {
+    display: flex;
+    gap: 2.22222rem;
+    flex-wrap: wrap;
+}
+
+/* Big Button Component
+ *
+ * Large button-like cards used for "Inspired by" and "Contributed to" sections.
+ */
+.big-button {
+    border: 2px dashed #000;
+    display: flex;
+    gap: 1.11111rem;
+    height: 6.66667rem;
+    padding: 0.55556rem;
+    align-items: center;
+    width: 20.72222rem;
+    text-decoration: none;
+    color: #000;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.big-button:hover {
+    border-style: solid;
+}
+
+.big-button-image {
+    width: 5.55556rem;
+    height: 5.55556rem;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+.big-button-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+}
+
+.big-button-title {
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.01222rem;
+    color: #000;
+    margin: 0 0 0.33333rem 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
+}
+
+.big-button-description {
+    font-family: 'Times New Roman', serif;
+    font-size: 0.88889rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.01778rem;
+    color: #000;
+    margin: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    text-overflow: ellipsis;
+}
+
+/* Responsive Layout for Big Buttons */
+@media (max-width: 768px) {
+    .story-connections {
+        padding-left: 1.11111rem;
+        padding-right: 1.11111rem;
+        gap: 3.33333rem;
+    }
+    
+    .story-connections-grid {
+        flex-direction: column;
+        gap: 1.11111rem;
+    }
+    
+    .big-button {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+/* Connections View
+ *
+ * Interactive scattered layout for showing story connections on homepage
+ */
+.connections-view {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    scroll-behavior: smooth;
+}
+
+.connections-view::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.connections-view::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.connections-view::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.connections-view::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.connections-canvas {
+    position: relative;
+    width: 3000px;
+    height: 2000px;
+    background: #FAF6F0;
+}
+
+.connection-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3000px;
+    height: 2000px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.story-link-scattered {
+    position: absolute;
+    display: block;
+    text-decoration: none;
+    z-index: 2;
+    width: auto;
+    height: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.story-link-scattered:hover {
+    transform: scale(1.05);
+    z-index: 2;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.story-image-scattered {
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+.story-link-scattered.connected {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.story-link-scattered.highlighted {
+    transform: scale(1.1);
+    z-index: 10;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation override for connections view */
+.connections-view + .homepage-content {
+    display: none;
+}
+
+/* Show homepage content when connections view is hidden */
+.connections-view.hidden + .homepage-content {
+    display: block;
+}
+
+.connections-view.hidden {
+    display: none;
 }

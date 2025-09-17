@@ -77,3 +77,13 @@ func GetAllStories() []data.Story {
 	}
 	return stories
 }
+
+// GetStoriesWithConnections retrieves stories that have relationship connections
+func GetStoriesWithConnections(limit int) []data.Story {
+	adapter := GetAdapter()
+	stories, err := adapter.GetStoriesWithConnections(limit)
+	if err != nil {
+		log.Fatalf("Failed to get connected stories: %v", err)
+	}
+	return stories
+}

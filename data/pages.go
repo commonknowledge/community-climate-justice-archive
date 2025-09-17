@@ -2,13 +2,14 @@
 package data
 
 type Page struct {
-	Title          string
-	Description    string
-	Themes         []Theme
-	Types          []Type
-	Stories        []Story
-	RandomStoryURL string
-	StoriesJSON    string
+	Title            string
+	Description      string
+	Themes           []Theme
+	Types            []Type
+	Stories          []Story
+	ConnectedStories []Story
+	RandomStoryURL   string
+	StoriesJSON      string
 }
 
 type TaxonomyIndexPage struct {

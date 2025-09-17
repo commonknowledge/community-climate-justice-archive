@@ -54,6 +54,11 @@ type NocoDBStoryDTO struct {
 
 // ToStory converts a NocoDB record map to a Story struct
 func NocoDBRecordToStory(record map[string]interface{}) (data.Story, error) {
+	return NocoDBRecordToStoryWithClient(record, nil)
+}
+
+// NocoDBRecordToStoryWithClient converts a NocoDB record to a Story struct with client for relationship resolution
+func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client) (data.Story, error) {
 	// Convert map to our DTO struct for easier handling
 	dto, err := mapToNocoDBStoryDTO(record)
 	if err != nil {
@@ -97,8 +102,8 @@ func NocoDBRecordToStory(record map[string]interface{}) (data.Story, error) {
 		Themes:                  themes,
 		Experience:              toString(dto.Experience),
 		TimeSpan:                toString(dto.TimeSpan),
-		InspiredBy:              toString(dto.InspiredBy),
-		HasInspired:             toString(dto.HasInspired),
+		InspiredBy:              fetchStoryConnectionsDirect(toString(dto.ID), "ccsugv6du8wnisr", client),
+		HasInspired:             fetchStoryConnectionsDirect(toString(dto.ID), "cilfzk65ypiw6o4", client),
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
@@ -437,27 +442,6 @@ func extractFilenameFromPath(path string) string {
 	return filename
 }
 
-// toString safely converts an interface{} to string
-func toString(v interface{}) string {
-	if v == nil {
-		return ""
-	}
-
-	switch val := v.(type) {
-	case string:
-		return val
-	case *string:
-		if val == nil {
-			return ""
-		}
-		return *val
-	case fmt.Stringer:
-		return val.String()
-	default:
-		return fmt.Sprintf("%v", val)
-	}
-}
-
 // createStoryURLFromFinding creates a URL from the story finding (same logic as store package)
 func createStoryURLFromFinding(finding string) string {
 	if finding == "" {
@@ -483,4 +467,49 @@ func downloadImageFromNocoDB(downloadPath, localPath string) error {
 	}
 
 	return client.DownloadAttachment(downloadPath, localPath)
+}
+
+// fetchStoryConnectionsDirect reads relationship data from cache instead of making API calls
+func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []data.StoryConnection {
+	if client == nil || recordID == "" || fieldID == "" {
+		return []data.StoryConnection{}
+	}
+
+	// Get all cached records and find the one matching our recordID
+	allRecords, err := client.GetAllRecords()
+	if err != nil {
+		log.Printf("Warning: Failed to get cached records for record %s: %v", recordID, err)
+		return []data.StoryConnection{}
+	}
+
+	// Find the record with matching ID
+	for _, record := range allRecords {
+		if toString(record["Id"]) == recordID {
+			// Determine which cached field to read based on fieldID
+			var cacheKey string
+			if fieldID == "ccsugv6du8wnisr" { // Inspired by
+				cacheKey = "__cached_inspired_by"
+			} else if fieldID == "cilfzk65ypiw6o4" { // Has inspired
+				cacheKey = "__cached_has_inspired"
+			} else {
+				log.Printf("Warning: Unknown fieldID %s for record %s", fieldID, recordID)
+				return []data.StoryConnection{}
+			}
+
+			// Get the cached relationships
+			if cachedData, exists := record[cacheKey]; exists {
+				if connections, ok := cachedData.([]data.StoryConnection); ok {
+					return connections
+				} else {
+					log.Printf("Warning: Cached relationship data has wrong type for record %s", recordID)
+				}
+			}
+
+			// If no cached data found, return empty slice (this is normal for records with no relationships)
+			return []data.StoryConnection{}
+		}
+	}
+
+	log.Printf("Warning: Record %s not found in cache", recordID)
+	return []data.StoryConnection{}
 }

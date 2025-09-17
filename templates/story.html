@@ -127,6 +127,44 @@
             </div>
         </div>
     </div>
+    
+    <div class="story-connections">
+        {{if $story.InspiredBy}}
+        <div class="story-connections-section">
+            <h2 class="story-connections-title">Inspired by</h2>
+            <div class="story-connections-grid">
+                {{range $story.InspiredBy}}
+                <a href="{{.URL}}" class="big-button">
+                    {{if .Image}}
+                    <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
+                    {{end}}
+                    <div class="big-button-content">
+                        <p class="big-button-title">{{.Finding}}</p>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+        
+        {{if $story.HasInspired}}
+        <div class="story-connections-section">
+            <h2 class="story-connections-title">Has inspired</h2>
+            <div class="story-connections-grid">
+                {{range $story.HasInspired}}
+                <a href="{{.URL}}" class="big-button">
+                    {{if .Image}}
+                    <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
+                    {{end}}
+                    <div class="big-button-content">
+                        <p class="big-button-title">{{.Finding}}</p>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+    </div>
 
     <div class="related-stories-container">
         {{if .FirstMoreTaggedStories}}
@@ -229,6 +267,7 @@
         </div>
         {{end}}
     </div>
+
     {{template "footer" .}}
 </body>
 </html>

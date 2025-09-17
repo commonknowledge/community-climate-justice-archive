@@ -2,14 +2,19 @@
 package nocodb
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
+	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/config"
+	"community-climate-justice-archive/internal/util"
 
 	"github.com/eduardolat/nocodbgo"
 )
@@ -99,9 +104,13 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 
 	// Cache the results
 	c.cachedRecords = allRecords
-	c.cacheLoaded = true
 
-	log.Printf("Successfully retrieved and cached all %d records from NocoDB", len(allRecords))
+	// Now fetch relationships for all records and add to cache
+	log.Printf("Fetching relationships for all %d records...", len(allRecords))
+	c.fetchAndCacheRelationships(allRecords)
+
+	c.cacheLoaded = true
+	log.Printf("Successfully retrieved and cached all %d records from NocoDB with relationships", len(allRecords))
 	return allRecords, nil
 }
 
@@ -251,4 +260,196 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+// fetchAndCacheRelationships fetches relationship data for all records and stores it in the cache
+func (c *Client) fetchAndCacheRelationships(records []map[string]interface{}) {
+	// NocoDB field IDs for relationships
+	inspiredByFieldID := "ccsugv6du8wnisr"
+	hasInspiredFieldID := "cilfzk65ypiw6o4"
+
+	for i, record := range records {
+		recordID := toString(record["Id"])
+		if recordID == "" {
+			continue
+		}
+
+		// Fetch "Inspired by" relationships
+		inspiredBy := c.fetchRelationshipDataWithCache(recordID, inspiredByFieldID, records)
+		records[i]["__cached_inspired_by"] = inspiredBy
+
+		// Fetch "Has inspired" relationships
+		hasInspired := c.fetchRelationshipDataWithCache(recordID, hasInspiredFieldID, records)
+		records[i]["__cached_has_inspired"] = hasInspired
+
+		// Log progress every 50 records
+		if (i+1)%50 == 0 {
+			log.Printf("Fetched relationships for %d/%d records", i+1, len(records))
+		}
+	}
+
+	log.Printf("Completed fetching relationships for all %d records", len(records))
+}
+
+// fetchRelationshipDataWithCache makes the HTTP call to get relationship data for a single record/field
+// and uses the provided records cache to look up images
+func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRecords []map[string]interface{}) []data.StoryConnection {
+	url := fmt.Sprintf("%s/api/v2/tables/%s/links/%s/records/%s",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID,
+		fieldID,
+		recordID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("Warning: Failed to create request for record %s field %s: %v", recordID, fieldID, err)
+		return []data.StoryConnection{}
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Printf("Warning: Failed to fetch links for record %s field %s: %v", recordID, fieldID, err)
+		return []data.StoryConnection{}
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Printf("Warning: Links API returned status %d for record %s field %s", resp.StatusCode, recordID, fieldID)
+		return []data.StoryConnection{}
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Warning: Failed to read response for record %s field %s: %v", recordID, fieldID, err)
+		return []data.StoryConnection{}
+	}
+
+	var linkResponse struct {
+		List []struct {
+			Id    int    `json:"Id"`
+			Title string `json:"Title"`
+		} `json:"list"`
+	}
+
+	if err := json.Unmarshal(body, &linkResponse); err != nil {
+		log.Printf("Warning: Failed to parse response for record %s field %s: %v", recordID, fieldID, err)
+		return []data.StoryConnection{}
+	}
+
+	var connections []data.StoryConnection
+	for _, item := range linkResponse.List {
+		if item.Title != "" {
+			connection := data.StoryConnection{
+				ID:      strconv.Itoa(item.Id),
+				Title:   item.Title,
+				Finding: item.Title,
+				URL:     "/stories/" + util.Slugify(item.Title) + ".html",
+			}
+
+			// Look up the full story data to get the image
+			storyIDStr := strconv.Itoa(item.Id)
+			if imageURL := c.getStoryImageFromRecords(storyIDStr, allRecords); imageURL != "" {
+				connection.Image = imageURL
+			}
+
+			connections = append(connections, connection)
+		}
+	}
+
+	return connections
+}
+
+// getStoryImageFromRecords looks up a story by ID in the provided records and returns its image URL
+func (c *Client) getStoryImageFromRecords(storyID string, allRecords []map[string]interface{}) string {
+	// Find the story with matching ID
+	for _, record := range allRecords {
+		recordID := toString(record["Id"])
+		if recordID == storyID {
+			// Extract image directly from the record
+			return c.extractImageFromRecord(record)
+		}
+	}
+
+	return ""
+}
+
+// extractImageFromRecord extracts the first image URL from a NocoDB record
+func (c *Client) extractImageFromRecord(record map[string]interface{}) string {
+	// Try to get images from the "Image" field
+	if imageField, exists := record["Image"]; exists && imageField != nil {
+
+		// Check if it's already a slice of maps (parsed by NocoDB client)
+		if imageSlice, ok := imageField.([]interface{}); ok && len(imageSlice) > 0 {
+			if imageMap, ok := imageSlice[0].(map[string]interface{}); ok {
+				if title, ok := imageMap["title"].(string); ok && title != "" {
+					// Create the processed image URL from title
+					ext := filepath.Ext(title)
+					name := strings.TrimSuffix(title, ext)
+					imageURL := "/images/processed/" + name + ".webp"
+					return imageURL
+				}
+			}
+		}
+
+		// Fallback: try to parse as JSON string if it's a string
+		if imageStr := toString(imageField); imageStr != "" {
+			var images []map[string]interface{}
+			if err := json.Unmarshal([]byte(imageStr), &images); err == nil && len(images) > 0 {
+				if filename, ok := images[0]["filename"].(string); ok && filename != "" {
+					// Create the processed image URL
+					ext := filepath.Ext(filename)
+					name := strings.TrimSuffix(filename, ext)
+					imageURL := "/images/processed/" + name + ".webp"
+					return imageURL
+				}
+			}
+		}
+	}
+
+	// Try "Source image" field as fallback
+	if sourceImageField, exists := record["Source image"]; exists && sourceImageField != nil {
+		// Check if it's already a slice of maps (parsed by NocoDB client)
+		if imageSlice, ok := sourceImageField.([]interface{}); ok && len(imageSlice) > 0 {
+			if imageMap, ok := imageSlice[0].(map[string]interface{}); ok {
+				if title, ok := imageMap["title"].(string); ok && title != "" {
+					// Create the processed image URL from title
+					ext := filepath.Ext(title)
+					name := strings.TrimSuffix(title, ext)
+					imageURL := "/images/processed/" + name + ".webp"
+					return imageURL
+				}
+			}
+		}
+
+		// Fallback: try to parse as JSON string if it's a string
+		if imageStr := toString(sourceImageField); imageStr != "" {
+			var images []map[string]interface{}
+			if err := json.Unmarshal([]byte(imageStr), &images); err == nil && len(images) > 0 {
+				if filename, ok := images[0]["filename"].(string); ok && filename != "" {
+					// Create the processed image URL
+					ext := filepath.Ext(filename)
+					name := strings.TrimSuffix(filename, ext)
+					imageURL := "/images/processed/" + name + ".webp"
+					return imageURL
+				}
+			}
+		}
+	}
+
+	return ""
+}
+
+// toString converts interface{} to string safely
+func toString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return fmt.Sprintf("%v", v)
 }
