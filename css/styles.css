@@ -1492,7 +1492,6 @@ A button with a dashed border for navigation and actions.
     position: relative;
     width: 100vw;
     height: 100vh;
-    background: #FAF6F0;
     overflow: auto;
     scroll-behavior: smooth;
 }
