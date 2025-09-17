@@ -309,14 +309,14 @@
         <div class="tag-list-container">
             <h2 class="tag-list-header">Themes</h2>
             <ul class="tag-list">{{range .Themes}}
-                <li><a class="tag large" href="/themes/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
             </ul>
         </div>
 
         <div class="tag-list-container">
             <h2 class="tag-list-header">Types</h2>
             <ul class="tag-list">{{range .Types}}
-                <li><a class="tag large" href="/types/{{.URL}}.html" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
             </ul>
         </div>
 
