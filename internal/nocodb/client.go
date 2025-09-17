@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/config"
@@ -63,7 +62,6 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 
 	// Return cached records if available
 	if c.cacheLoaded {
-		log.Printf("Returning %d cached records", len(c.cachedRecords))
 		return c.cachedRecords, nil
 	}
 
@@ -350,10 +348,14 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 				URL:     "/stories/" + util.Slugify(item.Title) + ".html",
 			}
 
-			// Look up the full story data to get the image
+			// Look up the full story data from provided records to get proper image URLs
 			storyIDStr := strconv.Itoa(item.Id)
-			if imageURL := c.getStoryImageFromRecords(storyIDStr, allRecords); imageURL != "" {
-				connection.Image = imageURL
+			if cachedStory, found := c.getStoryFromRecords(storyIDStr, allRecords); found {
+				storyImage := cachedStory.GetStoryImage()
+				if storyImage.URL != "" {
+					connection.Image = storyImage.URL
+					connection.ThumbURL = storyImage.ThumbURL
+				}
 			}
 
 			connections = append(connections, connection)
@@ -365,82 +367,43 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 
 // getStoryImageFromRecords looks up a story by ID in the provided records and returns its image URL
 func (c *Client) getStoryImageFromRecords(storyID string, allRecords []map[string]interface{}) string {
-	// Find the story with matching ID
-	for _, record := range allRecords {
-		recordID := toString(record["Id"])
-		if recordID == storyID {
-			// Extract image directly from the record
-			return c.extractImageFromRecord(record)
-		}
+	// Use the Story object from provided records to get the proper image URL
+	if story, found := c.getStoryFromRecords(storyID, allRecords); found {
+		storyImage := story.GetStoryImage()
+		return storyImage.URL
 	}
-
 	return ""
 }
 
-// extractImageFromRecord extracts the first image URL from a NocoDB record
-func (c *Client) extractImageFromRecord(record map[string]interface{}) string {
-	// Try to get images from the "Image" field
-	if imageField, exists := record["Image"]; exists && imageField != nil {
-
-		// Check if it's already a slice of maps (parsed by NocoDB client)
-		if imageSlice, ok := imageField.([]interface{}); ok && len(imageSlice) > 0 {
-			if imageMap, ok := imageSlice[0].(map[string]interface{}); ok {
-				if title, ok := imageMap["title"].(string); ok && title != "" {
-					// Create the processed image URL from title
-					ext := filepath.Ext(title)
-					name := strings.TrimSuffix(title, ext)
-					imageURL := "/images/processed/" + name + ".webp"
-					return imageURL
-				}
+// getStoryFromRecords looks up a story by ID in the provided records and returns a fully converted Story object
+func (c *Client) getStoryFromRecords(storyID string, allRecords []map[string]interface{}) (data.Story, bool) {
+	// Find the record with matching ID
+	for _, record := range allRecords {
+		recordID := toString(record["Id"])
+		if recordID == storyID {
+			// Convert the raw record to a full Story object
+			// Note: We pass nil for client to avoid infinite recursion on relationships
+			story, err := NocoDBRecordToStoryWithClient(record, nil)
+			if err != nil {
+				log.Printf("Warning: Failed to convert record to story %s: %v", storyID, err)
+				return data.Story{}, false
 			}
-		}
-
-		// Fallback: try to parse as JSON string if it's a string
-		if imageStr := toString(imageField); imageStr != "" {
-			var images []map[string]interface{}
-			if err := json.Unmarshal([]byte(imageStr), &images); err == nil && len(images) > 0 {
-				if filename, ok := images[0]["filename"].(string); ok && filename != "" {
-					// Create the processed image URL
-					ext := filepath.Ext(filename)
-					name := strings.TrimSuffix(filename, ext)
-					imageURL := "/images/processed/" + name + ".webp"
-					return imageURL
-				}
-			}
+			return story, true
 		}
 	}
 
-	// Try "Source image" field as fallback
-	if sourceImageField, exists := record["Source image"]; exists && sourceImageField != nil {
-		// Check if it's already a slice of maps (parsed by NocoDB client)
-		if imageSlice, ok := sourceImageField.([]interface{}); ok && len(imageSlice) > 0 {
-			if imageMap, ok := imageSlice[0].(map[string]interface{}); ok {
-				if title, ok := imageMap["title"].(string); ok && title != "" {
-					// Create the processed image URL from title
-					ext := filepath.Ext(title)
-					name := strings.TrimSuffix(title, ext)
-					imageURL := "/images/processed/" + name + ".webp"
-					return imageURL
-				}
-			}
-		}
+	return data.Story{}, false
+}
 
-		// Fallback: try to parse as JSON string if it's a string
-		if imageStr := toString(sourceImageField); imageStr != "" {
-			var images []map[string]interface{}
-			if err := json.Unmarshal([]byte(imageStr), &images); err == nil && len(images) > 0 {
-				if filename, ok := images[0]["filename"].(string); ok && filename != "" {
-					// Create the processed image URL
-					ext := filepath.Ext(filename)
-					name := strings.TrimSuffix(filename, ext)
-					imageURL := "/images/processed/" + name + ".webp"
-					return imageURL
-				}
-			}
-		}
+// getStoryFromCache looks up a story by ID in the cached records and returns a fully converted Story object
+func (c *Client) getStoryFromCache(storyID string) (data.Story, bool) {
+	allRecords, err := c.GetAllRecords()
+	if err != nil {
+		log.Printf("Warning: Failed to get cached records for story %s: %v", storyID, err)
+		return data.Story{}, false
 	}
 
-	return ""
+	return c.getStoryFromRecords(storyID, allRecords)
 }
 
 // toString converts interface{} to string safely

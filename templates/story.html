@@ -135,7 +135,9 @@
             <div class="story-connections-grid">
                 {{range $story.InspiredBy}}
                 <a href="{{.URL}}" class="big-button">
-                    {{if .Image}}
+                    {{if .ThumbURL}}
+                    <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                    {{else if .Image}}
                     <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
                     {{end}}
                     <div class="big-button-content">
@@ -153,7 +155,9 @@
             <div class="story-connections-grid">
                 {{range $story.HasInspired}}
                 <a href="{{.URL}}" class="big-button">
-                    {{if .Image}}
+                    {{if .ThumbURL}}
+                    <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                    {{else if .Image}}
                     <div class="big-button-image" style="background-image: url('{{.Image}}');"></div>
                     {{end}}
                     <div class="big-button-content">

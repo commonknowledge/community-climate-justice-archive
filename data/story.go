@@ -16,11 +16,12 @@ import (
 )
 
 type StoryConnection struct {
-	ID      string `json:"id"`
-	Title   string `json:"title"`
-	Finding string `json:"finding"`
-	Image   string `json:"image"`
-	URL     string `json:"url"`
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Finding  string `json:"finding"`
+	Image    string `json:"image"`
+	ThumbURL string `json:"thumbUrl"`
+	URL      string `json:"url"`
 }
 
 type Story struct {
