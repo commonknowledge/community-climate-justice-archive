@@ -1491,7 +1491,7 @@ A button with a dashed border for navigation and actions.
 .connections-view {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 150vh;
     overflow: auto;
     scroll-behavior: smooth;
 }
@@ -1517,8 +1517,7 @@ A button with a dashed border for navigation and actions.
 .connections-canvas {
     position: relative;
     width: 3000px;
-    height: 2000px;
-    background: #FAF6F0;
+    height: 2500px;
 }
 
 .connection-lines {
@@ -1526,7 +1525,7 @@ A button with a dashed border for navigation and actions.
     top: 0;
     left: 0;
     width: 3000px;
-    height: 2000px;
+    height: 2500px;
     pointer-events: none;
     z-index: 5;
 }
@@ -1567,16 +1566,6 @@ A button with a dashed border for navigation and actions.
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
 }
 
-/* Navigation override for connections view */
-.connections-view + .homepage-content {
-    display: none;
-}
-
-/* Show homepage content when connections view is hidden */
-.connections-view.hidden + .homepage-content {
-    display: block;
-}
-
-.connections-view.hidden {
-    display: none;
+.connections-view {
+    margin-bottom: 6.66667rem;
 }
