@@ -282,32 +282,6 @@
 <body>
     {{template "header" .}}
 
-    <!-- Connections View -->
-    <div class="connections-view" id="connections-view">
-        <div class="connections-canvas" id="connections-canvas">
-            <svg class="connection-lines"></svg>
-            
-            {{range $index, $story := .ConnectedStories}}
-            {{$storyImage := $story.GetStoryImage}}
-            {{if $storyImage.URL}}
-            <a href="{{$story.URL}}" class="story-link-scattered">
-                <img 
-                    class="story-image-scattered" 
-                    src="{{$storyImage.ThumbURL}}"
-                    alt="{{$story.Finding}}"
-                    data-story-id="{{$story.ID}}"
-                    data-story-title="{{$story.Finding}}"
-                    data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
-                    data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
-                    data-index="{{$index}}"
-                    loading="lazy"
-                />
-            </a>
-            {{end}}
-            {{end}}
-        </div>
-    </div>
-
     <div class="homepage-content">
         <div class="what-if-rotation">
             <div class="what-if-rotation-item">
@@ -348,61 +322,30 @@
 
         <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive</h2>
         
-        <!-- Filter Controls -->
-        <div class="archive-filters" id="archive-filters">
-            <div class="filter-dropdown" id="theme-dropdown">
-                <button class="filter-dropdown-button" id="theme-button">
-                    <span>themes</span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-                <div class="filter-dropdown-content" id="theme-content">
-                    <!-- Theme tags will be populated here -->
-                </div>
-            </div>
-            
-            <div class="filter-dropdown" id="type-dropdown">
-                <button class="filter-dropdown-button" id="type-button">
-                    <span>types</span>
-                    <span class="dropdown-arrow">▼</span>
-                </button>
-                <div class="filter-dropdown-content" id="type-content">
-                    <!-- Type tags will be populated here -->
-                </div>
-            </div>
-            
-            
-            <div class="filter-actions">
-                <button id="clear-filters" class="dashed-button clear-filters-btn">Clear all</button>
-                <div id="filter-count" class="filter-count"></div>
-            </div>
-        </div>
-        
-        <!-- Active Filters Display -->
-        <div id="active-filters" class="active-filters" style="display: none;">
-            <span class="active-filters-label">Active filters:</span>
-            <div id="active-filters-list" class="active-filters-list"></div>
-        </div>
-        
-        <div class="stories-list homepage" id="stories-container">{{range .Stories}}
-            {{$story := .}}
-            <div class="story">
-                {{with .GetStoryImage}}
-                {{ if .URL }}
-                <a href="{{$story.URL}}">
+        <!-- Connections View replaces the archive grid -->
+        <div class="connections-view" id="connections-view">
+            <div class="connections-canvas" id="connections-canvas">
+                <svg class="connection-lines"></svg>
+                
+                {{range $index, $story := .ConnectedStories}}
+                {{$storyImage := $story.GetStoryImage}}
+                {{if $storyImage.URL}}
+                <a href="{{$story.URL}}" class="story-link-scattered">
                     <img 
-                        src="{{.ThumbURL}}" 
-                        srcset="
-                            {{.ThumbURL}} 300w,
-                            {{.MediumURL}} 800w
-                        "
-                        sizes="(max-width: 600px) 300px, 800px"
-                        alt="{{.AlternativeText}}">
+                        class="story-image-scattered" 
+                        src="{{$storyImage.ThumbURL}}"
+                        alt="{{$story.Finding}}"
+                        data-story-id="{{$story.ID}}"
+                        data-story-title="{{$story.Finding}}"
+                        data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
+                        data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
+                        data-index="{{$index}}"
+                        loading="lazy"
+                    />
                 </a>
-                {{ else }}
-                <div>No image</div>
-                {{ end }}
                 {{end}}
-            </div>{{end}}
+                {{end}}
+            </div>
         </div>
     </div>
     {{template "footer" .}}
