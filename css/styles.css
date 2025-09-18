@@ -22,13 +22,18 @@ html {
     font-size: 18px;
 }
 
+/* CSS Variables */
+:root {
+    --Background: #FFFAF3;
+}
+
 /* Page Container
 
 The base styles for the entire page with a light cream background and classic
 serif font. Prevents horizontal scrolling and sets the base font size to 18px.
 */
 body {
-    background-color: #FFFBF9;
+    background-color: var(--Background);
     font-family: 'Times New Roman', serif;
     max-width: 100vw;
     overflow-x: hidden;
@@ -212,11 +217,11 @@ Headers for tag-related sections in the archive, underwhich we display stories.
     margin-top: 40px;
     color: #000;
     font-family: "Times New Roman";
-    font-size: 32px;
+    font-size: 52px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-    letter-spacing: -0.64px;
+    letter-spacing: -1.04px !important;
 }
 
 /* Wander Through Archive Header
@@ -245,7 +250,7 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
 }
 
 .filter-dropdown-button {
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px dashed #000;
     font-family: Arial, sans-serif;
     font-size: 1.22222rem;
@@ -290,7 +295,7 @@ Filter controls for browsing the archive with custom dropdowns matching Figma de
     top: 100%;
     left: 0;
     right: 0;
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px solid #000;
     border-top: none;
     z-index: 1000;
@@ -444,7 +449,7 @@ Shows currently applied filters as removable tags below the filter controls.
     align-items: center;
     min-height: 20rem;
     padding: 2.22222rem;
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px dashed #000;
     text-align: center;
 }
@@ -1076,7 +1081,7 @@ A button with a dashed border for navigation and actions.
 */
 .dashed-button {
     align-items: center;
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px dashed #000;
     color: var(--Black, #000);
     display: flex;
@@ -1203,7 +1208,7 @@ A button with a dashed border for navigation and actions.
 }
 
 .clear-filters-button-top {
-    background: #FFFBF9;
+    background: var(--Background);
     border: none;
     color: #000;
     cursor: pointer;
@@ -1258,7 +1263,7 @@ A button with a dashed border for navigation and actions.
 
 .clear-filters-button {
     align-items: center;
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px dashed #000;
     color: var(--Black, #000);
     display: flex;
@@ -1295,7 +1300,7 @@ A button with a dashed border for navigation and actions.
 
 .filter-dropdown-button {
     align-items: center;
-    background: #FFFBF9;
+    background: var(--Background);
     border: 2px dashed #000;
     color: var(--Black, #000);
     display: flex;
@@ -1326,7 +1331,7 @@ A button with a dashed border for navigation and actions.
 .filter-dropdown-content {
     display: none;
     position: absolute;
-    background-color: #FFFBF9;
+    background-color: var(--Background);
     border: 2px solid #000;
     min-width: 200px;
     max-height: 300px;
@@ -1515,6 +1520,7 @@ A button with a dashed border for navigation and actions.
 }
 
 .connections-canvas {
+    background-color: #ffffff;
     position: relative;
     width: 3000px;
     height: 2500px;
