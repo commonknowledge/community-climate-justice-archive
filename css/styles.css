@@ -1492,13 +1492,16 @@ A button with a dashed border for navigation and actions.
 /* Connections View
  *
  * Interactive scattered layout for showing story connections on homepage
+ * Creates an "infinite canvas" effect with a fixed viewport height
  */
 .connections-view {
     position: relative;
-    width: 100vw;
-    height: 150vh;
+    width: 100%;
+    height: 843px;
     overflow: auto;
     scroll-behavior: smooth;
+    margin-bottom: 6.66667rem;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset;
 }
 
 .connections-view::-webkit-scrollbar {
@@ -1520,19 +1523,19 @@ A button with a dashed border for navigation and actions.
 }
 
 .connections-canvas {
-    background-color: #ffffff;
-    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset;
-    height: 2500px;
     position: relative;
-    width: 3000px;
+    width: 5000px; /* Large internal canvas width */
+    height: 3500px; /* Large internal canvas height */
+    background-color: #ffffff; /* White background */
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset; /* Inset shadow for depth */
 }
 
 .connection-lines {
     position: absolute;
     top: 0;
     left: 0;
-    width: 3000px;
-    height: 2500px;
+    width: 5000px; /* Match canvas width */
+    height: 3500px; /* Match canvas height */
     pointer-events: none;
     z-index: 5;
 }
