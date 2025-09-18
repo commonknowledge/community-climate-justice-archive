@@ -1521,9 +1521,10 @@ A button with a dashed border for navigation and actions.
 
 .connections-canvas {
     background-color: #ffffff;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.25) inset;
+    height: 2500px;
     position: relative;
     width: 3000px;
-    height: 2500px;
 }
 
 .connection-lines {
