@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"text/template"
 
 	"community-climate-justice-archive/data"
@@ -20,15 +19,15 @@ import (
 
 // createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
 func createTypeIndexOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "types", fileName)
 }
 
-// createThemeIndexOutputPathFromTitle creates a path to the output file for a type index page.
+// createThemeIndexOutputPathFromTitle creates a path to the output file for a theme index page.
 func createThemeIndexOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "themes", fileName)
 }
 
@@ -41,8 +40,8 @@ func createStoryOutputPathFromFinding(finding string) string {
 
 // createWeatherOutputPathFromTitle creates a path to the output file for a weather page.
 func createWeatherOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "weather", fileName)
 }
 
