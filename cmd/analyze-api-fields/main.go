@@ -364,23 +364,25 @@ func (a *APIFieldAnalyzer) AnalyzeFields() ([]FieldAnalysis, error) {
 
 	// Analyze each field from the schema (more comprehensive than just sample record)
 	for fieldName := range a.nocoDBSchema {
-		var processingCategory string
-
-		// Categorize internal system fields
+		// Categorize and exclude internal system fields
 		if a.isInternalField(fieldName) {
 			a.internalFields[fieldName] = true
-			processingCategory = "system_managed"
-		} else if a.isUnusedField(fieldName) {
-			// Categorize intentionally unused fields
-			a.unusedFields[fieldName] = true
-			processingCategory = "custom_logic"
-		} else if a.hiddenFields[fieldName] {
-			// Categorize hidden fields (turned off in NocoDB view)
-			processingCategory = "ui_configured"
-		} else {
-			// Regular fields that go through standard processing
-			processingCategory = "standard"
+			continue
 		}
+
+		// Categorize and exclude intentionally unused fields
+		if a.isUnusedField(fieldName) {
+			a.unusedFields[fieldName] = true
+			continue
+		}
+
+		// Categorize and exclude hidden fields (turned off in NocoDB view)
+		if a.hiddenFields[fieldName] {
+			continue
+		}
+
+		// Regular fields that go through standard processing
+		processingCategory := "standard"
 
 		// Get sample value from the record if available
 		var sampleValue interface{}
