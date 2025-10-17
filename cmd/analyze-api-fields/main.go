@@ -22,17 +22,18 @@ import (
 
 // FieldAnalysis represents the analysis of a single API field
 type FieldAnalysis struct {
-	FieldName       string `json:"field_name"`
-	FieldType       string `json:"field_type"`
-	NocoDBType      string `json:"nocodb_type"`
-	NocoDBOptions   string `json:"nocodb_options,omitempty"`
-	CurrentlyMapped bool   `json:"currently_mapped"`
-	UsedInStory     bool   `json:"used_in_story"`
-	UsedInTemplates bool   `json:"used_in_templates"`
-	SampleValue     string `json:"sample_value"`
-	Status          string `json:"status"`
-	JSONTag         string `json:"json_tag,omitempty"`
-	TemplateFiles   string `json:"template_files,omitempty"`
+	FieldName          string `json:"field_name"`
+	FieldType          string `json:"field_type"`
+	NocoDBType         string `json:"nocodb_type"`
+	NocoDBOptions      string `json:"nocodb_options,omitempty"`
+	CurrentlyMapped    bool   `json:"currently_mapped"`
+	UsedInStory        bool   `json:"used_in_story"`
+	UsedInTemplates    bool   `json:"used_in_templates"`
+	SampleValue        string `json:"sample_value"`
+	Status             string `json:"status"`
+	JSONTag            string `json:"json_tag,omitempty"`
+	TemplateFiles      string `json:"template_files,omitempty"`
+	ProcessingCategory string `json:"processing_category,omitempty"`
 }
 
 // NocoDBField represents a field definition from NocoDB schema
@@ -363,21 +364,22 @@ func (a *APIFieldAnalyzer) AnalyzeFields() ([]FieldAnalysis, error) {
 
 	// Analyze each field from the schema (more comprehensive than just sample record)
 	for fieldName := range a.nocoDBSchema {
+		var processingCategory string
+
 		// Categorize internal system fields
 		if a.isInternalField(fieldName) {
 			a.internalFields[fieldName] = true
-			continue
-		}
-
-		// Categorize intentionally unused fields
-		if a.isUnusedField(fieldName) {
+			processingCategory = "system_managed"
+		} else if a.isUnusedField(fieldName) {
+			// Categorize intentionally unused fields
 			a.unusedFields[fieldName] = true
-			continue
-		}
-
-		// Skip hidden fields (turned off in NocoDB view)
-		if a.hiddenFields[fieldName] {
-			continue
+			processingCategory = "custom_logic"
+		} else if a.hiddenFields[fieldName] {
+			// Categorize hidden fields (turned off in NocoDB view)
+			processingCategory = "ui_configured"
+		} else {
+			// Regular fields that go through standard processing
+			processingCategory = "standard"
 		}
 
 		// Get sample value from the record if available
@@ -395,15 +397,16 @@ func (a *APIFieldAnalyzer) AnalyzeFields() ([]FieldAnalysis, error) {
 		nocoDBType, nocoDBOptions := a.getNocoDBFieldInfo(fieldName)
 
 		analysis := FieldAnalysis{
-			FieldName:       fieldName,
-			FieldType:       fieldType,
-			NocoDBType:      nocoDBType,
-			NocoDBOptions:   nocoDBOptions,
-			CurrentlyMapped: a.isFieldMappedInNocoDB(fieldName),
-			UsedInStory:     a.isFieldUsedInStory(fieldName),
-			UsedInTemplates: len(a.templateFieldUsage[fieldName]) > 0,
-			SampleValue:     truncateValue(sampleValue, 50),
-			JSONTag:         a.nocoDBFields[fieldName],
+			FieldName:          fieldName,
+			FieldType:          fieldType,
+			NocoDBType:         nocoDBType,
+			NocoDBOptions:      nocoDBOptions,
+			CurrentlyMapped:    a.isFieldMappedInNocoDB(fieldName),
+			UsedInStory:        a.isFieldUsedInStory(fieldName),
+			UsedInTemplates:    len(a.templateFieldUsage[fieldName]) > 0,
+			SampleValue:        truncateValue(sampleValue, 50),
+			JSONTag:            a.nocoDBFields[fieldName],
+			ProcessingCategory: processingCategory,
 		}
 
 		if templateFiles, exists := a.templateFieldUsage[fieldName]; exists {
@@ -574,11 +577,8 @@ func (a *APIFieldAnalyzer) isInternalField(fieldName string) bool {
 func (a *APIFieldAnalyzer) isUnusedField(fieldName string) bool {
 	// Fields that are programmatically excluded from analysis
 	unusedFields := []string{
-		"Stories",      // Programmatically excluded - not being used
-		"Stories1",     // Programmatically excluded - not being used
-		"Source image", // Programmatically excluded - used as fallback in image processing code
-		"Has inspired", // Programmatically excluded - complex relationship processing with special caching
-		"Inspired by",  // Programmatically excluded - complex relationship processing with special caching
+		"Stories",  // Programmatically excluded - not being used
+		"Stories1", // Programmatically excluded - not being used
 	}
 
 	for _, unused := range unusedFields {
@@ -856,53 +856,19 @@ func printSummary(analyses []FieldAnalysis, analyzer *APIFieldAnalyzer) {
 		fmt.Printf("  %s: %d\n", status, count)
 	}
 
-	// Categorize fields by status
+	// Show new fields
 	var newFields []string
-	var fullyMappedFields []string
-	var mappedNotUsedFields []string
-	var mappedNotDisplayedFields []string
 	var multiSelectFields []string
-
 	for _, analysis := range analyses {
-		switch analysis.Status {
-		case "NEW":
+		if analysis.Status == "NEW" {
 			newFields = append(newFields, analysis.FieldName)
-		case "FULLY_MAPPED":
-			fullyMappedFields = append(fullyMappedFields, analysis.FieldName)
-		case "MAPPED_NOT_USED":
-			mappedNotUsedFields = append(mappedNotUsedFields, analysis.FieldName)
-		case "MAPPED_NOT_DISPLAYED":
-			mappedNotDisplayedFields = append(mappedNotDisplayedFields, analysis.FieldName)
 		}
-
 		if analysis.NocoDBType == "MultiSelect" {
 			fieldDesc := analysis.FieldName
 			if analysis.NocoDBOptions != "" {
 				fieldDesc += " [" + analysis.NocoDBOptions + "]"
 			}
 			multiSelectFields = append(multiSelectFields, fieldDesc)
-		}
-	}
-
-	// Show fields by status
-	if len(fullyMappedFields) > 0 {
-		fmt.Printf("\nFully mapped and displayed fields:\n")
-		for _, field := range fullyMappedFields {
-			fmt.Printf("  - %s\n", field)
-		}
-	}
-
-	if len(mappedNotDisplayedFields) > 0 {
-		fmt.Printf("\nMapped but not displayed in templates:\n")
-		for _, field := range mappedNotDisplayedFields {
-			fmt.Printf("  - %s\n", field)
-		}
-	}
-
-	if len(mappedNotUsedFields) > 0 {
-		fmt.Printf("\nMapped but not used in Story struct:\n")
-		for _, field := range mappedNotUsedFields {
-			fmt.Printf("  - %s\n", field)
 		}
 	}
 
