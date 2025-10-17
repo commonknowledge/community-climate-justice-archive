@@ -231,11 +231,12 @@
     "field_name": "Time period",
     "field_type": "null",
     "nocodb_type": "MultiSelect",
-    "currently_mapped": false,
-    "used_in_story": false,
+    "currently_mapped": true,
+    "used_in_story": true,
     "used_in_templates": false,
     "sample_value": "\u003cnil\u003e",
-    "status": "NEW",
+    "status": "MAPPED_NOT_DISPLAYED",
+    "json_tag": "Time period",
     "processing_category": "standard"
   },
   {
@@ -248,7 +249,7 @@
     "sample_value": "Smoking pit",
     "status": "MAPPED_NOT_USED",
     "json_tag": "Title",
-    "template_files": "archive.html, homepage.html, nocodb-test.html, partials/stories-list.html, story.html, theme-index.html, type-index.html, wander.html, weather-index.html",
+    "template_files": "archive.html, giftedby-index.html, homepage.html, nocodb-test.html, partials/stories-list.html, scalepermanence-index.html, story.html, theme-index.html, timeperiod-index.html, type-index.html, wander.html, weather-index.html, whatwasisif-index.html",
     "processing_category": "standard"
   },
   {
