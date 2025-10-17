@@ -28,7 +28,6 @@ type Story struct {
 	ID                      string
 	CreatedTime             string
 	Finding                 string
-	Title                   string
 	HighStExperiment        string
 	WhatWasIsIf             string
 	Image                   string

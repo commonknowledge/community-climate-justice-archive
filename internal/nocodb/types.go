@@ -19,7 +19,6 @@ type NocoDBStoryDTO struct {
 	ID                      interface{} `json:"Id"`
 	CreatedTime             interface{} `json:"CreatedAt"`
 	Finding                 interface{} `json:"Title"`
-	Title                   interface{} `json:"Title"`
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
@@ -93,7 +92,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		ID:                      toString(dto.ID),
 		CreatedTime:             toString(dto.CreatedTime),
 		Finding:                 toString(dto.Finding),
-		Title:                   toString(dto.Title),
 		HighStExperiment:        toString(dto.HighStExperiment),
 		WhatWasIsIf:             toString(dto.WhatWasIsIf),
 		Image:                   func() string { img, _ := ParseImagesFromNocoDB(dto.Image); return img }(),
