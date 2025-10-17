@@ -574,8 +574,11 @@ func (a *APIFieldAnalyzer) isInternalField(fieldName string) bool {
 func (a *APIFieldAnalyzer) isUnusedField(fieldName string) bool {
 	// Fields that are programmatically excluded from analysis
 	unusedFields := []string{
-		"Stories",  // Programmatically excluded - not being used
-		"Stories1", // Programmatically excluded - not being used
+		"Stories",      // Programmatically excluded - not being used
+		"Stories1",     // Programmatically excluded - not being used
+		"Source image", // Programmatically excluded - used as fallback in image processing code
+		"Has inspired", // Programmatically excluded - complex relationship processing with special caching
+		"Inspired by",  // Programmatically excluded - complex relationship processing with special caching
 	}
 
 	for _, unused := range unusedFields {
@@ -853,19 +856,53 @@ func printSummary(analyses []FieldAnalysis, analyzer *APIFieldAnalyzer) {
 		fmt.Printf("  %s: %d\n", status, count)
 	}
 
-	// Show new fields
+	// Categorize fields by status
 	var newFields []string
+	var fullyMappedFields []string
+	var mappedNotUsedFields []string
+	var mappedNotDisplayedFields []string
 	var multiSelectFields []string
+
 	for _, analysis := range analyses {
-		if analysis.Status == "NEW" {
+		switch analysis.Status {
+		case "NEW":
 			newFields = append(newFields, analysis.FieldName)
+		case "FULLY_MAPPED":
+			fullyMappedFields = append(fullyMappedFields, analysis.FieldName)
+		case "MAPPED_NOT_USED":
+			mappedNotUsedFields = append(mappedNotUsedFields, analysis.FieldName)
+		case "MAPPED_NOT_DISPLAYED":
+			mappedNotDisplayedFields = append(mappedNotDisplayedFields, analysis.FieldName)
 		}
+
 		if analysis.NocoDBType == "MultiSelect" {
 			fieldDesc := analysis.FieldName
 			if analysis.NocoDBOptions != "" {
 				fieldDesc += " [" + analysis.NocoDBOptions + "]"
 			}
 			multiSelectFields = append(multiSelectFields, fieldDesc)
+		}
+	}
+
+	// Show fields by status
+	if len(fullyMappedFields) > 0 {
+		fmt.Printf("\nFully mapped and displayed fields:\n")
+		for _, field := range fullyMappedFields {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	if len(mappedNotDisplayedFields) > 0 {
+		fmt.Printf("\nMapped but not displayed in templates:\n")
+		for _, field := range mappedNotDisplayedFields {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	if len(mappedNotUsedFields) > 0 {
+		fmt.Printf("\nMapped but not used in Story struct:\n")
+		for _, field := range mappedNotUsedFields {
+			fmt.Printf("  - %s\n", field)
 		}
 	}
 
