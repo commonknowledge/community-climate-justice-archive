@@ -42,7 +42,7 @@
     {{end}}
     <div class="story-details">
         <div class="story-finding">
-            {{$story.Finding}}
+            {{if $story.Title}}{{$story.Title}}{{else}}{{$story.Finding}}{{end}}
         </div>
         <div class="story-metadata">
             <div class="story-metadata-item-group">
@@ -50,6 +50,30 @@
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Date</span>
                     <span>{{$story.StartDateTime}}{{if $story.EndDateTime}} - {{$story.EndDateTime}}{{end}}</span>
+                </div>
+                {{end}}
+                {{if $story.CreatedTime}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Created</span>
+                    <span class="story-metadata-item-value">{{$story.CreatedTime}}</span>
+                </div>
+                {{end}}
+                {{if $story.EndDateTime}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Added to Archive</span>
+                    <span class="story-metadata-item-value">{{$story.EndDateTime}}</span>
+                </div>
+                {{end}}
+                {{if $story.StartDateTime}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Experienced</span>
+                    <span class="story-metadata-item-value">{{$story.StartDateTime}}</span>
+                </div>
+                {{end}}
+                {{if $story.UpdatedAt}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Last Updated</span>
+                    <span class="story-metadata-item-value">{{$story.UpdatedAt}}</span>
                 </div>
                 {{end}}
                 {{if $story.Location}}
@@ -74,6 +98,12 @@
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Experience</span>
                     <span class="story-metadata-item-value">{{$story.Experience}}</span>
+                </div>
+                {{end}}
+                {{if $story.ReflectionLearning}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Reflection / Learning</span>
+                    <span class="story-metadata-item-value">{{$story.ReflectionLearning}}</span>
                 </div>
                 {{end}}
                 {{if $story.TimeSpan}}

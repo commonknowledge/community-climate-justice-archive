@@ -28,6 +28,7 @@ type Story struct {
 	ID                      string
 	CreatedTime             string
 	Finding                 string
+	Title                   string
 	HighStExperiment        string
 	WhatWasIsIf             string
 	Image                   string
@@ -59,6 +60,8 @@ type Story struct {
 	InstaText               string
 	InstaCount              string
 	InstaImage              string
+	ReflectionLearning      string
+	UpdatedAt               string
 	URL                     string
 }
 

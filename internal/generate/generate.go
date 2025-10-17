@@ -438,6 +438,8 @@ func WriteStories() error {
 		// Reformat the date fields to be more human readable
 		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
 		storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+		storyInQuestion.CreatedTime = util.FormatDate(storyInQuestion.CreatedTime)
+		storyInQuestion.UpdatedAt = util.FormatDate(storyInQuestion.UpdatedAt)
 
 		// For the "Other Comments" field, we want to extract the URLs and make them links
 		storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)

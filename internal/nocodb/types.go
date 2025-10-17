@@ -19,6 +19,7 @@ type NocoDBStoryDTO struct {
 	ID                      interface{} `json:"Id"`
 	CreatedTime             interface{} `json:"CreatedAt"`
 	Finding                 interface{} `json:"Title"`
+	Title                   interface{} `json:"Title"`
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
@@ -50,6 +51,8 @@ type NocoDBStoryDTO struct {
 	InstaText               interface{} `json:"Insta text"`
 	InstaCount              interface{} `json:"InstaCount"`
 	InstaImage              interface{} `json:"Insta image"`
+	ReflectionLearning      interface{} `json:"Reflection / learning"`
+	UpdatedAt               interface{} `json:"UpdatedAt"`
 }
 
 // ToStory converts a NocoDB record map to a Story struct
@@ -90,6 +93,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		ID:                      toString(dto.ID),
 		CreatedTime:             toString(dto.CreatedTime),
 		Finding:                 toString(dto.Finding),
+		Title:                   toString(dto.Title),
 		HighStExperiment:        toString(dto.HighStExperiment),
 		WhatWasIsIf:             toString(dto.WhatWasIsIf),
 		Image:                   func() string { img, _ := ParseImagesFromNocoDB(dto.Image); return img }(),
@@ -121,6 +125,8 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		InstaText:               toString(dto.InstaText),
 		InstaCount:              toString(dto.InstaCount),
 		InstaImage:              toString(dto.InstaImage),
+		ReflectionLearning:      toString(dto.ReflectionLearning),
+		UpdatedAt:               toString(dto.UpdatedAt),
 	}
 
 	// Set URL based on finding (same logic as SQLite version)
