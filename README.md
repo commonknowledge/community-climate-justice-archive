@@ -276,6 +276,217 @@ NocoDB API → NocoDBStoryDTO → Story → StoryPage → story.html template
 - `templates/story.html` - Template display
 - `internal/generate/generate.go` - (only if field used in filtering/JSON export)
 
+### Adding New MultiSelect Fields (Tags/Categories)
+
+When you need to add a **MultiSelect field** from NocoDB (like Themes, Types, or Weather), follow this comprehensive process. MultiSelect fields are used for tagging and categorization, requiring specialized handling.
+
+> **Note**: This process is for MultiSelect fields that function as tags/categories. For other complex field types (Links, LinkToAnotherRecord, Attachments), refer to existing examples in the codebase.
+
+#### 1. Add Field to NocoDBStoryDTO Struct
+**File**: `internal/nocodb/types.go`
+
+Add the new field to the `NocoDBStoryDTO` struct:
+
+```go
+type NocoDBStoryDTO struct {
+    // ... existing fields ...
+    NewMultiSelectField interface{} `json:"New Field Name"`
+}
+```
+
+#### 2. Create the Field Type Struct
+**File**: `data/story.go`
+
+Create a new struct to represent individual tag/category items:
+
+```go
+type NewFieldType struct {
+    Title  string  // Display name
+    URL    string  // Generated URL slug
+    Colour string  // Generated hex color
+}
+```
+
+#### 3. Add Field to Story Struct
+**File**: `data/story.go`
+
+Add the field as a slice of the new type:
+
+```go
+type Story struct {
+    // ... existing fields ...
+    NewMultiSelectField []NewFieldType
+}
+```
+
+#### 4. Create Parsing Function
+**File**: `internal/nocodb/types.go`
+
+Create a parsing function similar to existing ones (`ParseThemesFromNocoDB`, `ParseTypesFromNocoDB`, `ParseWeatherFromNocoDB`):
+
+```go
+func ParseNewFieldFromNocoDB(field interface{}) ([]data.NewFieldType, error) {
+    if field == nil {
+        return []data.NewFieldType{}, nil
+    }
+
+    fieldStr, ok := field.(string)
+    if !ok {
+        return []data.NewFieldType{}, fmt.Errorf("expected string, got %T", field)
+    }
+
+    if fieldStr == "" {
+        return []data.NewFieldType{}, nil
+    }
+
+    // Split comma-separated values from NocoDB
+    items := strings.Split(fieldStr, ",")
+    var result []data.NewFieldType
+
+    for _, item := range items {
+        item = strings.TrimSpace(item)
+        if item != "" {
+            result = append(result, data.NewFieldType{
+                Title:  item,
+                URL:    util.Slugify(item),
+                Colour: data.TitleToHexColor(item),
+            })
+        }
+    }
+
+    return result, nil
+}
+```
+
+#### 5. Add Conversion Mapping
+**File**: `internal/nocodb/types.go`
+
+Update the `NocoDBRecordToStoryWithClient` function:
+
+```go
+func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client) (data.Story, error) {
+    // ... existing DTO conversion ...
+
+    // Convert new field
+    newField, err := ParseNewFieldFromNocoDB(dto.NewMultiSelectField)
+    if err != nil {
+        log.Printf("Warning: failed to parse new field: %v", err)
+        newField = []data.NewFieldType{}
+    }
+
+    story := data.Story{
+        // ... existing mappings ...
+        NewMultiSelectField: newField,
+    }
+
+    return story, nil
+}
+```
+
+#### 6. Add to Template Display
+**File**: `templates/story.html`
+
+Add the field display using the tag pattern:
+
+```html
+{{if $story.NewMultiSelectField}}
+<div class="story-tags">
+    <span class="story-tags-label">New Field:</span>
+    {{range $story.NewMultiSelectField}}
+    <a href="/newfield/{{.URL}}.html" class="tag" style="background-color: {{.Colour}};">{{.Title}}</a>
+    {{end}}
+</div>
+{{end}}
+```
+
+#### 7. Add Store Functions
+**File**: `internal/store/` (add to appropriate adapter file)
+
+Add functions to retrieve and filter by the new field:
+
+```go
+func (s *SQLiteAdapter) GetNewFieldTypes() []data.NewFieldType {
+    // Get all unique values for the new field
+    // Similar to GetThemes(), GetTypes(), GetWeather()
+}
+
+func (s *SQLiteAdapter) GetStoriesForNewFieldType(fieldValue string) ([]data.Story, error) {
+    // Filter stories by the new field value
+    // Similar to GetStoriesForTheme(), GetStoriesForType(), GetStoriesForWeather()
+}
+```
+
+#### 8. Add Index Page Generation
+**File**: `internal/generate/generate.go`
+
+Add a function to generate individual pages for each field value:
+
+```go
+func WriteNewFieldIndexPages(stories []data.Story, store store.Adapter) error {
+    newFieldTypes := store.GetNewFieldTypes()
+    
+    for _, fieldType := range newFieldTypes {
+        fieldStories, err := store.GetStoriesForNewFieldType(fieldType.Title)
+        if err != nil {
+            return fmt.Errorf("failed to get stories for new field %s: %w", fieldType.Title, err)
+        }
+
+        page := data.Page{
+            Title:       fieldType.Title,
+            Stories:     fieldStories,
+            NewFieldType: &fieldType,
+        }
+
+        filename := fmt.Sprintf("newfield/%s.html", fieldType.URL)
+        if err := writePageToFile(filename, "newfield-index.html", page); err != nil {
+            return fmt.Errorf("failed to write new field page %s: %w", filename, err)
+        }
+    }
+
+    return nil
+}
+```
+
+#### 9. Create Index Template
+**File**: `templates/newfield-index.html`
+
+Create a template similar to `theme-index.html`, `type-index.html`, `weather-index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{.Title}} - Community Climate Justice Archive</title>
+    <!-- ... head content similar to other index templates ... -->
+</head>
+<body>
+    <div class="page-container">
+        <h1>{{.Title}}</h1>
+        <p>Stories tagged with "{{.Title}}"</p>
+        
+        <div class="stories-grid">
+            {{range .Stories}}
+            <!-- ... story display similar to other index templates ... -->
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>
+```
+
+#### 10. Add CSS Styling
+**File**: `css/styles.css`
+
+Ensure the new field tags have consistent styling with existing tags:
+
+```css
+/* New field tags should inherit existing .tag styles */
+.story-tags .tag {
+    /* Existing tag styles will apply */
+}
+```
+
+
 
 
 
