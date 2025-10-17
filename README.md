@@ -486,6 +486,25 @@ Ensure the new field tags have consistent styling with existing tags:
 }
 ```
 
+#### 11. Integrate Index Generation into Main Build Process
+**File**: `cmd/archive/main.go`
+
+Add calls to your new index generation functions in both `generateArchive()` and `hotRegenerate()` functions:
+
+```go
+// In generateArchive() function, after WriteWeatherIndexes():
+if err := generate.WriteNewFieldIndexPages(); err != nil {
+    return fmt.Errorf("failed to write new field indexes: %v", err)
+}
+
+// In hotRegenerate() function, after WriteWeatherIndexes():
+if err := generate.WriteNewFieldIndexPages(); err != nil {
+    return fmt.Errorf("failed to write new field indexes: %v", err)
+}
+```
+
+**Important**: Without this step, the index pages won't be generated and the tag links won't work!
+
 
 
 
