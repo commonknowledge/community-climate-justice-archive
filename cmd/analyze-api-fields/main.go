@@ -4,7 +4,9 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -22,6 +24,8 @@ import (
 type FieldAnalysis struct {
 	FieldName       string `json:"field_name"`
 	FieldType       string `json:"field_type"`
+	NocoDBType      string `json:"nocodb_type"`
+	NocoDBOptions   string `json:"nocodb_options,omitempty"`
 	CurrentlyMapped bool   `json:"currently_mapped"`
 	UsedInStory     bool   `json:"used_in_story"`
 	UsedInTemplates bool   `json:"used_in_templates"`
@@ -31,12 +35,52 @@ type FieldAnalysis struct {
 	TemplateFiles   string `json:"template_files,omitempty"`
 }
 
+// NocoDBField represents a field definition from NocoDB schema
+type NocoDBField struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	Type  string `json:"uidt"`
+	Show  *bool  `json:"show,omitempty"`
+	Meta  struct {
+		Options []struct {
+			Title string `json:"title"`
+			Color string `json:"color"`
+		} `json:"options"`
+	} `json:"meta"`
+}
+
+// NocoDBTableSchema represents the table schema from NocoDB
+type NocoDBTableSchema struct {
+	ID      string        `json:"id"`
+	Title   string        `json:"title"`
+	Columns []NocoDBField `json:"columns"`
+	Views   []NocoDBView  `json:"views"`
+}
+
+// NocoDBView represents a view configuration
+type NocoDBView struct {
+	ID      string             `json:"id"`
+	Title   string             `json:"title"`
+	Type    int                `json:"type"`
+	Columns []NocoDBViewColumn `json:"columns"`
+}
+
+// NocoDBViewColumn represents column visibility in a view
+type NocoDBViewColumn struct {
+	ID   string `json:"fk_column_id"`
+	Show *bool  `json:"show,omitempty"`
+}
+
 // APIFieldAnalyzer handles the analysis of API fields
 type APIFieldAnalyzer struct {
 	client             *nocodb.Client
-	nocoDBFields       map[string]string   // field name -> json tag
-	storyFields        map[string]bool     // field name -> exists
-	templateFieldUsage map[string][]string // field name -> template files
+	nocoDBFields       map[string]string      // field name -> json tag
+	nocoDBSchema       map[string]NocoDBField // field name -> schema info
+	hiddenFields       map[string]bool        // field name -> is hidden in view
+	internalFields     map[string]bool        // field name -> is internal system field
+	unusedFields       map[string]bool        // field name -> is intentionally unused
+	storyFields        map[string]bool        // field name -> exists
+	templateFieldUsage map[string][]string    // field name -> template files
 }
 
 func main() {
@@ -83,7 +127,7 @@ func main() {
 	}
 
 	// Summary
-	printSummary(analyses)
+	printSummary(analyses, analyzer)
 }
 
 // NewAPIFieldAnalyzer creates a new field analyzer
@@ -97,8 +141,17 @@ func NewAPIFieldAnalyzer() (*APIFieldAnalyzer, error) {
 	analyzer := &APIFieldAnalyzer{
 		client:             client,
 		nocoDBFields:       make(map[string]string),
+		nocoDBSchema:       make(map[string]NocoDBField),
+		hiddenFields:       make(map[string]bool),
+		internalFields:     make(map[string]bool),
+		unusedFields:       make(map[string]bool),
 		storyFields:        make(map[string]bool),
 		templateFieldUsage: make(map[string][]string),
+	}
+
+	// Fetch NocoDB schema
+	if err := analyzer.fetchNocoDBSchema(); err != nil {
+		return nil, fmt.Errorf("failed to fetch NocoDB schema: %w", err)
 	}
 
 	// Analyze current struct definitions
@@ -114,37 +167,242 @@ func NewAPIFieldAnalyzer() (*APIFieldAnalyzer, error) {
 	return analyzer, nil
 }
 
+// fetchNocoDBSchema fetches the table schema from NocoDB API
+func (a *APIFieldAnalyzer) fetchNocoDBSchema() error {
+	url := fmt.Sprintf("%s/api/v1/db/meta/tables/%s",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create schema request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch schema: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("schema API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read schema response: %w", err)
+	}
+
+	var schema NocoDBTableSchema
+	if err := json.Unmarshal(body, &schema); err != nil {
+		return fmt.Errorf("failed to parse schema response: %w", err)
+	}
+
+	log.Printf("Fetched schema for table '%s' with %d columns", schema.Title, len(schema.Columns))
+
+	// Build schema map
+	for _, column := range schema.Columns {
+		a.nocoDBSchema[column.Title] = column
+	}
+
+	// Fetch view information to detect hidden fields
+	if err := a.fetchViewConfiguration(); err != nil {
+		log.Printf("Warning: Failed to fetch view configuration: %v", err)
+		// Continue without view info - we'll still show all fields
+	}
+
+	return nil
+}
+
+// fetchViewConfiguration fetches view configuration to detect hidden fields
+func (a *APIFieldAnalyzer) fetchViewConfiguration() error {
+	// First, get the list of views for this table
+	viewsURL := fmt.Sprintf("%s/api/v1/db/meta/tables/%s/views",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID)
+
+	req, err := http.NewRequest("GET", viewsURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create views request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch views: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("views API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read views response: %w", err)
+	}
+
+	var views struct {
+		List []NocoDBView `json:"list"`
+	}
+	if err := json.Unmarshal(body, &views); err != nil {
+		return fmt.Errorf("failed to parse views response: %w", err)
+	}
+
+	log.Printf("Found %d views for table", len(views.List))
+
+	// Use the first view (usually the default Grid view) to determine field visibility
+	if len(views.List) > 0 {
+		defaultView := views.List[0]
+		log.Printf("Using view '%s' to determine field visibility", defaultView.Title)
+
+		// Get detailed view configuration
+		if err := a.fetchViewColumns(defaultView.ID); err != nil {
+			return fmt.Errorf("failed to fetch view columns: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// fetchViewColumns fetches column visibility for a specific view
+func (a *APIFieldAnalyzer) fetchViewColumns(viewID string) error {
+	url := fmt.Sprintf("%s/api/v1/db/meta/views/%s/columns",
+		config.AppConfig.NocoDBEndpoint,
+		viewID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create view columns request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch view columns: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("view columns API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read view columns response: %w", err)
+	}
+
+	var viewColumns struct {
+		List []struct {
+			ID          string      `json:"id"`
+			ColumnID    string      `json:"fk_column_id"`
+			Show        interface{} `json:"show"`
+			ColumnTitle string      `json:"title"`
+		} `json:"list"`
+	}
+	if err := json.Unmarshal(body, &viewColumns); err != nil {
+		return fmt.Errorf("failed to parse view columns response: %w", err)
+	}
+
+	// Map column visibility
+	hiddenCount := 0
+	for _, viewCol := range viewColumns.List {
+		// Find the corresponding schema column
+		for _, schemaCol := range a.nocoDBSchema {
+			if schemaCol.ID == viewCol.ColumnID {
+				// Check if field is hidden - handle different types for Show field
+				isHidden := false
+				switch v := viewCol.Show.(type) {
+				case bool:
+					isHidden = !v
+				case float64:
+					isHidden = v == 0
+				case int:
+					isHidden = v == 0
+				case nil:
+					isHidden = false // nil defaults to visible
+				default:
+					log.Printf("Warning: Unknown type for show field: %T", v)
+				}
+
+				if isHidden {
+					// Only mark as hidden if it's not already categorized as internal
+					if !a.isInternalField(schemaCol.Title) {
+						a.hiddenFields[schemaCol.Title] = true
+						hiddenCount++
+					}
+				}
+				break
+			}
+		}
+	}
+
+	log.Printf("Detected %d hidden fields in the default view", hiddenCount)
+	return nil
+}
+
 // AnalyzeFields performs the main field analysis
 func (a *APIFieldAnalyzer) AnalyzeFields() ([]FieldAnalysis, error) {
-	// Fetch sample records from API
-	records, err := a.client.GetAllRecords()
+	// Fetch just one sample record for field values (much more efficient)
+	sampleRecord, err := a.fetchSampleRecord()
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch records: %w", err)
+		return nil, fmt.Errorf("failed to fetch sample record: %w", err)
 	}
-
-	if len(records) == 0 {
-		return nil, fmt.Errorf("no records found in API response")
-	}
-
-	// Use first record as sample for field analysis
-	sampleRecord := records[0]
 
 	var analyses []FieldAnalysis
 
-	// Analyze each field in the API response
-	for fieldName, fieldValue := range sampleRecord {
-		// Skip internal cache fields
-		if strings.HasPrefix(fieldName, "__cached_") {
+	// Analyze each field from the schema (more comprehensive than just sample record)
+	for fieldName := range a.nocoDBSchema {
+		// Categorize internal system fields
+		if a.isInternalField(fieldName) {
+			a.internalFields[fieldName] = true
 			continue
 		}
 
+		// Categorize intentionally unused fields
+		if a.isUnusedField(fieldName) {
+			a.unusedFields[fieldName] = true
+			continue
+		}
+
+		// Skip hidden fields (turned off in NocoDB view)
+		if a.hiddenFields[fieldName] {
+			continue
+		}
+
+		// Get sample value from the record if available
+		var sampleValue interface{}
+		var fieldType string
+		if value, exists := sampleRecord[fieldName]; exists {
+			sampleValue = value
+			fieldType = getFieldType(value)
+		} else {
+			sampleValue = nil
+			fieldType = "null"
+		}
+
+		// Get NocoDB schema info for this field
+		nocoDBType, nocoDBOptions := a.getNocoDBFieldInfo(fieldName)
+
 		analysis := FieldAnalysis{
 			FieldName:       fieldName,
-			FieldType:       getFieldType(fieldValue),
+			FieldType:       fieldType,
+			NocoDBType:      nocoDBType,
+			NocoDBOptions:   nocoDBOptions,
 			CurrentlyMapped: a.isFieldMappedInNocoDB(fieldName),
 			UsedInStory:     a.isFieldUsedInStory(fieldName),
 			UsedInTemplates: len(a.templateFieldUsage[fieldName]) > 0,
-			SampleValue:     truncateValue(fieldValue, 50),
+			SampleValue:     truncateValue(sampleValue, 50),
 			JSONTag:         a.nocoDBFields[fieldName],
 		}
 
@@ -158,12 +416,175 @@ func (a *APIFieldAnalyzer) AnalyzeFields() ([]FieldAnalysis, error) {
 		analyses = append(analyses, analysis)
 	}
 
+	// Also check for any fields in the sample record that aren't in schema (shouldn't happen but just in case)
+	for fieldName, fieldValue := range sampleRecord {
+		// Skip if we already analyzed this field from schema
+		if _, exists := a.nocoDBSchema[fieldName]; exists {
+			continue
+		}
+
+		// Skip internal cache fields
+		if strings.HasPrefix(fieldName, "__cached_") {
+			continue
+		}
+
+		log.Printf("Warning: Found field '%s' in sample record but not in schema", fieldName)
+
+		analysis := FieldAnalysis{
+			FieldName:       fieldName,
+			FieldType:       getFieldType(fieldValue),
+			NocoDBType:      "Unknown",
+			NocoDBOptions:   "",
+			CurrentlyMapped: a.isFieldMappedInNocoDB(fieldName),
+			UsedInStory:     a.isFieldUsedInStory(fieldName),
+			UsedInTemplates: len(a.templateFieldUsage[fieldName]) > 0,
+			SampleValue:     truncateValue(fieldValue, 50),
+			JSONTag:         a.nocoDBFields[fieldName],
+		}
+
+		if templateFiles, exists := a.templateFieldUsage[fieldName]; exists {
+			analysis.TemplateFiles = strings.Join(templateFiles, ", ")
+		}
+
+		analysis.Status = a.determineFieldStatus(analysis)
+		analyses = append(analyses, analysis)
+	}
+
 	// Sort by field name for consistent output
 	sort.Slice(analyses, func(i, j int) bool {
 		return analyses[i].FieldName < analyses[j].FieldName
 	})
 
 	return analyses, nil
+}
+
+// fetchSampleRecord fetches just one record for sample values (much more efficient than getting all records)
+func (a *APIFieldAnalyzer) fetchSampleRecord() (map[string]interface{}, error) {
+	if a.client == nil {
+		return nil, fmt.Errorf("client not initialized")
+	}
+
+	log.Printf("Fetching single sample record for field analysis...")
+
+	// Use direct HTTP request to get just one record
+	url := fmt.Sprintf("%s/api/v2/tables/%s/records?limit=1",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create sample record request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch sample record: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("sample record API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read sample record response: %w", err)
+	}
+
+	var response struct {
+		List []map[string]interface{} `json:"list"`
+	}
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, fmt.Errorf("failed to parse sample record response: %w", err)
+	}
+
+	if len(response.List) == 0 {
+		return nil, fmt.Errorf("no records found in table")
+	}
+
+	log.Printf("Successfully fetched sample record with %d fields", len(response.List[0]))
+	return response.List[0], nil
+}
+
+// getNocoDBFieldInfo returns the NocoDB field type and options for a field
+func (a *APIFieldAnalyzer) getNocoDBFieldInfo(fieldName string) (string, string) {
+	if field, exists := a.nocoDBSchema[fieldName]; exists {
+		fieldType := field.Type
+
+		// For multi-select fields, include the options
+		if fieldType == "MultiSelect" && len(field.Meta.Options) > 0 {
+			var options []string
+			for _, option := range field.Meta.Options {
+				options = append(options, option.Title)
+			}
+			return fieldType, strings.Join(options, ", ")
+		}
+
+		// For single select fields, include the options
+		if fieldType == "SingleSelect" && len(field.Meta.Options) > 0 {
+			var options []string
+			for _, option := range field.Meta.Options {
+				options = append(options, option.Title)
+			}
+			return fieldType, strings.Join(options, ", ")
+		}
+
+		return fieldType, ""
+	}
+
+	return "Unknown", ""
+}
+
+// isInternalField determines if a field is an internal NocoDB system field
+func (a *APIFieldAnalyzer) isInternalField(fieldName string) bool {
+	// NocoDB internal fields that should be excluded from analysis
+	internalPrefixes := []string{
+		"nc_", // Most NocoDB internal fields
+	}
+
+	// Specific internal fields to exclude
+	internalFields := []string{
+		"ncRecordHash",
+		"ncRecordId",
+		// Note: CreatedAt and UpdatedAt are NOT excluded because they are used in templates
+	}
+
+	// Check prefixes
+	for _, prefix := range internalPrefixes {
+		if strings.HasPrefix(fieldName, prefix) {
+			return true
+		}
+	}
+
+	// Check specific fields
+	for _, internal := range internalFields {
+		if fieldName == internal {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isUnusedField determines if a field is programmatically excluded
+func (a *APIFieldAnalyzer) isUnusedField(fieldName string) bool {
+	// Fields that are programmatically excluded from analysis
+	unusedFields := []string{
+		"Stories",  // Programmatically excluded - not being used
+		"Stories1", // Programmatically excluded - not being used
+	}
+
+	for _, unused := range unusedFields {
+		if fieldName == unused {
+			return true
+		}
+	}
+
+	return false
 }
 
 // analyzeCurrentStructs analyzes the current Go struct definitions
@@ -335,13 +756,19 @@ func printConsoleTable(analyses []FieldAnalysis) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 	// Header
-	fmt.Fprintln(w, "FIELD NAME\tTYPE\tMAPPED\tIN STORY\tIN TEMPLATES\tSTATUS\tSAMPLE VALUE")
-	fmt.Fprintln(w, "----------\t----\t------\t--------\t------------\t------\t------------")
+	fmt.Fprintln(w, "FIELD NAME\tNOCODB TYPE\tDATA TYPE\tMAPPED\tIN STORY\tIN TEMPLATES\tSTATUS\tSAMPLE VALUE")
+	fmt.Fprintln(w, "----------\t-----------\t---------\t------\t--------\t------------\t------\t------------")
 
 	// Data rows
 	for _, analysis := range analyses {
-		fmt.Fprintf(w, "%s\t%s\t%v\t%v\t%v\t%s\t%s\n",
+		nocoDBDisplay := analysis.NocoDBType
+		if analysis.NocoDBOptions != "" {
+			nocoDBDisplay += " [" + truncateValue(analysis.NocoDBOptions, 20) + "]"
+		}
+
+		fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%v\t%v\t%s\t%s\n",
 			analysis.FieldName,
+			nocoDBDisplay,
 			analysis.FieldType,
 			analysis.CurrentlyMapped,
 			analysis.UsedInStory,
@@ -367,7 +794,7 @@ func writeCSV(analyses []FieldAnalysis) error {
 
 	// Header
 	header := []string{
-		"Field Name", "Type", "Currently Mapped", "Used in Story",
+		"Field Name", "NocoDB Type", "NocoDB Options", "Data Type", "Currently Mapped", "Used in Story",
 		"Used in Templates", "Status", "JSON Tag", "Template Files", "Sample Value",
 	}
 	if err := writer.Write(header); err != nil {
@@ -378,6 +805,8 @@ func writeCSV(analyses []FieldAnalysis) error {
 	for _, analysis := range analyses {
 		row := []string{
 			analysis.FieldName,
+			analysis.NocoDBType,
+			analysis.NocoDBOptions,
 			analysis.FieldType,
 			fmt.Sprintf("%v", analysis.CurrentlyMapped),
 			fmt.Sprintf("%v", analysis.UsedInStory),
@@ -409,7 +838,7 @@ func writeJSON(analyses []FieldAnalysis) error {
 }
 
 // printSummary prints a summary of the analysis
-func printSummary(analyses []FieldAnalysis) {
+func printSummary(analyses []FieldAnalysis, analyzer *APIFieldAnalyzer) {
 	fmt.Println("\n" + strings.Repeat("=", 50))
 	fmt.Println("SUMMARY")
 	fmt.Println(strings.Repeat("=", 50))
@@ -426,9 +855,17 @@ func printSummary(analyses []FieldAnalysis) {
 
 	// Show new fields
 	var newFields []string
+	var multiSelectFields []string
 	for _, analysis := range analyses {
 		if analysis.Status == "NEW" {
 			newFields = append(newFields, analysis.FieldName)
+		}
+		if analysis.NocoDBType == "MultiSelect" {
+			fieldDesc := analysis.FieldName
+			if analysis.NocoDBOptions != "" {
+				fieldDesc += " [" + analysis.NocoDBOptions + "]"
+			}
+			multiSelectFields = append(multiSelectFields, fieldDesc)
 		}
 	}
 
@@ -439,8 +876,59 @@ func printSummary(analyses []FieldAnalysis) {
 		}
 	}
 
-	fmt.Println("\nRecommendations:")
-	fmt.Println("  1. Review NEW fields and add them to NocoDBStoryDTO if needed")
-	fmt.Println("  2. Check MAPPED_NOT_DISPLAYED fields for potential template usage")
-	fmt.Println("  3. Consider removing MAPPED_NOT_USED fields if they're truly unused")
+	if len(multiSelectFields) > 0 {
+		fmt.Printf("\nMulti-Select fields (used for tagging):\n")
+		for _, field := range multiSelectFields {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	// Show intentionally hidden fields (user-configured)
+	var hiddenFieldsList []string
+	for fieldName := range analyzer.hiddenFields {
+		hiddenFieldsList = append(hiddenFieldsList, fieldName)
+	}
+
+	if len(hiddenFieldsList) > 0 {
+		sort.Strings(hiddenFieldsList)
+		fmt.Printf("\nFields intentionally hidden in NocoDB view (excluded from analysis):\n")
+		for _, field := range hiddenFieldsList {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	// Show intentionally unused fields
+	var unusedFieldsList []string
+	for fieldName := range analyzer.unusedFields {
+		unusedFieldsList = append(unusedFieldsList, fieldName)
+	}
+
+	if len(unusedFieldsList) > 0 {
+		sort.Strings(unusedFieldsList)
+		fmt.Printf("\nFields programmatically excluded from analysis:\n")
+		for _, field := range unusedFieldsList {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	// Show internal system fields that were excluded
+	var internalFieldsList []string
+	for fieldName := range analyzer.internalFields {
+		internalFieldsList = append(internalFieldsList, fieldName)
+	}
+
+	if len(internalFieldsList) > 0 {
+		sort.Strings(internalFieldsList)
+		fmt.Printf("\nInternal NocoDB system fields (excluded from analysis):\n")
+		for _, field := range internalFieldsList {
+			fmt.Printf("  - %s\n", field)
+		}
+	}
+
+	totalExcluded := len(hiddenFieldsList) + len(unusedFieldsList) + len(internalFieldsList)
+	if totalExcluded > 0 {
+		fmt.Printf("\nNote: %d fields were excluded from analysis (%d hidden, %d programmatically excluded, %d internal).\n",
+			totalExcluded, len(hiddenFieldsList), len(unusedFieldsList), len(internalFieldsList))
+	}
+
 }
