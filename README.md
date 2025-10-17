@@ -144,6 +144,138 @@ The archive templates should be straight forward to understand what they do, but
 - [**type-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/type-index.html): Shows all stories of a particular type.
 - [**weather-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/weather-index.html): Shows all stories that were creating in a particular weather condition.
 
+### Adding New Fields to Story Templates
+
+When you need to add a **simple field** (text, date, number, etc.) from NocoDB to display in the individual story template, follow these steps:
+
+> **Note**: These instructions are for simple field types only. MultiSelect, Links, and LinkToAnotherRecord fields require different treatment and specialized parsing logic.
+
+#### 1. Add Field to NocoDBStoryDTO Struct
+**File**: `internal/nocodb/types.go`
+
+Add the new field to the `NocoDBStoryDTO` struct with the proper JSON tag matching the NocoDB field name:
+
+```go
+type NocoDBStoryDTO struct {
+    // ... existing fields ...
+    NewField interface{} `json:"New Field Name"`
+}
+```
+
+#### 2. Add Field to Story Struct
+**File**: `data/story.go`
+
+Add the corresponding field to the `Story` struct (around lines 27-63):
+
+```go
+type Story struct {
+    // ... existing fields ...
+    NewField string
+}
+```
+
+#### 3. Map Field in Conversion Function
+**File**: `internal/nocodb/types.go`
+
+Update the `NocoDBRecordToStoryWithClient` function (around lines 89-125) to map from DTO to Story:
+
+```go
+story := data.Story{
+    // ... existing mappings ...
+    NewField: toString(dto.NewField),
+}
+```
+
+#### 4. Add Field to HTML Template
+**File**: `templates/story.html`
+
+Add the field display in the template using Go template syntax:
+
+```html
+<!-- Simple field display -->
+{{.Story.NewField}}
+
+<!-- Conditional display -->
+{{if .Story.NewField}}
+    <p>{{.Story.NewField}}</p>
+{{end}}
+
+<!-- With HTML structure -->
+<div class="new-field">
+    <label>New Field:</label>
+    <span>{{.Story.NewField}}</span>
+</div>
+```
+
+#### 5. Simple Field Types Supported
+
+This process works for these NocoDB field types:
+- **SingleLineText** - Maps to `string`
+- **LongText** - Maps to `string` 
+- **Number** - Maps to `string` (converted via `toString()`)
+- **Date** - Maps to `string`
+- **DateTime** - Maps to `string`
+- **URL** - Maps to `string`
+- **Email** - Maps to `string`
+- **PhoneNumber** - Maps to `string`
+
+#### 5. Complex Field Types (Different Process Required)
+
+The following field types require **specialized handling** and are **not covered** by these instructions:
+- **MultiSelect** - Requires custom parsing to convert to `[]Theme`, `[]Type`, or `[]Weather` structs
+- **Links** - Requires relationship resolution and connection caching
+- **LinkToAnotherRecord** - Requires relationship resolution and connection caching
+- **Attachment** - Requires image processing and JSON conversion
+- **Checkbox** - Requires boolean conversion
+- **SingleSelect** - May require enum/option handling
+
+For these complex types, refer to existing examples in the codebase:
+- MultiSelect: See `ParseThemesFromNocoDB()`, `ParseTypesFromNocoDB()`, `ParseWeatherFromNocoDB()`
+- Links/LinkToAnotherRecord: See `fetchStoryConnectionsDirect()` 
+- Attachment: See `ParseImagesFromNocoDB()`
+
+#### 6. Update Filtering Data (optional)
+**File**: `internal/generate/generate.go`
+
+If the field should be available for client-side filtering, add it to the `StoryData` struct (around lines 82-96):
+
+```go
+type StoryData struct {
+    // ... existing fields ...
+    NewField string `json:"newField"`
+}
+```
+
+#### 7. Verify Field Integration
+
+Run the field analysis utility to verify the field shows as `FULLY_MAPPED`:
+
+```bash
+go run cmd/analyze-api-fields/main.go
+```
+
+The field should appear with `processing_category: "standard"` and `status: "FULLY_MAPPED"` if properly integrated.
+
+#### Data Flow Summary
+
+The data flows through these components:
+```
+NocoDB API → NocoDBStoryDTO → Story → StoryPage → story.html template
+```
+
+1. **NocoDB API** returns raw field data
+2. **NocoDBStoryDTO** receives and structures the raw data  
+3. **Story struct** gets converted, typed data
+4. **StoryPage** wraps Story for template context
+5. **story.html** template renders the field using `{{.Story.FieldName}}`
+
+#### Key Files to Modify
+
+- `internal/nocodb/types.go` - DTO struct + conversion logic
+- `data/story.go` - Story struct definition  
+- `templates/story.html` - Template display
+- `internal/generate/generate.go` - (only if field used in filtering/JSON export)
+
 
 
 
