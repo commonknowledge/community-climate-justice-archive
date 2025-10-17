@@ -46,6 +46,34 @@ func createWeatherOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "weather", fileName)
 }
 
+// createGiftedByOutputPathFromTitle creates a path to the output file for a gifted by page.
+func createGiftedByOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "giftedby", fileName)
+}
+
+// createScalePermanenceOutputPathFromTitle creates a path to the output file for a scale permanence page.
+func createScalePermanenceOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "scalepermanence", fileName)
+}
+
+// createWhatWasIsIfOutputPathFromTitle creates a path to the output file for a what was/is/if page.
+func createWhatWasIsIfOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "whatwasisif", fileName)
+}
+
+// createTimePeriodOutputPathFromTitle creates a path to the output file for a time period page.
+func createTimePeriodOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "timeperiod", fileName)
+}
+
 // loadTemplates loads all templates and partials needed by the application
 func loadTemplates() (*template.Template, error) {
 	tmpl := template.New("")
@@ -797,6 +825,234 @@ func WriteHomePage() error {
 	}
 
 	log.Printf("Successfully wrote homepage to %s", outputPath)
+
+	return nil
+}
+
+// WriteGiftedByIndexPages generates the gifted by index pages and writes them to the out/giftedby directory.
+func WriteGiftedByIndexPages() error {
+	log.Println("Starting gifted by generation")
+	giftedByTypes := store.GetGiftedByTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/giftedby", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output giftedby directory: %w", err)
+	}
+
+	for _, giftedByInQuestion := range giftedByTypes {
+		outputPath := createGiftedByOutputPathFromTitle(giftedByInQuestion.Title)
+
+		log.Printf("Writing gifted by %s to %s", giftedByInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForGiftedBy(giftedByInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "giftedby-index.html", data.TaxonomyIndexPage{
+			Title:          giftedByInQuestion.Title,
+			Description:    "A list of stories gifted or co-created by " + giftedByInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: giftedByInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote gifted by to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteScalePermanenceIndexPages generates the scale permanence index pages and writes them to the out/scalepermanence directory.
+func WriteScalePermanenceIndexPages() error {
+	log.Println("Starting scale permanence generation")
+	scalePermanenceTypes := store.GetScalePermanenceTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/scalepermanence", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output scalepermanence directory: %w", err)
+	}
+
+	for _, scalePermanenceInQuestion := range scalePermanenceTypes {
+		outputPath := createScalePermanenceOutputPathFromTitle(scalePermanenceInQuestion.Title)
+
+		log.Printf("Writing scale permanence %s to %s", scalePermanenceInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForScalePermanence(scalePermanenceInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "scalepermanence-index.html", data.TaxonomyIndexPage{
+			Title:          scalePermanenceInQuestion.Title,
+			Description:    "A list of stories with scale of permanence " + scalePermanenceInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: scalePermanenceInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote scale permanence to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteWhatWasIsIfIndexPages generates the what was/is/if index pages and writes them to the out/whatwasisif directory.
+func WriteWhatWasIsIfIndexPages() error {
+	log.Println("Starting what was/is/if generation")
+	whatWasIsIfTypes := store.GetWhatWasIsIfTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/whatwasisif", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output whatwasisif directory: %w", err)
+	}
+
+	for _, whatWasIsIfInQuestion := range whatWasIsIfTypes {
+		outputPath := createWhatWasIsIfOutputPathFromTitle(whatWasIsIfInQuestion.Title)
+
+		log.Printf("Writing what was/is/if %s to %s", whatWasIsIfInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForWhatWasIsIf(whatWasIsIfInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "whatwasisif-index.html", data.TaxonomyIndexPage{
+			Title:          whatWasIsIfInQuestion.Title,
+			Description:    "A list of stories for " + whatWasIsIfInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: whatWasIsIfInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote what was/is/if to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteTimePeriodIndexPages generates the time period index pages and writes them to the out/timeperiod directory.
+func WriteTimePeriodIndexPages() error {
+	log.Println("Starting time period generation")
+	timePeriodTypes := store.GetTimePeriodTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/timeperiod", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output timeperiod directory: %w", err)
+	}
+
+	for _, timePeriodInQuestion := range timePeriodTypes {
+		outputPath := createTimePeriodOutputPathFromTitle(timePeriodInQuestion.Title)
+
+		log.Printf("Writing time period %s to %s", timePeriodInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForTimePeriod(timePeriodInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "timeperiod-index.html", data.TaxonomyIndexPage{
+			Title:          timePeriodInQuestion.Title,
+			Description:    "A list of stories from time period " + timePeriodInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: timePeriodInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote time period to %s", outputPath)
+	}
 
 	return nil
 }

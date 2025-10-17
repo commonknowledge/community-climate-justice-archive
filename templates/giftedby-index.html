@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    <title>{{.Title}} - Gifted By</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/styles.css">
+    {{template "grid-code" .}}
+</head>
+
+<body>
+    {{template "header" .}}
+    <div class="theme-index-header">Items gifted or co-created by: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
+    <div class="stories-list standard-margins">
+        {{template "stories-list" .}}
+    </div>
+    {{template "footer" .}}
+</body>
+
+</html>

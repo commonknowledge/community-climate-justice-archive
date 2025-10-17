@@ -24,12 +24,35 @@ type StoryConnection struct {
 	URL      string `json:"url"`
 }
 
+type GiftedBy struct {
+	Title  string
+	URL    string
+	Colour string
+}
+
+type ScalePermanence struct {
+	Title  string
+	URL    string
+	Colour string
+}
+
+type WhatWasIsIf struct {
+	Title  string
+	URL    string
+	Colour string
+}
+
+type TimePeriod struct {
+	Title  string
+	URL    string
+	Colour string
+}
+
 type Story struct {
 	ID                      string
 	CreatedTime             string
 	Finding                 string
 	HighStExperiment        string
-	WhatWasIsIf             string
 	Image                   string
 	SourceImage             string
 	Location                string
@@ -45,6 +68,10 @@ type Story struct {
 	OtherComments           string
 	Type                    []Type
 	Weather                 []Weather
+	GiftedBy                []GiftedBy
+	ScalePermanence         []ScalePermanence
+	WhatWasIsIf             []WhatWasIsIf
+	TimePeriod              []TimePeriod
 	PersonFinder            string
 	MapCache                string
 	MapSize                 string
@@ -179,7 +206,6 @@ type StoryDTO struct {
 	CreatedTime             sql.NullString
 	Finding                 sql.NullString
 	HighStExperiment        sql.NullString
-	WhatWasIsIf             sql.NullString
 	Image                   sql.NullString
 	SourceImage             sql.NullString
 	Location                sql.NullString
@@ -284,7 +310,6 @@ func (dto *StoryDTO) ToStory() Story {
 		CreatedTime:             dto.CreatedTime.String,
 		Finding:                 dto.Finding.String,
 		HighStExperiment:        dto.HighStExperiment.String,
-		WhatWasIsIf:             dto.WhatWasIsIf.String,
 		Image:                   dto.Image.String,
 		SourceImage:             dto.SourceImage.String,
 		Location:                dto.Location.String,

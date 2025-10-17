@@ -67,6 +67,22 @@ func generateArchive(skipImages bool) error {
 		return fmt.Errorf("failed to write weather indexes: %v", err)
 	}
 
+	if err := generate.WriteGiftedByIndexPages(); err != nil {
+		return fmt.Errorf("failed to write gifted by indexes: %v", err)
+	}
+
+	if err := generate.WriteScalePermanenceIndexPages(); err != nil {
+		return fmt.Errorf("failed to write scale permanence indexes: %v", err)
+	}
+
+	if err := generate.WriteWhatWasIsIfIndexPages(); err != nil {
+		return fmt.Errorf("failed to write what was/is/if indexes: %v", err)
+	}
+
+	if err := generate.WriteTimePeriodIndexPages(); err != nil {
+		return fmt.Errorf("failed to write time period indexes: %v", err)
+	}
+
 	if err := generate.CopyImagesToOutput(); err != nil {
 		return fmt.Errorf("failed to copy images: %v", err)
 	}
@@ -124,6 +140,22 @@ func hotRegenerate() error {
 
 	if err := generate.WriteWeatherIndexes(); err != nil {
 		return fmt.Errorf("failed to write weather indexes: %v", err)
+	}
+
+	if err := generate.WriteGiftedByIndexPages(); err != nil {
+		return fmt.Errorf("failed to write gifted by indexes: %v", err)
+	}
+
+	if err := generate.WriteScalePermanenceIndexPages(); err != nil {
+		return fmt.Errorf("failed to write scale permanence indexes: %v", err)
+	}
+
+	if err := generate.WriteWhatWasIsIfIndexPages(); err != nil {
+		return fmt.Errorf("failed to write what was/is/if indexes: %v", err)
+	}
+
+	if err := generate.WriteTimePeriodIndexPages(); err != nil {
+		return fmt.Errorf("failed to write time period indexes: %v", err)
 	}
 
 	if err := generate.CopyCSSToOutput(); err != nil {

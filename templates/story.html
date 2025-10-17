@@ -148,6 +148,42 @@
                     </span>
                 </div>
                 {{end}}
+                {{if $story.GiftedBy}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Gifted or co-created by</span>
+                    <span class="story-metadata-item-value tags">
+                        {{range $story.GiftedBy}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{end}}
+                    </span>
+                </div>
+                {{end}}
+                {{if $story.ScalePermanence}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Scale of permanence</span>
+                    <span class="story-metadata-item-value tags">
+                        {{range $story.ScalePermanence}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{end}}
+                    </span>
+                </div>
+                {{end}}
+                {{if $story.WhatWasIsIf}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">What was/is/if</span>
+                    <span class="story-metadata-item-value tags">
+                        {{range $story.WhatWasIsIf}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{end}}
+                    </span>
+                </div>
+                {{end}}
+                {{if $story.TimePeriod}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">Time period</span>
+                    <span class="story-metadata-item-value tags">
+                        {{range $story.TimePeriod}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                        {{end}}
+                    </span>
+                </div>
+                {{end}}
             </div>
         </div>
     </div>

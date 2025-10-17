@@ -35,6 +35,30 @@ type DataAdapter interface {
 	// GetWeather retrieves all unique weather conditions
 	GetWeather() ([]data.Weather, error)
 
+	// GetGiftedByTypes retrieves all unique gifted by values
+	GetGiftedByTypes() ([]data.GiftedBy, error)
+
+	// GetStoriesForGiftedBy retrieves stories filtered by gifted by
+	GetStoriesForGiftedBy(giftedByTitle string) ([]data.Story, error)
+
+	// GetScalePermanenceTypes retrieves all unique scale of permanence values
+	GetScalePermanenceTypes() ([]data.ScalePermanence, error)
+
+	// GetStoriesForScalePermanence retrieves stories filtered by scale of permanence
+	GetStoriesForScalePermanence(scalePermanenceTitle string) ([]data.Story, error)
+
+	// GetWhatWasIsIfTypes retrieves all unique what was/is/if values
+	GetWhatWasIsIfTypes() ([]data.WhatWasIsIf, error)
+
+	// GetStoriesForWhatWasIsIf retrieves stories filtered by what was/is/if
+	GetStoriesForWhatWasIsIf(whatWasIsIfTitle string) ([]data.Story, error)
+
+	// GetTimePeriodTypes retrieves all unique time period values
+	GetTimePeriodTypes() ([]data.TimePeriod, error)
+
+	// GetStoriesForTimePeriod retrieves stories filtered by time period
+	GetStoriesForTimePeriod(timePeriodTitle string) ([]data.Story, error)
+
 	// DropCache clears any cached data to force fresh retrieval
 	DropCache() error
 }
