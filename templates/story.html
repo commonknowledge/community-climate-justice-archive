@@ -46,12 +46,6 @@
         </div>
         <div class="story-metadata">
             <div class="story-metadata-item-group">
-                {{if or $story.StartDateTime $story.EndDateTime}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Date</span>
-                    <span>{{$story.StartDateTime}}{{if $story.EndDateTime}} - {{$story.EndDateTime}}{{end}}</span>
-                </div>
-                {{end}}
                 {{if $story.CreatedTime}}
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Created</span>
