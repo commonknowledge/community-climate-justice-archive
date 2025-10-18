@@ -232,7 +232,7 @@ The following field types require **specialized handling** and are **not covered
 For these complex types, refer to existing examples in the codebase:
 - MultiSelect: See `ParseThemesFromNocoDB()`, `ParseTypesFromNocoDB()`, `ParseWeatherFromNocoDB()`
 - Links/LinkToAnotherRecord: See `fetchStoryConnectionsDirect()` 
-- Attachment: See `ParseImagesFromNocoDB()`
+- Attachment: See `ParseAttachmentsFromNocoDB()`
 
 #### 6. Update Filtering Data (optional)
 **File**: `internal/generate/generate.go`

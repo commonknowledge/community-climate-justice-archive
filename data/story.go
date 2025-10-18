@@ -91,10 +91,11 @@ type Story struct {
 	URL                     string
 }
 
-type StoryImage struct {
+type StoryAttachment struct {
 	Filename        string
 	AlternativeText string
 	Type            string
+	FileType        string // "image", "audio", "document"
 	Size            int
 	Width           int
 	Height          int
@@ -105,99 +106,147 @@ type StoryImage struct {
 	Thumbnails      map[string]Thumbnail
 }
 
-// GetStoryImage returns the image for a story.
-func (s Story) GetStoryImages() []StoryImage {
-	// The image is stored as a following JSON blob format from Airtable:
-	// [
-	//   {
-	//     "id": "attENPLcNOsEdYP5E",
-	//     "width": 3252,
-	//     "height": 2193,
-	//     "url": "https://v5.airtableusercontent.com/...",
-	//     "filename": "Michelle Gartside Model 5.png",
-	//     "size": 7205950,
-	//     "type": "image/png",
-	//     "thumbnails": {
-	//       "small": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 53,
-	//         "height": 36
-	//       },
-	//       "large": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 759,
-	//         "height": 512
-	//       },
-	//       "full": {
-	//         "url": "https://v5.airtableusercontent.com/...",
-	//         "width": 3000,
-	//         "height": 3000
-	//       }
-	//     }
-	//   }
-	// ]
-	//
-	// In the Airtable dump this is in two columns:
-	// - Image
-	// - Source Image
-	//
-	// We need to combine them into a single slice of StoryImage structs.
-
-	var images []StoryImage
-	json.Unmarshal([]byte(s.Image), &images)
-
-	for i := range images {
-		// Split filename into name and extension
-		ext := filepath.Ext(images[i].Filename)
-		name := strings.TrimSuffix(images[i].Filename, ext)
-
-		// Check if WebP version exists
-		webpPath := filepath.Join("images", name+".webp")
-		if _, err := os.Stat(webpPath); err == nil {
-			// WebP version exists, use it
-			images[i].Filename = name + ".webp"
-			images[i].Type = "image/webp"
-		}
-
-		// Set URLs for different sizes
-		images[i].URL = "/images/processed/" + name + ".webp"
-		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
-		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
-		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
-	}
-
-	json.Unmarshal([]byte(s.SourceImage), &images)
-
-	for i := range images {
-		// Split filename into name and extension
-		ext := filepath.Ext(images[i].Filename)
-		name := strings.TrimSuffix(images[i].Filename, ext)
-
-		// Check if WebP version exists
-		webpPath := filepath.Join("images", name+".webp")
-		if _, err := os.Stat(webpPath); err == nil {
-			// WebP version exists, use it
-			images[i].Filename = name + ".webp"
-			images[i].Type = "image/webp"
-		}
-
-		// Set URLs for different sizes
-		images[i].URL = "/images/processed/" + name + ".webp"
-		images[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
-		images[i].MediumURL = "/images/processed/" + name + "_medium.webp"
-		images[i].LargeURL = "/images/processed/" + name + "_large.webp"
-	}
-
-	return images
+// IsImage returns true if the attachment is an image
+func (a StoryAttachment) IsImage() bool {
+	return a.FileType == "image"
 }
 
-func (s Story) GetStoryImage() StoryImage {
-	images := s.GetStoryImages()
-	if len(images) > 0 {
-		log.Println("Found", len(images), "images for story", images[0].URL)
-		return images[0]
+// IsAudio returns true if the attachment is audio
+func (a StoryAttachment) IsAudio() bool {
+	return a.FileType == "audio"
+}
+
+// IsDocument returns true if the attachment is a document
+func (a StoryAttachment) IsDocument() bool {
+	return a.FileType == "document"
+}
+
+// IsPlayable returns true if the attachment can be played (audio files)
+func (a StoryAttachment) IsPlayable() bool {
+	return a.IsAudio()
+}
+
+// IsDownloadable returns true if the attachment should be downloaded (documents)
+func (a StoryAttachment) IsDownloadable() bool {
+	return a.IsDocument()
+}
+
+// GetFileTypeFromExtension determines the file type based on the file extension
+func GetFileTypeFromExtension(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+
+	// Image files
+	switch ext {
+	case ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp":
+		return "image"
 	}
-	return StoryImage{}
+
+	// Audio files
+	switch ext {
+	case ".mp3", ".wav", ".ogg":
+		return "audio"
+	}
+
+	// Document files
+	switch ext {
+	case ".pdf", ".docx", ".doc":
+		return "document"
+	}
+
+	// Default to document for unknown types
+	return "document"
+}
+
+// processAttachmentSlice processes a slice of attachments and sets URLs/metadata
+func processAttachmentSlice(attachments []StoryAttachment) []StoryAttachment {
+	for i := range attachments {
+		// Determine file type based on extension
+		attachments[i].FileType = GetFileTypeFromExtension(attachments[i].Filename)
+
+		// Split filename into name and extension
+		ext := filepath.Ext(attachments[i].Filename)
+		name := strings.TrimSuffix(attachments[i].Filename, ext)
+
+		// Handle different file types
+		if attachments[i].IsImage() {
+			// For images, check if WebP version exists
+			webpPath := filepath.Join("images", name+".webp")
+			if _, err := os.Stat(webpPath); err == nil {
+				// WebP version exists, use it
+				attachments[i].Filename = name + ".webp"
+				attachments[i].Type = "image/webp"
+			}
+
+			// Set URLs for different sizes (images only)
+			attachments[i].URL = "/images/processed/" + name + ".webp"
+			attachments[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
+			attachments[i].MediumURL = "/images/processed/" + name + "_medium.webp"
+			attachments[i].LargeURL = "/images/processed/" + name + "_large.webp"
+		} else {
+			// For non-images (audio, documents), just set the direct URL
+			attachments[i].URL = "/images/" + attachments[i].Filename
+			attachments[i].ThumbURL = ""
+			attachments[i].MediumURL = ""
+			attachments[i].LargeURL = ""
+		}
+	}
+	return attachments
+}
+
+// GetStoryAttachments returns all attachments (images, audio, documents) for a story.
+func (s Story) GetStoryAttachments() []StoryAttachment {
+	var allAttachments []StoryAttachment
+
+	// Process Image field
+	if s.Image != "" {
+		var imageAttachments []StoryAttachment
+		if err := json.Unmarshal([]byte(s.Image), &imageAttachments); err != nil {
+			log.Printf("Warning: Failed to unmarshal Image field for story %s: %v", s.ID, err)
+			log.Printf("Image field content: %s", s.Image)
+		} else {
+			processedAttachments := processAttachmentSlice(imageAttachments)
+			allAttachments = append(allAttachments, processedAttachments...)
+		}
+	}
+
+	// Process SourceImage field
+	if s.SourceImage != "" {
+		var sourceAttachments []StoryAttachment
+		if err := json.Unmarshal([]byte(s.SourceImage), &sourceAttachments); err != nil {
+			log.Printf("Warning: Failed to unmarshal SourceImage field for story %s: %v", s.ID, err)
+			log.Printf("SourceImage field content: %s", s.SourceImage)
+		} else {
+			processedAttachments := processAttachmentSlice(sourceAttachments)
+			allAttachments = append(allAttachments, processedAttachments...)
+		}
+	}
+
+	// Only log when there are no attachments for debugging purposes
+	if len(allAttachments) == 0 && (s.Image != "" || s.SourceImage != "") {
+		log.Printf("Warning: Story %s has image data but no valid attachments parsed", s.ID)
+	}
+
+	return allAttachments
+}
+
+// GetStoryAttachment returns the first attachment for a story
+func (s Story) GetStoryAttachment() StoryAttachment {
+	attachments := s.GetStoryAttachments()
+	if len(attachments) > 0 {
+		log.Println("Found", len(attachments), "attachments for story", attachments[0].URL)
+		return attachments[0]
+	}
+	return StoryAttachment{}
+}
+
+// GetStoryImage returns the first image attachment for backward compatibility
+func (s Story) GetStoryImage() StoryAttachment {
+	return s.GetStoryAttachment()
+}
+
+// GetStoryImages returns all attachments for backward compatibility
+func (s Story) GetStoryImages() []StoryAttachment {
+	return s.GetStoryAttachments()
 }
 
 // StoryDTO is a data transfer object that handles NULL values from the database.

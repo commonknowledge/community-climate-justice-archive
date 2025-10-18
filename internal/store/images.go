@@ -10,14 +10,14 @@ import (
 	"community-climate-justice-archive/data"
 )
 
-// GetImages retrieves all images from the images directory and returns them as a slice of StoryImage.
+// GetImages retrieves all images from the images directory and returns them as a slice of StoryAttachment.
 // Intended for passing to HTML templates.
 // For the moment this reads the images from the images/ directory.
 // We will use SQLite here in the future.
-func GetImages() []data.StoryImage {
+func GetImages() []data.StoryAttachment {
 	log.Println("Getting images")
 
-	var images []data.StoryImage
+	var images []data.StoryAttachment
 
 	files, err := os.ReadDir("images")
 	if err != nil {
@@ -34,7 +34,11 @@ func GetImages() []data.StoryImage {
 			// Common image extensions
 			switch ext {
 			case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp":
-				images = append(images, data.StoryImage{Filename: filename, AlternativeText: filename})
+				images = append(images, data.StoryAttachment{
+					Filename:        filename,
+					AlternativeText: filename,
+					FileType:        "image",
+				})
 				processedCount++
 			}
 		}

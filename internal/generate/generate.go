@@ -107,28 +107,30 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 
 // StoryData represents a story with all necessary data for filtering
 type StoryData struct {
-	ID            string     `json:"id"`
-	Finding       string     `json:"finding"`
-	URL           string     `json:"url"`
-	Location      string     `json:"location"`
-	StartDateTime string     `json:"startDateTime"`
-	EndDateTime   string     `json:"endDateTime"`
-	Season        string     `json:"season"`
-	Experience    string     `json:"experience"`
-	TimeSpan      string     `json:"timeSpan"`
-	Themes        []string   `json:"themes"`
-	Types         []string   `json:"types"`
-	Weather       []string   `json:"weather"`
-	Image         StoryImage `json:"image"`
+	ID            string          `json:"id"`
+	Finding       string          `json:"finding"`
+	URL           string          `json:"url"`
+	Location      string          `json:"location"`
+	StartDateTime string          `json:"startDateTime"`
+	EndDateTime   string          `json:"endDateTime"`
+	Season        string          `json:"season"`
+	Experience    string          `json:"experience"`
+	TimeSpan      string          `json:"timeSpan"`
+	Themes        []string        `json:"themes"`
+	Types         []string        `json:"types"`
+	Weather       []string        `json:"weather"`
+	Attachment    StoryAttachment `json:"attachment"`
 }
 
-// StoryImage represents the image data for a story
-type StoryImage struct {
+// StoryAttachment represents the attachment data for a story
+type StoryAttachment struct {
 	URL       string `json:"url"`
 	ThumbURL  string `json:"thumbUrl"`
 	MediumURL string `json:"mediumUrl"`
 	LargeURL  string `json:"largeUrl"`
 	Alt       string `json:"alt"`
+	FileType  string `json:"fileType"`
+	Filename  string `json:"filename"`
 }
 
 // FilterData represents all the data needed for client-side filtering
@@ -152,7 +154,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 	// Create story data
 	storyData := make([]StoryData, len(stories))
 	for i, story := range stories {
-		image := story.GetStoryImage()
+		attachment := story.GetStoryAttachment()
 
 		// Extract theme titles
 		themeNames := make([]string, len(story.Themes))
@@ -185,12 +187,14 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Themes:        themeNames,
 			Types:         typeNames,
 			Weather:       weatherNames,
-			Image: StoryImage{
-				URL:       image.URL,
-				ThumbURL:  image.ThumbURL,
-				MediumURL: image.MediumURL,
-				LargeURL:  image.LargeURL,
-				Alt:       image.AlternativeText,
+			Attachment: StoryAttachment{
+				URL:       attachment.URL,
+				ThumbURL:  attachment.ThumbURL,
+				MediumURL: attachment.MediumURL,
+				LargeURL:  attachment.LargeURL,
+				Alt:       attachment.AlternativeText,
+				FileType:  attachment.FileType,
+				Filename:  attachment.Filename,
 			},
 		}
 	}
