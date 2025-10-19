@@ -138,8 +138,12 @@
         }, true);
 
         // Use event delegation for popup hover events to handle dynamically created popups
+        // Target the text area which has pointer-events: auto
         document.addEventListener('mouseenter', (e) => {
-            const popup = e.target.closest('.story-popup');
+            const popupText = e.target.closest('.story-popup-text');
+            if (!popupText) return;
+            
+            const popup = popupText.closest('.story-popup');
             if (!popup) return;
             
             // Cancel any pending hide timeout
@@ -151,7 +155,10 @@
         }, true);
 
         document.addEventListener('mouseleave', (e) => {
-            const popup = e.target.closest('.story-popup');
+            const popupText = e.target.closest('.story-popup-text');
+            if (!popupText) return;
+            
+            const popup = popupText.closest('.story-popup');
             if (!popup) return;
             
             globalHideTimeout = setTimeout(() => {
