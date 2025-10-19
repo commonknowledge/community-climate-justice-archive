@@ -694,6 +694,21 @@ Stories after JavaScript randomization completes.
 
 The story image and navigation arrows.
 */
+/* Story Attachment Navigation Container
+Navigation wrapper that contains arrows and attachment content.
+*/
+.story-attachment-navigation {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
+    padding: 0;
+    width: 100%;
+}
+
 .story-image-container {
     align-items: center;
     box-sizing: border-box;
@@ -704,6 +719,7 @@ The story image and navigation arrows.
     overflow-x: hidden;
     padding: 0;
     width: 100%;
+    flex: 1;
 }
 
 /* Story Image
