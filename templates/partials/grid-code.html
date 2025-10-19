@@ -44,7 +44,15 @@
             const storyId = container.dataset.storyId;
             console.log(`Opening popup for story ${storyId}`);
 
-            const storyPopup = popupCache.get(storyId);
+            let storyPopup = popupCache.get(storyId);
+
+            // If popup not in cache, try to find it in DOM (for dynamically created popups)
+            if (!storyPopup) {
+                storyPopup = document.querySelector(`[data-story-popup-id="${storyId}"]`);
+                if (storyPopup) {
+                    popupCache.set(storyId, storyPopup);
+                }
+            }
 
             if (!storyPopup) {
                 console.log(`Could not find story popup for story ${storyId}`);
@@ -62,7 +70,15 @@
         }
 
         function hidePopup(storyId) {
-            const storyPopup = popupCache.get(storyId);
+            let storyPopup = popupCache.get(storyId);
+            
+            // If popup not in cache, try to find it in DOM (for dynamically created popups)
+            if (!storyPopup) {
+                storyPopup = document.querySelector(`[data-story-popup-id="${storyId}"]`);
+                if (storyPopup) {
+                    popupCache.set(storyId, storyPopup);
+                }
+            }
             
             if (storyPopup && isOpen(storyPopup)) {
                 storyPopup.style.display = 'none';
@@ -70,69 +86,80 @@
             }
         }
 
-        storyImageContainers.forEach(container => {
-            let hoverTimeout = null;
+        // Use event delegation for story container hover events to handle dynamically created elements
+        let hoverTimeouts = new Map();
+        
+        document.addEventListener('mouseenter', (e) => {
+            const container = e.target.closest('.story-image-container');
+            if (!container) return;
+            
+            const storyId = container.dataset.storyId;
+            if (!storyId) return;
+            
+            // Clear any existing timeouts for this story
+            if (hoverTimeouts.has(storyId)) {
+                clearTimeout(hoverTimeouts.get(storyId));
+                hoverTimeouts.delete(storyId);
+            }
+            if (globalHideTimeout) {
+                clearTimeout(globalHideTimeout);
+                globalHideTimeout = null;
+            }
+            
+            // Close other popups first
+            closeAllPopups();
+            
+            // Show popup after delay
+            const timeout = setTimeout(() => {
+                showPopup(container);
+                hoverTimeouts.delete(storyId);
+            }, HOVER_SHOW_DELAY);
+            hoverTimeouts.set(storyId, timeout);
+        }, true);
 
-            // Show popup on hover
-            container.addEventListener('mouseenter', () => {
-                // Clear any existing timeouts
-                if (hoverTimeout) {
-                    clearTimeout(hoverTimeout);
-                    hoverTimeout = null;
-                }
-                if (globalHideTimeout) {
-                    clearTimeout(globalHideTimeout);
-                    globalHideTimeout = null;
-                }
-                
-                // Close other popups first
-                closeAllPopups();
-                
-                // Show popup after delay
-                hoverTimeout = setTimeout(() => {
-                    showPopup(container);
-                    hoverTimeout = null;
-                }, HOVER_SHOW_DELAY);
-            });
+        document.addEventListener('mouseleave', (e) => {
+            const container = e.target.closest('.story-image-container');
+            if (!container) return;
+            
+            const storyId = container.dataset.storyId;
+            if (!storyId) return;
+            
+            // Clear the show timeout if still pending
+            if (hoverTimeouts.has(storyId)) {
+                clearTimeout(hoverTimeouts.get(storyId));
+                hoverTimeouts.delete(storyId);
+            }
+            
+            // Schedule hide after delay
+            globalHideTimeout = setTimeout(() => {
+                hidePopup(storyId);
+                globalHideTimeout = null;
+            }, HOVER_HIDE_DELAY);
+        }, true);
 
-            // Hide popup on hover leave
-            container.addEventListener('mouseleave', () => {
-                // Clear the show timeout if still pending
-                if (hoverTimeout) {
-                    clearTimeout(hoverTimeout);
-                    hoverTimeout = null;
-                }
-                
-                // Schedule hide after delay
-                const storyId = container.dataset.storyId;
-                globalHideTimeout = setTimeout(() => {
-                    hidePopup(storyId);
-                    globalHideTimeout = null;
-                }, HOVER_HIDE_DELAY);
-            });
-        });
+        // Use event delegation for popup hover events to handle dynamically created popups
+        document.addEventListener('mouseenter', (e) => {
+            const popup = e.target.closest('.story-popup');
+            if (!popup) return;
+            
+            // Cancel any pending hide timeout
+            if (globalHideTimeout) {
+                clearTimeout(globalHideTimeout);
+                globalHideTimeout = null;
+            }
+            popup.dataset.storyOpen = true;
+        }, true);
 
-        // Handle popup hover to keep it open when hovering over the popup itself
-        storyPopups.forEach(popup => {
-            // Keep popup open when hovering over it
-            popup.addEventListener('mouseenter', () => {
-                // Cancel any pending hide timeout
-                if (globalHideTimeout) {
-                    clearTimeout(globalHideTimeout);
-                    globalHideTimeout = null;
-                }
-                popup.dataset.storyOpen = true;
-            });
-
-            // Hide popup when leaving it
-            popup.addEventListener('mouseleave', () => {
-                globalHideTimeout = setTimeout(() => {
-                    popup.style.display = 'none';
-                    popup.dataset.storyOpen = false;
-                    globalHideTimeout = null;
-                }, HOVER_HIDE_DELAY);
-            });
-        });
+        document.addEventListener('mouseleave', (e) => {
+            const popup = e.target.closest('.story-popup');
+            if (!popup) return;
+            
+            globalHideTimeout = setTimeout(() => {
+                popup.style.display = 'none';
+                popup.dataset.storyOpen = false;
+                globalHideTimeout = null;
+            }, HOVER_HIDE_DELAY);
+        }, true);
     });
 </script>
 {{end}}
