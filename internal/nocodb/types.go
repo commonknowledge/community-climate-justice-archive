@@ -764,10 +764,20 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 
 			// Get the cached relationships
 			if cachedData, exists := record[cacheKey]; exists {
+				// Handle nil case (no relationships)
+				if cachedData == nil {
+					return []data.StoryConnection{}
+				}
+
+				// Handle both fresh cache ([]data.StoryConnection) and disk-loaded cache ([]interface{})
 				if connections, ok := cachedData.([]data.StoryConnection); ok {
+					// Fresh cache data - use directly
 					return connections
+				} else if interfaceSlice, ok := cachedData.([]interface{}); ok {
+					// Disk-loaded cache data - convert from generic interfaces
+					return convertInterfaceSliceToConnections(interfaceSlice)
 				} else {
-					log.Printf("Warning: Cached relationship data has wrong type for record %s", recordID)
+					log.Printf("Warning: Cached relationship data has unexpected type %T for record %s", cachedData, recordID)
 				}
 			}
 
@@ -778,4 +788,26 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 
 	log.Printf("Warning: Record %s not found in cache", recordID)
 	return []data.StoryConnection{}
+}
+
+// convertInterfaceSliceToConnections converts a slice of generic interfaces (from JSON deserialization)
+// back to StoryConnection objects
+func convertInterfaceSliceToConnections(interfaceSlice []interface{}) []data.StoryConnection {
+	var connections []data.StoryConnection
+
+	for _, item := range interfaceSlice {
+		if connMap, ok := item.(map[string]interface{}); ok {
+			connection := data.StoryConnection{
+				ID:       toString(connMap["id"]),
+				Title:    toString(connMap["title"]),
+				Finding:  toString(connMap["finding"]),
+				Image:    toString(connMap["image"]),
+				ThumbURL: toString(connMap["thumbUrl"]),
+				URL:      toString(connMap["url"]),
+			}
+			connections = append(connections, connection)
+		}
+	}
+
+	return connections
 }
