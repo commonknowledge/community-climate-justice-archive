@@ -180,6 +180,20 @@ class ArchiveFilters {
         return luminance > 0.5 ? '#000000' : '#ffffff';
     }
     
+    // Helper function to get tag color from filter data
+    getTagColor(tagTitle, filterType) {
+        if (!this.filterData || !this.filterData[filterType]) {
+            return this.getDefaultColor(tagTitle, filterType);
+        }
+        
+        const option = this.filterData[filterType].find(opt => opt.title === tagTitle);
+        if (option && option.color) {
+            return option.color;
+        }
+        
+        return this.getDefaultColor(tagTitle, filterType);
+    }
+    
     setupEventListeners() {
         // Dropdown button handlers
         if (this.elements.themeButton) {
@@ -480,21 +494,24 @@ class ArchiveFilters {
             `;
         }
         
-        // Build tag content - simplified version
+        // Build tag content with proper colors
         let tagContent = '';
         if (story.types && story.types.length > 0) {
             story.types.forEach(type => {
-                tagContent += `<span class="tag">${type}</span>`;
+                const color = this.getTagColor(type, 'types');
+                tagContent += `<span class="tag" style="background-color: ${color};">${type}</span>`;
             });
         }
         if (story.weather && story.weather.length > 0) {
             story.weather.forEach(weather => {
-                tagContent += `<span class="tag">${weather}</span>`;
+                const color = this.getTagColor(weather, 'weather');
+                tagContent += `<span class="tag" style="background-color: ${color};">${weather}</span>`;
             });
         }
         if (story.themes && story.themes.length > 0) {
             story.themes.forEach(theme => {
-                tagContent += `<span class="tag">${theme}</span>`;
+                const color = this.getTagColor(theme, 'themes');
+                tagContent += `<span class="tag" style="background-color: ${color};">${theme}</span>`;
             });
         }
         
