@@ -615,11 +615,39 @@ func WriteSingleStory(storyInQuestion data.Story) error {
 	}
 	defer file.Close()
 
-	// For single story, just use the first story as previous/next for simplicity
+	// Find the actual previous and next stories based on the current story's position
 	var previousStory, nextStory data.Story
 	if len(allStories) > 0 {
-		previousStory = allStories[0]
-		nextStory = allStories[0]
+		// Find the current story's index in the slice
+		currentIndex := -1
+		for i, story := range allStories {
+			if story.ID == storyInQuestion.ID {
+				currentIndex = i
+				break
+			}
+		}
+
+		if currentIndex >= 0 {
+			// Get previous story, wrapping to the end if at the beginning
+			if currentIndex > 0 {
+				previousStory = allStories[currentIndex-1]
+			} else {
+				// If this is the first story, the previous is the last story
+				previousStory = allStories[len(allStories)-1]
+			}
+
+			// Get next story, wrapping to the beginning if at the end
+			if currentIndex < len(allStories)-1 {
+				nextStory = allStories[currentIndex+1]
+			} else {
+				// If this is the last story, the next is the first story
+				nextStory = allStories[0]
+			}
+		} else {
+			// If story not found (shouldn't happen), use first story as fallback
+			previousStory = allStories[0]
+			nextStory = allStories[0]
+		}
 	}
 
 	// Select a random story for the random link

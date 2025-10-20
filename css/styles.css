@@ -1770,3 +1770,119 @@ Inspired by Quake console, using existing design elements.
         text-overflow: ellipsis;
     }
 }
+
+/* Story Navigation Buttons
+
+Next and Previous navigation buttons for story pages, based on Figma design.
+Uses cream background with dashed border and flexible layout.
+*/
+.story-navigation {
+    display: flex;
+    gap: 1.11111rem;
+    margin-top: 3.33333rem;
+    margin-bottom: 2.22222rem;
+}
+
+.story-nav-button {
+    border: 2px dashed #000;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 0.55556rem;
+    text-decoration: none;
+    color: #000;
+    flex: 1;
+    min-height: 6.66667rem;
+    gap: 1.11111rem;
+    transition: border-style 0.2s ease;
+}
+
+.story-nav-button:hover {
+    border-style: solid;
+}
+
+.story-nav-button.previous {
+    justify-content: flex-start;
+}
+
+.story-nav-button.next {
+    justify-content: flex-end;
+}
+
+.story-nav-image {
+    width: 5.55556rem;
+    height: 5.55556rem;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.story-nav-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.story-nav-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.story-nav-button.previous .story-nav-text {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.story-nav-button.next .story-nav-text {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.story-nav-label {
+    font-family: Arial, sans-serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.01222rem;
+    margin: 0;
+}
+
+.story-nav-title {
+    font-family: Arial, sans-serif;
+    font-size: 0.88889rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.00889rem;
+    margin: 0.22222rem 0 0 0;
+    opacity: 0.7;
+}
+
+/* Mobile responsiveness for navigation */
+@media (max-width: 768px) {
+    .story-navigation {
+        flex-direction: column;
+        gap: 0.55556rem;
+    }
+    
+    .story-nav-button {
+        min-height: 5rem;
+        gap: 0.77778rem;
+    }
+    
+    .story-nav-image {
+        width: 4rem;
+        height: 4rem;
+    }
+    
+    .story-nav-label {
+        font-size: 1rem;
+    }
+    
+    .story-nav-title {
+        font-size: 0.77778rem;
+    }
+}

@@ -642,6 +642,56 @@
         {{end}}
     </div>
 
+    <!-- Story Navigation -->
+    <div class="story-navigation standard-margins">
+        {{if .LastStory.ID}}
+        <a href="{{.LastStory.URL}}" class="story-nav-button previous">
+            <div class="story-nav-image">
+                {{$prevAttachment := .LastStory.GetStoryAttachment}}
+                {{if and $prevAttachment.URL $prevAttachment.IsImage}}
+                <img src="{{$prevAttachment.ThumbURL}}" alt="{{$prevAttachment.AlternativeText}}">
+                {{else}}
+                <div class="story-no-attachment">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21,15 16,10 5,21"></polyline>
+                    </svg>
+                </div>
+                {{end}}
+            </div>
+            <div class="story-nav-text">
+                <p class="story-nav-label">Previous</p>
+            </div>
+        </a>
+        {{else}}
+        <div></div> <!-- Empty placeholder for flexbox alignment -->
+        {{end}}
+
+        {{if .NextStory.ID}}
+        <a href="{{.NextStory.URL}}" class="story-nav-button next">
+            <div class="story-nav-text">
+                <p class="story-nav-label">Next</p>
+            </div>
+            <div class="story-nav-image">
+                {{$nextAttachment := .NextStory.GetStoryAttachment}}
+                {{if and $nextAttachment.URL $nextAttachment.IsImage}}
+                <img src="{{$nextAttachment.ThumbURL}}" alt="{{$nextAttachment.AlternativeText}}">
+                {{else}}
+                <div class="story-no-attachment">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21,15 16,10 5,21"></polyline>
+                    </svg>
+                </div>
+                {{end}}
+            </div>
+        </a>
+        {{else}}
+        <div></div> <!-- Empty placeholder for flexbox alignment -->
+        {{end}}
+    </div>
 
     {{template "footer" .}}
     
