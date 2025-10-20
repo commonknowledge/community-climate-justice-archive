@@ -505,17 +505,34 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 				ID:      strconv.Itoa(item.Id),
 				Title:   item.Title,
 				Finding: item.Title,
-				URL:     "/stories/" + util.Slugify(item.Title) + ".html",
+				URL:     "/stories/" + util.Slugify(item.Title) + "-" + strconv.Itoa(item.Id) + ".html",
 			}
 
-			// Look up the full story data from provided records to get proper image URLs
+			// Look up the full story data from provided records to get proper attachment info
 			storyIDStr := strconv.Itoa(item.Id)
 			if cachedStory, found := c.getStoryFromRecords(storyIDStr, allRecords); found {
+				// First try to get an image attachment
 				storyImage := cachedStory.GetStoryImage()
 				if storyImage.URL != "" {
 					connection.Image = storyImage.URL
 					connection.ThumbURL = storyImage.ThumbURL
+					connection.AttachmentType = "image"
+					connection.AttachmentFilename = storyImage.Filename
+				} else {
+					// No image, check for audio attachment
+					audioAttachment := cachedStory.GetFirstNonImageAttachment()
+					if audioAttachment.URL != "" && audioAttachment.IsAudio() {
+						connection.AttachmentType = "audio"
+						connection.AttachmentFilename = audioAttachment.Filename
+					} else if audioAttachment.URL != "" && audioAttachment.IsDocument() {
+						connection.AttachmentType = "document"
+						connection.AttachmentFilename = audioAttachment.Filename
+					} else {
+						connection.AttachmentType = "none"
+					}
 				}
+			} else {
+				connection.AttachmentType = "none"
 			}
 
 			connections = append(connections, connection)

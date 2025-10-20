@@ -16,12 +16,14 @@ import (
 )
 
 type StoryConnection struct {
-	ID       string `json:"id"`
-	Title    string `json:"title"`
-	Finding  string `json:"finding"`
-	Image    string `json:"image"`
-	ThumbURL string `json:"thumbUrl"`
-	URL      string `json:"url"`
+	ID                 string `json:"id"`
+	Title              string `json:"title"`
+	Finding            string `json:"finding"`
+	Image              string `json:"image"`
+	ThumbURL           string `json:"thumbUrl"`
+	URL                string `json:"url"`
+	AttachmentType     string `json:"attachmentType"`     // "image", "audio", "document", or "none"
+	AttachmentFilename string `json:"attachmentFilename"` // filename for display with non-image attachments
 }
 
 type GiftedBy struct {
@@ -54,6 +56,7 @@ type Story struct {
 	Finding                 string
 	HighStExperiment        string
 	Image                   string
+	ImageVideoSound         string
 	SourceImage             string
 	Location                string
 	StartDateTime           string
@@ -197,13 +200,17 @@ func processAttachmentSlice(attachments []StoryAttachment) []StoryAttachment {
 func (s Story) GetStoryAttachments() []StoryAttachment {
 	var allAttachments []StoryAttachment
 
-	// Debug logging for specific story
-	if s.ID == "1" {
+	// Debug logging for specific stories
+	if s.ID == "1" || s.ID == "12" {
 		log.Printf("DEBUG: Story %s attachment processing:", s.ID)
 		log.Printf("DEBUG: Image field length: %d", len(s.Image))
+		log.Printf("DEBUG: ImageVideoSound field length: %d", len(s.ImageVideoSound))
 		log.Printf("DEBUG: SourceImage field length: %d", len(s.SourceImage))
 		if s.Image != "" {
 			log.Printf("DEBUG: Image field content: %s", s.Image)
+		}
+		if s.ImageVideoSound != "" {
+			log.Printf("DEBUG: ImageVideoSound field content: %s", s.ImageVideoSound)
 		}
 		if s.SourceImage != "" {
 			log.Printf("DEBUG: SourceImage field content: %s", s.SourceImage)
@@ -225,6 +232,32 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 		}
 	}
 
+	// Process ImageVideoSound field (NocoDB format)
+	if s.ImageVideoSound != "" {
+		if s.ID == "1" || s.ID == "12" {
+			log.Printf("DEBUG: Processing ImageVideoSound field with NocoDB format")
+		}
+
+		// Parse NocoDB attachment format
+		var nocoAttachments []map[string]interface{}
+		if err := json.Unmarshal([]byte(s.ImageVideoSound), &nocoAttachments); err != nil {
+			log.Printf("Warning: Failed to unmarshal ImageVideoSound field for story %s: %v", s.ID, err)
+			log.Printf("ImageVideoSound field content: %s", s.ImageVideoSound)
+		} else {
+			// Convert NocoDB format to StoryAttachment format
+			for _, nocoAttachment := range nocoAttachments {
+				attachment := s.convertNocoDBAttachment(nocoAttachment)
+				if attachment.Filename != "" {
+					allAttachments = append(allAttachments, attachment)
+				}
+			}
+
+			if s.ID == "1" || s.ID == "12" {
+				log.Printf("DEBUG: Successfully parsed %d ImageVideoSound attachments", len(nocoAttachments))
+			}
+		}
+	}
+
 	// Process SourceImage field
 	if s.SourceImage != "" {
 		var sourceAttachments []StoryAttachment
@@ -240,13 +273,13 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 		}
 	}
 
-	// Debug logging for specific story
-	if s.ID == "1" {
+	// Debug logging for specific stories
+	if s.ID == "1" || s.ID == "12" {
 		log.Printf("DEBUG: Total attachments for story %s: %d", s.ID, len(allAttachments))
 	}
 
 	// Only log when there are no attachments for debugging purposes
-	if len(allAttachments) == 0 && (s.Image != "" || s.SourceImage != "") {
+	if len(allAttachments) == 0 && (s.Image != "" || s.ImageVideoSound != "" || s.SourceImage != "") {
 		log.Printf("Warning: Story %s has image data but no valid attachments parsed", s.ID)
 	}
 
@@ -265,7 +298,29 @@ func (s Story) GetStoryAttachment() StoryAttachment {
 
 // GetStoryImage returns the first image attachment for backward compatibility
 func (s Story) GetStoryImage() StoryAttachment {
-	return s.GetStoryAttachment()
+	return s.GetFirstImageAttachment()
+}
+
+// GetFirstImageAttachment returns the first image attachment specifically, or empty if none
+func (s Story) GetFirstImageAttachment() StoryAttachment {
+	attachments := s.GetStoryAttachments()
+	for _, attachment := range attachments {
+		if attachment.IsImage() {
+			return attachment
+		}
+	}
+	return StoryAttachment{}
+}
+
+// GetFirstNonImageAttachment returns the first non-image attachment (audio/document), or empty if none
+func (s Story) GetFirstNonImageAttachment() StoryAttachment {
+	attachments := s.GetStoryAttachments()
+	for _, attachment := range attachments {
+		if !attachment.IsImage() {
+			return attachment
+		}
+	}
+	return StoryAttachment{}
 }
 
 // GetStoryImages returns all attachments for backward compatibility
@@ -487,4 +542,86 @@ func parseStoryConnectionsFromString(connectionStr string) []StoryConnection {
 // GetNocoDBURL returns a direct link to this story in the NocoDB interface for debugging
 func (s Story) GetNocoDBURL() string {
 	return fmt.Sprintf("https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path=", s.ID)
+}
+
+// convertNocoDBAttachment converts a NocoDB attachment object to StoryAttachment format
+func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) StoryAttachment {
+	// Extract basic info
+	filename := ""
+	if t, ok := nocoAttachment["title"].(string); ok {
+		filename = t
+	}
+
+	mimetype := ""
+	if m, ok := nocoAttachment["mimetype"].(string); ok {
+		mimetype = m
+	}
+
+	if filename == "" {
+		return StoryAttachment{} // Return empty if no filename
+	}
+
+	// Determine file type from mimetype (not just extension)
+	fileType := s.getFileTypeFromMimeType(mimetype)
+
+	attachment := StoryAttachment{
+		Filename:        filename,
+		AlternativeText: s.Finding + " - " + filename,
+		Type:            mimetype,
+		FileType:        fileType,
+	}
+
+	// Set size if available
+	if size, ok := nocoAttachment["size"].(float64); ok {
+		attachment.Size = int(size)
+	}
+
+	// Handle different file types appropriately
+	switch fileType {
+	case "image":
+		// For images, set dimensions and create processed URLs
+		if width, ok := nocoAttachment["width"].(float64); ok {
+			attachment.Width = int(width)
+		}
+		if height, ok := nocoAttachment["height"].(float64); ok {
+			attachment.Height = int(height)
+		}
+
+		// Create processed image URLs (webp versions)
+		processedFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".webp"
+		attachment.URL = "/images/processed/" + processedFilename
+		attachment.ThumbURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_thumb.webp"
+		attachment.MediumURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_medium.webp"
+		attachment.LargeURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_large.webp"
+
+	case "audio":
+		// For audio files, use original file path (no processing needed)
+		attachment.URL = "/audio/" + filename // Assuming audio files go in /audio/
+
+	case "document":
+		// For documents (PDF, Word), use original file path
+		attachment.URL = "/documents/" + filename // Assuming docs go in /documents/
+	}
+
+	return attachment
+}
+
+// getFileTypeFromMimeType determines file category from MIME type
+func (s Story) getFileTypeFromMimeType(mimetype string) string {
+	switch {
+	case strings.HasPrefix(mimetype, "image/"):
+		return "image"
+	case strings.HasPrefix(mimetype, "audio/"):
+		return "audio"
+	case strings.HasPrefix(mimetype, "video/"):
+		return "video"
+	case mimetype == "application/pdf":
+		return "document"
+	case mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+		return "document"
+	case mimetype == "application/msword":
+		return "document"
+	default:
+		return "document" // Default fallback
+	}
 }

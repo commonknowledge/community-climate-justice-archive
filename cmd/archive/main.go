@@ -88,6 +88,14 @@ func generateArchive(skipImages bool) error {
 		return fmt.Errorf("failed to copy images: %v", err)
 	}
 
+	if err := generate.CopyAudioToOutput(); err != nil {
+		return fmt.Errorf("failed to copy audio files: %v", err)
+	}
+
+	if err := generate.CopyDocumentsToOutput(); err != nil {
+		return fmt.Errorf("failed to copy document files: %v", err)
+	}
+
 	if err := generate.CopyCSSToOutput(); err != nil {
 		return fmt.Errorf("failed to copy CSS: %v", err)
 	}
@@ -157,6 +165,15 @@ func hotRegenerate() error {
 
 	if err := generate.WriteTimePeriodIndexPages(); err != nil {
 		return fmt.Errorf("failed to write time period indexes: %v", err)
+	}
+
+	// Copy non-image files during hot regeneration
+	if err := generate.CopyAudioToOutput(); err != nil {
+		return fmt.Errorf("failed to copy audio files: %v", err)
+	}
+
+	if err := generate.CopyDocumentsToOutput(); err != nil {
+		return fmt.Errorf("failed to copy document files: %v", err)
 	}
 
 	if err := generate.CopyCSSToOutput(); err != nil {

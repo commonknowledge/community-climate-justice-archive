@@ -93,7 +93,7 @@ func GetStoriesForWeatherLegacy(weatherTitle string) []data.Story {
 		}
 
 		story := dto.ToStory()
-		story.URL = CreateStoryURLFromFinding(story.Finding)
+		story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 
 		stories = append(stories, story)
 	}

@@ -38,6 +38,13 @@ func createStoryOutputPathFromFinding(finding string) string {
 	return filepath.Join("out", "stories", fileName)
 }
 
+// createStoryOutputPathFromFindingWithID creates a path to the output file for a story page with ID suffix.
+func createStoryOutputPathFromFindingWithID(finding, id string) string {
+	slug := util.Slugify(finding)
+	fileName := fmt.Sprintf("%s-%s.html", slug, id)
+	return filepath.Join("out", "stories", fileName)
+}
+
 // createWeatherOutputPathFromTitle creates a path to the output file for a weather page.
 func createWeatherOutputPathFromTitle(title string) string {
 	slug := util.Slugify(title)
@@ -435,7 +442,7 @@ func WriteStories() error {
 	totalStories := len(stories)
 
 	for i, storyInQuestion := range stories {
-		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
+		outputPath := createStoryOutputPathFromFindingWithID(storyInQuestion.Finding, storyInQuestion.ID)
 
 		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
 
@@ -599,7 +606,7 @@ func WriteSingleStory(storyInQuestion data.Story) error {
 		return fmt.Errorf("failed to create output stories directory: %w", err)
 	}
 
-	outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
+	outputPath := createStoryOutputPathFromFindingWithID(storyInQuestion.Finding, storyInQuestion.ID)
 	log.Printf("Writing single story with finding %s to %s", storyInQuestion.Finding, outputPath)
 
 	file, err := os.Create(outputPath)

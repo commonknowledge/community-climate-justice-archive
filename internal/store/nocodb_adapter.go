@@ -274,7 +274,7 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 
 		// Ensure URL is set
 		if story.URL == "" {
-			story.URL = CreateStoryURLFromFinding(story.Finding)
+			story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 		}
 
 		stories = append(stories, story)

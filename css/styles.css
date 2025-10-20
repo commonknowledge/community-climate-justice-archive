@@ -733,6 +733,90 @@ The main image for individual stories.
     object-fit: contain;
 }
 
+/* Story Audio
+
+Audio player display for main story attachments, centered between navigation arrows.
+*/
+.story-audio {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 200px;
+}
+
+.story-audio audio {
+    max-width: 100%;
+}
+
+/* Story Document
+
+Document download display for main story attachments, centered between navigation arrows.
+*/
+.story-document {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 200px;
+    text-align: center;
+}
+
+.story-document .document-icon {
+    margin-bottom: 1rem;
+}
+
+.story-document .download-link {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid #000;
+    text-decoration: none;
+    color: #000;
+    transition: background-color 0.3s ease;
+}
+
+.story-document .download-link:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Story No Attachments
+
+Discrete display when story has no attached media, centered and subtle.
+*/
+.story-no-attachments {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 150px;
+    text-align: center;
+    color: #999;
+}
+
+.no-attachment-placeholder {
+    margin-bottom: 0.75rem;
+    opacity: 0.6;
+}
+
+.no-attachment-placeholder svg {
+    width: 32px;
+    height: 32px;
+    stroke: #ccc;
+}
+
+.story-no-attachments p {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.22222rem;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.02rem;
+    color: #aaa;
+    margin: 0;
+}
+
 /* Story Details
 
 The main content and metadata for a story.

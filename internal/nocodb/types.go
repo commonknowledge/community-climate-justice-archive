@@ -22,6 +22,7 @@ type NocoDBStoryDTO struct {
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
+	ImageVideoSound         interface{} `json:"Image / video / sound"`
 	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
 	StartDateTime           interface{} `json:"Dated created / experienced"`
@@ -120,11 +121,20 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 	}
 
 	story := data.Story{
-		ID:                      toString(dto.ID),
-		CreatedTime:             toString(dto.CreatedTime),
-		Finding:                 toString(dto.Finding),
-		HighStExperiment:        toString(dto.HighStExperiment),
-		Image:                   func() string { img, _ := ParseAttachmentsFromNocoDB(dto.Image); return img }(),
+		ID:               toString(dto.ID),
+		CreatedTime:      toString(dto.CreatedTime),
+		Finding:          toString(dto.Finding),
+		HighStExperiment: toString(dto.HighStExperiment),
+		Image:            func() string { img, _ := ParseAttachmentsFromNocoDB(dto.Image); return img }(),
+		ImageVideoSound: func() string {
+			// Keep original NocoDB structure for rich metadata (mimetype, size, dimensions)
+			if dto.ImageVideoSound != nil {
+				if jsonBytes, err := json.Marshal(dto.ImageVideoSound); err == nil {
+					return string(jsonBytes)
+				}
+			}
+			return ""
+		}(),
 		SourceImage:             func() string { img, _ := ParseAttachmentsFromNocoDB(dto.SourceImage); return img }(),
 		Location:                toString(dto.Location),
 		StartDateTime:           toString(dto.StartDateTime),
@@ -161,8 +171,8 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		UpdatedAt:               toString(dto.UpdatedAt),
 	}
 
-	// Set URL based on finding (same logic as SQLite version)
-	story.URL = createStoryURLFromFinding(story.Finding)
+	// Set URL based on finding with ID suffix
+	story.URL = createStoryURLFromFindingWithID(story.Finding, story.ID)
 
 	return story, nil
 }
@@ -717,6 +727,15 @@ func createStoryURLFromFinding(finding string) string {
 	return fmt.Sprintf("/stories/%s.html", slug)
 }
 
+// createStoryURLFromFindingWithID creates a URL from the story finding with ID suffix
+func createStoryURLFromFindingWithID(finding, id string) string {
+	if finding == "" {
+		return ""
+	}
+	slug := util.Slugify(finding)
+	return fmt.Sprintf("/stories/%s-%s.html", slug, id)
+}
+
 // Helper function to check if a file exists
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
@@ -798,12 +817,14 @@ func convertInterfaceSliceToConnections(interfaceSlice []interface{}) []data.Sto
 	for _, item := range interfaceSlice {
 		if connMap, ok := item.(map[string]interface{}); ok {
 			connection := data.StoryConnection{
-				ID:       toString(connMap["id"]),
-				Title:    toString(connMap["title"]),
-				Finding:  toString(connMap["finding"]),
-				Image:    toString(connMap["image"]),
-				ThumbURL: toString(connMap["thumbUrl"]),
-				URL:      toString(connMap["url"]),
+				ID:                 toString(connMap["id"]),
+				Title:              toString(connMap["title"]),
+				Finding:            toString(connMap["finding"]),
+				Image:              toString(connMap["image"]),
+				ThumbURL:           toString(connMap["thumbUrl"]),
+				URL:                toString(connMap["url"]),
+				AttachmentType:     toString(connMap["attachmentType"]),
+				AttachmentFilename: toString(connMap["attachmentFilename"]),
 			}
 			connections = append(connections, connection)
 		}
