@@ -10,7 +10,11 @@
 <body>
     {{template "header" .}}
     {{$story := .Story}}
-    {{$attachments := $story.GetStoryAttachments}}
+    <!-- DEBUG: Using pre-computed attachments to avoid calling GetStoryAttachments from template -->
+    <!-- DEBUG: Story ID {{$story.ID}}, Finding: {{$story.Finding}} -->
+    <!-- DEBUG: NocoDB Link: {{.NocoDBURL}} -->
+    {{$attachments := .Attachments}}
+    <!-- DEBUG: Attachment count: {{len $attachments}} -->
     {{if $attachments}}
     {{$multipleAttachments := gt (len $attachments) 1}}
     
@@ -405,6 +409,16 @@
             {{end}}
         </div>
         {{end}}
+    </div>
+
+    <!-- DEBUG: Direct NocoDB link for debugging -->
+    <div class="story-debug-info" style="margin: 20px auto; padding: 15px; border: 1px dashed #ccc; background-color: #f9f9f9; max-width: 800px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Debug Info</h4>
+        <p style="margin: 0; font-size: 12px; color: #888;">
+            Story ID: <strong>{{$story.ID}}</strong> | 
+            <a href="{{.NocoDBURL}}" target="_blank" style="color: #007cba; text-decoration: underline;">View in NocoDB</a> |
+            Attachments: <strong>{{len $attachments}}</strong>
+        </p>
     </div>
 
     {{template "footer" .}}

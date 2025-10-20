@@ -36,6 +36,35 @@ func (n *NocoDBAdapter) GetAllStories() ([]data.Story, error) {
 	return n.convertRecordsToStories(records)
 }
 
+// GetStoryByID retrieves a single story by its ID from NocoDB
+func (n *NocoDBAdapter) GetStoryByID(id string) (data.Story, error) {
+	record, err := n.client.GetRecordByID(id)
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to get record by ID %s from NocoDB: %w", id, err)
+	}
+
+	stories, err := n.convertRecordsToStories([]map[string]interface{}{record})
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to convert record to story: %w", err)
+	}
+
+	if len(stories) == 0 {
+		return data.Story{}, fmt.Errorf("story with ID %s not found", id)
+	}
+
+	return stories[0], nil
+}
+
+// GetRawRecords returns the raw NocoDB API response without any processing - for debugging
+func (n *NocoDBAdapter) GetRawRecords() ([]map[string]interface{}, error) {
+	records, err := n.client.GetAllRecords()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get raw records from NocoDB: %w", err)
+	}
+
+	return records, nil
+}
+
 // GetStoriesForTheme retrieves stories filtered by theme from NocoDB
 func (n *NocoDBAdapter) GetStoriesForTheme(themeTitle string) ([]data.Story, error) {
 	log.Println("Getting stories for theme", themeTitle)
@@ -258,6 +287,16 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 func (n *NocoDBAdapter) DropCache() error {
 	n.client.DropCache()
 	return nil
+}
+
+// ClearDiskCache clears the disk cache file
+func (n *NocoDBAdapter) ClearDiskCache() error {
+	return n.client.ClearDiskCache()
+}
+
+// SetCacheOnlyMode enables cache-only mode for offline debugging
+func (n *NocoDBAdapter) SetCacheOnlyMode(enabled bool) {
+	n.client.SetCacheOnlyMode(enabled)
 }
 
 // GetGiftedByTypes retrieves all unique gifted by values from NocoDB

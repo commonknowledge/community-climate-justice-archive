@@ -31,6 +31,30 @@ func (s *SQLiteAdapter) GetAllStories() ([]data.Story, error) {
 	return s.scanStories(rows)
 }
 
+// GetStoryByID retrieves a single story by its ID from SQLite database
+func (s *SQLiteAdapter) GetStoryByID(id string) (data.Story, error) {
+	db := s.connectToDatabase()
+	defer db.Close()
+
+	query := `SELECT * FROM Stories WHERE "ID" = ?`
+	rows, err := db.Query(query, id)
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to query story by ID %s: %w", id, err)
+	}
+	defer rows.Close()
+
+	stories, err := s.scanStories(rows)
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to scan story: %w", err)
+	}
+
+	if len(stories) == 0 {
+		return data.Story{}, fmt.Errorf("story with ID %s not found", id)
+	}
+
+	return stories[0], nil
+}
+
 // GetStoriesForTheme retrieves all stories for a given theme from SQLite
 func (s *SQLiteAdapter) GetStoriesForTheme(themeTitle string) ([]data.Story, error) {
 	log.Println("Getting stories for theme", themeTitle)
@@ -378,6 +402,19 @@ func (s *SQLiteAdapter) DropCache() error {
 	// SQLite adapter doesn't use caching, so nothing to drop
 	log.Println("SQLite adapter cache drop requested (no-op)")
 	return nil
+}
+
+// ClearDiskCache is a no-op for SQLite since it doesn't use disk caching
+func (s *SQLiteAdapter) ClearDiskCache() error {
+	// SQLite adapter doesn't use disk caching, so nothing to clear
+	log.Println("SQLite adapter disk cache clear requested (no-op)")
+	return nil
+}
+
+// SetCacheOnlyMode is a no-op for SQLite since it doesn't use external caching
+func (s *SQLiteAdapter) SetCacheOnlyMode(enabled bool) {
+	// SQLite adapter doesn't use external APIs or caching, so this is a no-op
+	log.Println("SQLite adapter cache-only mode requested (no-op)")
 }
 
 // GetGiftedByTypes retrieves all unique gifted by values from SQLite

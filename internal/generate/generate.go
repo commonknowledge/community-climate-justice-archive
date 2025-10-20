@@ -545,10 +545,15 @@ func WriteStories() error {
 			}
 		}
 
+		// Pre-compute attachments to avoid calling method from template
+		attachments := storyInQuestion.GetStoryAttachments()
+
 		err = tmpl.ExecuteTemplate(file, "story.html", data.StoryPage{
 			Title:                   storyInQuestion.Finding,
 			Description:             "A story that says:" + storyInQuestion.Finding,
 			Story:                   storyInQuestion,
+			Attachments:             attachments,
+			NocoDBURL:               storyInQuestion.GetNocoDBURL(),
 			LastStory:               previousStory,
 			NextStory:               nextStory,
 			FirstMoreTaggedStories:  firstRelated,
@@ -562,9 +567,169 @@ func WriteStories() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
+		// Explicit sync to ensure content is written
+		if err := file.Sync(); err != nil {
+			log.Printf("Warning: Failed to sync file: %v", err)
+		}
+
 		log.Printf("Successfully wrote story to %s", outputPath)
 	}
 
+	return nil
+}
+
+// WriteSingleStory generates a single story page for debugging purposes
+func WriteSingleStory(storyInQuestion data.Story) error {
+	log.Printf("Starting single story generation for: %s", storyInQuestion.Finding)
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/stories", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output stories directory: %w", err)
+	}
+
+	outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
+	log.Printf("Writing single story with finding %s to %s", storyInQuestion.Finding, outputPath)
+
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+	}
+	defer file.Close()
+
+	// For single story, just use the first story as previous/next for simplicity
+	var previousStory, nextStory data.Story
+	if len(allStories) > 0 {
+		previousStory = allStories[0]
+		nextStory = allStories[0]
+	}
+
+	// Select a random story for the random link
+	randomStory := allStories[rand.Intn(len(allStories))]
+
+	// Reformat the date fields to be more human readable
+	storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
+	storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+	storyInQuestion.CreatedTime = util.FormatDate(storyInQuestion.CreatedTime)
+	storyInQuestion.UpdatedAt = util.FormatDate(storyInQuestion.UpdatedAt)
+
+	// For the "Other Comments" field, we want to extract the URLs and make them links
+	storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)
+
+	// Chuck all the tagged story of things into a slice
+	var allTagsWeHave []interface{}
+
+	// Convert each tag type to []interface{} before appending
+	for _, theme := range storyInQuestion.Themes {
+		allTagsWeHave = append(allTagsWeHave, theme)
+	}
+
+	for _, typeTag := range storyInQuestion.Type {
+		allTagsWeHave = append(allTagsWeHave, typeTag)
+	}
+
+	var firstTag interface{}
+	var firstMoreTaggedStories []data.Story
+
+	// Shuffle the tags
+	rand.Shuffle(len(allTagsWeHave), func(i, j int) {
+		allTagsWeHave[i], allTagsWeHave[j] = allTagsWeHave[j], allTagsWeHave[i]
+	})
+
+	if len(allTagsWeHave) > 0 {
+		firstTag = allTagsWeHave[0]
+		firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, 5)
+	}
+
+	var secondMoreTaggedStories []data.Story
+	var thirdMoreTaggedStories []data.Story
+
+	var secondTag interface{}
+	var thirdTag interface{}
+
+	if len(allTagsWeHave) > 1 {
+		secondTag = allTagsWeHave[1]
+		secondMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, secondTag, 5)
+	}
+
+	if len(allTagsWeHave) > 2 {
+		thirdTag = allTagsWeHave[2]
+		thirdMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, thirdTag, 5)
+	}
+
+	var firstRelated data.RelatedStories
+	var secondRelated data.RelatedStories
+	var thirdRelated data.RelatedStories
+
+	if len(firstMoreTaggedStories) > 0 && firstTag != nil {
+		firstRelated = data.RelatedStories{
+			Tag:     firstTag,
+			TagType: getTagType(firstTag),
+			Stories: firstMoreTaggedStories,
+		}
+	}
+
+	if len(secondMoreTaggedStories) > 0 && secondTag != nil {
+		secondRelated = data.RelatedStories{
+			Tag:     secondTag,
+			TagType: getTagType(secondTag),
+			Stories: secondMoreTaggedStories,
+		}
+	}
+
+	if len(thirdMoreTaggedStories) > 0 && thirdTag != nil {
+		thirdRelated = data.RelatedStories{
+			Tag:     thirdTag,
+			TagType: getTagType(thirdTag),
+			Stories: thirdMoreTaggedStories,
+		}
+	}
+
+	// Pre-compute attachments to avoid calling method from template
+	attachments := storyInQuestion.GetStoryAttachments()
+	log.Printf("Pre-computed %d attachments for template", len(attachments))
+
+	templateData := data.StoryPage{
+		Title:                   storyInQuestion.Finding,
+		Description:             "A story that says:" + storyInQuestion.Finding,
+		Story:                   storyInQuestion,
+		Attachments:             attachments,
+		NocoDBURL:               storyInQuestion.GetNocoDBURL(),
+		LastStory:               previousStory,
+		NextStory:               nextStory,
+		FirstMoreTaggedStories:  firstRelated,
+		SecondMoreTaggedStories: secondRelated,
+		ThirdMoreTaggedStories:  thirdRelated,
+		RandomStoryURL:          randomStory.URL,
+		StoriesJSON:             storiesJSON,
+	}
+
+	log.Printf("DEBUG: About to execute template with story: %s", templateData.Story.Finding)
+
+	err = tmpl.ExecuteTemplate(file, "story.html", templateData)
+	log.Printf("DEBUG: Template execution result: %v", err)
+
+	if err != nil {
+		return fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	// Explicit sync to ensure content is written
+	if err := file.Sync(); err != nil {
+		log.Printf("Warning: Failed to sync file: %v", err)
+	}
+
+	log.Printf("Successfully wrote single story to %s", outputPath)
 	return nil
 }
 

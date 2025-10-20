@@ -31,6 +31,8 @@ type StoryPage struct {
 	Title                   string
 	Description             string
 	Story                   Story
+	Attachments             []StoryAttachment
+	NocoDBURL               string
 	LastStory               Story
 	NextStory               Story
 	FirstMoreTaggedStories  RelatedStories

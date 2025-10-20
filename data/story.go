@@ -197,6 +197,19 @@ func processAttachmentSlice(attachments []StoryAttachment) []StoryAttachment {
 func (s Story) GetStoryAttachments() []StoryAttachment {
 	var allAttachments []StoryAttachment
 
+	// Debug logging for specific story
+	if s.ID == "1" {
+		log.Printf("DEBUG: Story %s attachment processing:", s.ID)
+		log.Printf("DEBUG: Image field length: %d", len(s.Image))
+		log.Printf("DEBUG: SourceImage field length: %d", len(s.SourceImage))
+		if s.Image != "" {
+			log.Printf("DEBUG: Image field content: %s", s.Image)
+		}
+		if s.SourceImage != "" {
+			log.Printf("DEBUG: SourceImage field content: %s", s.SourceImage)
+		}
+	}
+
 	// Process Image field
 	if s.Image != "" {
 		var imageAttachments []StoryAttachment
@@ -204,6 +217,9 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 			log.Printf("Warning: Failed to unmarshal Image field for story %s: %v", s.ID, err)
 			log.Printf("Image field content: %s", s.Image)
 		} else {
+			if s.ID == "1" {
+				log.Printf("DEBUG: Successfully parsed %d Image attachments", len(imageAttachments))
+			}
 			processedAttachments := processAttachmentSlice(imageAttachments)
 			allAttachments = append(allAttachments, processedAttachments...)
 		}
@@ -216,9 +232,17 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 			log.Printf("Warning: Failed to unmarshal SourceImage field for story %s: %v", s.ID, err)
 			log.Printf("SourceImage field content: %s", s.SourceImage)
 		} else {
+			if s.ID == "1" {
+				log.Printf("DEBUG: Successfully parsed %d SourceImage attachments", len(sourceAttachments))
+			}
 			processedAttachments := processAttachmentSlice(sourceAttachments)
 			allAttachments = append(allAttachments, processedAttachments...)
 		}
+	}
+
+	// Debug logging for specific story
+	if s.ID == "1" {
+		log.Printf("DEBUG: Total attachments for story %s: %d", s.ID, len(allAttachments))
 	}
 
 	// Only log when there are no attachments for debugging purposes
@@ -458,4 +482,9 @@ func parseStoryConnectionsFromString(connectionStr string) []StoryConnection {
 	}
 
 	return []StoryConnection{connection}
+}
+
+// GetNocoDBURL returns a direct link to this story in the NocoDB interface for debugging
+func (s Story) GetNocoDBURL() string {
+	return fmt.Sprintf("https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path=", s.ID)
 }

@@ -14,6 +14,9 @@ type DataAdapter interface {
 	// GetAllStories retrieves all stories from the data source
 	GetAllStories() ([]data.Story, error)
 
+	// GetStoryByID retrieves a single story by its ID
+	GetStoryByID(id string) (data.Story, error)
+
 	// GetStoriesWithConnections retrieves stories that have InspiredBy or HasInspired relationships
 	GetStoriesWithConnections(limit int) ([]data.Story, error)
 
@@ -61,6 +64,12 @@ type DataAdapter interface {
 
 	// DropCache clears any cached data to force fresh retrieval
 	DropCache() error
+
+	// ClearDiskCache clears any disk cache files (NocoDB only, no-op for SQLite)
+	ClearDiskCache() error
+
+	// SetCacheOnlyMode enables cache-only mode for offline debugging (NocoDB only, no-op for SQLite)
+	SetCacheOnlyMode(enabled bool)
 }
 
 // Global adapter instance

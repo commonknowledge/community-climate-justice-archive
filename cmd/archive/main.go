@@ -3,17 +3,18 @@ package main
 
 import (
 	"bufio"
-
-	"community-climate-justice-archive/internal/config"
-	"community-climate-justice-archive/internal/generate"
-	"community-climate-justice-archive/internal/server"
-	"community-climate-justice-archive/internal/store"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"community-climate-justice-archive/internal/config"
+	"community-climate-justice-archive/internal/generate"
+	"community-climate-justice-archive/internal/server"
+	"community-climate-justice-archive/internal/store"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -247,12 +248,99 @@ func waitForInput() {
 	reader.ReadRune()
 }
 
+// dumpNocoDBData dumps raw NocoDB API response data to JSON file for debugging
+func dumpNocoDBData() error {
+	log.Println("Starting raw NocoDB API data dump for debugging...")
+
+	// Load configuration from environment variables and .env file
+	config.LoadConfig()
+
+	// We need to get the raw NocoDB records directly, bypassing the story conversion
+	adapter := store.GetAdapter()
+
+	// Check if we're using NocoDB adapter
+	nocodbAdapter, ok := adapter.(*store.NocoDBAdapter)
+	if !ok {
+		return fmt.Errorf("debug dump only works with NocoDB adapter, currently using: %T", adapter)
+	}
+
+	// Get raw records directly from NocoDB client
+	rawRecords, err := nocodbAdapter.GetRawRecords()
+	if err != nil {
+		return fmt.Errorf("failed to get raw records from NocoDB: %v", err)
+	}
+
+	log.Printf("Retrieved %d raw records from NocoDB API for debugging dump", len(rawRecords))
+
+	// Create debug data structure with raw NocoDB response
+	debugData := struct {
+		TotalRecords int                      `json:"total_records"`
+		RawRecords   []map[string]interface{} `json:"raw_records"`
+		DumpTime     string                   `json:"dump_time"`
+		Note         string                   `json:"note"`
+	}{
+		TotalRecords: len(rawRecords),
+		RawRecords:   rawRecords,
+		DumpTime:     time.Now().Format(time.RFC3339),
+		Note:         "This contains the raw NocoDB API response before any processing or conversion to Story structs",
+	}
+
+	// Write to JSON file
+	file, err := os.Create("debug-raw-nocodb-data.json")
+	if err != nil {
+		return fmt.Errorf("failed to create debug file: %v", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(debugData); err != nil {
+		return fmt.Errorf("failed to write debug data: %v", err)
+	}
+
+	log.Println("Raw NocoDB API data dump completed successfully -> debug-raw-nocodb-data.json")
+	return nil
+}
+
+// generateSingleStory regenerates a single story by ID for debugging
+func generateSingleStory(storyID string) error {
+	log.Printf("Starting single story regeneration for ID: %s", storyID)
+
+	// Warm cache to ensure data is available
+	store.WarmCache()
+
+	// Get the specific story
+	adapter := store.GetAdapter()
+	story, err := adapter.GetStoryByID(storyID)
+	if err != nil {
+		return fmt.Errorf("failed to get story %s: %v", storyID, err)
+	}
+
+	if story.ID == "" {
+		return fmt.Errorf("story with ID %s not found", storyID)
+	}
+
+	log.Printf("Found story: %s", story.Finding)
+
+	// Generate just this story
+	if err := generate.WriteSingleStory(story); err != nil {
+		return fmt.Errorf("failed to write story %s: %v", storyID, err)
+	}
+
+	log.Printf("Single story regeneration completed successfully for: %s", storyID)
+	return nil
+}
+
 // main builds the archive and optionally serves it in development mode.
 func main() {
 	devMode := flag.Bool("development", false, "Run in development mode with live reload")
 	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
 	skipImages := flag.Bool("skip-images", false, "Skip image processing and generation")
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
+	debugDump := flag.Bool("debug-dump", false, "Dump raw NocoDB data to JSON file for debugging")
+	storyID := flag.String("story-id", "", "Regenerate a specific story by ID (for debugging)")
+	clearCache := flag.Bool("clear-cache", false, "Clear the disk cache and fetch fresh data from NocoDB")
+	useCacheOnly := flag.Bool("cache-only", false, "Use only disk cache, fail if not available (for offline debugging)")
 	flag.Parse()
 
 	// Load configuration from environment variables and .env file
@@ -261,6 +349,42 @@ func main() {
 	// Initialize the data adapter based on configuration
 	if err := store.InitializeAdapter(); err != nil {
 		log.Fatalf("Failed to initialize data adapter: %v", err)
+	}
+
+	// Handle cache management flags
+	if *clearCache {
+		log.Println("Clearing all caches...")
+		adapter := store.GetAdapter()
+		if err := adapter.DropCache(); err != nil {
+			log.Printf("Warning: Failed to drop in-memory cache: %v", err)
+		}
+		if err := adapter.ClearDiskCache(); err != nil {
+			log.Printf("Warning: Failed to clear disk cache: %v", err)
+		}
+		log.Println("Cache clearing completed")
+		return
+	}
+
+	if *useCacheOnly {
+		log.Println("Cache-only mode: Will only use disk cache, no API calls")
+		adapter := store.GetAdapter()
+		adapter.SetCacheOnlyMode(true)
+	}
+
+	// Handle debug dump flag
+	if *debugDump {
+		if err := dumpNocoDBData(); err != nil {
+			log.Fatalf("Debug dump failed: %v", err)
+		}
+		return
+	}
+
+	// Handle single story regeneration flag
+	if *storyID != "" {
+		if err := generateSingleStory(*storyID); err != nil {
+			log.Fatalf("Single story generation failed: %v", err)
+		}
+		return
 	}
 
 	if *skipImages {
