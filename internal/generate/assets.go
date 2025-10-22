@@ -362,3 +362,123 @@ func CopyJSToOutput() error {
 
 	return nil
 }
+
+// CopyAudioToOutput copies audio files to the out/audio directory.
+func CopyAudioToOutput() error {
+	log.Println("Starting audio copy process")
+
+	// Create the output directory for audio
+	err := os.MkdirAll("out/audio", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output audio directory: %w", err)
+	}
+
+	// Walk through the images directory to find audio files (they might be mixed in)
+	copyCount := 0
+	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		// Only copy audio files
+		ext := strings.ToLower(filepath.Ext(path))
+		switch ext {
+		case ".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac":
+			filename := filepath.Base(path)
+			destinationPath := filepath.Join("out/audio", filename)
+
+			// Copy the file
+			sourceFile, err := os.Open(path)
+			if err != nil {
+				return fmt.Errorf("failed to open source audio %s: %w", path, err)
+			}
+			defer sourceFile.Close()
+
+			destinationFile, err := os.Create(destinationPath)
+			if err != nil {
+				return fmt.Errorf("failed to create destination audio %s: %w", destinationPath, err)
+			}
+			defer destinationFile.Close()
+
+			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+				return fmt.Errorf("failed to copy audio %s: %w", path, err)
+			}
+
+			copyCount++
+			log.Printf("Copied audio file: %s", filename)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking directories for audio files: %w", err)
+	}
+
+	log.Printf("Successfully copied %d audio files to output directory", copyCount)
+	return nil
+}
+
+// CopyDocumentsToOutput copies document files to the out/documents directory.
+func CopyDocumentsToOutput() error {
+	log.Println("Starting documents copy process")
+
+	// Create the output directory for documents
+	err := os.MkdirAll("out/documents", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output documents directory: %w", err)
+	}
+
+	// Walk through the images directory to find document files (they might be mixed in)
+	copyCount := 0
+	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		// Only copy document files
+		ext := strings.ToLower(filepath.Ext(path))
+		switch ext {
+		case ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".rtf":
+			filename := filepath.Base(path)
+			destinationPath := filepath.Join("out/documents", filename)
+
+			// Copy the file
+			sourceFile, err := os.Open(path)
+			if err != nil {
+				return fmt.Errorf("failed to open source document %s: %w", path, err)
+			}
+			defer sourceFile.Close()
+
+			destinationFile, err := os.Create(destinationPath)
+			if err != nil {
+				return fmt.Errorf("failed to create destination document %s: %w", destinationPath, err)
+			}
+			defer destinationFile.Close()
+
+			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+				return fmt.Errorf("failed to copy document %s: %w", path, err)
+			}
+
+			copyCount++
+			log.Printf("Copied document file: %s", filename)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking directories for document files: %w", err)
+	}
+
+	log.Printf("Successfully copied %d document files to output directory", copyCount)
+	return nil
+}

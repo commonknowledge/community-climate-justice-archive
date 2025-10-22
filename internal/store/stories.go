@@ -22,6 +22,13 @@ func CreateStoryURLFromFinding(finding string) string {
 	return filepath.Join("/stories", fileName)
 }
 
+// CreateStoryURLFromFindingWithID creates a URL to the output file for a story page with ID suffix.
+func CreateStoryURLFromFindingWithID(finding, id string) string {
+	slug := util.Slugify(finding)
+	fileName := fmt.Sprintf("%s-%s.html", slug, id)
+	return filepath.Join("/stories", fileName)
+}
+
 func connectToDatabase() *sql.DB {
 	db, err := sql.Open("sqlite3", "airtable-export.db")
 	if err != nil {

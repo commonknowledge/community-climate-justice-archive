@@ -36,6 +36,35 @@ func (n *NocoDBAdapter) GetAllStories() ([]data.Story, error) {
 	return n.convertRecordsToStories(records)
 }
 
+// GetStoryByID retrieves a single story by its ID from NocoDB
+func (n *NocoDBAdapter) GetStoryByID(id string) (data.Story, error) {
+	record, err := n.client.GetRecordByID(id)
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to get record by ID %s from NocoDB: %w", id, err)
+	}
+
+	stories, err := n.convertRecordsToStories([]map[string]interface{}{record})
+	if err != nil {
+		return data.Story{}, fmt.Errorf("failed to convert record to story: %w", err)
+	}
+
+	if len(stories) == 0 {
+		return data.Story{}, fmt.Errorf("story with ID %s not found", id)
+	}
+
+	return stories[0], nil
+}
+
+// GetRawRecords returns the raw NocoDB API response without any processing - for debugging
+func (n *NocoDBAdapter) GetRawRecords() ([]map[string]interface{}, error) {
+	records, err := n.client.GetAllRecords()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get raw records from NocoDB: %w", err)
+	}
+
+	return records, nil
+}
+
 // GetStoriesForTheme retrieves stories filtered by theme from NocoDB
 func (n *NocoDBAdapter) GetStoriesForTheme(themeTitle string) ([]data.Story, error) {
 	log.Println("Getting stories for theme", themeTitle)
@@ -245,7 +274,7 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 
 		// Ensure URL is set
 		if story.URL == "" {
-			story.URL = CreateStoryURLFromFinding(story.Finding)
+			story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 		}
 
 		stories = append(stories, story)
@@ -260,5 +289,148 @@ func (n *NocoDBAdapter) DropCache() error {
 	return nil
 }
 
-// Helper functions that need to be exposed from nocodb package
-// We'll need to create these as exported functions in the nocodb package
+// ClearDiskCache clears the disk cache file
+func (n *NocoDBAdapter) ClearDiskCache() error {
+	return n.client.ClearDiskCache()
+}
+
+// SetCacheOnlyMode enables cache-only mode for offline debugging
+func (n *NocoDBAdapter) SetCacheOnlyMode(enabled bool) {
+	n.client.SetCacheOnlyMode(enabled)
+}
+
+// GetGiftedByTypes retrieves all unique gifted by values from NocoDB
+func (n *NocoDBAdapter) GetGiftedByTypes() ([]data.GiftedBy, error) {
+	allStories, err := n.GetAllStories()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all stories: %w", err)
+	}
+
+	giftedByMap := make(map[string]data.GiftedBy)
+	for _, story := range allStories {
+		for _, giftedBy := range story.GiftedBy {
+			giftedByMap[giftedBy.Title] = giftedBy
+		}
+	}
+
+	var giftedByTypes []data.GiftedBy
+	for _, giftedBy := range giftedByMap {
+		giftedByTypes = append(giftedByTypes, giftedBy)
+	}
+
+	return giftedByTypes, nil
+}
+
+// GetStoriesForGiftedBy retrieves stories filtered by gifted by from NocoDB
+func (n *NocoDBAdapter) GetStoriesForGiftedBy(giftedByTitle string) ([]data.Story, error) {
+	log.Println("Getting stories for gifted by", giftedByTitle)
+
+	records, err := n.client.GetFilteredRecords("Gifted or co-created by…", giftedByTitle)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get filtered records for gifted by: %w", err)
+	}
+
+	return n.convertRecordsToStories(records)
+}
+
+// GetScalePermanenceTypes retrieves all unique scale of permanence values from NocoDB
+func (n *NocoDBAdapter) GetScalePermanenceTypes() ([]data.ScalePermanence, error) {
+	allStories, err := n.GetAllStories()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all stories: %w", err)
+	}
+
+	scalePermanenceMap := make(map[string]data.ScalePermanence)
+	for _, story := range allStories {
+		for _, scalePermanence := range story.ScalePermanence {
+			scalePermanenceMap[scalePermanence.Title] = scalePermanence
+		}
+	}
+
+	var scalePermanenceTypes []data.ScalePermanence
+	for _, scalePermanence := range scalePermanenceMap {
+		scalePermanenceTypes = append(scalePermanenceTypes, scalePermanence)
+	}
+
+	return scalePermanenceTypes, nil
+}
+
+// GetStoriesForScalePermanence retrieves stories filtered by scale of permanence from NocoDB
+func (n *NocoDBAdapter) GetStoriesForScalePermanence(scalePermanenceTitle string) ([]data.Story, error) {
+	log.Println("Getting stories for scale of permanence", scalePermanenceTitle)
+
+	records, err := n.client.GetFilteredRecords("Scale of permanence", scalePermanenceTitle)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get filtered records for scale of permanence: %w", err)
+	}
+
+	return n.convertRecordsToStories(records)
+}
+
+// GetWhatWasIsIfTypes retrieves all unique what was/is/if values from NocoDB
+func (n *NocoDBAdapter) GetWhatWasIsIfTypes() ([]data.WhatWasIsIf, error) {
+	allStories, err := n.GetAllStories()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all stories: %w", err)
+	}
+
+	whatWasIsIfMap := make(map[string]data.WhatWasIsIf)
+	for _, story := range allStories {
+		for _, whatWasIsIf := range story.WhatWasIsIf {
+			whatWasIsIfMap[whatWasIsIf.Title] = whatWasIsIf
+		}
+	}
+
+	var whatWasIsIfTypes []data.WhatWasIsIf
+	for _, whatWasIsIf := range whatWasIsIfMap {
+		whatWasIsIfTypes = append(whatWasIsIfTypes, whatWasIsIf)
+	}
+
+	return whatWasIsIfTypes, nil
+}
+
+// GetStoriesForWhatWasIsIf retrieves stories filtered by what was/is/if from NocoDB
+func (n *NocoDBAdapter) GetStoriesForWhatWasIsIf(whatWasIsIfTitle string) ([]data.Story, error) {
+	log.Println("Getting stories for what was/is/if", whatWasIsIfTitle)
+
+	records, err := n.client.GetFilteredRecords("What was/is/if", whatWasIsIfTitle)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get filtered records for what was/is/if: %w", err)
+	}
+
+	return n.convertRecordsToStories(records)
+}
+
+// GetTimePeriodTypes retrieves all unique time period values from NocoDB
+func (n *NocoDBAdapter) GetTimePeriodTypes() ([]data.TimePeriod, error) {
+	allStories, err := n.GetAllStories()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all stories: %w", err)
+	}
+
+	timePeriodMap := make(map[string]data.TimePeriod)
+	for _, story := range allStories {
+		for _, timePeriod := range story.TimePeriod {
+			timePeriodMap[timePeriod.Title] = timePeriod
+		}
+	}
+
+	var timePeriodTypes []data.TimePeriod
+	for _, timePeriod := range timePeriodMap {
+		timePeriodTypes = append(timePeriodTypes, timePeriod)
+	}
+
+	return timePeriodTypes, nil
+}
+
+// GetStoriesForTimePeriod retrieves stories filtered by time period from NocoDB
+func (n *NocoDBAdapter) GetStoriesForTimePeriod(timePeriodTitle string) ([]data.Story, error) {
+	log.Println("Getting stories for time period", timePeriodTitle)
+
+	records, err := n.client.GetFilteredRecords("Time period", timePeriodTitle)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get filtered records for time period: %w", err)
+	}
+
+	return n.convertRecordsToStories(records)
+}

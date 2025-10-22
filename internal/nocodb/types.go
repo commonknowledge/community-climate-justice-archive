@@ -22,6 +22,7 @@ type NocoDBStoryDTO struct {
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
 	Image                   interface{} `json:"Image"`
+	ImageVideoSound         interface{} `json:"Image / video / sound"`
 	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
 	StartDateTime           interface{} `json:"Dated created / experienced"`
@@ -36,6 +37,9 @@ type NocoDBStoryDTO struct {
 	HasInspired             interface{} `json:"Has inspired"`
 	OtherComments           interface{} `json:"Description"`
 	Type                    interface{} `json:"Type"`
+	GiftedBy                interface{} `json:"Gifted or co-created by…"`
+	ScalePermanence         interface{} `json:"Scale of permanence"`
+	TimePeriod              interface{} `json:"Time period"`
 	PersonFinder            interface{} `json:"Gifted or co-created by…"`
 	MapCache                interface{} `json:"Map Cache"`
 	MapSize                 interface{} `json:"Map Size"`
@@ -50,6 +54,8 @@ type NocoDBStoryDTO struct {
 	InstaText               interface{} `json:"Insta text"`
 	InstaCount              interface{} `json:"InstaCount"`
 	InstaImage              interface{} `json:"Insta image"`
+	ReflectionLearning      interface{} `json:"Reflection / learning"`
+	UpdatedAt               interface{} `json:"UpdatedAt"`
 }
 
 // ToStory converts a NocoDB record map to a Story struct
@@ -86,14 +92,50 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		weather = []data.Weather{}
 	}
 
+	// Convert gifted by
+	giftedBy, err := ParseGiftedByFromNocoDB(dto.GiftedBy)
+	if err != nil {
+		log.Printf("Warning: failed to parse gifted by: %v", err)
+		giftedBy = []data.GiftedBy{}
+	}
+
+	// Convert scale of permanence
+	scalePermanence, err := ParseScalePermanenceFromNocoDB(dto.ScalePermanence)
+	if err != nil {
+		log.Printf("Warning: failed to parse scale of permanence: %v", err)
+		scalePermanence = []data.ScalePermanence{}
+	}
+
+	// Convert what was/is/if
+	whatWasIsIf, err := ParseWhatWasIsIfFromNocoDB(dto.WhatWasIsIf)
+	if err != nil {
+		log.Printf("Warning: failed to parse what was/is/if: %v", err)
+		whatWasIsIf = []data.WhatWasIsIf{}
+	}
+
+	// Convert time period
+	timePeriod, err := ParseTimePeriodFromNocoDB(dto.TimePeriod)
+	if err != nil {
+		log.Printf("Warning: failed to parse time period: %v", err)
+		timePeriod = []data.TimePeriod{}
+	}
+
 	story := data.Story{
-		ID:                      toString(dto.ID),
-		CreatedTime:             toString(dto.CreatedTime),
-		Finding:                 toString(dto.Finding),
-		HighStExperiment:        toString(dto.HighStExperiment),
-		WhatWasIsIf:             toString(dto.WhatWasIsIf),
-		Image:                   func() string { img, _ := ParseImagesFromNocoDB(dto.Image); return img }(),
-		SourceImage:             func() string { img, _ := ParseImagesFromNocoDB(dto.SourceImage); return img }(),
+		ID:               toString(dto.ID),
+		CreatedTime:      toString(dto.CreatedTime),
+		Finding:          toString(dto.Finding),
+		HighStExperiment: toString(dto.HighStExperiment),
+		Image:            func() string { img, _ := ParseAttachmentsFromNocoDB(dto.Image); return img }(),
+		ImageVideoSound: func() string {
+			// Keep original NocoDB structure for rich metadata (mimetype, size, dimensions)
+			if dto.ImageVideoSound != nil {
+				if jsonBytes, err := json.Marshal(dto.ImageVideoSound); err == nil {
+					return string(jsonBytes)
+				}
+			}
+			return ""
+		}(),
+		SourceImage:             func() string { img, _ := ParseAttachmentsFromNocoDB(dto.SourceImage); return img }(),
 		Location:                toString(dto.Location),
 		StartDateTime:           toString(dto.StartDateTime),
 		EndDateTime:             toString(dto.EndDateTime),
@@ -107,6 +149,10 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
+		GiftedBy:                giftedBy,
+		ScalePermanence:         scalePermanence,
+		WhatWasIsIf:             whatWasIsIf,
+		TimePeriod:              timePeriod,
 		PersonFinder:            toString(dto.PersonFinder),
 		MapCache:                toString(dto.MapCache),
 		MapSize:                 toString(dto.MapSize),
@@ -121,10 +167,12 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		InstaText:               toString(dto.InstaText),
 		InstaCount:              toString(dto.InstaCount),
 		InstaImage:              toString(dto.InstaImage),
+		ReflectionLearning:      toString(dto.ReflectionLearning),
+		UpdatedAt:               toString(dto.UpdatedAt),
 	}
 
-	// Set URL based on finding (same logic as SQLite version)
-	story.URL = createStoryURLFromFinding(story.Finding)
+	// Set URL based on finding with ID suffix
+	story.URL = createStoryURLFromFindingWithID(story.Finding, story.ID)
 
 	return story, nil
 }
@@ -320,14 +368,242 @@ func ParseWeatherFromNocoDB(weatherField interface{}) ([]data.Weather, error) {
 	return weather, nil
 }
 
-// ParseImagesFromNocoDB parses images from NocoDB field and converts to expected JSON format
-// Downloads missing images from NocoDB if they don't exist locally
-func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
-	if imageField == nil {
+// ParseGiftedByFromNocoDB parses gifted by from NocoDB field
+func ParseGiftedByFromNocoDB(giftedByField interface{}) ([]data.GiftedBy, error) {
+	if giftedByField == nil {
+		return []data.GiftedBy{}, nil
+	}
+
+	var giftedByStrings []string
+
+	switch v := giftedByField.(type) {
+	case string:
+		if v == "" {
+			return []data.GiftedBy{}, nil
+		}
+		// NocoDB returns gifted by as comma-separated string
+		if err := json.Unmarshal([]byte(v), &giftedByStrings); err != nil {
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			giftedByStrings = strings.Split(v, ",")
+			for i, giftedByStr := range giftedByStrings {
+				giftedByStrings[i] = strings.TrimSpace(giftedByStr)
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			if str := toString(item); str != "" {
+				giftedByStrings = append(giftedByStrings, str)
+			}
+		}
+	case []string:
+		giftedByStrings = v
+	default:
+		str := toString(v)
+		if str != "" {
+			if err := json.Unmarshal([]byte(str), &giftedByStrings); err != nil {
+				// If not JSON, treat as comma-separated string
+				giftedByStrings = strings.Split(str, ",")
+				for i, giftedByStr := range giftedByStrings {
+					giftedByStrings[i] = strings.TrimSpace(giftedByStr)
+				}
+			}
+		}
+	}
+
+	// Convert to GiftedBy structs
+	var giftedBy []data.GiftedBy
+	for _, giftedByTitle := range giftedByStrings {
+		if giftedByTitle != "" {
+			giftedBy = append(giftedBy, data.GiftedBy{
+				Title:  giftedByTitle,
+				URL:    "/giftedby/" + util.Slugify(giftedByTitle) + ".html",
+				Colour: data.TitleToHexColor(giftedByTitle),
+			})
+		}
+	}
+
+	return giftedBy, nil
+}
+
+// ParseScalePermanenceFromNocoDB parses scale of permanence from NocoDB field
+func ParseScalePermanenceFromNocoDB(scalePermanenceField interface{}) ([]data.ScalePermanence, error) {
+	if scalePermanenceField == nil {
+		return []data.ScalePermanence{}, nil
+	}
+
+	var scalePermanenceStrings []string
+
+	switch v := scalePermanenceField.(type) {
+	case string:
+		if v == "" {
+			return []data.ScalePermanence{}, nil
+		}
+		// NocoDB returns scale of permanence as comma-separated string
+		if err := json.Unmarshal([]byte(v), &scalePermanenceStrings); err != nil {
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			scalePermanenceStrings = strings.Split(v, ",")
+			for i, scalePermanenceStr := range scalePermanenceStrings {
+				scalePermanenceStrings[i] = strings.TrimSpace(scalePermanenceStr)
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			if str := toString(item); str != "" {
+				scalePermanenceStrings = append(scalePermanenceStrings, str)
+			}
+		}
+	case []string:
+		scalePermanenceStrings = v
+	default:
+		str := toString(v)
+		if str != "" {
+			if err := json.Unmarshal([]byte(str), &scalePermanenceStrings); err != nil {
+				// If not JSON, treat as comma-separated string
+				scalePermanenceStrings = strings.Split(str, ",")
+				for i, scalePermanenceStr := range scalePermanenceStrings {
+					scalePermanenceStrings[i] = strings.TrimSpace(scalePermanenceStr)
+				}
+			}
+		}
+	}
+
+	// Convert to ScalePermanence structs
+	var scalePermanence []data.ScalePermanence
+	for _, scalePermanenceTitle := range scalePermanenceStrings {
+		if scalePermanenceTitle != "" {
+			scalePermanence = append(scalePermanence, data.ScalePermanence{
+				Title:  scalePermanenceTitle,
+				URL:    "/scalepermanence/" + util.Slugify(scalePermanenceTitle) + ".html",
+				Colour: data.TitleToHexColor(scalePermanenceTitle),
+			})
+		}
+	}
+
+	return scalePermanence, nil
+}
+
+// ParseWhatWasIsIfFromNocoDB parses what was/is/if from NocoDB field
+func ParseWhatWasIsIfFromNocoDB(whatWasIsIfField interface{}) ([]data.WhatWasIsIf, error) {
+	if whatWasIsIfField == nil {
+		return []data.WhatWasIsIf{}, nil
+	}
+
+	var whatWasIsIfStrings []string
+
+	switch v := whatWasIsIfField.(type) {
+	case string:
+		if v == "" {
+			return []data.WhatWasIsIf{}, nil
+		}
+		// NocoDB returns what was/is/if as comma-separated string
+		if err := json.Unmarshal([]byte(v), &whatWasIsIfStrings); err != nil {
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			whatWasIsIfStrings = strings.Split(v, ",")
+			for i, whatWasIsIfStr := range whatWasIsIfStrings {
+				whatWasIsIfStrings[i] = strings.TrimSpace(whatWasIsIfStr)
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			if str := toString(item); str != "" {
+				whatWasIsIfStrings = append(whatWasIsIfStrings, str)
+			}
+		}
+	case []string:
+		whatWasIsIfStrings = v
+	default:
+		str := toString(v)
+		if str != "" {
+			if err := json.Unmarshal([]byte(str), &whatWasIsIfStrings); err != nil {
+				// If not JSON, treat as comma-separated string
+				whatWasIsIfStrings = strings.Split(str, ",")
+				for i, whatWasIsIfStr := range whatWasIsIfStrings {
+					whatWasIsIfStrings[i] = strings.TrimSpace(whatWasIsIfStr)
+				}
+			}
+		}
+	}
+
+	// Convert to WhatWasIsIf structs
+	var whatWasIsIf []data.WhatWasIsIf
+	for _, whatWasIsIfTitle := range whatWasIsIfStrings {
+		if whatWasIsIfTitle != "" {
+			whatWasIsIf = append(whatWasIsIf, data.WhatWasIsIf{
+				Title:  whatWasIsIfTitle,
+				URL:    "/whatwasisif/" + util.Slugify(whatWasIsIfTitle) + ".html",
+				Colour: data.TitleToHexColor(whatWasIsIfTitle),
+			})
+		}
+	}
+
+	return whatWasIsIf, nil
+}
+
+// ParseTimePeriodFromNocoDB parses time period from NocoDB field
+func ParseTimePeriodFromNocoDB(timePeriodField interface{}) ([]data.TimePeriod, error) {
+	if timePeriodField == nil {
+		return []data.TimePeriod{}, nil
+	}
+
+	var timePeriodStrings []string
+
+	switch v := timePeriodField.(type) {
+	case string:
+		if v == "" {
+			return []data.TimePeriod{}, nil
+		}
+		// NocoDB returns time period as comma-separated string
+		if err := json.Unmarshal([]byte(v), &timePeriodStrings); err != nil {
+			// If not JSON, treat as comma-separated string (NocoDB format)
+			timePeriodStrings = strings.Split(v, ",")
+			for i, timePeriodStr := range timePeriodStrings {
+				timePeriodStrings[i] = strings.TrimSpace(timePeriodStr)
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			if str := toString(item); str != "" {
+				timePeriodStrings = append(timePeriodStrings, str)
+			}
+		}
+	case []string:
+		timePeriodStrings = v
+	default:
+		str := toString(v)
+		if str != "" {
+			if err := json.Unmarshal([]byte(str), &timePeriodStrings); err != nil {
+				// If not JSON, treat as comma-separated string
+				timePeriodStrings = strings.Split(str, ",")
+				for i, timePeriodStr := range timePeriodStrings {
+					timePeriodStrings[i] = strings.TrimSpace(timePeriodStr)
+				}
+			}
+		}
+	}
+
+	// Convert to TimePeriod structs
+	var timePeriod []data.TimePeriod
+	for _, timePeriodTitle := range timePeriodStrings {
+		if timePeriodTitle != "" {
+			timePeriod = append(timePeriod, data.TimePeriod{
+				Title:  timePeriodTitle,
+				URL:    "/timeperiod/" + util.Slugify(timePeriodTitle) + ".html",
+				Colour: data.TitleToHexColor(timePeriodTitle),
+			})
+		}
+	}
+
+	return timePeriod, nil
+}
+
+// ParseAttachmentsFromNocoDB parses attachments from NocoDB field and converts to expected JSON format
+// Downloads missing files from NocoDB if they don't exist locally
+func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
+	if attachmentField == nil {
 		return "", nil
 	}
 
-	switch v := imageField.(type) {
+	switch v := attachmentField.(type) {
 	case string:
 		// If it's already a JSON string (from SQLite), return as-is
 		if strings.TrimSpace(v) == "" {
@@ -339,53 +615,53 @@ func ParseImagesFromNocoDB(imageField interface{}) (string, error) {
 		// Single filename string - convert to expected JSON format
 		return convertSingleFilenameToJSON(v), nil
 	case []interface{}:
-		// NocoDB returns images as array of objects with metadata
-		// Convert to the JSON format expected by GetStoryImages()
-		var storyImages []map[string]interface{}
+		// NocoDB returns attachments as array of objects with metadata
+		// Convert to the JSON format expected by GetStoryAttachments()
+		var storyAttachments []map[string]interface{}
 
 		for _, item := range v {
-			if imageObj, ok := item.(map[string]interface{}); ok {
+			if attachmentObj, ok := item.(map[string]interface{}); ok {
 				// Extract filename and download path from NocoDB object
 				var filename string
 				var downloadPath string
 
-				if title, exists := imageObj["title"]; exists {
+				if title, exists := attachmentObj["title"]; exists {
 					filename = toString(title)
 				}
-				if path, exists := imageObj["path"]; exists {
+				if path, exists := attachmentObj["path"]; exists {
 					downloadPath = toString(path)
 				}
 
 				if filename != "" {
-					// Use original filename since we're downloading images now
+					// Use original filename since we're downloading files now
 					// No need to clean NocoDB suffixes anymore
 
-					// Check if we need to download the image
-					localImagePath := filepath.Join("images", filename)
-					if config.AppConfig.UseNocoDB && downloadPath != "" && !fileExists(localImagePath) {
-						err := downloadImageFromNocoDB(downloadPath, localImagePath)
+					// Check if we need to download the file
+					localFilePath := filepath.Join("images", filename)
+					if config.AppConfig.UseNocoDB && downloadPath != "" && !fileExists(localFilePath) {
+						err := downloadFileFromNocoDB(downloadPath, localFilePath)
 						if err != nil {
-							log.Printf("Warning: failed to download image %s: %v", filename, err)
-							// Continue anyway, image might be available elsewhere
+							log.Printf("Warning: failed to download file %s: %v", filename, err)
+							// Continue anyway, file might be available elsewhere
 						}
 					}
 
-					// Create StoryImage-compatible object
-					storyImage := map[string]interface{}{
+					// Create StoryAttachment-compatible object
+					storyAttachment := map[string]interface{}{
 						"filename": filename,
-						"url":      "",           // Will be set by GetStoryImages()
-						"type":     "image/jpeg", // Default, will be corrected later
+						"url":      "",                         // Will be set by GetStoryAttachments()
+						"type":     "application/octet-stream", // Default, will be corrected later
 						"size":     0,
 						"width":    0,
 						"height":   0,
 					}
-					storyImages = append(storyImages, storyImage)
+					storyAttachments = append(storyAttachments, storyAttachment)
 				}
 			}
 		}
 
-		if len(storyImages) > 0 {
-			jsonBytes, err := json.Marshal(storyImages)
+		if len(storyAttachments) > 0 {
+			jsonBytes, err := json.Marshal(storyAttachments)
 			if err != nil {
 				return "", err
 			}
@@ -413,7 +689,7 @@ func convertSingleFilenameToJSON(filename string) string {
 
 	storyImage := map[string]interface{}{
 		"filename": filename,
-		"url":      "",           // Will be set by GetStoryImages()
+		"url":      "",           // Will be set by GetStoryAttachments()
 		"type":     "image/jpeg", // Default, will be corrected later
 		"size":     0,
 		"width":    0,
@@ -451,14 +727,23 @@ func createStoryURLFromFinding(finding string) string {
 	return fmt.Sprintf("/stories/%s.html", slug)
 }
 
+// createStoryURLFromFindingWithID creates a URL from the story finding with ID suffix
+func createStoryURLFromFindingWithID(finding, id string) string {
+	if finding == "" {
+		return ""
+	}
+	slug := util.Slugify(finding)
+	return fmt.Sprintf("/stories/%s-%s.html", slug, id)
+}
+
 // Helper function to check if a file exists
 func fileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
 }
 
-// downloadImageFromNocoDB downloads an image from NocoDB to the local images directory
-func downloadImageFromNocoDB(downloadPath, localPath string) error {
+// downloadFileFromNocoDB downloads a file from NocoDB to the local directory
+func downloadFileFromNocoDB(downloadPath, localPath string) error {
 	// We need access to a NocoDB client to download
 	// For now, create a temporary client - in a real implementation you might pass this as a parameter
 	client, err := NewClient()
@@ -498,10 +783,20 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 
 			// Get the cached relationships
 			if cachedData, exists := record[cacheKey]; exists {
+				// Handle nil case (no relationships)
+				if cachedData == nil {
+					return []data.StoryConnection{}
+				}
+
+				// Handle both fresh cache ([]data.StoryConnection) and disk-loaded cache ([]interface{})
 				if connections, ok := cachedData.([]data.StoryConnection); ok {
+					// Fresh cache data - use directly
 					return connections
+				} else if interfaceSlice, ok := cachedData.([]interface{}); ok {
+					// Disk-loaded cache data - convert from generic interfaces
+					return convertInterfaceSliceToConnections(interfaceSlice)
 				} else {
-					log.Printf("Warning: Cached relationship data has wrong type for record %s", recordID)
+					log.Printf("Warning: Cached relationship data has unexpected type %T for record %s", cachedData, recordID)
 				}
 			}
 
@@ -512,4 +807,28 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 
 	log.Printf("Warning: Record %s not found in cache", recordID)
 	return []data.StoryConnection{}
+}
+
+// convertInterfaceSliceToConnections converts a slice of generic interfaces (from JSON deserialization)
+// back to StoryConnection objects
+func convertInterfaceSliceToConnections(interfaceSlice []interface{}) []data.StoryConnection {
+	var connections []data.StoryConnection
+
+	for _, item := range interfaceSlice {
+		if connMap, ok := item.(map[string]interface{}); ok {
+			connection := data.StoryConnection{
+				ID:                 toString(connMap["id"]),
+				Title:              toString(connMap["title"]),
+				Finding:            toString(connMap["finding"]),
+				Image:              toString(connMap["image"]),
+				ThumbURL:           toString(connMap["thumbUrl"]),
+				URL:                toString(connMap["url"]),
+				AttachmentType:     toString(connMap["attachmentType"]),
+				AttachmentFilename: toString(connMap["attachmentFilename"]),
+			}
+			connections = append(connections, connection)
+		}
+	}
+
+	return connections
 }

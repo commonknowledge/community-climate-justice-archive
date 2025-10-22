@@ -180,6 +180,20 @@ class ArchiveFilters {
         return luminance > 0.5 ? '#000000' : '#ffffff';
     }
     
+    // Helper function to get tag color from filter data
+    getTagColor(tagTitle, filterType) {
+        if (!this.filterData || !this.filterData[filterType]) {
+            return this.getDefaultColor(tagTitle, filterType);
+        }
+        
+        const option = this.filterData[filterType].find(opt => opt.title === tagTitle);
+        if (option && option.color) {
+            return option.color;
+        }
+        
+        return this.getDefaultColor(tagTitle, filterType);
+    }
+    
     setupEventListeners() {
         // Dropdown button handlers
         if (this.elements.themeButton) {
@@ -325,6 +339,10 @@ class ArchiveFilters {
         
         // Use a small delay to allow the loading state to show
         setTimeout(() => {
+            // Clean up any dynamically created popups before clearing stories
+            const dynamicPopups = document.querySelectorAll('.story-popup[data-dynamic="true"]');
+            dynamicPopups.forEach(popup => popup.remove());
+            
             // Clear existing stories
             this.elements.storiesContainer.innerHTML = '';
             
@@ -358,20 +376,163 @@ class ArchiveFilters {
         const storyDiv = document.createElement('div');
         storyDiv.className = 'story';
         
-        if (story.image && story.image.url) {
+        if (story.attachment && story.attachment.url) {
+            const attachment = story.attachment;
+            let content = '';
+            
+            if (attachment.fileType === 'image') {
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <img 
+                            src="${attachment.thumbUrl}" 
+                            srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
+                            sizes="(max-width: 600px) 300px, 800px"
+                            alt="${attachment.alt || ''}"
+                            loading="lazy">
+                    </a>
+                `;
+            } else if (attachment.fileType === 'audio') {
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <div class="story-audio-preview">
+                            <div class="audio-play-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                </svg>
+                            </div>
+                            <div class="audio-filename">${attachment.filename}</div>
+                        </div>
+                    </a>
+                `;
+            } else if (attachment.fileType === 'document') {
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <div class="story-document-preview">
+                            <div class="document-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10,9 9,9 8,9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="document-filename">${attachment.filename}</div>
+                        </div>
+                    </a>
+                `;
+            }
+            
+            storyDiv.innerHTML = content;
+        } else {
             storyDiv.innerHTML = `
-                <a href="${story.url}">
-                    <img 
-                        src="${story.image.thumbUrl}" 
-                        srcset="${story.image.thumbUrl} 300w, ${story.image.mediumUrl} 800w"
-                        sizes="(max-width: 600px) 300px, 800px"
-                        alt="${story.image.alt || ''}"
-                        loading="lazy">
+                <a class="story-image-container no-attachment" href="${story.url}" data-story-id="${story.id}">
+                    <div class="story-no-attachment">
+                        <div class="no-attachment-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21,15 16,10 5,21"></polyline>
+                            </svg>
+                        </div>
+                        <div class="no-attachment-text">View story</div>
+                    </div>
                 </a>
             `;
-        } else {
-            storyDiv.innerHTML = '<div>No image</div>';
         }
+        
+        // Create the corresponding popup element
+        const popupDiv = document.createElement('div');
+        popupDiv.className = 'story-popup';
+        popupDiv.setAttribute('data-story-popup-id', story.id);
+        popupDiv.setAttribute('data-dynamic', 'true');
+        
+        let popupContent = '';
+        if (story.attachment && story.attachment.url) {
+            const attachment = story.attachment;
+            if (attachment.fileType === 'image') {
+                popupContent = `<img data-src="${attachment.largeUrl || attachment.url}" alt="" class="popup-img">`;
+            } else if (attachment.fileType === 'audio') {
+                popupContent = `
+                    <div class="popup-audio">
+                        <audio controls>
+                            <source src="${attachment.url}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                `;
+            } else if (attachment.fileType === 'document') {
+                popupContent = `
+                    <div class="popup-document">
+                        <div class="document-icon-large">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10,9 9,9 8,9"></polyline>
+                            </svg>
+                        </div>
+                        <a href="${attachment.url}" download="${attachment.filename}" class="download-link">
+                            Download ${attachment.filename}
+                        </a>
+                    </div>
+                `;
+            }
+        } else {
+            popupContent = `
+                <div class="popup-no-attachment">
+                    <div class="no-attachment-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Build tag content with proper colors
+        let tagContent = '';
+        if (story.types && story.types.length > 0) {
+            story.types.forEach(type => {
+                const color = this.getTagColor(type, 'types');
+                tagContent += `<span class="tag" style="background-color: ${color};">${type}</span>`;
+            });
+        }
+        if (story.weather && story.weather.length > 0) {
+            story.weather.forEach(weather => {
+                const color = this.getTagColor(weather, 'weather');
+                tagContent += `<span class="tag" style="background-color: ${color};">${weather}</span>`;
+            });
+        }
+        if (story.themes && story.themes.length > 0) {
+            story.themes.forEach(theme => {
+                const color = this.getTagColor(theme, 'themes');
+                tagContent += `<span class="tag" style="background-color: ${color};">${theme}</span>`;
+            });
+        }
+        
+        popupDiv.innerHTML = `
+            <div class="story-popup-container">
+                ${popupContent}
+                <div class="story-popup-text">
+                    <div class="story-popup-text-finding">
+                        <span class="story-popup-text-finding-content">
+                            ${story.finding}
+                        </span>
+                    </div>
+                    <div class="story-popup-text-tags">
+                        ${tagContent}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Append popup to body (where other popups are)
+        document.body.appendChild(popupDiv);
         
         return storyDiv;
     }

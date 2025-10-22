@@ -59,7 +59,6 @@ func GetStoriesForWeatherLegacy(weatherTitle string) []data.Story {
 			&dto.CreatedTime,
 			&dto.Finding,
 			&dto.HighStExperiment,
-			&dto.WhatWasIsIf,
 			&dto.Image,
 			&dto.SourceImage,
 			&dto.Location,
@@ -94,7 +93,7 @@ func GetStoriesForWeatherLegacy(weatherTitle string) []data.Story {
 		}
 
 		story := dto.ToStory()
-		story.URL = CreateStoryURLFromFinding(story.Finding)
+		story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 
 		stories = append(stories, story)
 	}

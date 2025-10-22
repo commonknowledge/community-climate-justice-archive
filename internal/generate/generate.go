@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"text/template"
 
 	"community-climate-justice-archive/data"
@@ -20,15 +19,15 @@ import (
 
 // createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
 func createTypeIndexOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "types", fileName)
 }
 
-// createThemeIndexOutputPathFromTitle creates a path to the output file for a type index page.
+// createThemeIndexOutputPathFromTitle creates a path to the output file for a theme index page.
 func createThemeIndexOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "themes", fileName)
 }
 
@@ -39,11 +38,46 @@ func createStoryOutputPathFromFinding(finding string) string {
 	return filepath.Join("out", "stories", fileName)
 }
 
+// createStoryOutputPathFromFindingWithID creates a path to the output file for a story page with ID suffix.
+func createStoryOutputPathFromFindingWithID(finding, id string) string {
+	slug := util.Slugify(finding)
+	fileName := fmt.Sprintf("%s-%s.html", slug, id)
+	return filepath.Join("out", "stories", fileName)
+}
+
 // createWeatherOutputPathFromTitle creates a path to the output file for a weather page.
 func createWeatherOutputPathFromTitle(title string) string {
-	lowerCaseTitle := strings.ToLower(title)
-	fileName := fmt.Sprintf("%s.html", lowerCaseTitle)
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
 	return filepath.Join("out", "weather", fileName)
+}
+
+// createGiftedByOutputPathFromTitle creates a path to the output file for a gifted by page.
+func createGiftedByOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "giftedby", fileName)
+}
+
+// createScalePermanenceOutputPathFromTitle creates a path to the output file for a scale permanence page.
+func createScalePermanenceOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "scalepermanence", fileName)
+}
+
+// createWhatWasIsIfOutputPathFromTitle creates a path to the output file for a what was/is/if page.
+func createWhatWasIsIfOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "whatwasisif", fileName)
+}
+
+// createTimePeriodOutputPathFromTitle creates a path to the output file for a time period page.
+func createTimePeriodOutputPathFromTitle(title string) string {
+	slug := util.Slugify(title)
+	fileName := fmt.Sprintf("%s.html", slug)
+	return filepath.Join("out", "timeperiod", fileName)
 }
 
 // loadTemplates loads all templates and partials needed by the application
@@ -80,28 +114,30 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 
 // StoryData represents a story with all necessary data for filtering
 type StoryData struct {
-	ID            string     `json:"id"`
-	Finding       string     `json:"finding"`
-	URL           string     `json:"url"`
-	Location      string     `json:"location"`
-	StartDateTime string     `json:"startDateTime"`
-	EndDateTime   string     `json:"endDateTime"`
-	Season        string     `json:"season"`
-	Experience    string     `json:"experience"`
-	TimeSpan      string     `json:"timeSpan"`
-	Themes        []string   `json:"themes"`
-	Types         []string   `json:"types"`
-	Weather       []string   `json:"weather"`
-	Image         StoryImage `json:"image"`
+	ID            string          `json:"id"`
+	Finding       string          `json:"finding"`
+	URL           string          `json:"url"`
+	Location      string          `json:"location"`
+	StartDateTime string          `json:"startDateTime"`
+	EndDateTime   string          `json:"endDateTime"`
+	Season        string          `json:"season"`
+	Experience    string          `json:"experience"`
+	TimeSpan      string          `json:"timeSpan"`
+	Themes        []string        `json:"themes"`
+	Types         []string        `json:"types"`
+	Weather       []string        `json:"weather"`
+	Attachment    StoryAttachment `json:"attachment"`
 }
 
-// StoryImage represents the image data for a story
-type StoryImage struct {
+// StoryAttachment represents the attachment data for a story
+type StoryAttachment struct {
 	URL       string `json:"url"`
 	ThumbURL  string `json:"thumbUrl"`
 	MediumURL string `json:"mediumUrl"`
 	LargeURL  string `json:"largeUrl"`
 	Alt       string `json:"alt"`
+	FileType  string `json:"fileType"`
+	Filename  string `json:"filename"`
 }
 
 // FilterData represents all the data needed for client-side filtering
@@ -125,7 +161,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 	// Create story data
 	storyData := make([]StoryData, len(stories))
 	for i, story := range stories {
-		image := story.GetStoryImage()
+		attachment := story.GetStoryAttachment()
 
 		// Extract theme titles
 		themeNames := make([]string, len(story.Themes))
@@ -158,12 +194,14 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Themes:        themeNames,
 			Types:         typeNames,
 			Weather:       weatherNames,
-			Image: StoryImage{
-				URL:       image.URL,
-				ThumbURL:  image.ThumbURL,
-				MediumURL: image.MediumURL,
-				LargeURL:  image.LargeURL,
-				Alt:       image.AlternativeText,
+			Attachment: StoryAttachment{
+				URL:       attachment.URL,
+				ThumbURL:  attachment.ThumbURL,
+				MediumURL: attachment.MediumURL,
+				LargeURL:  attachment.LargeURL,
+				Alt:       attachment.AlternativeText,
+				FileType:  attachment.FileType,
+				Filename:  attachment.Filename,
 			},
 		}
 	}
@@ -404,7 +442,7 @@ func WriteStories() error {
 	totalStories := len(stories)
 
 	for i, storyInQuestion := range stories {
-		outputPath := createStoryOutputPathFromFinding(storyInQuestion.Finding)
+		outputPath := createStoryOutputPathFromFindingWithID(storyInQuestion.Finding, storyInQuestion.ID)
 
 		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
 
@@ -438,6 +476,8 @@ func WriteStories() error {
 		// Reformat the date fields to be more human readable
 		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
 		storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+		storyInQuestion.CreatedTime = util.FormatDate(storyInQuestion.CreatedTime)
+		storyInQuestion.UpdatedAt = util.FormatDate(storyInQuestion.UpdatedAt)
 
 		// For the "Other Comments" field, we want to extract the URLs and make them links
 		storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)
@@ -512,10 +552,15 @@ func WriteStories() error {
 			}
 		}
 
+		// Pre-compute attachments to avoid calling method from template
+		attachments := storyInQuestion.GetStoryAttachments()
+
 		err = tmpl.ExecuteTemplate(file, "story.html", data.StoryPage{
 			Title:                   storyInQuestion.Finding,
 			Description:             "A story that says:" + storyInQuestion.Finding,
 			Story:                   storyInQuestion,
+			Attachments:             attachments,
+			NocoDBURL:               storyInQuestion.GetNocoDBURL(),
 			LastStory:               previousStory,
 			NextStory:               nextStory,
 			FirstMoreTaggedStories:  firstRelated,
@@ -529,9 +574,197 @@ func WriteStories() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
+		// Explicit sync to ensure content is written
+		if err := file.Sync(); err != nil {
+			log.Printf("Warning: Failed to sync file: %v", err)
+		}
+
 		log.Printf("Successfully wrote story to %s", outputPath)
 	}
 
+	return nil
+}
+
+// WriteSingleStory generates a single story page for debugging purposes
+func WriteSingleStory(storyInQuestion data.Story) error {
+	log.Printf("Starting single story generation for: %s", storyInQuestion.Finding)
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/stories", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output stories directory: %w", err)
+	}
+
+	outputPath := createStoryOutputPathFromFindingWithID(storyInQuestion.Finding, storyInQuestion.ID)
+	log.Printf("Writing single story with finding %s to %s", storyInQuestion.Finding, outputPath)
+
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+	}
+	defer file.Close()
+
+	// Find the actual previous and next stories based on the current story's position
+	var previousStory, nextStory data.Story
+	if len(allStories) > 0 {
+		// Find the current story's index in the slice
+		currentIndex := -1
+		for i, story := range allStories {
+			if story.ID == storyInQuestion.ID {
+				currentIndex = i
+				break
+			}
+		}
+
+		if currentIndex >= 0 {
+			// Get previous story, wrapping to the end if at the beginning
+			if currentIndex > 0 {
+				previousStory = allStories[currentIndex-1]
+			} else {
+				// If this is the first story, the previous is the last story
+				previousStory = allStories[len(allStories)-1]
+			}
+
+			// Get next story, wrapping to the beginning if at the end
+			if currentIndex < len(allStories)-1 {
+				nextStory = allStories[currentIndex+1]
+			} else {
+				// If this is the last story, the next is the first story
+				nextStory = allStories[0]
+			}
+		} else {
+			// If story not found (shouldn't happen), use first story as fallback
+			previousStory = allStories[0]
+			nextStory = allStories[0]
+		}
+	}
+
+	// Select a random story for the random link
+	randomStory := allStories[rand.Intn(len(allStories))]
+
+	// Reformat the date fields to be more human readable
+	storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
+	storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
+	storyInQuestion.CreatedTime = util.FormatDate(storyInQuestion.CreatedTime)
+	storyInQuestion.UpdatedAt = util.FormatDate(storyInQuestion.UpdatedAt)
+
+	// For the "Other Comments" field, we want to extract the URLs and make them links
+	storyInQuestion.OtherComments = extractURLsAndMakeLinks(storyInQuestion.OtherComments)
+
+	// Chuck all the tagged story of things into a slice
+	var allTagsWeHave []interface{}
+
+	// Convert each tag type to []interface{} before appending
+	for _, theme := range storyInQuestion.Themes {
+		allTagsWeHave = append(allTagsWeHave, theme)
+	}
+
+	for _, typeTag := range storyInQuestion.Type {
+		allTagsWeHave = append(allTagsWeHave, typeTag)
+	}
+
+	var firstTag interface{}
+	var firstMoreTaggedStories []data.Story
+
+	// Shuffle the tags
+	rand.Shuffle(len(allTagsWeHave), func(i, j int) {
+		allTagsWeHave[i], allTagsWeHave[j] = allTagsWeHave[j], allTagsWeHave[i]
+	})
+
+	if len(allTagsWeHave) > 0 {
+		firstTag = allTagsWeHave[0]
+		firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, 5)
+	}
+
+	var secondMoreTaggedStories []data.Story
+	var thirdMoreTaggedStories []data.Story
+
+	var secondTag interface{}
+	var thirdTag interface{}
+
+	if len(allTagsWeHave) > 1 {
+		secondTag = allTagsWeHave[1]
+		secondMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, secondTag, 5)
+	}
+
+	if len(allTagsWeHave) > 2 {
+		thirdTag = allTagsWeHave[2]
+		thirdMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, thirdTag, 5)
+	}
+
+	var firstRelated data.RelatedStories
+	var secondRelated data.RelatedStories
+	var thirdRelated data.RelatedStories
+
+	if len(firstMoreTaggedStories) > 0 && firstTag != nil {
+		firstRelated = data.RelatedStories{
+			Tag:     firstTag,
+			TagType: getTagType(firstTag),
+			Stories: firstMoreTaggedStories,
+		}
+	}
+
+	if len(secondMoreTaggedStories) > 0 && secondTag != nil {
+		secondRelated = data.RelatedStories{
+			Tag:     secondTag,
+			TagType: getTagType(secondTag),
+			Stories: secondMoreTaggedStories,
+		}
+	}
+
+	if len(thirdMoreTaggedStories) > 0 && thirdTag != nil {
+		thirdRelated = data.RelatedStories{
+			Tag:     thirdTag,
+			TagType: getTagType(thirdTag),
+			Stories: thirdMoreTaggedStories,
+		}
+	}
+
+	// Pre-compute attachments to avoid calling method from template
+	attachments := storyInQuestion.GetStoryAttachments()
+	log.Printf("Pre-computed %d attachments for template", len(attachments))
+
+	templateData := data.StoryPage{
+		Title:                   storyInQuestion.Finding,
+		Description:             "A story that says:" + storyInQuestion.Finding,
+		Story:                   storyInQuestion,
+		Attachments:             attachments,
+		NocoDBURL:               storyInQuestion.GetNocoDBURL(),
+		LastStory:               previousStory,
+		NextStory:               nextStory,
+		FirstMoreTaggedStories:  firstRelated,
+		SecondMoreTaggedStories: secondRelated,
+		ThirdMoreTaggedStories:  thirdRelated,
+		RandomStoryURL:          randomStory.URL,
+		StoriesJSON:             storiesJSON,
+	}
+
+	log.Printf("DEBUG: About to execute template with story: %s", templateData.Story.Finding)
+
+	err = tmpl.ExecuteTemplate(file, "story.html", templateData)
+	log.Printf("DEBUG: Template execution result: %v", err)
+
+	if err != nil {
+		return fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	// Explicit sync to ensure content is written
+	if err := file.Sync(); err != nil {
+		log.Printf("Warning: Failed to sync file: %v", err)
+	}
+
+	log.Printf("Successfully wrote single story to %s", outputPath)
 	return nil
 }
 
@@ -795,6 +1028,234 @@ func WriteHomePage() error {
 	}
 
 	log.Printf("Successfully wrote homepage to %s", outputPath)
+
+	return nil
+}
+
+// WriteGiftedByIndexPages generates the gifted by index pages and writes them to the out/giftedby directory.
+func WriteGiftedByIndexPages() error {
+	log.Println("Starting gifted by generation")
+	giftedByTypes := store.GetGiftedByTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/giftedby", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output giftedby directory: %w", err)
+	}
+
+	for _, giftedByInQuestion := range giftedByTypes {
+		outputPath := createGiftedByOutputPathFromTitle(giftedByInQuestion.Title)
+
+		log.Printf("Writing gifted by %s to %s", giftedByInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForGiftedBy(giftedByInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "giftedby-index.html", data.TaxonomyIndexPage{
+			Title:          giftedByInQuestion.Title,
+			Description:    "A list of stories gifted or co-created by " + giftedByInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: giftedByInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote gifted by to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteScalePermanenceIndexPages generates the scale permanence index pages and writes them to the out/scalepermanence directory.
+func WriteScalePermanenceIndexPages() error {
+	log.Println("Starting scale permanence generation")
+	scalePermanenceTypes := store.GetScalePermanenceTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/scalepermanence", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output scalepermanence directory: %w", err)
+	}
+
+	for _, scalePermanenceInQuestion := range scalePermanenceTypes {
+		outputPath := createScalePermanenceOutputPathFromTitle(scalePermanenceInQuestion.Title)
+
+		log.Printf("Writing scale permanence %s to %s", scalePermanenceInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForScalePermanence(scalePermanenceInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "scalepermanence-index.html", data.TaxonomyIndexPage{
+			Title:          scalePermanenceInQuestion.Title,
+			Description:    "A list of stories with scale of permanence " + scalePermanenceInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: scalePermanenceInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote scale permanence to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteWhatWasIsIfIndexPages generates the what was/is/if index pages and writes them to the out/whatwasisif directory.
+func WriteWhatWasIsIfIndexPages() error {
+	log.Println("Starting what was/is/if generation")
+	whatWasIsIfTypes := store.GetWhatWasIsIfTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/whatwasisif", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output whatwasisif directory: %w", err)
+	}
+
+	for _, whatWasIsIfInQuestion := range whatWasIsIfTypes {
+		outputPath := createWhatWasIsIfOutputPathFromTitle(whatWasIsIfInQuestion.Title)
+
+		log.Printf("Writing what was/is/if %s to %s", whatWasIsIfInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForWhatWasIsIf(whatWasIsIfInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "whatwasisif-index.html", data.TaxonomyIndexPage{
+			Title:          whatWasIsIfInQuestion.Title,
+			Description:    "A list of stories for " + whatWasIsIfInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: whatWasIsIfInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote what was/is/if to %s", outputPath)
+	}
+
+	return nil
+}
+
+// WriteTimePeriodIndexPages generates the time period index pages and writes them to the out/timeperiod directory.
+func WriteTimePeriodIndexPages() error {
+	log.Println("Starting time period generation")
+	timePeriodTypes := store.GetTimePeriodTypes()
+	allStories := store.GetAllStories()
+
+	// Convert stories to JSON
+	storiesJSON, err := convertStoriesToJSON(allStories)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	err = os.MkdirAll("out/timeperiod", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output timeperiod directory: %w", err)
+	}
+
+	for _, timePeriodInQuestion := range timePeriodTypes {
+		outputPath := createTimePeriodOutputPathFromTitle(timePeriodInQuestion.Title)
+
+		log.Printf("Writing time period %s to %s", timePeriodInQuestion.Title, outputPath)
+
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
+		}
+		defer file.Close()
+
+		stories := store.GetStoriesForTimePeriod(timePeriodInQuestion.Title)
+
+		// Select a random story for the random link
+		randomStory := allStories[rand.Intn(len(allStories))]
+
+		err = tmpl.ExecuteTemplate(file, "timeperiod-index.html", data.TaxonomyIndexPage{
+			Title:          timePeriodInQuestion.Title,
+			Description:    "A list of stories from time period " + timePeriodInQuestion.Title,
+			Stories:        stories,
+			TaxonomyColour: timePeriodInQuestion.Colour,
+			RandomStoryURL: randomStory.URL,
+			StoriesJSON:    storiesJSON,
+		})
+
+		if err != nil {
+			return fmt.Errorf("failed to execute template: %w", err)
+		}
+
+		log.Printf("Successfully wrote time period to %s", outputPath)
+	}
 
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/config"
@@ -24,6 +25,7 @@ type Client struct {
 	table         *nocodbgo.Table
 	cachedRecords []map[string]interface{}
 	cacheLoaded   bool
+	cacheOnlyMode bool // If true, only use cache, never hit API
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables
@@ -54,7 +56,7 @@ func NewClient() (*Client, error) {
 }
 
 // GetAllRecords retrieves all records from the configured table using pagination
-// Uses caching to avoid repeated API calls
+// Uses caching to avoid repeated API calls. Tries disk cache first for faster debugging.
 func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	if c.table == nil {
 		return nil, fmt.Errorf("table not initialized")
@@ -63,6 +65,23 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	// Return cached records if available
 	if c.cacheLoaded {
 		return c.cachedRecords, nil
+	}
+
+	// Try loading from disk cache first
+	if c.IsDiskCacheAvailable() {
+		if err := c.LoadCacheFromDisk(); err != nil {
+			log.Printf("Warning: Failed to load disk cache: %v", err)
+			if c.cacheOnlyMode {
+				return nil, fmt.Errorf("cache-only mode enabled but disk cache failed to load: %w", err)
+			}
+		} else {
+			return c.cachedRecords, nil
+		}
+	}
+
+	// If cache-only mode is enabled and no cache available, fail
+	if c.cacheOnlyMode {
+		return nil, fmt.Errorf("cache-only mode enabled but no disk cache available")
 	}
 
 	// Fetch records from API and cache them
@@ -109,7 +128,148 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 
 	c.cacheLoaded = true
 	log.Printf("Successfully retrieved and cached all %d records from NocoDB with relationships", len(allRecords))
+
+	// Save cache to disk for faster future loading
+	if err := c.SaveCacheToDisk(); err != nil {
+		log.Printf("Warning: Failed to save cache to disk: %v", err)
+	}
+
 	return allRecords, nil
+}
+
+// GetRecordByID retrieves a single record by its ID
+func (c *Client) GetRecordByID(id string) (map[string]interface{}, error) {
+	if c.table == nil {
+		return nil, fmt.Errorf("table not initialized")
+	}
+
+	// First try to find it in cache if available
+	if c.cacheLoaded {
+		for _, record := range c.cachedRecords {
+			// Try both string and numeric ID comparisons
+			if recordID, ok := record["Id"].(string); ok && recordID == id {
+				return record, nil
+			}
+			if recordID, ok := record["Id"].(float64); ok && fmt.Sprintf("%.0f", recordID) == id {
+				return record, nil
+			}
+			if recordID, ok := record["Id"].(int); ok && fmt.Sprintf("%d", recordID) == id {
+				return record, nil
+			}
+		}
+		return nil, fmt.Errorf("record with ID %s not found in cache", id)
+	}
+
+	// If not cached, we can't fetch individual records from the API easily
+	// Force cache load and then search in cache
+	_, err := c.GetAllRecords()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load cache for record search: %w", err)
+	}
+
+	// Search in cache again
+	for _, record := range c.cachedRecords {
+		// Try both string and numeric ID comparisons
+		if recordID, ok := record["Id"].(string); ok && recordID == id {
+			return record, nil
+		}
+		if recordID, ok := record["Id"].(float64); ok && fmt.Sprintf("%.0f", recordID) == id {
+			return record, nil
+		}
+		if recordID, ok := record["Id"].(int); ok && fmt.Sprintf("%d", recordID) == id {
+			return record, nil
+		}
+	}
+
+	return nil, fmt.Errorf("record with ID %s not found", id)
+}
+
+const diskCacheFile = "debug-cache-nocodb.json"
+
+// DiskCacheData represents the structure of the disk cache
+type DiskCacheData struct {
+	Records   []map[string]interface{} `json:"records"`
+	Timestamp time.Time                `json:"timestamp"`
+	Count     int                      `json:"count"`
+}
+
+// SaveCacheToDisk saves the current cache to disk for faster debugging
+func (c *Client) SaveCacheToDisk() error {
+	if !c.cacheLoaded || len(c.cachedRecords) == 0 {
+		return fmt.Errorf("no cache loaded to save")
+	}
+
+	cacheData := DiskCacheData{
+		Records:   c.cachedRecords,
+		Timestamp: time.Now(),
+		Count:     len(c.cachedRecords),
+	}
+
+	file, err := os.Create(diskCacheFile)
+	if err != nil {
+		return fmt.Errorf("failed to create cache file: %w", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(cacheData); err != nil {
+		return fmt.Errorf("failed to write cache data: %w", err)
+	}
+
+	log.Printf("Cache saved to disk: %s (%d records)", diskCacheFile, len(c.cachedRecords))
+	return nil
+}
+
+// LoadCacheFromDisk loads cache from disk if available
+func (c *Client) LoadCacheFromDisk() error {
+	file, err := os.Open(diskCacheFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("disk cache file not found: %s", diskCacheFile)
+		}
+		return fmt.Errorf("failed to open cache file: %w", err)
+	}
+	defer file.Close()
+
+	var cacheData DiskCacheData
+	decoder := json.NewDecoder(file)
+	if err := decoder.Decode(&cacheData); err != nil {
+		return fmt.Errorf("failed to decode cache data: %w", err)
+	}
+
+	c.cachedRecords = cacheData.Records
+	c.cacheLoaded = true
+
+	age := time.Since(cacheData.Timestamp)
+	log.Printf("Cache loaded from disk: %s (%d records, age: %v)",
+		diskCacheFile, len(c.cachedRecords), age.Truncate(time.Second))
+
+	return nil
+}
+
+// IsDiskCacheAvailable checks if a disk cache file exists
+func (c *Client) IsDiskCacheAvailable() bool {
+	_, err := os.Stat(diskCacheFile)
+	return !os.IsNotExist(err)
+}
+
+// ClearDiskCache removes the disk cache file
+func (c *Client) ClearDiskCache() error {
+	err := os.Remove(diskCacheFile)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove disk cache: %w", err)
+	}
+	log.Printf("Disk cache cleared: %s", diskCacheFile)
+	return nil
+}
+
+// SetCacheOnlyMode enables cache-only mode where no API calls will be made
+func (c *Client) SetCacheOnlyMode(enabled bool) {
+	c.cacheOnlyMode = enabled
+	if enabled {
+		log.Println("NocoDB client set to cache-only mode")
+	}
 }
 
 // GetFilteredRecords retrieves records filtered by a field containing a value using client-side filtering
@@ -345,17 +505,34 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 				ID:      strconv.Itoa(item.Id),
 				Title:   item.Title,
 				Finding: item.Title,
-				URL:     "/stories/" + util.Slugify(item.Title) + ".html",
+				URL:     "/stories/" + util.Slugify(item.Title) + "-" + strconv.Itoa(item.Id) + ".html",
 			}
 
-			// Look up the full story data from provided records to get proper image URLs
+			// Look up the full story data from provided records to get proper attachment info
 			storyIDStr := strconv.Itoa(item.Id)
 			if cachedStory, found := c.getStoryFromRecords(storyIDStr, allRecords); found {
+				// First try to get an image attachment
 				storyImage := cachedStory.GetStoryImage()
 				if storyImage.URL != "" {
 					connection.Image = storyImage.URL
 					connection.ThumbURL = storyImage.ThumbURL
+					connection.AttachmentType = "image"
+					connection.AttachmentFilename = storyImage.Filename
+				} else {
+					// No image, check for audio attachment
+					audioAttachment := cachedStory.GetFirstNonImageAttachment()
+					if audioAttachment.URL != "" && audioAttachment.IsAudio() {
+						connection.AttachmentType = "audio"
+						connection.AttachmentFilename = audioAttachment.Filename
+					} else if audioAttachment.URL != "" && audioAttachment.IsDocument() {
+						connection.AttachmentType = "document"
+						connection.AttachmentFilename = audioAttachment.Filename
+					} else {
+						connection.AttachmentType = "none"
+					}
 				}
+			} else {
+				connection.AttachmentType = "none"
 			}
 
 			connections = append(connections, connection)
