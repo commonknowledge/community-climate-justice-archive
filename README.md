@@ -528,9 +528,3 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
 ```
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
-
-
-
-
-
-
