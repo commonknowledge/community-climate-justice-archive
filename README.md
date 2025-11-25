@@ -12,11 +12,17 @@ At the time of writing, this contains the first version of the archive. This is 
 
 ### SQLite
 
+The ulimate aim in this project was to use SQLite as the database backend.
+
 [SQLite](https://www.sqlite.org/index.html) was chosen for this project because it is a lightweight, disk-based database. It allows us to keep all of the archive's data in a single file, making it easier to store and transport. 
 
 In the event of a climate collapse, the database will still be readable and usable and can easily be reproduced.
 
 In comparison to a more traditional database like PostgreSQL, SQLite is also more energy efficient.
+
+The eventual ambition is for the project itself to contain its own backend which uses NocoDB. Currently NocoDB is used as an interface for the backend of the archive, which does ultimately write to a SQLite database stored on disk. At some point we will replace calls to the NocoDB API with direct reads of an SQLite database, but it was decided that this was too much complexity for now, as the NocoDB interface provided a lot of power.
+
+Accessing the NocoDB database directly from SQLite clients is possible, so the archive does not ultimate depend on NocoDB. All parts of the archive can therefore be replaced.
 
 ## Deployment
 
