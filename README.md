@@ -20,49 +20,6 @@ In comparison to a more traditional database like PostgreSQL, SQLite is also mor
 
 ## Local Development
 
-### Creating a SQLite export of the Airtable database
-
-1. You will need three things:
- - Access to the Dudley People's School of Climate Justice Airtable. You can request this from someone involved in the project.
- - An Airtable personal access token, [which you can create here](https://airtable.com/create/tokens). Assigning the token the `data.records:read` scope is sufficient.
- - The Airtable table ID, which you can find by going to the table in Airtable and [copying the ID from the URL](https://support.airtable.com/docs/finding-airtable-ids).
-
-2. Install [airtable-to-sqlite](https://github.com/kanedata/airtable-to-sqlite) following the instructions in the README.
-
-3. Run the following command to export the table to a SQLite database:
-
-```bash
-airtable-to-sqlite --personal-access-token <your-token> --output airtable-export.db <your-table-id>
-```
-
-This will create a file called `airtable-export.db` in the current directory. The `dump-images-from-airtable` program expects this file to be present in the root of the repository.
-
-### Using the `dump-images-from-airtable.go`
-
-This program will dump all images out of an Airtable export and write them to disk.
-
-#### macOS
-
-1. In order to run the programs in this repository, you'll need to install Go.
-
-```bash
-brew install go
-```
-
-2. Download the repository.
-
-```bash
-git clone https://github.com/commonknowledge/community-climate-justice-archive.git
-```
-
-3. Run the program.
-
-```bash
-go run cmd/cli/dump-images-from-airtable.go
-```
-
-As we have already exported all the images into this repository, the only thing that will happen is a series of log messages, noting that the images are already present and the download has been skipped.
-
 ### Working with the archive
 
 #### Compiling the archive
