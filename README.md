@@ -43,7 +43,7 @@ A **static site** is just a folder full of regular HTML files - like the website
 - **Simple**: Just HTML files, so you can host them almost anywhere
 - **Resilient**: If something goes wrong with the hosting, you still have all your HTML files. Resilience against all kinds of disaster, especially climate related, is a key goal of this archive
 - **Low energy**: Static files use way less server resources than dynamic sites
-- **Future-proof**: In 20 years, HTML files will still work, even if the database software is obsolete
+- **Future-proof**: In 20 and even 100 years, HTML files will still work, even if the database software and all other technologies in the archive are obsolete
 
 **The "Generator" Part:**
 We don't write all those HTML files by hand! The archive *generates* them automatically from the NocoDB data and templates. You run the build command, it creates all the HTML files, and then those files get uploaded to Render for hosting.
