@@ -48,7 +48,7 @@ A **static site** is just a folder full of regular HTML files - like the website
 **The "Generator" Part:**
 We don't write all those HTML files by hand! The archive *generates* them automatically from the NocoDB data and templates. You run the build command, it creates all the HTML files, and then those files get uploaded to a web hosting service called Render so that people can visit the archive with their web browser.
 
-So: **Database + Templates → Build Process → HTML Files → Upload to Render → Live Website!**
+So: **Database + Templates → Build Process → HTML Files → Upload to Render → Live Archive**
 
 ### The Big Picture
 
