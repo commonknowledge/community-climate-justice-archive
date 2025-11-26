@@ -20,9 +20,7 @@ type NocoDBStoryDTO struct {
 	Finding                 interface{} `json:"Title"`
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
-	Image                   interface{} `json:"Image"`
 	ImageVideoSound         interface{} `json:"Image / video / sound"`
-	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
 	StartDateTime           interface{} `json:"Dated created / experienced"`
 	EndDateTime             interface{} `json:"Date added to the archive"`
@@ -124,7 +122,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		CreatedTime:      toString(dto.CreatedTime),
 		Finding:          toString(dto.Finding),
 		HighStExperiment: toString(dto.HighStExperiment),
-		Image:            func() string { img, _ := ParseAttachmentsFromNocoDB(dto.Image); return img }(),
 		ImageVideoSound: func() string {
 			// Keep original NocoDB structure for rich metadata (mimetype, size, dimensions)
 			if dto.ImageVideoSound != nil {
@@ -134,7 +131,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 			}
 			return ""
 		}(),
-		SourceImage:             func() string { img, _ := ParseAttachmentsFromNocoDB(dto.SourceImage); return img }(),
 		Location:                toString(dto.Location),
 		StartDateTime:           toString(dto.StartDateTime),
 		EndDateTime:             toString(dto.EndDateTime),

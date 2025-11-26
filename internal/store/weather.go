@@ -28,19 +28,3 @@ func GetWeather() []data.Weather {
 	}
 	return weather
 }
-
-// uniqueWeather returns a slice of unique weather conditions.
-func uniqueWeather(weathers []data.Weather) []data.Weather {
-	seen := make(map[string]bool)
-	unique := []data.Weather{}
-
-	// Loop over the slice and only keep first occurrence of each weather.
-	for _, w := range weathers {
-		if !seen[w.Title] {
-			seen[w.Title] = true
-			unique = append(unique, w)
-		}
-	}
-
-	return unique
-}
