@@ -18,12 +18,6 @@ In the event of a climate collapse, the database will still be readable and usab
 
 In comparison to a more traditional database like PostgreSQL, SQLite is also more energy efficient.
 
-## Deployment
-
-The archive currently deploys to [GitHub Pages](https://pages.github.com/). This is done on every commit to the `main` branch.
-
-The deployment process is encapsulated in a [GitHub Action](https://github.com/features/actions), the process of which is in `.github/workflows/deploy.yml`.
-
 ## Local Development
 
 ### Creating a SQLite export of the Airtable database
