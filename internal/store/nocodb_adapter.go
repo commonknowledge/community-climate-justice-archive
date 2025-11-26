@@ -27,8 +27,15 @@ import (
 )
 
 // NocoDBAdapter implements DataAdapter for NocoDB API
+//
+// Performance Note:
+// This adapter uses a pre-computed story index for taxonomy lookups. After fetching
+// all stories once, we build an index that allows instant lookups by theme, type,
+// weather, and other taxonomies. This makes builds fast and efficient, especially
+// as the archive grows.
 type NocoDBAdapter struct {
-	client *nocodb.Client
+	client     *nocodb.Client
+	storyIndex *StoryIndex // Pre-computed indexes for fast story lookups
 }
 
 // NewNocoDBAdapter creates a new NocoDB adapter
@@ -44,13 +51,32 @@ func NewNocoDBAdapter() (*NocoDBAdapter, error) {
 }
 
 // GetAllStories retrieves all stories from NocoDB
+//
+// Performance Optimisation:
+// After fetching and converting all stories, we build a story index if one doesn't
+// exist yet. This index allows us to do instant lookups by taxonomy (theme, type,
+// weather, etc.) rather than scanning through all stories repeatedly.
+//
+// The first call to this function will take slightly longer (to build the index),
+// but all subsequent taxonomy lookups will be nearly instant.
 func (n *NocoDBAdapter) GetAllStories() ([]data.Story, error) {
 	records, err := n.client.GetAllRecords()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all records from NocoDB: %w", err)
 	}
 
-	return n.convertRecordsToStories(records)
+	stories, err := n.convertRecordsToStories(records)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build the story index if we haven't already
+	// This happens once per build and makes all subsequent taxonomy lookups fast
+	if n.storyIndex == nil {
+		n.storyIndex = BuildStoryIndex(stories)
+	}
+
+	return stories, nil
 }
 
 // GetStoryByID retrieves a single story by its ID from NocoDB
@@ -82,16 +108,24 @@ func (n *NocoDBAdapter) GetRawRecords() ([]map[string]interface{}, error) {
 	return records, nil
 }
 
-// GetStoriesForTheme retrieves stories filtered by theme from NocoDB
+// GetStoriesForTheme retrieves stories filtered by theme
+//
+// Performance:
+// Uses the pre-computed story index for instant O(1) lookup. The index is built
+// automatically when GetAllStories() is first called.
+//
+// If the index hasn't been built yet, we ensure it exists by calling GetAllStories first.
 func (n *NocoDBAdapter) GetStoriesForTheme(themeTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for theme", themeTitle)
-
-	records, err := n.client.GetFilteredRecords("Themes", themeTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for theme: %w", err)
+	// Ensure the index exists (it should already be built by GetAllStories)
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForTheme(themeTitle), nil
 }
 
 // GetStoriesWithConnections retrieves stories that have InspiredBy or HasInspired relationships from NocoDB
@@ -152,28 +186,36 @@ func (n *NocoDBAdapter) GetStoriesWithConnections(limit int) ([]data.Story, erro
 	return result, nil
 }
 
-// GetStoriesForType retrieves stories filtered by type from NocoDB
+// GetStoriesForType retrieves stories filtered by type
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForType(typeTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for type", typeTitle)
-
-	records, err := n.client.GetFilteredRecords("Type", typeTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for type: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForType(typeTitle), nil
 }
 
-// GetStoriesForWeather retrieves stories filtered by weather from NocoDB
+// GetStoriesForWeather retrieves stories filtered by weather
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForWeather(weatherTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for weather", weatherTitle)
-
-	records, err := n.client.GetFilteredRecords("Weather", weatherTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for weather: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForWeather(weatherTitle), nil
 }
 
 // GetThemes retrieves all unique themes from NocoDB
@@ -301,8 +343,12 @@ func (n *NocoDBAdapter) convertRecordsToStories(records []map[string]interface{}
 }
 
 // DropCache clears any cached data in the NocoDB client
+//
+// This also clears the story index, which will be rebuilt automatically on the next
+// call to GetAllStories().
 func (n *NocoDBAdapter) DropCache() error {
 	n.client.DropCache()
+	n.storyIndex = nil // Clear the index so it gets rebuilt
 	return nil
 }
 
@@ -338,16 +384,20 @@ func (n *NocoDBAdapter) GetGiftedByTypes() ([]data.GiftedBy, error) {
 	return giftedByTypes, nil
 }
 
-// GetStoriesForGiftedBy retrieves stories filtered by gifted by from NocoDB
+// GetStoriesForGiftedBy retrieves stories filtered by gifted by
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForGiftedBy(giftedByTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for gifted by", giftedByTitle)
-
-	records, err := n.client.GetFilteredRecords("Gifted or co-created by…", giftedByTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for gifted by: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForGiftedBy(giftedByTitle), nil
 }
 
 // GetScalePermanenceTypes retrieves all unique scale of permanence values from NocoDB
@@ -372,16 +422,20 @@ func (n *NocoDBAdapter) GetScalePermanenceTypes() ([]data.ScalePermanence, error
 	return scalePermanenceTypes, nil
 }
 
-// GetStoriesForScalePermanence retrieves stories filtered by scale of permanence from NocoDB
+// GetStoriesForScalePermanence retrieves stories filtered by scale of permanence
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForScalePermanence(scalePermanenceTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for scale of permanence", scalePermanenceTitle)
-
-	records, err := n.client.GetFilteredRecords("Scale of permanence", scalePermanenceTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for scale of permanence: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForScalePermanence(scalePermanenceTitle), nil
 }
 
 // GetWhatWasIsIfTypes retrieves all unique what was/is/if values from NocoDB
@@ -406,16 +460,20 @@ func (n *NocoDBAdapter) GetWhatWasIsIfTypes() ([]data.WhatWasIsIf, error) {
 	return whatWasIsIfTypes, nil
 }
 
-// GetStoriesForWhatWasIsIf retrieves stories filtered by what was/is/if from NocoDB
+// GetStoriesForWhatWasIsIf retrieves stories filtered by what was/is/if
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForWhatWasIsIf(whatWasIsIfTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for what was/is/if", whatWasIsIfTitle)
-
-	records, err := n.client.GetFilteredRecords("What was/is/if", whatWasIsIfTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for what was/is/if: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForWhatWasIsIf(whatWasIsIfTitle), nil
 }
 
 // GetTimePeriodTypes retrieves all unique time period values from NocoDB
@@ -440,14 +498,18 @@ func (n *NocoDBAdapter) GetTimePeriodTypes() ([]data.TimePeriod, error) {
 	return timePeriodTypes, nil
 }
 
-// GetStoriesForTimePeriod retrieves stories filtered by time period from NocoDB
+// GetStoriesForTimePeriod retrieves stories filtered by time period
+//
+// Uses the pre-computed story index for instant O(1) lookup.
 func (n *NocoDBAdapter) GetStoriesForTimePeriod(timePeriodTitle string) ([]data.Story, error) {
-	log.Println("Getting stories for time period", timePeriodTitle)
-
-	records, err := n.client.GetFilteredRecords("Time period", timePeriodTitle)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get filtered records for time period: %w", err)
+	// Ensure the index exists
+	if n.storyIndex == nil {
+		_, err := n.GetAllStories()
+		if err != nil {
+			return nil, fmt.Errorf("failed to build story index: %w", err)
+		}
 	}
 
-	return n.convertRecordsToStories(records)
+	// Instant lookup from the index
+	return n.storyIndex.GetStoriesForTimePeriod(timePeriodTitle), nil
 }
