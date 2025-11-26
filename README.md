@@ -8,19 +8,19 @@ At the time of writing, this contains the second version of the archive, release
 
 ### Go
 
-[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language, which makes it more efficient in terms of energy consumption.
+[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled], which makes it more efficient in terms of energy consumption.
 
 ### SQLite
 
 The ulimate aim in this project was to use SQLite as the database backend.
 
-[SQLite](https://www.sqlite.org/index.html) was chosen for this project because it is a lightweight, disk-based database. It allows us to keep all of the archive's data in a single file, making it easier to store and transport. 
+[SQLite](https://www.sqlite.org/index.html) was chosen for this project because it is a lightweight, disk-based database[^database]. It allows us to keep all of the archive's data in a single file, making it easier to store and transport. 
 
 In the event of a climate collapse, the database will still be readable and usable and can easily be reproduced.
 
 In comparison to a more traditional database like PostgreSQL, SQLite is also more energy efficient.
 
-The eventual ambition is for the project itself to contain its own backend which uses NocoDB. Currently NocoDB is used as an interface for the backend of the archive, which does ultimately write to a SQLite database stored on disk. At some point we will replace calls to the NocoDB API with direct reads of an SQLite database, but it was decided that this was too much complexity for now, as the NocoDB interface provided a lot of power.
+The eventual ambition is for the project itself to contain its own backend which uses NocoDB. Currently NocoDB is used as an interface for the backend of the archive, which does ultimately write to a SQLite database stored on disk. At some point we will replace calls to the NocoDB API[^api] with direct reads of an SQLite database, but it was decided that this was too much complexity for now, as the NocoDB interface provided a lot of power.
 
 Accessing the NocoDB database directly from SQLite clients is possible, so the archive does not ultimate depend on NocoDB. All parts of the archive can therefore be replaced.
 
@@ -32,7 +32,7 @@ This section explains how the archive takes story data from NocoDB and turns it 
 
 Before we dive in, let's be clear about what "static site" means:
 
-A **static site** is just a folder full of regular HTML files - like the websites from the early days of the internet. When someone visits the archive, their browser just downloads and displays these HTML files directly. There's no database query happening, no server generating pages on-the-fly.
+A **static site** is just a folder full of regular HTML[^html] files - like the websites from the early days of the internet. When someone visits the archive, their browser just downloads and displays these HTML files directly. There's no database query happening, no server generating pages on-the-fly.
 
 **Think of it like this:**
 - **Dynamic sites** (like Facebook): When you visit, the server runs code, fetches data from a database, builds the page right then, and sends it to you. Different every time!
@@ -52,7 +52,7 @@ So: **Database + Templates → Build Process → HTML Files → Upload to Render
 
 ### The Big Picture
 
-The archive is a **static site generator**. It takes data we have an makes a static site, as described above. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files. The generated site is then uploaded for hosting. No database or server-side code is needed once the site is built.
+The archive is a **static site generator**. It takes data we have an makes a static site, as described above. It fetches data from NocoDB, processes images, fills in HTML templates[^templates], and creates a complete website of HTML files. The generated site is then uploaded for hosting. No database or server-side code is needed once the site is built.
 
 ```mermaid
 graph TB
@@ -195,7 +195,7 @@ graph LR
 **Step by step:**
 
 1. **NocoDB JSON**: Raw data with field names like "Image / video / sound" (notice the spaces)
-2. **NocoDBStoryDTO**: A Go struct with json tags that match NocoDB's field names exactly
+2. **NocoDBStoryDTO**: A Go struct[^struct] with JSON[^json] tags that match NocoDB's field names exactly
 3. **Story Struct**: The proper struct everyone uses, with nice Go field names and proper types
 4. **HTML Template**: The template accesses fields like `{{.Story.Finding}}` to display them
 
@@ -206,7 +206,7 @@ The conversion happens in `internal/nocodb/types.go`. It handles tricky things l
 
 ### Image Processing Pipeline
 
-Images need special treatment. We resize them into different sizes and convert them to WebP format (which loads faster and uses less bandwidth).
+Images need special treatment. We resize them into different sizes and convert them to WebP[^webp] format (which loads faster and uses less bandwidth).
 
 ```mermaid
 graph TB
@@ -353,7 +353,7 @@ The next time you build, it'll fetch everything fresh from NocoDB.
 - Rebuild the archive
 
 **Build failing?**
-- Check your `.env` file has all the NocoDB settings
+- Check your `.env` file has all the NocoDB settings (environment variables[^envvar])
 - Make sure NocoDB is accessible
 - Check for error messages in the console
 
@@ -384,9 +384,9 @@ That's it! Render does all the work - building the site and hosting it. No GitHu
 brew install go
 ```
 
-2. Download the repository.
+2. Download the repository[^repository].
 
-You can do this on the command line with the following, or use your favoured Git client.
+You can do this on the command line[^commandline] with the following, or use your favoured Git[^git] client.
 
 Its a bit repository, so be patient while it downloads.
 
@@ -396,7 +396,7 @@ git clone https://github.com/commonknowledge/community-climate-justice-archive.g
 
 3. Run the archive in development mode.
 
-Enter the repository directory in a terminal. 
+Enter the repository directory in a terminal[^terminal]. 
 
 ```bash
 cd community-climate-justice-archive
@@ -842,3 +842,33 @@ The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy
 go build -o consolidate-image-fields ./cmd/consolidate-image-fields
 ./consolidate-image-fields --checksum  # Verify consolidation is complete
 ```
+
+---
+
+## Technical Terms Glossary
+
+[^compiled]: **Compiled language**: A programming language where code is translated into machine instructions before running, making it faster and more efficient. [Learn more](https://www.freecodecamp.org/news/compiled-versus-interpreted-languages/)
+
+[^database]: **Database**: A structured system for storing and organising data. Think of it like a sophisticated filing cabinet for information. [Learn more](https://www.oracle.com/uk/database/what-is-database/)
+
+[^api]: **API (Application Programming Interface)**: A way for programs to talk to each other. NocoDB's API lets us request story data over the internet. [Learn more](https://www.howtogeek.com/343877/what-is-an-api/)
+
+[^html]: **HTML (HyperText Markup Language)**: The standard language for creating web pages. HTML files tell browsers how to display content. [Learn more](https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics)
+
+[^templates]: **Templates**: Pre-designed files with placeholders that get filled in with actual data. Like a form letter where you fill in the name and address. [Learn more](https://en.wikipedia.org/wiki/Template_processor)
+
+[^struct]: **Struct (Structure)**: In Go, a struct is a custom data type that groups related pieces of information together. Like a form with labelled fields. [Learn more](https://gobyexample.com/structs)
+
+[^json]: **JSON (JavaScript Object Notation)**: A text format for storing and transmitting data that's easy for both humans and computers to read. [Learn more](https://www.json.org/json-en.html)
+
+[^webp]: **WebP**: A modern image format that creates smaller file sizes than JPEG or PNG while maintaining quality, making pages load faster. [Learn more](https://developers.google.com/speed/webp)
+
+[^repository]: **Repository**: A storage location for your project files and their entire revision history. Often shortened to "repo". [Learn more](https://docs.github.com/en/repositories/creating-and-managing-repositories/about-repositories)
+
+[^commandline]: **Command line**: A text-based interface where you type commands to interact with your computer, rather than clicking with a mouse. [Learn more](https://tutorial.djangogirls.org/en/intro_to_command_line/)
+
+[^git]: **Git**: A version control system that tracks changes to files over time, letting you collaborate with others and revert to previous versions if needed. [Learn more](https://www.atlassian.com/git/tutorials/what-is-git)
+
+[^terminal]: **Terminal**: A program that provides the command line interface. On macOS, it's called "Terminal"; on Windows, "Command Prompt" or "PowerShell". [Learn more](https://www.codecademy.com/article/command-line-commands)
+
+[^envvar]: **Environment variables**: Configuration settings stored outside your code, often in a `.env` file. They keep sensitive information like passwords separate from the code. [Learn more](https://www.twilio.com/en-us/blog/environment-variables-python)
