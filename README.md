@@ -52,7 +52,7 @@ So: **Database + Templates → Build Process → HTML Files → Upload to Render
 
 ### The Big Picture
 
-The archive is a **static site generator**. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files. The generated site is then deployed to Render for hosting. No database or server-side code is needed once the site is built!
+The archive is a **static site generator**. It takes data we have an makes a static site, as described above. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files. The generated site is then uploaded for hosting. No database or server-side code is needed once the site is built.
 
 ```mermaid
 graph TB
