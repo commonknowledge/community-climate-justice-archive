@@ -24,6 +24,344 @@ The eventual ambition is for the project itself to contain its own backend which
 
 Accessing the NocoDB database directly from SQLite clients is possible, so the archive does not ultimate depend on NocoDB. All parts of the archive can therefore be replaced.
 
+## How It All Works
+
+This section explains how the archive takes story data from NocoDB and turns it into a complete static website. If you're new to maintaining the archive, this will help you understand how everything fits together.
+
+### The Big Picture
+
+The archive is a **static site generator**. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files that can be hosted anywhere. No database or server-side code is needed once the site is built!
+
+```mermaid
+graph TB
+    A[NocoDB Database] -->|Fetch stories via API| B[Archive Builder]
+    B -->|Process & resize| C[Images]
+    B -->|Fill with data| D[HTML Templates]
+    C --> E[Generated Website]
+    D --> E
+    E -->|Deploy| F[GitHub Pages]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style E fill:#e8f5e9
+    style F fill:#f3e5f5
+```
+
+### The Architecture: Layers
+
+The code is organised into layers, each with a specific job. This keeps things tidy and makes it easier to change one part without breaking others.
+
+```mermaid
+graph TB
+    subgraph "Entry Point"
+        CMD[cmd/archive/main.go<br/>Starts everything]
+    end
+    
+    subgraph "Generation Layer"
+        GEN[internal/generate/<br/>Creates HTML pages]
+        ASSETS[internal/generate/assets.go<br/>Processes images]
+    end
+    
+    subgraph "Store Layer - The Adapter"
+        ADAPTER[internal/store/adapter.go<br/>Defines how to fetch data]
+        NOCODB[internal/store/nocodb_adapter.go<br/>Talks to NocoDB]
+    end
+    
+    subgraph "Data Layer"
+        TYPES[internal/nocodb/types.go<br/>Translates NocoDB format]
+        STORY[data/story.go<br/>Story structs everyone uses]
+    end
+    
+    subgraph "Templates"
+        TMPL[templates/<br/>HTML templates]
+    end
+    
+    CMD --> GEN
+    CMD --> ASSETS
+    GEN --> ADAPTER
+    ADAPTER --> NOCODB
+    NOCODB --> TYPES
+    TYPES --> STORY
+    GEN --> TMPL
+    
+    style CMD fill:#ffebee
+    style GEN fill:#e1f5ff
+    style ASSETS fill:#e1f5ff
+    style ADAPTER fill:#fff9c4
+    style NOCODB fill:#fff9c4
+    style TYPES fill:#e8f5e9
+    style STORY fill:#e8f5e9
+    style TMPL fill:#f3e5f5
+```
+
+### How Data Flows: From Database to Website
+
+Here's what happens when you run `go run ./cmd/archive`:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Main as cmd/archive/main.go
+    participant Store as Store Layer
+    participant NocoDB as NocoDB Adapter
+    participant DB as NocoDB Database
+    participant Gen as Generate Layer
+    participant Templates
+    participant Output as out/ folder
+    
+    User->>Main: Run archive
+    Main->>Main: Load config from .env
+    Main->>Store: Initialize adapter
+    Store->>NocoDB: Create NocoDB adapter
+    
+    Main->>Store: Fetch all stories
+    Store->>NocoDB: GetAllStories()
+    NocoDB->>DB: HTTP request to NocoDB API
+    DB-->>NocoDB: JSON response
+    NocoDB->>NocoDB: Parse JSON into Story structs
+    NocoDB-->>Store: List of Story objects
+    Store-->>Main: Stories ready!
+    
+    Main->>Gen: Process images
+    Gen->>Gen: Resize & convert to WebP
+    Gen->>Output: Write processed images
+    
+    Main->>Gen: Generate homepage
+    Gen->>Store: Get themes, types, stories
+    Gen->>Templates: Load homepage.html
+    Gen->>Templates: Fill with data
+    Gen->>Output: Write homepage.html
+    
+    Main->>Gen: Generate story pages
+    loop For each story
+        Gen->>Templates: Load story.html
+        Gen->>Templates: Fill with story data
+        Gen->>Output: Write stories/story-slug.html
+    end
+    
+    Main->>Gen: Generate index pages
+    Gen->>Templates: Load theme-index.html, type-index.html, etc.
+    Gen->>Output: Write all index pages
+    
+    Main->>Gen: Copy CSS
+    Gen->>Output: Copy styles.css
+    
+    Main-->>User: ✅ Website built in out/ folder!
+```
+
+### The Store Layer: The Adapter Pattern
+
+The store layer is like a translator. The rest of the code just asks "give me stories" and doesn't need to know if they're coming from NocoDB, SQLite, or anywhere else.
+
+**Why we have this:**
+- We can swap NocoDB for SQLite later without rewriting everything
+- The code is cleaner because fetching data is separate from displaying it
+- Testing is easier because we can create fake adapters
+
+```go
+// The interface - what the adapter promises to do
+type DataAdapter interface {
+    GetAllStories() ([]data.Story, error)
+    GetStoryByID(id string) (data.Story, error)
+    GetStoriesForTheme(theme string) ([]data.Story, error)
+    // ... and so on
+}
+
+// The NocoDB version - how we do it right now
+type NocoDBAdapter struct {
+    client *nocodb.Client
+}
+
+// In the future, we might have:
+type SQLiteAdapter struct {
+    db *sql.DB
+}
+```
+
+The rest of the code just uses `GetAdapter()` and doesn't care which adapter it is!
+
+### How Stories Get Transformed
+
+NocoDB sends data in one format, but we need it in another. Here's how a story transforms as it moves through the system:
+
+```mermaid
+graph LR
+    A[NocoDB JSON<br/>Field: 'Image / video / sound'<br/>Field: 'What was/is/if'] 
+    -->|Parse| B[NocoDBStoryDTO<br/>ImageVideoSound interface{}<br/>WhatWasIsIf interface{}]
+    -->|Convert| C[Story Struct<br/>ImageVideoSound string<br/>WhatWasIsIf []WhatWasIsIf]
+    -->|Render| D[HTML Template<br/>{{.Story.ImageVideoSound}}<br/>{{range .Story.WhatWasIsIf}}]
+    
+    style A fill:#ffebee
+    style B fill:#fff9c4
+    style C fill:#e8f5e9
+    style D fill:#f3e5f5
+```
+
+**Step by step:**
+
+1. **NocoDB JSON**: Raw data with field names like "Image / video / sound" (notice the spaces!)
+2. **NocoDBStoryDTO**: A Go struct with json tags that match NocoDB's field names exactly
+3. **Story Struct**: The proper struct everyone uses, with nice Go field names and proper types
+4. **HTML Template**: The template accesses fields like `{{.Story.Finding}}` to display them
+
+The conversion happens in `internal/nocodb/types.go`. It handles tricky things like:
+- Converting `["Theme A", "Theme B"]` into proper Theme structs with URLs and colours
+- Parsing attachment JSON into StoryAttachment objects
+- Turning `null` into sensible defaults instead of crashing
+
+### Image Processing Pipeline
+
+Images need special treatment. We resize them into different sizes and convert them to WebP format (which loads faster and uses less bandwidth).
+
+```mermaid
+graph TB
+    A[Original Image<br/>photo.jpg<br/>3000×2000px] --> B[Read from images/ folder]
+    B --> C{Resize into 3 versions}
+    C --> D[Thumbnail<br/>400×267px]
+    C --> E[Medium<br/>1024×683px]
+    C --> F[Large<br/>2048×1365px]
+    D --> G[Convert to WebP]
+    E --> G
+    F --> G
+    G --> H[Save to out/images/processed/]
+    H --> I[Templates reference<br/>processed/photo-thumb.webp<br/>processed/photo-medium.webp<br/>processed/photo-large.webp]
+    
+    style A fill:#ffebee
+    style G fill:#e8f5e9
+    style I fill:#f3e5f5
+```
+
+**Why WebP?**
+- Much smaller file sizes than JPG or PNG
+- Faster page loading for visitors
+- Better for accessibility (people on slow connections)
+- More environmentally friendly (less data transfer = less energy)
+
+### The Build Process
+
+When you run the archive, here's what actually happens:
+
+```mermaid
+graph TB
+    START([Run: go run ./cmd/archive]) --> CONFIG[Load configuration<br/>from .env file]
+    CONFIG --> ADAPTER[Initialize NocoDB adapter]
+    ADAPTER --> CACHE[Warm the cache<br/>Fetch all stories once]
+    CACHE --> IMAGES{Skip images?}
+    IMAGES -->|No| PROCESS[Process all images<br/>Resize & convert to WebP]
+    IMAGES -->|Yes -s flag| SKIP[Skip image processing]
+    PROCESS --> PAGES
+    SKIP --> PAGES[Generate all HTML pages]
+    
+    PAGES --> HOME[Homepage]
+    PAGES --> ARCHIVE[Archive page]
+    PAGES --> WANDER[Wander page]
+    PAGES --> STORIES[Individual story pages<br/>One per story]
+    PAGES --> THEMES[Theme index pages]
+    PAGES --> TYPES[Type index pages]
+    PAGES --> WEATHER[Weather index pages]
+    PAGES --> OTHER[Other index pages<br/>Gifted By, Time Period, etc.]
+    
+    HOME --> CSS
+    ARCHIVE --> CSS
+    WANDER --> CSS
+    STORIES --> CSS
+    THEMES --> CSS
+    TYPES --> CSS
+    WEATHER --> CSS
+    OTHER --> CSS
+    
+    CSS[Copy CSS to out/] --> DONE{Development mode?}
+    DONE -->|Yes -d flag| SERVER[Start local server<br/>http://localhost:8080<br/>Watch for template changes]
+    DONE -->|No| FINISH([Done! Website in out/ folder])
+    
+    style START fill:#e8f5e9
+    style PROCESS fill:#fff9c4
+    style PAGES fill:#e1f5ff
+    style SERVER fill:#f3e5f5
+    style FINISH fill:#e8f5e9
+```
+
+### Development Mode vs Production Mode
+
+**Development Mode** (`-d` flag):
+- Builds the website
+- Starts a local web server on http://localhost:8080
+- Watches for template changes
+- Press Enter to regenerate pages
+- Perfect for testing changes quickly
+
+**Production Mode** (no flags):
+- Builds the website
+- Exits when done
+- The GitHub Action uses this mode
+- The generated `out/` folder gets deployed to GitHub Pages
+
+### Key Files and What They Do
+
+If you need to make changes, here's where to look:
+
+| File | What it does |
+|------|-------------|
+| `cmd/archive/main.go` | Entry point - starts everything |
+| `internal/config/config.go` | Loads settings from .env |
+| `internal/store/adapter.go` | Defines the adapter interface |
+| `internal/store/nocodb_adapter.go` | NocoDB implementation |
+| `internal/nocodb/types.go` | Translates NocoDB → Go structs |
+| `data/story.go` | Main Story struct & helpers |
+| `data/tags.go` | Theme, Type, Weather structs |
+| `internal/generate/generate.go` | Creates all HTML pages |
+| `internal/generate/assets.go` | Processes images & copies CSS |
+| `templates/*.html` | HTML templates |
+
+### Adding New Features: Common Tasks
+
+**Want to add a new field to stories?**
+1. Add to `NocoDBStoryDTO` in `internal/nocodb/types.go`
+2. Add to `Story` struct in `data/story.go`
+3. Map in the conversion function in `internal/nocodb/types.go`
+4. Use in template with `{{.Story.NewField}}`
+
+**Want to add a new page type?**
+1. Create a template in `templates/`
+2. Add a generation function in `internal/generate/generate.go`
+3. Call it from `cmd/archive/main.go` in both `generateArchive()` and `hotRegenerate()`
+
+**Want to change how pages look?**
+- Edit `css/styles.css` for styling
+- Edit templates in `templates/` for structure
+- Images in `images/` get processed automatically
+
+### Caching: Keeping Things Fast
+
+The archive caches story data in a JSON file (`debug-cache-nocodb.json`) so it doesn't have to fetch from NocoDB every single time during development. 
+
+If you need fresh data (like after updating stories in NocoDB), just delete the cache file:
+```bash
+rm debug-cache-nocodb.json
+```
+
+The next time you build, it'll fetch everything fresh from NocoDB.
+
+### Troubleshooting Tips
+
+**Images not showing up?**
+- Check `images/` folder has the files
+- Make sure you're not using `-s` flag (which skips image processing)
+- Delete `debug-cache-nocodb.json` and rebuild
+
+**Template changes not appearing?**
+- In development mode, press Enter to regenerate
+- Or restart the archive
+
+**Story data seems stale?**
+- Delete `debug-cache-nocodb.json`
+- Rebuild the archive
+
+**Build failing?**
+- Check your `.env` file has all the NocoDB settings
+- Make sure NocoDB is accessible
+- Check for error messages in the console
+
 ## Deployment
 
 The archive currently deploys to [GitHub Pages](https://pages.github.com/). This is done on every commit to the `main` branch.
