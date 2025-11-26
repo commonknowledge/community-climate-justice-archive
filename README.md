@@ -121,54 +121,27 @@ graph TB
 Here's what happens when you run `go run ./cmd/archive`:
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Main as cmd/archive/main.go
-    participant Store as Store Layer
-    participant NocoDB as NocoDB Adapter
-    participant DB as NocoDB Database
-    participant Gen as Generate Layer
-    participant Templates
-    participant Output as out/ folder
+flowchart TD
+    Start([Run: go run ./cmd/archive]) --> Config[Load settings from .env file]
+    Config --> Fetch[Fetch all stories from NocoDB]
+    Fetch --> Images[Process images<br/>Resize and convert to WebP]
+    Images --> Pages[Generate all HTML pages]
     
-    User->>Main: Run archive
-    Main->>Main: Load config from .env
-    Main->>Store: Initialize adapter
-    Store->>NocoDB: Create NocoDB adapter
+    Pages --> Home[Homepage]
+    Pages --> Stories[Story pages<br/>One for each story]
+    Pages --> Index[Index pages<br/>Themes, types, weather, etc.]
     
-    Main->>Store: Fetch all stories
-    Store->>NocoDB: GetAllStories()
-    NocoDB->>DB: HTTP request to NocoDB API
-    DB-->>NocoDB: JSON response
-    NocoDB->>NocoDB: Parse JSON into Story structs
-    NocoDB-->>Store: List of Story objects
-    Store-->>Main: Stories ready!
+    Home --> CSS[Copy CSS and assets]
+    Stories --> CSS
+    Index --> CSS
     
-    Main->>Gen: Process images
-    Gen->>Gen: Resize & convert to WebP
-    Gen->>Output: Write processed images
+    CSS --> Done([Done! Files in out/ folder])
     
-    Main->>Gen: Generate homepage
-    Gen->>Store: Get themes, types, stories
-    Gen->>Templates: Load homepage.html
-    Gen->>Templates: Fill with data
-    Gen->>Output: Write homepage.html
-    
-    Main->>Gen: Generate story pages
-    loop For each story
-        Gen->>Templates: Load story.html
-        Gen->>Templates: Fill with story data
-        Gen->>Output: Write stories/story-slug.html
-    end
-    
-    Main->>Gen: Generate index pages
-    Gen->>Templates: Load theme-index.html, type-index.html, etc.
-    Gen->>Output: Write all index pages
-    
-    Main->>Gen: Copy CSS
-    Gen->>Output: Copy styles.css
-    
-    Main-->>User: Website built in out/ folder!
+    style Start fill:#e8f5e9
+    style Fetch fill:#e1f5ff
+    style Images fill:#fff9c4
+    style Pages fill:#ffebee
+    style Done fill:#e8f5e9
 ```
 
 ### The Store Layer: The Adapter Pattern
