@@ -75,43 +75,4 @@
         });
     })();
 </script>
-{{end}}
-    window.storyUrls = {{.StoriesJSON}};
-    (function() {
-        const randomLink = document.querySelector('.random-story-link');
-        if (!randomLink) return;
-        
-        function updateRandomLink() {
-            if (window.storyUrls && window.storyUrls.length > 0) {
-                const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
-                const baseUrl = window.location.origin;
-                randomLink.href = baseUrl + '/' + randomUrl;
-            }
-        }
-
-        updateRandomLink();
-        
-        randomLink.addEventListener('click', function(e) {
-            updateRandomLink();
-        });
-    })();
-
-    // Highlight current page navigation button
-    (function() {
-        const navButtons = document.querySelectorAll('.header-nav .dashed-button');
-        const currentPath = window.location.pathname;
-        
-        navButtons.forEach(button => {
-            const href = button.getAttribute('href');
-            
-            // Check if current page matches the button's href
-            if (currentPath === href || 
-                (currentPath === '/' && href === '/') ||
-                (currentPath.includes('archive') && href === '/archive.html') ||
-                (currentPath.includes('wander') && href === '/wander.html')) {
-                button.style.backgroundColor = '#FFFF99';
-            }
-        });
-    })();
-</script>
 {{end}} 
