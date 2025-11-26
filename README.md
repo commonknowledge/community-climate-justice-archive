@@ -28,18 +28,40 @@ Accessing the NocoDB database directly from SQLite clients is possible, so the a
 
 This section explains how the archive takes story data from NocoDB and turns it into a complete static website. If you're new to maintaining the archive, this will help you understand how everything fits together.
 
+### What's a Static Site?
+
+Before we dive in, let's be clear about what "static site" means:
+
+A **static site** is just a folder full of regular HTML files - like the websites from the early days of the internet. When someone visits the archive, their browser just downloads and displays these HTML files directly. There's no database query happening, no server generating pages on-the-fly.
+
+**Think of it like this:**
+- **Dynamic sites** (like Facebook): When you visit, the server runs code, fetches data from a database, builds the page right then, and sends it to you. Different every time!
+- **Static sites** (like this archive): All the pages are already built and sitting in a folder. When you visit, the server just sends you the pre-made HTML file. Simple!
+
+**Why we use a static site:**
+- **Fast**: No waiting for a server to build pages - they're already built
+- **Simple**: Just HTML files, so you can host them almost anywhere
+- **Resilient**: If something goes wrong with the hosting, you still have all your HTML files
+- **Low energy**: Static files use way less server resources than dynamic sites
+- **Future-proof**: In 20 years, HTML files will still work, even if the database software is obsolete
+
+**The "Generator" Part:**
+We don't write all those HTML files by hand! The archive *generates* them automatically from the NocoDB data and templates. You run the build command, it creates all the HTML files, and then those files get uploaded to Render for hosting.
+
+So: **Database + Templates → Build Process → HTML Files → Upload to Render → Live Website!**
+
 ### The Big Picture
 
-The archive is a **static site generator**. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files that can be hosted anywhere. No database or server-side code is needed once the site is built!
+The archive is a **static site generator**. It fetches data from NocoDB, processes images, fills in HTML templates, and creates a complete website of HTML files. The generated site is then deployed to Render for hosting. No database or server-side code is needed once the site is built!
 
 ```mermaid
 graph TB
-    A[NocoDB Database] -->|Fetch stories via API| B[Archive Builder]
+    A[NocoDB Database<br/>Stories live here] -->|Fetch stories via API| B[Archive Builder<br/>Go program]
     B -->|Process & resize| C[Images]
     B -->|Fill with data| D[HTML Templates]
-    C --> E[Generated Website]
+    C --> E[Generated Website<br/>Just HTML files in a folder!]
     D --> E
-    E -->|Deploy| F[GitHub Pages]
+    E -->|Upload| F[Render Static Site<br/>Visitors download these HTML files]
     
     style A fill:#e1f5ff
     style B fill:#fff4e1
@@ -186,10 +208,10 @@ NocoDB sends data in one format, but we need it in another. Here's how a story t
 
 ```mermaid
 graph LR
-    A[NocoDB JSON<br/>Field: 'Image / video / sound'<br/>Field: 'What was/is/if'] 
-    -->|Parse| B[NocoDBStoryDTO<br/>ImageVideoSound interface{}<br/>WhatWasIsIf interface{}]
-    -->|Convert| C[Story Struct<br/>ImageVideoSound string<br/>WhatWasIsIf []WhatWasIsIf]
-    -->|Render| D[HTML Template<br/>{{.Story.ImageVideoSound}}<br/>{{range .Story.WhatWasIsIf}}]
+    A["NocoDB JSON<br/>Field: 'Image / video / sound'<br/>Field: 'What was/is/if'"] 
+    -->|Parse| B["NocoDBStoryDTO<br/>ImageVideoSound interface<br/>WhatWasIsIf interface"]
+    -->|Convert| C["Story Struct<br/>ImageVideoSound string<br/>WhatWasIsIf []WhatWasIsIf"]
+    -->|Render| D["HTML Template<br/>.Story.ImageVideoSound<br/>range .Story.WhatWasIsIf"]
     
     style A fill:#ffebee
     style B fill:#fff9c4
@@ -291,10 +313,10 @@ graph TB
 - Perfect for testing changes quickly
 
 **Production Mode** (no flags):
-- Builds the website
+- Builds the website (generates all the HTML files)
 - Exits when done
-- The GitHub Action uses this mode
-- The generated `out/` folder gets deployed to GitHub Pages
+- Render uses this mode when deploying
+- The generated `out/` folder (full of HTML files) gets served to visitors
 
 ### Key Files and What They Do
 
@@ -364,9 +386,17 @@ The next time you build, it'll fetch everything fresh from NocoDB.
 
 ## Deployment
 
-The archive currently deploys to [GitHub Pages](https://pages.github.com/). This is done on every commit to the `main` branch.
+The archive currently deploys to [Render](https://render.com/) as a static site. Render handles the entire build and deployment process automatically.
 
-The deployment process is encapsulated in a [GitHub Action](https://github.com/features/actions), the process of which is in `.github/workflows/deploy.yml`.
+**How it works:**
+
+When you push commits to the `main` branch, Render automatically:
+1. Detects the change in the repository
+2. Runs the build command: `go run ./cmd/archive` (production mode)
+3. Generates all the HTML files into the `out/` folder
+4. Serves these HTML files to visitors
+
+That's it! Render does all the work - building the site and hosting it. No GitHub Actions or manual deployment needed.
 ## Local Development
 
 ### Working with the archive
