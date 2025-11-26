@@ -168,7 +168,7 @@ sequenceDiagram
     Main->>Gen: Copy CSS
     Gen->>Output: Copy styles.css
     
-    Main-->>User: ✅ Website built in out/ folder!
+    Main-->>User: Website built in out/ folder!
 ```
 
 ### The Store Layer: The Adapter Pattern
