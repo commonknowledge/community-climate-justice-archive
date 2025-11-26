@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"community-climate-justice-archive/data"
-	"community-climate-justice-archive/internal/config"
 )
 
 // DataAdapter defines the interface for data access operations
@@ -65,37 +64,31 @@ type DataAdapter interface {
 	// DropCache clears any cached data to force fresh retrieval
 	DropCache() error
 
-	// ClearDiskCache clears any disk cache files (NocoDB only, no-op for SQLite)
+	// ClearDiskCache clears any disk cache files
 	ClearDiskCache() error
 
-	// SetCacheOnlyMode enables cache-only mode for offline debugging (NocoDB only, no-op for SQLite)
+	// SetCacheOnlyMode enables cache-only mode for offline debugging
 	SetCacheOnlyMode(enabled bool)
 }
 
 // Global adapter instance
 var currentAdapter DataAdapter
 
-// InitializeAdapter sets up the data adapter based on configuration
+// InitializeAdapter sets up the NocoDB data adapter
 func InitializeAdapter() error {
-	if config.AppConfig.UseNocoDB {
-		adapter, err := NewNocoDBAdapter()
-		if err != nil {
-			return fmt.Errorf("failed to initialize NocoDB adapter: %w", err)
-		}
-		currentAdapter = adapter
-		log.Println("Initialized NocoDB adapter")
-	} else {
-		currentAdapter = &SQLiteAdapter{}
-		log.Println("Initialized SQLite adapter")
+	adapter, err := NewNocoDBAdapter()
+	if err != nil {
+		return fmt.Errorf("failed to initialize NocoDB adapter: %w", err)
 	}
+	currentAdapter = adapter
+	log.Println("Initialized NocoDB adapter")
 	return nil
 }
 
 // GetAdapter returns the current data adapter
 func GetAdapter() DataAdapter {
 	if currentAdapter == nil {
-		// Fallback to SQLite if not initialized
-		currentAdapter = &SQLiteAdapter{}
+		log.Fatal("Data adapter not initialized - call InitializeAdapter() first")
 	}
 	return currentAdapter
 }

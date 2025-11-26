@@ -2,9 +2,7 @@
 package data
 
 import (
-	"community-climate-justice-archive/internal/util"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -328,147 +326,6 @@ func (s Story) GetStoryImages() []StoryAttachment {
 	return s.GetStoryAttachments()
 }
 
-// StoryDTO is a data transfer object that handles NULL values from the database.
-type StoryDTO struct {
-	ID                      sql.NullString
-	CreatedTime             sql.NullString
-	Finding                 sql.NullString
-	HighStExperiment        sql.NullString
-	Image                   sql.NullString
-	SourceImage             sql.NullString
-	Location                sql.NullString
-	StartDateTime           sql.NullString
-	EndDateTime             sql.NullString
-	Season                  sql.NullString
-	Weather                 sql.NullString
-	StreetDetectoristClue   sql.NullString
-	Themes                  sql.NullString
-	Experience              sql.NullString
-	TimeSpan                sql.NullString
-	InspiredBy              sql.NullString
-	HasInspired             sql.NullString
-	OtherComments           sql.NullString
-	Type                    sql.NullString
-	PersonFinder            sql.NullString
-	MapCache                sql.NullString
-	MapSize                 sql.NullString
-	Created                 sql.NullString
-	StreetDetectoristMapURL sql.NullString
-	OtherTheme              sql.NullString
-	OtherWeather            sql.NullString
-	ShareStatus             sql.NullString
-	PostDate                sql.NullString
-	TwitterText             sql.NullString
-	CharacterCount          sql.NullString
-	InstaText               sql.NullString
-	InstaCount              sql.NullString
-	InstaImage              sql.NullString
-}
-
-// ToStory converts the DTO to a Story so we can use it in our own code.
-func (dto *StoryDTO) ToStory() Story {
-	// Stories have themes, which are a JSON array of strings in the database, that looks like this:
-	// ["Climate Change", "Extreme Weather", "Social Justice"]
-	// We want to convert this into a slice of Theme structs so we can use it in our templates.
-	var themes []Theme
-
-	if dto.Themes.Valid {
-		var themeStrings []string
-		err := json.Unmarshal([]byte(dto.Themes.String), &themeStrings)
-		if err != nil {
-			log.Fatalf("Failed to unmarshal themes: %v", err)
-		}
-
-		// Convert string array to Theme structs, constructing the URL from the title.
-		for _, themeTitle := range themeStrings {
-			themes = append(themes, Theme{
-				Title:  themeTitle,
-				URL:    "/themes/" + util.Slugify(themeTitle) + ".html",
-				Colour: TitleToHexColor(themeTitle),
-			})
-		}
-	}
-
-	// Stories have types, which are a JSON array of strings in the database, that looks like this:
-	// ["Collage", "Photograph", "Poem", "Text"]
-	// We want to convert this into a slice of Type structs so we can use it in our templates.
-	var types []Type
-
-	if dto.Type.Valid {
-		var typeStrings []string
-		err := json.Unmarshal([]byte(dto.Type.String), &typeStrings)
-		if err != nil {
-			log.Fatalf("Failed to unmarshal types: %v", err)
-		}
-
-		// Convert string array to Type structs, constructing the URL from the title.
-		for _, typeTitle := range typeStrings {
-			types = append(types, Type{
-				Title:  typeTitle,
-				URL:    "/types/" + util.Slugify(typeTitle) + ".html",
-				Colour: TitleToHexColor(typeTitle),
-			})
-		}
-	}
-
-	// Stories have weather, which is a JSON array of strings in the database, that looks like this:
-	// ["Sunny", "Cloudy", "Rainy"]
-	// We want to convert this into a slice of Weather structs so we can use it in our templates.
-	var weather []Weather
-
-	if dto.Weather.Valid {
-		var weatherStrings []string
-		err := json.Unmarshal([]byte(dto.Weather.String), &weatherStrings)
-		if err != nil {
-			log.Fatalf("Failed to unmarshal types: %v", err)
-		}
-
-		// Convert string array to Weather structs, constructing the URL from the title.
-		for _, weatherTitle := range weatherStrings {
-			weather = append(weather, Weather{
-				Title:  weatherTitle,
-				URL:    "/weather/" + util.Slugify(weatherTitle) + ".html",
-				Colour: TitleToHexColor(weatherTitle),
-			})
-		}
-	}
-
-	return Story{
-		ID:                      dto.ID.String,
-		CreatedTime:             dto.CreatedTime.String,
-		Finding:                 dto.Finding.String,
-		HighStExperiment:        dto.HighStExperiment.String,
-		Image:                   dto.Image.String,
-		SourceImage:             dto.SourceImage.String,
-		Location:                dto.Location.String,
-		StartDateTime:           dto.StartDateTime.String,
-		EndDateTime:             dto.EndDateTime.String,
-		Season:                  dto.Season.String,
-		Weather:                 weather,
-		StreetDetectoristClue:   dto.StreetDetectoristClue.String,
-		Themes:                  themes,
-		Experience:              dto.Experience.String,
-		TimeSpan:                dto.TimeSpan.String,
-		InspiredBy:              parseStoryConnectionsFromString(dto.InspiredBy.String),
-		HasInspired:             parseStoryConnectionsFromString(dto.HasInspired.String),
-		OtherComments:           dto.OtherComments.String,
-		Type:                    types,
-		PersonFinder:            dto.PersonFinder.String,
-		MapCache:                dto.MapCache.String,
-		MapSize:                 dto.MapSize.String,
-		Created:                 dto.Created.String,
-		StreetDetectoristMapURL: dto.StreetDetectoristMapURL.String,
-		OtherTheme:              dto.OtherTheme.String,
-		OtherWeather:            dto.OtherWeather.String,
-		ShareStatus:             dto.ShareStatus.String,
-		PostDate:                dto.PostDate.String,
-		TwitterText:             dto.TwitterText.String,
-		CharacterCount:          dto.CharacterCount.String,
-		InstaText:               dto.InstaText.String,
-		InstaCount:              dto.InstaCount.String,
-		InstaImage:              dto.InstaImage.String,
-	}
-}
 
 func TitleToHexColor(title string) string {
 	// Initialize random with title's hash for deterministic output
@@ -521,23 +378,6 @@ func hsbToRGB(hue, saturation, brightness float64) (uint8, uint8, uint8) {
 	return finalRed, finalGreen, finalBlue
 }
 
-// parseStoryConnectionsFromString converts a string to StoryConnection slice
-// This is a fallback for SQLite data that doesn't have proper relationships
-func parseStoryConnectionsFromString(connectionStr string) []StoryConnection {
-	if connectionStr == "" {
-		return []StoryConnection{}
-	}
-
-	// For SQLite, we only have the title/finding as a string
-	// Create a basic connection
-	connection := StoryConnection{
-		Title:   connectionStr,
-		Finding: connectionStr,
-		URL:     "/stories/" + util.Slugify(connectionStr) + ".html",
-	}
-
-	return []StoryConnection{connection}
-}
 
 // GetNocoDBURL returns a direct link to this story in the NocoDB interface for debugging
 func (s Story) GetNocoDBURL() string {

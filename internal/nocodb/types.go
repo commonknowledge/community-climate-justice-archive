@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"community-climate-justice-archive/data"
-	"community-climate-justice-archive/internal/config"
 	"community-climate-justice-archive/internal/util"
 )
 
@@ -605,7 +604,7 @@ func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
 
 	switch v := attachmentField.(type) {
 	case string:
-		// If it's already a JSON string (from SQLite), return as-is
+		// If it's already a JSON string, return as-is
 		if strings.TrimSpace(v) == "" {
 			return "", nil
 		}
@@ -638,7 +637,7 @@ func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
 
 					// Check if we need to download the file
 					localFilePath := filepath.Join("images", filename)
-					if config.AppConfig.UseNocoDB && downloadPath != "" && !fileExists(localFilePath) {
+					if downloadPath != "" && !fileExists(localFilePath) {
 						err := downloadFileFromNocoDB(downloadPath, localFilePath)
 						if err != nil {
 							log.Printf("Warning: failed to download file %s: %v", filename, err)

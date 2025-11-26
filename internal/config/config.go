@@ -15,9 +15,6 @@ type Config struct {
 	NocoDBEndpoint string
 	NocoDBAPIKey   string
 	NocoDBTableID  string
-
-	// Data source selection
-	UseNocoDB bool
 }
 
 // Global configuration instance
@@ -32,24 +29,21 @@ func LoadConfig() {
 		NocoDBEndpoint: getEnvWithDefault("NOCODB_ENDPOINT", ""),
 		NocoDBAPIKey:   getEnvWithDefault("NOCODB_API_KEY", ""),
 		NocoDBTableID:  getEnvWithDefault("NOCODB_TABLE_ID", ""),
-		UseNocoDB:      getEnvBool("USE_NOCODB", false),
 	}
 
-	log.Printf("Configuration loaded - UseNocoDB: %t", AppConfig.UseNocoDB)
+	log.Println("Configuration loaded for NocoDB")
 
-	// Validate NocoDB configuration if enabled
-	if AppConfig.UseNocoDB {
-		if AppConfig.NocoDBEndpoint == "" {
-			log.Fatal("NOCODB_ENDPOINT is required when USE_NOCODB=true")
-		}
-		if AppConfig.NocoDBAPIKey == "" {
-			log.Fatal("NOCODB_API_KEY is required when USE_NOCODB=true")
-		}
-		if AppConfig.NocoDBTableID == "" {
-			log.Fatal("NOCODB_TABLE_ID is required when USE_NOCODB=true")
-		}
-		log.Println("NocoDB configuration validated successfully")
+	// Validate NocoDB configuration
+	if AppConfig.NocoDBEndpoint == "" {
+		log.Fatal("NOCODB_ENDPOINT is required")
 	}
+	if AppConfig.NocoDBAPIKey == "" {
+		log.Fatal("NOCODB_API_KEY is required")
+	}
+	if AppConfig.NocoDBTableID == "" {
+		log.Fatal("NOCODB_TABLE_ID is required")
+	}
+	log.Println("NocoDB configuration validated successfully")
 }
 
 // getEnvWithDefault returns the environment variable value or a default value
