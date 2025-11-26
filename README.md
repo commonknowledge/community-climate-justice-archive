@@ -200,7 +200,7 @@ type SQLiteAdapter struct {
 }
 ```
 
-The rest of the code just uses `GetAdapter()` and doesn't care which adapter it is!
+The rest of the code just uses `GetAdapter()` and doesn't care which adapter it is.
 
 ### How Stories Get Transformed
 
