@@ -41,7 +41,12 @@ import (
 // - Fills in the HTML templates with the actual data
 // - Writes all the HTML files to the out/ folder
 // - Copies over the CSS and images
+//
+// Times the build and displays how long it took at the end.
 func generateArchive(skipImages bool) error {
+	// Record when the build started so we can show how long it took
+	buildStartTime := time.Now()
+	
 	log.Println("Starting build process")
 
 	// Warm the cache to ensure all subsequent operations are fast
@@ -121,12 +126,19 @@ func generateArchive(skipImages bool) error {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
-	log.Println("Build process completed successfully")
+	// Calculate how long the build took
+	buildDuration := time.Since(buildStartTime)
+	
+	// Display completion message with build time
+	log.Printf("Build process completed successfully in %s", formatDuration(buildDuration))
 
 	return nil
 }
 
 func hotRegenerate() error {
+	// Record when the regeneration started so we can show how long it took
+	regenStartTime := time.Now()
+	
 	log.Println("Starting partial build process")
 
 	// Warm the cache to ensure all subsequent operations are fast
@@ -197,7 +209,11 @@ func hotRegenerate() error {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
-	log.Println("Partial build process completed successfully")
+	// Calculate how long the regeneration took
+	regenDuration := time.Since(regenStartTime)
+	
+	// Display completion message with regeneration time
+	log.Printf("Partial build process completed successfully in %s", formatDuration(regenDuration))
 
 	return nil
 }
@@ -269,6 +285,26 @@ func watchCSS() (*fsnotify.Watcher, error) {
 
 	log.Printf("Successfully watching CSS files in %s for changes", cssDir)
 	return watcher, nil
+}
+
+// formatDuration converts a duration into a friendly, human-readable string.
+//
+// Examples:
+//   - 1.234s → "1.2s"
+//   - 45.678s → "45.7s"
+//   - 1m30s → "1m 30s"
+//   - 2m5s → "2m 5s"
+func formatDuration(d time.Duration) string {
+	// For durations under a minute, show seconds with one decimal place
+	if d < time.Minute {
+		seconds := float64(d) / float64(time.Second)
+		return fmt.Sprintf("%.1fs", seconds)
+	}
+	
+	// For longer durations, show minutes and seconds
+	minutes := int(d.Minutes())
+	seconds := int(d.Seconds()) % 60
+	return fmt.Sprintf("%dm %ds", minutes, seconds)
 }
 
 // waitForInput waits for input and then rebuilds the archive when enter is pressed.
@@ -367,6 +403,8 @@ func main() {
 	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
 	skipImages := flag.Bool("skip-images", false, "Skip image processing and generation")
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
+	debugMode := flag.Bool("debug", false, "Enable verbose debug logging")
+	flag.BoolVar(debugMode, "v", false, "Enable verbose debug logging (shorthand)")
 	debugDump := flag.Bool("debug-dump", false, "Dump raw NocoDB data to JSON file for debugging")
 	storyID := flag.String("story-id", "", "Regenerate a specific story by ID (for debugging)")
 	clearCache := flag.Bool("clear-cache", false, "Clear the disk cache and fetch fresh data from NocoDB")
