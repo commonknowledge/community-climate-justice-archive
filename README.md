@@ -41,7 +41,7 @@ A **static site** is just a folder full of regular HTML files - like the website
 **Why we use a static site:**
 - **Fast**: No waiting for a server to build pages - they're already built
 - **Simple**: Just HTML files, so you can host them almost anywhere
-- **Resilient**: If something goes wrong with the hosting, you still have all your HTML files
+- **Resilient**: If something goes wrong with the hosting, you still have all your HTML files. Resilience against all kinds of disaster, especially climate related, is a key goal of this archive
 - **Low energy**: Static files use way less server resources than dynamic sites
 - **Future-proof**: In 20 years, HTML files will still work, even if the database software is obsolete
 
