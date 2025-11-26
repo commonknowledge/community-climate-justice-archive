@@ -28,10 +28,8 @@ go.work.sum
 *.db
 !airtable-export.db
 
-# Debug and cache files - these are auto-generated and may contain sensitive data
-debug-*.json
-*-cache-*.json
-api-field-analysis.json
+# Cache files - auto-generated for performance (safe to delete/regenerate)
+debug-cache-nocodb.json
 
 # For the moment, we aren't commiting our output files
 out/*
