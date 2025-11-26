@@ -316,7 +316,7 @@ graph TB
 - Builds the website (generates all the HTML files)
 - Exits when done
 - Render uses this mode when deploying
-- The generated `out/` folder (full of HTML files) gets served to visitors
+- The generated `out/` folder (full of HTML files) gets served to visitors by Render
 
 ### Key Files and What They Do
 
