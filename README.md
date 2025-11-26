@@ -227,7 +227,7 @@ graph LR
 4. **HTML Template**: The template accesses fields like `{{.Story.Finding}}` to display them
 
 The conversion happens in `internal/nocodb/types.go`. It handles tricky things like:
-- Converting `["Theme A", "Theme B"]` into proper Theme structs with URLs and colours
+- Converting things like `["Theme A", "Theme B"]` into proper Go structs with URLs and colours
 - Parsing attachment JSON into StoryAttachment objects
 - Turning `null` into sensible defaults instead of crashing
 
