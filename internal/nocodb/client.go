@@ -184,6 +184,39 @@ func (c *Client) GetRecordByID(id string) (map[string]interface{}, error) {
 	return nil, fmt.Errorf("record with ID %s not found", id)
 }
 
+// UpdateRecord updates a record by ID in NocoDB with the provided field data
+func (c *Client) UpdateRecord(id string, fieldData map[string]interface{}) error {
+	if c.table == nil {
+		return fmt.Errorf("table not initialized")
+	}
+
+	if c.cacheOnlyMode {
+		return fmt.Errorf("cannot update record in cache-only mode")
+	}
+
+	log.Printf("Updating record %s with fields: %v", id, fieldData)
+
+	// The NocoDB library requires the ID to be included in the data for updates
+	updateData := make(map[string]interface{})
+	for k, v := range fieldData {
+		updateData[k] = v
+	}
+	updateData["Id"] = id
+
+	// Use the NocoDB library to update the record
+	err := c.table.UpdateRecord(updateData).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to update record %s: %w", id, err)
+	}
+
+	log.Printf("Successfully updated record %s", id)
+	
+	// Invalidate cache since we've made changes
+	c.DropCache()
+	
+	return nil
+}
+
 const diskCacheFile = "debug-cache-nocodb.json"
 
 // DiskCacheData represents the structure of the disk cache

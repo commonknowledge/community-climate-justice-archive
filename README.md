@@ -12,11 +12,17 @@ At the time of writing, this contains the first version of the archive. This is 
 
 ### SQLite
 
+The ulimate aim in this project was to use SQLite as the database backend.
+
 [SQLite](https://www.sqlite.org/index.html) was chosen for this project because it is a lightweight, disk-based database. It allows us to keep all of the archive's data in a single file, making it easier to store and transport. 
 
 In the event of a climate collapse, the database will still be readable and usable and can easily be reproduced.
 
 In comparison to a more traditional database like PostgreSQL, SQLite is also more energy efficient.
+
+The eventual ambition is for the project itself to contain its own backend which uses NocoDB. Currently NocoDB is used as an interface for the backend of the archive, which does ultimately write to a SQLite database stored on disk. At some point we will replace calls to the NocoDB API with direct reads of an SQLite database, but it was decided that this was too much complexity for now, as the NocoDB interface provided a lot of power.
+
+Accessing the NocoDB database directly from SQLite clients is possible, so the archive does not ultimate depend on NocoDB. All parts of the archive can therefore be replaced.
 
 ## Deployment
 
@@ -138,11 +144,29 @@ Key template features include:
 
 The archive templates should be straight forward to understand what they do, but to start you off, here is a brief description of each of them.
 
+**Main page templates:**
 - [**homepage.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/homepage.html): The main landing page.
 - [**story.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/story.html): Displays individual stories with their image, details (type, date, location, etc.), and related stories.
+- [**archive.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/archive.html): The main archive page with filtering functionality to browse all stories.
+- [**wander.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/wander.html): A randomized/shuffled view of all stories for serendipitous discovery.
+
+**Pages for different ways to organize stories:**
 - [**theme-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/theme-index.html): Shows all stories related to a specific theme.
 - [**type-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/type-index.html): Shows all stories of a particular type.
-- [**weather-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/weather-index.html): Shows all stories that were creating in a particular weather condition.
+- [**weather-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/weather-index.html): Shows all stories that were created in a particular weather condition.
+- [**giftedby-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/giftedby-index.html): Shows all stories gifted or co-created by a specific person or organization.
+- [**timeperiod-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/timeperiod-index.html): Shows all stories from a specific time period.
+- [**whatwasisif-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/whatwasisif-index.html): Shows all stories categorized by "What Was/Is/If" framework.
+- [**scalepermanence-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/scalepermanence-index.html): Shows all stories with a specific scale of permanence classification.
+
+**Helper templates:**
+- [**nocodb-test.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/nocodb-test.html): A testing page to check if the database connection is working properly.
+
+**Shared pieces (used by other templates):**
+- [**partials/header.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/header.html): The top part of every page with the site title and navigation menu.
+- [**partials/footer.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/footer.html): The bottom part of every page with project information and contact details.
+- [**partials/stories-list.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/stories-list.html): The code that displays stories in a grid - used by many different pages.
+- [**partials/grid-code.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/grid-code.html): The code that makes story previews pop up when you hover over them.
 
 ### Adding New Fields to Story Templates
 
@@ -232,7 +256,7 @@ The following field types require **specialized handling** and are **not covered
 For these complex types, refer to existing examples in the codebase:
 - MultiSelect: See `ParseThemesFromNocoDB()`, `ParseTypesFromNocoDB()`, `ParseWeatherFromNocoDB()`
 - Links/LinkToAnotherRecord: See `fetchStoryConnectionsDirect()` 
-- Attachment: See `ParseAttachmentsFromNocoDB()`
+- Attachment: Raw JSON marshalling is used (see `ImageVideoSound` field mapping in `NocoDBRecordToStoryWithClient`)
 
 #### 6. Update Filtering Data (optional)
 **File**: `internal/generate/generate.go`
@@ -505,8 +529,22 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
 
+## Deprecated Tools
 
+### Image Field Consolidation Tool
 
+**Status: DEPRECATED - No longer needed**
 
+The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
 
+**Important Notes:**
+- The tool is **idempotent** and safe to run multiple times
+- Running it now will not cause any issues as it will detect no changes are needed
+- The tool is kept for historical reference and potential future migrations
+- All stories now use only the `ImageVideoSound` field for attachments
 
+**Usage (if needed):**
+```bash
+go build -o consolidate-image-fields ./cmd/consolidate-image-fields
+./consolidate-image-fields --checksum  # Verify consolidation is complete
+```
