@@ -1,4 +1,19 @@
-// Package store provides data access abstractions
+// Package store is how the rest of the code talks to the database.
+//
+// This file defines the DataAdapter - think of it as a translator between the
+// application and wherever the data is stored.
+//
+// Why we have this:
+// We want to be able to swap between different databases (NocoDB now, maybe SQLite
+// later) without having to rewrite everything. So instead of the whole application
+// being full of "get from NocoDB" code, everything just says "get from the adapter"
+// and the adapter worries about where it actually is.
+//
+// At the moment we're using NocoDB, but the adapter pattern means we could switch
+// to reading from SQLite files directly without changing the rest of the code.
+//
+// When the application starts up, it creates the adapter (currently NocoDBAdapter),
+// and then everywhere just calls GetAdapter() to use it.
 package store
 
 import (

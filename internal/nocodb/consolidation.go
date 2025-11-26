@@ -1,4 +1,22 @@
-// Package nocodb provides image field consolidation functionality
+// Package nocodb provides consolidation functionality for merging image fields in NocoDB.
+//
+// This file contains the logic for the one-time migration that consolidated the
+// separate "Image" and "SourceImage" fields into a single "ImageVideoSound" field
+// in the NocoDB database.
+//
+// Historical Context:
+// The archive originally stored images in two separate fields, which created
+// complexity and confusion. This consolidation tool was created to merge those
+// fields into one unified attachment field.
+//
+// Status: This code is now primarily for reference. The migration has been completed,
+// though the tool remains idempotent and can be run safely if needed.
+//
+// How It Works:
+// The consolidation process reads both source fields and the target field,
+// intelligently merges their attachments (avoiding duplicates based on filename),
+// and writes the combined result back to the ImageVideoSound field. It preserves
+// all NocoDB metadata like file paths, dimensions, and MIME types.
 package nocodb
 
 import (

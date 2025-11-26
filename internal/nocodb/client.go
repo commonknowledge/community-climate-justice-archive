@@ -1,4 +1,25 @@
-// Package nocodb provides NocoDB API client functionality
+// Package nocodb provides the NocoDB API client for accessing the archive database.
+//
+// This file implements the Client struct, which wraps the NocoDB REST API and
+// provides methods for reading (and occasionally writing) story data.
+//
+// The Client handles:
+// - Connecting to NocoDB with authentication
+// - Fetching all records with pagination
+// - Retrieving individual records by ID
+// - Filtering records by field values
+// - Caching responses for performance
+// - Downloading attachment files
+//
+// Caching Strategy:
+// To minimize API calls and improve performance, the client implements two levels
+// of caching:
+// 1. In-memory cache: Stores fetched records for the duration of the program
+// 2. Disk cache: Saves records to a JSON file for faster startup on subsequent runs
+//
+// The cache includes not just the basic record data, but also relationship
+// information (like "inspired by" connections between stories), making the
+// application fast even with hundreds of stories.
 package nocodb
 
 import (

@@ -1,4 +1,22 @@
-// Package nocodb provides types for handling NocoDB API responses
+// Package nocodb translates between NocoDB's format and our Go structs.
+//
+// NocoDB sends data back to us in JSON, but that JSON doesn't quite match the
+// Story struct we use everywhere else. This file does the translation.
+//
+// The tricky bits:
+// - NocoDB field names have spaces in them (like "Image / video / sound")
+// - Tags come as arrays of strings (like ["Climate Change", "Community"])
+// - Attachments have lots of metadata about file sizes, dimensions, etc.
+// - Related stories need to be fetched separately
+//
+// What this file does:
+// - NocoDBStoryDTO: A struct that matches NocoDB's field names exactly
+// - Parse functions: Convert NocoDB's arrays into proper Theme, Type, Weather structs
+// - Conversion logic: Turn NocoDBStoryDTO into the Story struct everyone else uses
+//
+// So when NocoDB sends ["Climate Change", "Community"], we turn that into a
+// proper []Theme list with URLs and colours. When it sends attachment JSON, we
+// parse that into StoryAttachment structs. And so on!
 package nocodb
 
 import (
@@ -13,7 +31,14 @@ import (
 	"community-climate-justice-archive/internal/util"
 )
 
-// NocoDBStoryDTO represents a story record from NocoDB API
+// NocoDBStoryDTO is what NocoDB sends us when we ask for a story.
+//
+// The field names match NocoDB's JSON exactly (notice they have spaces and slashes).
+// The json:"..." tags tell Go which JSON field maps to which struct field.
+//
+// We use interface{} for most fields because NocoDB might send null, a string,
+// a number, or even an array depending on the field. We handle that uncertainty
+// in the conversion functions.
 type NocoDBStoryDTO struct {
 	ID                      interface{} `json:"Id"`
 	CreatedTime             interface{} `json:"CreatedAt"`

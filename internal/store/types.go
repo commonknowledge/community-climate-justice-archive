@@ -1,4 +1,20 @@
-// Retrieves and processes types from the database as required.
+// Package store provides functions for retrieving story type and categorisation data.
+//
+// This file contains functions for working with story types and other categorisation
+// systems in the archive. Story types classify the format or medium of a story,
+// such as "Photo", "Poem", "Video", "Drawing", "Text", etc.
+//
+// Story types help visitors understand what kind of content they're about to view
+// and enable filtering by preferred formats. Each story can have multiple types
+// (for example, a story might be both a "Photo" and a "Poem").
+//
+// Additionally, this file manages other filtering categories:
+// - Gifted By: Who contributed or co-created the story
+// - Scale of Permanence: How long-lasting the subject matter is
+// - What Was/Is/If: Temporal perspective (past, present, future)
+// - Time Period: Historical era or timeframe
+//
+// All these categorisation systems help organise and browse the archive's stories.
 package store
 
 import (

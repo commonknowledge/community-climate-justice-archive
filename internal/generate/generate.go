@@ -1,5 +1,26 @@
-// Package generate provides functionality for generating static HTML pages
-// from templates and data for the Dudley People's School for Climate Justice website.
+// Package generate builds all the HTML pages for the archive.
+//
+// This is where the website actually gets made! It takes story data from the database,
+// runs it through HTML templates, and creates a complete static website in the out/
+// folder.
+//
+// What gets built:
+// - The homepage
+// - The archive page (where you can filter and browse everything)
+// - The "wander" page (for exploring stories randomly)
+// - One page for each story
+// - Pages for each theme, type, weather condition, contributor, time period, etc.
+//
+// How it works:
+// 1. Fetch all the story data from the database
+// 2. For each type of page, load the right HTML template
+// 3. Fill in the template with the actual data (stories, tags, etc.)
+// 4. Turn that into HTML
+// 5. Save it as a file in the out/ folder
+//
+// Everything is static HTML - once it's built, you just need a simple web server
+// to show it. No database or fancy server required. This makes the archive fast
+// and easy to host anywhere!
 package generate
 
 import (

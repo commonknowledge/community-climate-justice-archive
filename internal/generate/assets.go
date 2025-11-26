@@ -1,4 +1,24 @@
-// assets.go contains functions for copying CSS and image files to the output directory at out/.
+// Package generate handles processing and copying images, CSS, and other files.
+//
+// When building the website, we need to prepare all the assets - images, stylesheets,
+// audio files, documents - and copy them to the output folder.
+//
+// What gets handled:
+// - Images: Resized into different sizes and converted to WebP (loads faster)
+// - CSS: Just copied over
+// - JavaScript: Just copied over
+// - Audio files: Just copied over
+// - Documents (PDFs, Word files): Just copied over
+//
+// The image processing is the most involved:
+// 1. Read the original image from the images/ folder
+// 2. Create three versions: thumbnail, medium, and large
+// 3. Convert all of them to WebP format (it compresses better than JPG or PNG)
+// 4. Save them in out/images/processed/
+//
+// Why WebP? It makes images much smaller without losing quality, so pages load
+// faster for visitors. Good for accessibility and better for the environment too
+// (less data transfer = less energy used).
 package generate
 
 import (

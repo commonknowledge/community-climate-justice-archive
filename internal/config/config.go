@@ -1,4 +1,10 @@
-// Package config provides configuration management for the application
+// Package config handles loading settings for the application.
+//
+// The application needs to know things like "where is NocoDB?" and "what's the
+// API key?" - those settings live in environment variables or a .env file.
+//
+// This package loads those settings when the application starts and makes them
+// available to the rest of the code through AppConfig.
 package config
 
 import (
@@ -9,18 +15,28 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config holds all configuration values for the application
+// Config holds all the settings the application needs.
+//
+// At the moment it's just NocoDB settings, but if we needed other configuration
+// in the future, it would go here too.
 type Config struct {
-	// NocoDB configuration
-	NocoDBEndpoint string
-	NocoDBAPIKey   string
-	NocoDBTableID  string
+	// Where NocoDB is and how to talk to it
+	NocoDBEndpoint string // The NocoDB server URL
+	NocoDBAPIKey   string // The API key for authentication
+	NocoDBTableID  string // Which table to read stories from
 }
 
-// Global configuration instance
+// AppConfig is the global config that everyone uses.
+//
+// It gets set when LoadConfig() runs at startup, and then the rest of the
+// application just reads from AppConfig.NocoDBEndpoint, AppConfig.NocoDBAPIKey, etc.
 var AppConfig *Config
 
-// LoadConfig loads configuration from environment variables and .env file
+// LoadConfig reads settings from environment variables and the .env file.
+//
+// It looks for a .env file first (for local development), then checks environment
+// variables. If any required settings are missing, it stops the application -
+// better to fail early than to run with wrong settings!
 func LoadConfig() {
 	// Try to load .env file (ignore error if file doesn't exist)
 	_ = godotenv.Load()
