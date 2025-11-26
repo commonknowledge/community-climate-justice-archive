@@ -372,11 +372,35 @@ When you push commits to the `main` branch, Render automatically:
 That's it! Render does all the work - building the site and hosting it. No GitHub Actions or manual deployment needed.
 ## Local Development
 
-### Working with the archive
+### Quick Start (macOS)
 
-#### Compiling the archive
+We've created an automated setup script that handles everything for you.
 
-##### macOS
+1. Download the repository[^repository].
+
+```bash
+git clone https://github.com/commonknowledge/community-climate-justice-archive.git
+cd community-climate-justice-archive
+```
+
+2. Run the setup script.
+
+```bash
+bash setup.sh
+```
+
+The script will:
+- Check for Homebrew[^homebrew] and install it if needed
+- Check for Go and prompt you to install it if needed
+- Ask you for your NocoDB configuration (endpoint, API key, table ID)
+- Build the archive
+- Optionally launch it in development mode
+
+That's it! The archive will be running at [http://localhost:8080](http://localhost:8080).
+
+### Manual Setup (macOS)
+
+If you prefer to set things up manually:
 
 1. Install Go.
 
@@ -394,7 +418,16 @@ Its a bit repository, so be patient while it downloads.
 git clone https://github.com/commonknowledge/community-climate-justice-archive.git
 ```
 
-3. Run the archive in development mode.
+3. Create your `.env` file.
+
+Copy `env.example` to `.env` and add your NocoDB credentials:
+
+```bash
+cp env.example .env
+# Then edit .env with your text editor
+```
+
+4. Run the archive in development mode.
 
 Enter the repository directory in a terminal[^terminal]. 
 
@@ -872,3 +905,5 @@ go build -o consolidate-image-fields ./cmd/consolidate-image-fields
 [^terminal]: **Terminal**: A program that provides the command line interface. On macOS, it's called "Terminal"; on Windows, "Command Prompt" or "PowerShell". [Learn more](https://www.codecademy.com/article/command-line-commands)
 
 [^envvar]: **Environment variables**: Configuration settings stored outside your code, often in a `.env` file. They keep sensitive information like passwords separate from the code. [Learn more](https://www.twilio.com/en-us/blog/environment-variables-python)
+
+[^homebrew]: **Homebrew**: A package manager for macOS that makes installing and managing software much easier. Think of it as an app store for developer tools. [Learn more](https://brew.sh/)
