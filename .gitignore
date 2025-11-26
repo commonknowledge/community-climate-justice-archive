@@ -28,6 +28,11 @@ go.work.sum
 *.db
 !airtable-export.db
 
+# Debug and cache files - these are auto-generated and may contain sensitive data
+debug-*.json
+*-cache-*.json
+api-field-analysis.json
+
 # For the moment, we aren't commiting our output files
 out/*
 !out/.gitkeep
