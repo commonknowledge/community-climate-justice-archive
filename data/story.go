@@ -198,22 +198,6 @@ func processAttachmentSlice(attachments []StoryAttachment) []StoryAttachment {
 func (s Story) GetStoryAttachments() []StoryAttachment {
 	var allAttachments []StoryAttachment
 
-	// Debug logging for specific stories
-	if s.ID == "1" || s.ID == "12" {
-		log.Printf("DEBUG: Story %s attachment processing:", s.ID)
-		log.Printf("DEBUG: Image field length: %d", len(s.Image))
-		log.Printf("DEBUG: ImageVideoSound field length: %d", len(s.ImageVideoSound))
-		log.Printf("DEBUG: SourceImage field length: %d", len(s.SourceImage))
-		if s.Image != "" {
-			log.Printf("DEBUG: Image field content: %s", s.Image)
-		}
-		if s.ImageVideoSound != "" {
-			log.Printf("DEBUG: ImageVideoSound field content: %s", s.ImageVideoSound)
-		}
-		if s.SourceImage != "" {
-			log.Printf("DEBUG: SourceImage field content: %s", s.SourceImage)
-		}
-	}
 
 	// Process Image field
 	if s.Image != "" {
@@ -232,11 +216,6 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 
 	// Process ImageVideoSound field (NocoDB format)
 	if s.ImageVideoSound != "" {
-		if s.ID == "1" || s.ID == "12" {
-			log.Printf("DEBUG: Processing ImageVideoSound field with NocoDB format")
-		}
-
-		// Parse NocoDB attachment format
 		var nocoAttachments []map[string]interface{}
 		if err := json.Unmarshal([]byte(s.ImageVideoSound), &nocoAttachments); err != nil {
 			log.Printf("Warning: Failed to unmarshal ImageVideoSound field for story %s: %v", s.ID, err)
@@ -248,10 +227,6 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 				if attachment.Filename != "" {
 					allAttachments = append(allAttachments, attachment)
 				}
-			}
-
-			if s.ID == "1" || s.ID == "12" {
-				log.Printf("DEBUG: Successfully parsed %d ImageVideoSound attachments", len(nocoAttachments))
 			}
 		}
 	}
