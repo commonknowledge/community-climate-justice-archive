@@ -12,8 +12,6 @@ import (
 
 // GetImages retrieves all images from the images directory and returns them as a slice of StoryAttachment.
 // Intended for passing to HTML templates.
-// For the moment this reads the images from the images/ directory.
-// We will use SQLite here in the future.
 func GetImages() []data.StoryAttachment {
 	log.Println("Getting images")
 

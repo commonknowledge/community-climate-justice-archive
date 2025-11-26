@@ -2,14 +2,10 @@
 package store
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
 	"math/rand"
-
-	"fmt"
 	"path/filepath"
-
-	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/util"
@@ -29,14 +25,6 @@ func CreateStoryURLFromFindingWithID(finding, id string) string {
 	return filepath.Join("/stories", fileName)
 }
 
-func connectToDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", "airtable-export.db")
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
-	}
-
-	return db
-}
 
 // GetMoreTaggedStories gets the first 3 more tagged stories for a story.
 func GetMoreTaggedStories(story data.Story, tag interface{}, count int) []data.Story {

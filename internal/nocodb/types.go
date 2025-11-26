@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"community-climate-justice-archive/data"
@@ -19,7 +20,9 @@ type NocoDBStoryDTO struct {
 	Finding                 interface{} `json:"Title"`
 	HighStExperiment        interface{} `json:"Project / Event"`
 	WhatWasIsIf             interface{} `json:"What was/is/if"`
+	Image                   interface{} `json:"Image"`
 	ImageVideoSound         interface{} `json:"Image / video / sound"`
+	SourceImage             interface{} `json:"Source image"`
 	Location                interface{} `json:"Location"`
 	StartDateTime           interface{} `json:"Dated created / experienced"`
 	EndDateTime             interface{} `json:"Date added to the archive"`
@@ -121,6 +124,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		CreatedTime:      toString(dto.CreatedTime),
 		Finding:          toString(dto.Finding),
 		HighStExperiment: toString(dto.HighStExperiment),
+		Image:            func() string { img, _ := ParseAttachmentsFromNocoDB(dto.Image); return img }(),
 		ImageVideoSound: func() string {
 			// Keep original NocoDB structure for rich metadata (mimetype, size, dimensions)
 			if dto.ImageVideoSound != nil {
@@ -130,6 +134,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 			}
 			return ""
 		}(),
+		SourceImage:             func() string { img, _ := ParseAttachmentsFromNocoDB(dto.SourceImage); return img }(),
 		Location:                toString(dto.Location),
 		StartDateTime:           toString(dto.StartDateTime),
 		EndDateTime:             toString(dto.EndDateTime),
@@ -590,7 +595,127 @@ func ParseTimePeriodFromNocoDB(timePeriodField interface{}) ([]data.TimePeriod, 
 	return timePeriod, nil
 }
 
+// ParseAttachmentsFromNocoDB parses attachments from NocoDB field and converts to expected JSON format
+// Downloads missing files from NocoDB if they don't exist locally
+func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
+	if attachmentField == nil {
+		return "", nil
+	}
 
+	switch v := attachmentField.(type) {
+	case string:
+		// If it's already a JSON string, return as-is
+		if strings.TrimSpace(v) == "" {
+			return "", nil
+		}
+		if strings.HasPrefix(strings.TrimSpace(v), "[") {
+			return v, nil
+		}
+		// Single filename string - convert to expected JSON format
+		return convertSingleFilenameToJSON(v), nil
+	case []interface{}:
+		// NocoDB returns attachments as array of objects with metadata
+		// Convert to the JSON format expected by GetStoryAttachments()
+		var storyAttachments []map[string]interface{}
+
+		for _, item := range v {
+			if attachmentObj, ok := item.(map[string]interface{}); ok {
+				// Extract filename and download path from NocoDB object
+				var filename string
+				var downloadPath string
+
+				if title, exists := attachmentObj["title"]; exists {
+					filename = toString(title)
+				}
+				if path, exists := attachmentObj["path"]; exists {
+					downloadPath = toString(path)
+				}
+
+				if filename != "" {
+					// Use original filename since we're downloading files now
+					// No need to clean NocoDB suffixes anymore
+
+					// Check if we need to download the file
+					localFilePath := filepath.Join("images", filename)
+					if downloadPath != "" && !fileExists(localFilePath) {
+						err := downloadFileFromNocoDB(downloadPath, localFilePath)
+						if err != nil {
+							log.Printf("Warning: failed to download file %s: %v", filename, err)
+							// Continue anyway, file might be available elsewhere
+						}
+					}
+
+					// Create StoryAttachment-compatible object
+					storyAttachment := map[string]interface{}{
+						"filename": filename,
+						"url":      "",                         // Will be set by GetStoryAttachments()
+						"type":     "application/octet-stream", // Default, will be corrected later
+						"size":     0,
+						"width":    0,
+						"height":   0,
+					}
+					storyAttachments = append(storyAttachments, storyAttachment)
+				}
+			}
+		}
+
+		if len(storyAttachments) > 0 {
+			jsonBytes, err := json.Marshal(storyAttachments)
+			if err != nil {
+				return "", err
+			}
+			return string(jsonBytes), nil
+		}
+		return "", nil
+	default:
+		// Try to convert to string and handle
+		str := toString(v)
+		if str == "" {
+			return "", nil
+		}
+		return convertSingleFilenameToJSON(str), nil
+	}
+}
+
+// Helper function to convert a single filename to the expected JSON format
+func convertSingleFilenameToJSON(filename string) string {
+	if filename == "" {
+		return ""
+	}
+
+	// Use original filename since we're downloading images now
+	// No need to clean NocoDB suffixes anymore
+
+	storyImage := map[string]interface{}{
+		"filename": filename,
+		"url":      "",           // Will be set by GetStoryAttachments()
+		"type":     "image/jpeg", // Default, will be corrected later
+		"size":     0,
+		"width":    0,
+		"height":   0,
+	}
+
+	jsonBytes, _ := json.Marshal([]map[string]interface{}{storyImage})
+	return string(jsonBytes)
+}
+
+// Helper function to extract filename from a file path
+func extractFilenameFromPath(path string) string {
+	if path == "" {
+		return ""
+	}
+
+	// Extract filename from path like "download/2025/06/02/abc123/filename.jpg"
+	parts := strings.Split(path, "/")
+	filename := path
+	if len(parts) > 0 {
+		filename = parts[len(parts)-1]
+	}
+
+	// Return original filename since we're downloading images now
+	// No need to clean NocoDB suffixes anymore
+	return filename
+}
 
 // createStoryURLFromFinding creates a URL from the story finding (same logic as store package)
 func createStoryURLFromFinding(finding string) string {

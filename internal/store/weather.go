@@ -2,11 +2,7 @@
 package store
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
-
-	_ "github.com/mattn/go-sqlite3"
 
 	"community-climate-justice-archive/data"
 )
@@ -21,83 +17,6 @@ func GetStoriesForWeather(weatherTitle string) []data.Story {
 	return stories
 }
 
-// Legacy function content moved to adapter
-func GetStoriesForWeatherLegacy(weatherTitle string) []data.Story {
-	log.Println("Getting stories for weather", weatherTitle)
-
-	dbPath := "airtable-export.db"
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
-	}
-	defer db.Close()
-
-	// Weather is stored as JSON array in the database like this:
-	// ["Sunny", "Cloudy", "Rainy"]
-	// We use LIKE to query it, as it works okay for now and we control the data, which is static.
-	likePattern := fmt.Sprintf("%%%q%%", weatherTitle)
-
-	query := `
-		SELECT *
-		FROM Stories
-		WHERE "Weather" LIKE ?;
-	`
-
-	rows, err := db.Query(query, likePattern)
-
-	if err != nil {
-		log.Fatalf("Failed to query stories: %v", err)
-	}
-	defer rows.Close()
-
-	stories := []data.Story{}
-	for rows.Next() {
-		var dto data.StoryDTO
-		err := rows.Scan(
-			&dto.ID,
-			&dto.CreatedTime,
-		&dto.Finding,
-		&dto.HighStExperiment,
-		&dto.Location,
-			&dto.StartDateTime,
-			&dto.EndDateTime,
-			&dto.Season,
-			&dto.Weather,
-			&dto.StreetDetectoristClue,
-			&dto.Themes,
-			&dto.Experience,
-			&dto.TimeSpan,
-			&dto.OtherComments,
-			&dto.Type,
-			&dto.PersonFinder,
-			&dto.MapCache,
-			&dto.MapSize,
-			&dto.Created,
-			&dto.StreetDetectoristMapURL,
-			&dto.OtherTheme,
-			&dto.OtherWeather,
-			&dto.ShareStatus,
-			&dto.PostDate,
-			&dto.TwitterText,
-			&dto.CharacterCount,
-			&dto.InstaText,
-			&dto.InstaCount,
-			&dto.InstaImage,
-		)
-
-		if err != nil {
-			log.Fatalf("Failed to scan story: %v", err)
-		}
-
-		story := dto.ToStory()
-		story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
-
-		stories = append(stories, story)
-	}
-
-	return stories
-}
 
 // GetWeather retrieves all weather from the database and returns them as a slice of Weather.
 // Intended for passing to HTML templates.

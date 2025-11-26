@@ -91,9 +91,7 @@ func main() {
 	// Load configuration
 	config.LoadConfig()
 
-	if !config.AppConfig.UseNocoDB {
-		log.Fatal("This utility requires NocoDB to be enabled. Set USE_NOCODB=true in your environment.")
-	}
+	log.Println("Analyzing NocoDB API fields...")
 
 	// Create analyzer
 	analyzer, err := NewAPIFieldAnalyzer()

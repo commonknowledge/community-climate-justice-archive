@@ -24,9 +24,12 @@ go.work.sum
 # env file
 .env
 
-# For the moment, we aren't commiting our SQLite database file, as we can't verify it has no user data in it
+# Configuration files that may contain sensitive data
 *.db
-!airtable-export.db
+.env
+
+# Cache files - auto-generated for performance (safe to delete/regenerate)
+debug-cache-nocodb.json
 
 # For the moment, we aren't commiting our output files
 out/*

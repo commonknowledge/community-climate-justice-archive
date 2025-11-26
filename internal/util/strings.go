@@ -21,7 +21,7 @@ func FormatDate(dateString string) string {
 		return ""
 	}
 
-	// Try parsing with RFC3339 format first (SQLite format)
+	// Try parsing with RFC3339 format first
 	parsedTime, err := time.Parse(time.RFC3339, dateString)
 
 	if err != nil {

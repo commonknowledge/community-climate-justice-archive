@@ -30,9 +30,6 @@ type Client struct {
 
 // NewClient creates a new NocoDB client with configuration from environment variables
 func NewClient() (*Client, error) {
-	if !config.AppConfig.UseNocoDB {
-		return nil, fmt.Errorf("NocoDB is not enabled in configuration")
-	}
 
 	// Create NocoDB client
 	client, err := nocodbgo.NewClient().
