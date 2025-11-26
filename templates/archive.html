@@ -1,3 +1,21 @@
+{{/*
+    Archive Template
+    
+    This is the main browsing page where you can filter and explore all stories
+    in the archive. It's the most interactive page, with dropdown filters and
+    client-side filtering.
+    
+    Key features:
+    - Three filter dropdowns: Themes, Types, and Weather
+    - Active filter display showing what's currently selected
+    - Live count showing "X of Y stories"
+    - Client-side filtering (instant, no page reloads)
+    - URL updates so you can bookmark or share filtered views
+    - Lazy loading of stories as you scroll (performance optimization)
+    
+    The filtering is handled by archive-filters.js, which loads story data from
+    filter-data.json and filters it in the browser.
+*/}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +27,9 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    {{/* The JavaScript that makes filtering work */}}
     <script src="/js/archive-filters.js"></script>
+    {{/* The JavaScript that makes story popups work */}}
     {{template "grid-code" .}}
 </head>
 
@@ -17,7 +37,7 @@
     {{template "header" .}}
 
     <main class="main-content archive">
-        <!-- Archive Header with Count -->
+        {{/* Top section with total count and clear filters button */}}
         <div class="archive-header">
             <h2 id="explore-archive" class="archive-header-title">All items from the archive (<span id="total-count">0</span>)</h2>
             <button type="button" id="clear-filters" class="clear-filters-button-top">

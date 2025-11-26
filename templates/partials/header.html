@@ -1,16 +1,81 @@
+{{/*
+    Header Partial Template
+    
+    This is the top part of every page in the archive - the site title and navigation buttons.
+    It's a "partial" because it gets included in all the other templates, so we don't have to
+    copy the same HTML everywhere.
+    
+    What it includes:
+    - The site title "Dudley Time Portal" that links back home
+    - Navigation buttons: Wander, Archive, Random, and Add
+    - JavaScript for making the Random button pick different stories
+    - JavaScript for highlighting which page you're currently on
+    
+    The {{.RandomStoryURL}} and {{.StoriesJSON}} bits are filled in by the Go program when
+    it generates each page.
+*/}}
 {{define "header"}}
 <header>
     <div class="main-header">
         <h1><a href="/">Dudley Time Portal</a></h1>
         <nav class="header-nav">
+            <!-- Navigation buttons -->
             <a class="dashed-button" href="/">Wander</a>
             <a class="dashed-button" href="/archive.html">Archive</a>
             <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
+            <!-- Link to NocoDB form where people can add new stories -->
             <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
         </nav>
     </div>
 </header>
 <script>
+    // Make the Random button work properly
+    // The Go program gives us a list of all story URLs, and we pick one at random
+    
+    window.storyUrls = {{.StoriesJSON}};  // List of all story URLs from the Go program
+    (function() {
+        const randomLink = document.querySelector('.random-story-link');
+        if (!randomLink) return;  // Safety check - make sure the button exists
+        
+        // This function picks a random story from the list and updates the button's link
+        function updateRandomLink() {
+            if (window.storyUrls && window.storyUrls.length > 0) {
+                // Pick a random story URL from the list
+                const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
+                const baseUrl = window.location.origin;  // Like "https://archive.example.com"
+                randomLink.href = baseUrl + '/' + randomUrl;  // Update the button's destination
+            }
+        }
+
+        // Pick a random story when the page first loads
+        updateRandomLink();
+        
+        // Pick a new random story each time someone clicks the button
+        randomLink.addEventListener('click', function(e) {
+            updateRandomLink();
+        });
+    })();
+
+    // Highlight the current page's button
+    // So if you're on the Archive page, the Archive button gets a yellow background
+    (function() {
+        const navButtons = document.querySelectorAll('.header-nav .dashed-button');
+        const currentPath = window.location.pathname;  // Like "/archive.html"
+        
+        navButtons.forEach(button => {
+            const href = button.getAttribute('href');
+            
+            // Check if this button's link matches the current page
+            if (currentPath === href || 
+                (currentPath === '/' && href === '/') ||
+                (currentPath.includes('archive') && href === '/archive.html') ||
+                (currentPath.includes('wander') && href === '/wander.html')) {
+                button.style.backgroundColor = '#FFFF99';  // Yellow highlight
+            }
+        });
+    })();
+</script>
+{{end}}
     window.storyUrls = {{.StoriesJSON}};
     (function() {
         const randomLink = document.querySelector('.random-story-link');

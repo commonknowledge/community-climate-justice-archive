@@ -1,49 +1,72 @@
-/* 
-CSS for Dudley Community Climate Justice Archive
-
-The design system uses rem units for consistent scaling (1rem = 18px) and maintains
-a consistent spacing system based on multiples of 1.11111rem.
-
-For questions about specific CSS properties, visit:
-https://developer.mozilla.org/en-US/docs/Web/CSS
+/* ============================================================================
+   CSS for Dudley Community Climate Justice Archive
+   ============================================================================
+   
+   This stylesheet contains all the styles for the archive website.
+   
+   STRUCTURE:
+   1. Global Reset & Variables
+   2. Typography & Links
+   3. Layout (Header, Footer, Main Content)
+   4. Story Grid & Popups
+   5. Filter System
+   6. Responsive Design (Mobile/Tablet/Desktop)
+   
+   For learning about CSS properties, visit:
+   https://developer.mozilla.org/en-US/docs/Web/CSS
+   
+   For learning about responsive design:
+   https://web.dev/responsive-web-design-basics/
 */
 
-/* Global Reset
-
-Ensures consistent box model behavior across all elements by including padding and border
-in width/height calculations. This makes element sizing more predictable.
+/* ============================================================================
+   GLOBAL RESET
+   ============================================================================
+   
+   Sets box-sizing to border-box for all elements. This means padding and
+   border are included in width/height calculations instead of being added.
 */
 * {
     box-sizing: border-box;
 }
 
 html {
-    /* Base size - 1rem equals 18px */
+    /* 
+       Base font size - all rem units calculate from this
+       1rem = 18px
+    */
     font-size: 18px;
 }
 
-/* CSS Variables */
+/* ============================================================================
+   CSS VARIABLES (Custom Properties)
+   ============================================================================
+   
+   These variables store reusable values. Reference them throughout the
+   stylesheet with var(--variable-name). Change the value here to update
+   it everywhere it's used.
+*/
 :root {
-    /* Background Colors */
-    --background: #FFFAF3;
+    /* Background Colours */
+    --background: #FFFAF3;          /* Cream background */
     --white: #ffffff;
-    --highlight-yellow: #FFFF99;
+    --highlight-yellow: #FFFF99;    /* Used for hovers */
     --light-gray: var(--light-gray);
     --light-blue: var(--light-blue);
     --border-gray: var(--border-gray);
     
-    /* Text Colors */
+    /* Text Colours */
     --black: #000;
     --white-text: #FFF;
     --gray-text: #666;
     --black-alt: #000000;
     
-    /* Shadow Colors */
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.15);
-    --shadow-dark: rgba(0, 0, 0, 0.2);
-    --shadow-darker: rgba(0, 0, 0, 0.25);
-    --shadow-darkest: rgba(0, 0, 0, 0.3);
+    /* Shadow Colours - RGBA values for transparency */
+    --shadow-light: rgba(0, 0, 0, 0.1);      /* 10% opacity */
+    --shadow-medium: rgba(0, 0, 0, 0.15);    /* 15% opacity */
+    --shadow-dark: rgba(0, 0, 0, 0.2);       /* 20% opacity */
+    --shadow-darker: rgba(0, 0, 0, 0.25);    /* 25% opacity */
+    --shadow-darkest: rgba(0, 0, 0, 0.3);    /* 30% opacity */
     --shadow-scroll-track: rgba(0, 0, 0, 0.1);
     --shadow-scroll-thumb: rgba(0, 0, 0, 0.3);
     --shadow-scroll-thumb-hover: rgba(0, 0, 0, 0.5);
@@ -51,58 +74,64 @@ html {
     --shadow-heavy: #00000040;
 }
 
-/* Page Container
-
-The base styles for the entire page with a light cream background and classic
-serif font. Prevents horizontal scrolling and sets the base font size to 18px.
+/* ============================================================================
+   BODY
+   ============================================================================
+   
+   Base styles for the <body> element.
 */
 body {
-    background-color: var(--background);
-    font-family: 'Times New Roman', serif;
-    max-width: 100vw;
-    overflow-x: hidden;
+    background-color: var(--background);    /* #FFFAF3 cream colour */
+    font-family: 'Times New Roman', serif;  /* Serif font */
+    max-width: 100vw;                       /* 100% of viewport width */
+    overflow-x: hidden;                     /* Hides horizontal scrollbar */
 }
 
-/* Base link style - no hover effect */
+/* ============================================================================
+   LINKS & HOVER EFFECTS
+   ============================================================================ */
+
+/* a - Base link style */
 a {
     color: var(--black);
 }
 
-/* This applies a relatively complex hover effect for links, where a yellow box surrounds the link when hovered over.
-
-We could do this with the padding attribute, but this causes the link to move with a jump when hovered over, as the padding is added in.
-
-Instead we use the pseudo-element to create a yellow box that surrounds the link when hovered over using the inset property.
-
-The z-index property makes sure this box is always under the link.
-
-We don't want this hover effect to apply everywhere, so we turn it off on specific classes.
+/*
+   Content Link Hover Effect
+   
+   Uses a ::before pseudo-element positioned absolutely behind the link
+   to create a yellow highlight box on hover.
+   
+   Applied to links in: .story-finding, .story-metadata, .footer-content,
+   and header h1. Excludes .tag elements.
 */
 
-/* Apply hover effect only to content links */
+/* Sets positioning context for the ::before pseudo-element */
 .story-finding a,
 .story-metadata a:not(.tag),
 .footer-content a,
 header h1 a {
-    position: relative;
+    position: relative;              /* Creates positioning context */
 }
 
+/* Creates the highlight box */
 .story-finding a::before,
 .story-metadata a:not(.tag)::before,
 .footer-content a::before,
 header h1 a::before {
-    content: '';
-    position: absolute;
-    inset: -5px;
-    background: transparent;
-    z-index: -1;
+    content: '';                     /* Required for pseudo-element */
+    position: absolute;              /* Positions relative to the link */
+    inset: -5px;                     /* Shorthand for top/right/bottom/left: -5px */
+    background: transparent;         /* Invisible by default */
+    z-index: -1;                     /* Behind the link text */
 }
 
+/* Shows the yellow background on hover */
 .story-finding a:hover::before,
 .story-metadata a:not(.tag):hover::before,
 .footer-content a:hover::before,
 header h1 a:hover::before {
-    background: var(--highlight-yellow);
+    background: var(--highlight-yellow);  /* Makes the box visible */
 }
 
 /* These links don't get the hover effect */
@@ -112,57 +141,60 @@ header h1 a:hover::before {
     background: none;
 }
 
-/* Homepage Header
-
-The main navigation and title for the homepage.
+/* ============================================================================
+   LAYOUT & SPACING
+   ============================================================================
+   
+   Page-specific margin overrides.
 */
+
+/* header.homepage
+   Narrower margins for homepage header */
 header.homepage {
-    margin-left: 1.11111rem;
+    margin-left: 1.11111rem;    /* 20px */
     margin-right: 1.11111rem;
 }
 
-/* Homepage Content
-
-The main content area of the homepage, including featured stories and navigation.
-*/
+/* .homepage-content
+   Side margins for homepage content area */
 .homepage-content {
-    margin-left: 2.22222rem;
+    margin-left: 2.22222rem;    /* 40px */
     margin-right: 2.22222rem;
 }
 
-/* Wander Page Content
-
-The main content area of the wander page, matching homepage padding.
-*/
+/* .main-content.wander
+   Side margins for wander page */
 .main-content.wander {
     margin-left: 2.22222rem;
     margin-right: 2.22222rem;
 }
 
-/* Main Header
+/* ============================================================================
+   HEADER & NAVIGATION
+   ============================================================================ */
 
-The site title and navigation elements that remain visible while scrolling.
-*/
+/* header
+   Main site header (sticks to top when scrolling) */
 header {
     font-family: Arial, sans-serif;
     margin-left: 2.222222rem;
     margin-right: 2.222222rem;
-    position: sticky;
+    position: sticky;               /* Remains visible during scroll */
     top: 0;
-    z-index: 101;
-    padding: 1.11111rem 0;
+    z-index: 101;                   /* Above popups (z-index: 100) */
+    padding: 1.11111rem 0;          /* 20px top and bottom */
 }
 
+/* .main-header
+   Layout for header - site title on left, navigation on right */
 .main-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between;  /* Pushes children apart */
+    align-items: center;             /* Vertically centers */
 }
 
-/* Header Title
-
-The main heading in the header.
-*/
+/* header h1
+   Site title "Dudley Time Portal" */
 header h1 {
     color: var(--black);
     font-family: Arial;
@@ -173,135 +205,160 @@ header h1 {
     letter-spacing: -0.22px;
 }
 
+/* header h1 a
+   Site title link (no underline by default) */
 header h1 a {
     text-decoration: none;
 }
 
+/* header h1 a:hover
+   Site title link hover (adds underline) */
 header h1 a:hover {
     text-decoration: underline;
 }
 
-/* Header Paragraph
-
-Paragraph text in the header, matching the heading size but with lowercase
-text transformation.
-*/
+/* header p
+   Paragraphs in header area */
 header p {
     text-transform: lowercase;
     color: var(--black);
     font-family: Arial;
-    font-size: 1.22222rem;
+    font-size: 1.22222rem;           /* 22px */
     font-style: normal;
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.01222rem;
 }
 
-/* Header Navigation
-
-Navigation buttons in the header.
-*/
+/* .header-nav
+   Holds the Wander/Archive/Random/Add navigation buttons */
 .header-nav {
     display: flex;
-    gap: 20px;
+    gap: 20px;                       /* Space between buttons */
 }
 
+/* .header-nav .dashed-button
+   Navigation buttons (Wander, Archive, Random, Add) */
 .header-nav .dashed-button {
     height: 41px;
     padding: 5px 10px;
     text-transform: lowercase;
 }
 
-/* Header Navigation Button Hover State 
-
-Repeats the padding to prevent the button from moving when we hover over it.
-*/
+/* .header-nav .dashed-button:hover
+   Navigation button hover state (repeats padding to prevent movement) */
 .header-nav .dashed-button:hover {
     padding: 5px 10px;
 }
 
-/* Tag Headers
-
-Headers for tag-related sections in the archive, underwhich we display stories.
+/* ============================================================================
+   PAGE HEADINGS
+   ============================================================================
+   
+   Headers for different sections and index pages.
 */
+
+/* .tag-list-header, .wander-through-archive-header, .theme-index-header, .type-index-header
+   Standard headers for tag/category pages
+   - Serif font (Times New Roman) matches the body text
+   - Larger size (32px) makes them prominent
+   - Negative letter spacing tightens large text */
 .tag-list-header,
 .wander-through-archive-header,
 .theme-index-header,
 .type-index-header {
     color: var(--black);
     font-family: "Times New Roman";
-    font-size: 1.77778rem;
+    font-size: 1.77778rem;           /* 32px */
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-    letter-spacing: -0.03556rem;
+    letter-spacing: -0.03556rem;     /* Tighten large text */
 }
 
+/* .wander-through-archive-header (specific override)
+   Extra large size for the main "Wander through archive" heading */
 .wander-through-archive-header {
     margin-top: 40px;
     color: var(--black);
     font-family: "Times New Roman";
-    font-size: 52px;
+    font-size: 52px;                 /* Much larger than other headers */
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-    letter-spacing: -1.04px !important;
+    letter-spacing: -1.04px !important;  /* Proportionally tighter */
+    margin-bottom: 1.66667rem;       /* 30px spacing below */
 }
 
-/* Wander Through Archive Header
-
-The header for the archive browsing section.
+/* ============================================================================
+   FILTER SYSTEM
+   ============================================================================
+   
+   The filtering interface on the Archive page. Uses custom dropdown menus
+   (not native <select> elements) for better styling control.
 */
-.wander-through-archive-header {
-    margin-bottom: 1.66667rem;
-}
 
-/* Archive Filters
-
-Filter controls for browsing the archive with custom dropdowns matching Figma design.
-*/
+/* .archive-filters
+   Container for all filter dropdowns (Themes, Types, Weather)
+   - Flexbox with wrap allows dropdowns to stack on small screens
+   - Gap creates consistent spacing between dropdowns */
 .archive-filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.11111rem;
-    margin-bottom: 2.22222rem;
+    flex-wrap: wrap;                 /* Stack on small screens */
+    gap: 1.11111rem;                 /* 20px between dropdowns */
+    margin-bottom: 2.22222rem;       /* 40px below filters */
     align-items: flex-start;
 }
 
+/* .filter-dropdown
+   Individual dropdown container (one for each filter type)
+   - Relative positioning for absolutely positioned dropdown content */
 .filter-dropdown {
-    position: relative;
-    min-width: 200px;
+    position: relative;              /* For absolute dropdown content */
+    min-width: 200px;                /* Dropdowns don't get too narrow */
 }
 
+/* .filter-dropdown-button
+   The button that opens/closes a filter dropdown
+   - Dashed border changes to solid on hover/focus for feedback
+   - Full width fills the dropdown container
+   - Flexbox spreads text left, arrow right */
 .filter-dropdown-button {
     background: var(--Background);
-    border: 2px dashed var(--black);
+    border: 2px dashed var(--black); /* Dashed = not active */
     font-family: Arial, sans-serif;
-    font-size: 1.22222rem;
+    font-size: 1.22222rem;           /* 22px */
     font-weight: 400;
     color: var(--black);
-    padding: 0.27778rem 0.55556rem;
-    width: 100%;
+    padding: 0.27778rem 0.55556rem;  /* 5px 10px */
+    width: 100%;                     /* Fill container */
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between;  /* Text left, arrow right */
     align-items: center;
-    cursor: pointer;
+    cursor: pointer;                 /* Shows it's clickable */
     letter-spacing: -0.01222rem;
     line-height: 1.4;
 }
 
+/* .filter-dropdown-button:hover
+   Hover state - border becomes solid for feedback */
 .filter-dropdown-button:hover {
-    border-style: solid;
+    border-style: solid;             /* Dashed → solid */
 }
 
+/* .filter-dropdown-button:focus
+   Focus state (keyboard navigation) - same as hover */
 .filter-dropdown-button:focus {
-    outline: none;
-    border-style: solid;
+    outline: none;                   /* Remove default browser outline */
+    border-style: solid;             /* Our custom focus indicator */
 }
 
+/* .dropdown-arrow
+   The down arrow (▼) in the dropdown button
+   - Could rotate when dropdown opens (handled by JavaScript) */
 .dropdown-arrow {
     font-size: 1rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease; /* Smooth rotation animation */
 }
 
 .filter-dropdown.open .dropdown-arrow {
@@ -415,45 +472,69 @@ Shows currently applied filters as removable tags below the filter controls.
     gap: 0.33333rem;
 }
 
+/* .active-filter-tag
+   Individual tag showing an active filter (e.g., "Climate Change × ")
+   - Displayed above the story grid to show what filters are applied
+   - Background color matches the tag's theme color (set by JavaScript)
+   - Includes an × button to remove the filter */
 .active-filter-tag {
     display: inline-flex;
     align-items: center;
     font-family: Arial, sans-serif;
-    font-size: 0.88889rem;
-    padding: 0.22222rem 0.44444rem;
-    gap: 0.33333rem;
+    font-size: 0.88889rem;          /* 16px - slightly smaller than body */
+    padding: 0.22222rem 0.44444rem; /* 4px 8px */
+    gap: 0.33333rem;                /* Space between text and × */
     border: none;
-    cursor: pointer;
-    /* Background and color set dynamically via JavaScript */
+    cursor: pointer;                /* Whole tag is clickable to remove */
+    /* Background and text color set by JavaScript based on tag color */
 }
 
+/* .active-filter-tag:hover
+   Hover state - slight transparency shows it's interactive */
 .active-filter-tag:hover {
-    opacity: 0.8;
+    opacity: 0.8;                   /* Slight fade on hover */
 }
 
+/* .active-filter-remove
+   The × button within an active filter tag
+   - Inherits color from parent for good contrast
+   - No background or border - just the × character */
 .active-filter-remove {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.11111rem;
-    line-height: 1;
+    font-size: 1.11111rem;          /* Slightly larger than tag text */
+    line-height: 1;                 /* Tight line height for × */
     padding: 0;
     margin: 0;
-    /* Color inherited from parent tag for good contrast */
+    /* Color inherited from parent .active-filter-tag */
 }
 
+/* .active-filter-remove:hover
+   Hover state for the × - extra transparency */
 .active-filter-remove:hover {
-    opacity: 0.7;
+    opacity: 0.7;                   /* More faded than tag hover */
 }
 
-/* Filter Loading State */
+/* ============================================================================
+   FILTER UI STATES
+   ============================================================================
+   
+   Visual feedback for filtering operations and results.
+*/
+
+/* .stories-list.filtering
+   Loading state when filters are being applied
+   - Faded out and non-interactive while JavaScript updates the grid */
 .stories-list.filtering {
-    opacity: 0.6;
-    pointer-events: none;
+    opacity: 0.6;                    /* Fade to show it's updating */
+    pointer-events: none;            /* Disable clicks during update */
 }
 
+/* .filter-loading
+   Loading message (hidden by default, shown by JavaScript if needed) */
 .filter-loading {
-    display: none;
+    display: none;                   /* Hidden by default */
     font-family: Arial, sans-serif;
     font-size: 0.88889rem;
     color: var(--gray-text);
@@ -461,51 +542,75 @@ Shows currently applied filters as removable tags below the filter controls.
     padding: 1.11111rem;
 }
 
+/* .filter-loading.visible
+   Loading message when visible */
 .filter-loading.visible {
     display: block;
 }
 
-/* No Results Message */
+/* ============================================================================
+   NO RESULTS MESSAGE
+   ============================================================================
+   
+   Friendly message shown when filters match no stories.
+*/
+
+/* .no-results
+   Container for "no results" message
+   - Takes full width of the grid
+   - Dashed border matches the filter aesthetic
+   - Centered content with generous padding */
 .no-results {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1;             /* Span all grid columns */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 20rem;
+    min-height: 20rem;               /* Tall enough to be noticeable */
     padding: 2.22222rem;
     background: var(--Background);
-    border: 2px dashed var(--black);
+    border: 2px dashed var(--black); /* Matches filter dropdowns */
     text-align: center;
 }
 
+/* .no-results-content h3
+   "No stories found" heading */
 .no-results-content h3 {
     font-family: Arial, sans-serif;
-    font-size: 1.66667rem;
-    font-weight: 400;
+    font-size: 1.66667rem;           /* 30px - prominent */
+    font-weight: 400;                /* Regular weight */
     margin-bottom: 1.11111rem;
     color: var(--black);
 }
 
+/* .no-results-content p
+   Explanation text
+   - Grey color makes it secondary to the heading
+   - Max width keeps lines readable */
 .no-results-content p {
     font-family: Arial, sans-serif;
     font-size: 1rem;
     line-height: 1.5;
     margin-bottom: 0.55556rem;
-    color: var(--gray-text);
-    max-width: 28rem;
+    color: var(--gray-text);         /* Lighter than main text */
+    max-width: 28rem;                /* ~500px - comfortable reading width */
 }
 
+/* .no-results-content .clear-link
+   "Clear all filters" link within the no results message
+   - Styled as an underlined link (not a button) */
 .no-results-content .clear-link {
     background: none;
     border: none;
     color: var(--black);
-    text-decoration: underline;
+    text-decoration: underline;      /* Looks like a link */
     font-family: Arial, sans-serif;
     font-size: 1rem;
     cursor: pointer;
     padding: 0;
 }
 
+/* .no-results-content .clear-link:hover
+   Hover removes underline (opposite of normal links) */
 .no-results-content .clear-link:hover {
     text-decoration: none;
 }
@@ -580,88 +685,81 @@ Shows currently applied filters as removable tags below the filter controls.
     }
 }
 
-/* Tag List Container
-
-Tags arranged in rows, wrapping to new lines as needed.
+/* ============================================================================
+   TAGS
+   ============================================================================
+   
+   Tags are used throughout the archive to show themes, types, weather, and
+   other categories. Each tag has a colour (set inline by Go templates) that
+   represents its category.
 */
+
+/* .tag-list
+   Displays tags in a wrapping row (used on index pages and story pages) */
 .tag-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    list-style-type: none;
+    flex-wrap: wrap;                 /* Tags wrap to new lines */
+    gap: 10px;                       /* 10px between each tag */
+    list-style-type: none;           /* No bullets */
 }
 
-/* Tag List Wrapper
-
-The list of tags with consistent bottom margin.
-*/
+/* .tag-list-container
+   Adds large bottom margin to sections containing tag lists */
 .tag-list-container {
-    margin-bottom: 6.66667rem;
+    margin-bottom: 6.66667rem;       /* 120px */
 }
 
-/* Unordered Tag List
-
-Unordered lists of tags don't have default list styling.
-*/
+/* ul.tag-list
+   Removes default left padding when tag list is a <ul> element */
 ul.tag-list {
     padding-inline-start: 0;
 }
 
-/* Individual Tag
-
-A single tag look for categories, themes, types, and weather.
-*/
+/* .tag
+   Small pill-shaped tags for themes, types, weather (background color set inline) */
 .tag {
     align-items: center;
-    background-color: var(--black);
+    background-color: var(--black);  /* Default background */
     color: var(--white-text);
     display: flex;
     font-family: Arial;
-    font-size: 0.77778rem;
+    font-size: 0.77778rem;           /* 14px */
     font-style: normal;
     font-weight: 400;
     gap: 0.55556rem;
     justify-content: center;
     letter-spacing: -0.00778rem;
     line-height: 140%;
-    padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
+    padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;  /* 2px 5px 3px 5px */
     text-decoration: none;
     text-transform: lowercase;
     width: fit-content;
 }
 
-/* Hover State for Tag
-
-In general it is bad practice to use !important in CSS, but here we need to in order to override
-the colour of the tag, which is set on the style attribute, because this is the only way to attach
-colour to the element tag when we inject it into the template.
-
-Like this:
-<a href="#" class="tag" style="background: #000;">Tag</a>
-*/
+/* .tag:hover
+   All tags turn black on hover (!important overrides inline styles) */
 .tag:hover {
     background: #000 !important;
 }
 
-/* 
-As we have a global link style, we need to override it for tags to retain the padding and margin.
-*/
+/* a.tag
+   Maintains tag padding when tag is a link */
 a.tag {
     margin: 0;
     padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
 }
 
-/* Large Tag
-
-A more prominent version of the tag look used on the homepage and in headers.
-*/
+/* .tag.large
+   Larger tag size used in headers */
 .tag.large {
-    font-size: 1.22222rem;
+    font-size: 1.22222rem;           /* 22px */
     justify-content: center;
     letter-spacing: -0.01222rem;
-    padding: 0.27778rem 0.55556rem;
+    padding: 0.27778rem 0.55556rem;  /* 5px 10px */
 }
 
+/* .tag.medium
+   Medium-sized tags (between default and large) */
 .tag.medium {
     font-family: Arial;
     gap: 10px;

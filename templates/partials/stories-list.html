@@ -1,15 +1,39 @@
+{{/*
+    Stories List Partial Template
+    
+    This displays a grid of story previews - used on the homepage, archive page, and all
+    the index pages (themes, types, weather, etc.).
+    
+    How it works:
+    - Loops through all the stories we've been given
+    - For each story, shows a preview (image, audio player, or document icon)
+    - Creates a popup that appears when you hover over a story
+    - The popup shows a larger version and the story's title and tags
+    
+    The {{range .Stories}} loops through each story, and the template code inside
+    gets repeated for each one. The {{if}} statements check what type of attachment
+    the story has (image, audio, document, or none) and display it appropriately.
+    
+    Some stories have no attachment, so we show a placeholder icon instead.
+*/}}
 {{define "stories-list"}}
 {{range .Stories}}
         <div class="story">
+            {{/* Store the current story and its first attachment in variables */}}
             {{$story := .}}
             {{$attachment := .GetStoryAttachment}}
+            
+            {{/* If the story has an attachment (image, audio, or document) */}}
             {{if $attachment.URL}}
             <a class="story-image-container" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
+                {{/* If it's an image, show it with responsive sizing */}}
                 {{if $attachment.IsImage}}
+                    {{/* The srcset provides different sizes for different screen widths */}}
                     <img src="{{$attachment.ThumbURL}}" srcset="
                             {{$attachment.ThumbURL}} 300w,
                             {{$attachment.MediumURL}} 800w
                         " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
+                {{/* If it's audio, show a play button and the filename */}}
                 {{else if $attachment.IsAudio}}
                     <div class="story-audio-preview">
                         <div class="audio-play-button">
@@ -20,6 +44,7 @@
                         </div>
                         <div class="audio-filename">{{$attachment.Filename}}</div>
                     </div>
+                {{/* If it's a document (PDF, Word, etc.), show a document icon */}}
                 {{else if $attachment.IsDocument}}
                     <div class="story-document-preview">
                         <div class="document-icon">
@@ -35,6 +60,7 @@
                     </div>
                 {{end}}
             </a>
+            {{/* If the story has no attachment, show a placeholder */}}
             {{else}}
             <a class="story-image-container no-attachment" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
                 <div class="story-no-attachment">
@@ -50,8 +76,13 @@
             </a>
             {{end}}
             
+            {{/* 
+                The popup that appears when you hover over a story
+                This is hidden by default and shown by the JavaScript in grid-code.html
+            */}}
             <div class="story-popup" data-story-popup-id="{{$story.ID}}">
                 <div class="story-popup-container">
+                    {{/* Show the larger version of the attachment in the popup */}}
                     {{if $attachment.URL}}
                         {{if $attachment.IsImage}}
                             <img data-src="{{$attachment.LargeURL}}" alt="" class="popup-img">

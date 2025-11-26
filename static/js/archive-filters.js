@@ -1,11 +1,35 @@
 /**
  * Archive Filtering System
  * 
- * Provides client-side filtering for the Dudley Climate Justice Archive
- * using vanilla JavaScript with no dependencies.
+ * This JavaScript makes the filtering work on the Archive page. When you click
+ * filter buttons (like "Climate Change" or "Photo"), it shows only the stories
+ * that match your selections.
+ * 
+ * How it works:
+ * 1. When the page loads, fetch a JSON file with all the story data
+ * 2. Display all stories initially
+ * 3. When someone clicks a filter, hide stories that don't match
+ * 4. Update the URL so you can bookmark or share filtered views
+ * 5. Lazy-load more stories as you scroll down (performance optimization)
+ * 
+ * This all happens in the browser ("client-side") using vanilla JavaScript -
+ * no libraries like jQuery, no server requests after the initial load. This
+ * makes filtering instant and reduces server load.
+ * 
+ * The code is organized as a class called ArchiveFilters. When the page loads,
+ * we create a single instance of this class which handles everything.
  */
 
 class ArchiveFilters {
+    /**
+     * Set up the filtering system
+     * 
+     * This constructor runs once when the page loads. It:
+     * - Finds all the HTML elements we need (buttons, dropdowns, etc.)
+     * - Loads the story data from a JSON file
+     * - Sets up event listeners for user interactions
+     * - Checks if the URL has filter parameters and applies them
+     */
     constructor() {
         this.filterData = null;
         this.currentFilters = {
@@ -23,26 +47,44 @@ class ArchiveFilters {
         this.loadFiltersFromURL();
     }
     
+    /**
+     * Find all the HTML elements we need
+     * 
+     * We store references to buttons, dropdowns, and containers so we can
+     * manipulate them later without searching the page every time.
+     * 
+     * The code checks if each element exists and warns us if something is missing.
+     * This helps catch problems during development.
+     */
     initializeElements() {
+        // Store all the HTML elements we'll need
         this.elements = {
+            // The three dropdown menus for filters
             themeDropdown: document.getElementById('theme-dropdown'),
             typeDropdown: document.getElementById('type-dropdown'),
             weatherDropdown: document.getElementById('weather-dropdown'),
+            // The buttons that open the dropdowns
             themeButton: document.getElementById('theme-button'),
             typeButton: document.getElementById('type-button'),
             weatherButton: document.getElementById('weather-button'),
+            // The content areas inside the dropdowns (where the filter options go)
             themeContent: document.getElementById('theme-content'),
             typeContent: document.getElementById('type-content'),
             weatherContent: document.getElementById('weather-content'),
+            // The "Clear filters" button
             clearFilters: document.getElementById('clear-filters'),
+            // Text showing "X of Y stories"
             filterCount: document.getElementById('filter-count'),
+            // The area showing active filter tags
             activeFilters: document.getElementById('active-filters'),
             activeFiltersList: document.getElementById('active-filters-list'),
+            // Where the story grid gets displayed
             storiesContainer: document.getElementById('stories-container'),
+            // The total count in the header
             totalCount: document.getElementById('total-count')
         };
         
-        // Verify all elements exist
+        // Safety check - warn if any elements are missing
         for (const [name, element] of Object.entries(this.elements)) {
             if (!element) {
                 console.warn(`Filter element not found: ${name}`);
@@ -50,20 +92,41 @@ class ArchiveFilters {
         }
     }
     
+    /**
+     * Load story data from the JSON file
+     * 
+     * When the archive is built, the Go program creates a file called
+     * filter-data.json containing all the stories and their tags. This
+     * function fetches that file and stores the data.
+     * 
+     * Once we have the data, we:
+     * - Fill in the filter dropdowns with all available options
+     * - Set up the initial list of stories to display
+     * - Update the count showing how many stories there are
+     */
     async loadFilterData() {
         try {
+            // Fetch the JSON file (this is the only network request after page load)
             const response = await fetch('/filter-data.json');
             if (!response.ok) {
                 throw new Error(`Failed to load filter data: ${response.status}`);
             }
             
+            // Parse the JSON and store it
             this.filterData = await response.json();
+            
+            // Fill in the dropdown menus with filter options
             this.populateFilterDropdowns();
+            
+            // Start with all stories visible
             this.filteredStories = [...this.filterData.stories];
+            
+            // Show "X stories" in the header
             this.updateFilterCount();
             
         } catch (error) {
             console.error('Error loading filter data:', error);
+            // Show a friendly error message to the user
             this.showError('Failed to load filtering options. Please refresh the page.');
         }
     }
@@ -295,66 +358,103 @@ class ArchiveFilters {
         });
     }
     
+    /**
+     * Filter the stories based on current selections
+     * 
+     * This is the heart of the filtering system. It goes through all the stories
+     * and checks if each one matches the selected filters.
+     * 
+     * For a story to be shown, it needs to match:
+     * - At least one of the selected themes (if any themes are selected)
+     * - At least one of the selected types (if any types are selected)
+     * - At least one of the selected weather conditions (if any are selected)
+     * 
+     * So if you select "Climate Change" and "Photo", you'll see all photos about
+     * climate change, even if they also have other themes or types.
+     * 
+     * After filtering, we re-render the grid to show only matching stories.
+     */
     applyFilters() {
         if (!this.filterData) return;
         
+        // Go through all stories and keep only the ones that match
         this.filteredStories = this.filterData.stories.filter(story => {
-            // Check themes filter
+            // Check theme filters
             if (this.currentFilters.themes.length > 0) {
+                // Does this story have at least one of the selected themes?
                 const hasMatchingTheme = this.currentFilters.themes.some(theme => 
                     story.themes.includes(theme)
                 );
-                if (!hasMatchingTheme) return false;
+                if (!hasMatchingTheme) return false;  // Doesn't match, hide it
             }
             
-            // Check types filter
+            // Check type filters
             if (this.currentFilters.types.length > 0) {
+                // Does this story have at least one of the selected types?
                 const hasMatchingType = this.currentFilters.types.some(type => 
                     story.types.includes(type)
                 );
-                if (!hasMatchingType) return false;
+                if (!hasMatchingType) return false;  // Doesn't match, hide it
             }
             
-            // Check weather filter
+            // Check weather filters
             if (this.currentFilters.weather.length > 0) {
+                // Does this story have at least one of the selected weather conditions?
                 const hasMatchingWeather = this.currentFilters.weather.some(weather => 
                     story.weather.includes(weather)
                 );
-                if (!hasMatchingWeather) return false;
+                if (!hasMatchingWeather) return false;  // Doesn't match, hide it
             }
             
+            // If we get here, the story matches all filters
             return true;
         });
         
+        // Reset to the first page
         this.currentPage = 0;
+        
+        // Redraw the story grid with the filtered results
         this.renderStories();
+        
+        // Update the "X of Y stories" text
         this.updateFilterCount();
     }
     
+    /**
+     * Display the filtered stories on the page
+     * 
+     * This function rebuilds the story grid with the current filtered stories.
+     * It doesn't show all stories at once - instead it uses "lazy loading" to
+     * show 20 stories at a time, loading more as you scroll down. This keeps
+     * the page fast even with hundreds of stories.
+     * 
+     * We add a short delay (50ms) to show a loading state, which gives visual
+     * feedback that something is happening when you change filters.
+     */
     renderStories() {
         if (!this.elements.storiesContainer) return;
         
-        // Show loading state
+        // Add a CSS class to show we're filtering (CSS can show a loading spinner)
         this.elements.storiesContainer.classList.add('filtering');
         
-        // Use a small delay to allow the loading state to show
+        // Brief delay to let the loading state show (better user experience)
         setTimeout(() => {
-            // Clean up any dynamically created popups before clearing stories
+            // Clean up any popups that were created by previous filtering
             const dynamicPopups = document.querySelectorAll('.story-popup[data-dynamic="true"]');
             dynamicPopups.forEach(popup => popup.remove());
             
-            // Clear existing stories
+            // Remove all the current stories from the page
             this.elements.storiesContainer.innerHTML = '';
             
             if (this.filteredStories.length === 0) {
-                // Show friendly no results message
+                // No matches - show a friendly message
                 this.elements.storiesContainer.appendChild(this.createNoResultsElement());
             } else {
-                // Render initial batch of stories
+                // Show the first batch of stories (more load as you scroll)
                 this.renderStoriesBatch(0, this.storiesPerPage);
             }
             
-            // Remove loading state
+            // Remove the loading state
             this.elements.storiesContainer.classList.remove('filtering');
         }, 50);
     }
@@ -659,6 +759,19 @@ class ArchiveFilters {
         this.updateActiveFiltersDisplay();
     }
     
+    /**
+     * Load more stories when scrolling near the bottom
+     * 
+     * This is "lazy loading" or "infinite scroll". Instead of showing all stories
+     * at once (which would be slow with hundreds of stories), we show 20 at a time.
+     * 
+     * When you scroll near the bottom, this function automatically loads the next
+     * batch. The user never sees a "Load more" button - it just happens smoothly
+     * as they scroll.
+     * 
+     * The 200px buffer means we start loading before you actually reach the bottom,
+     * so stories appear just as you need them.
+     */
     handleScroll() {
         if (!this.elements.storiesContainer) return;
         
@@ -667,11 +780,12 @@ class ArchiveFilters {
         const windowHeight = window.innerHeight;
         const containerBottom = container.offsetTop + container.offsetHeight;
         
-        // Check if we're near the bottom and have more stories to load
+        // Are we within 200 pixels of the bottom?
         if (scrollTop + windowHeight >= containerBottom - 200) {
             const currentlyDisplayed = container.children.length;
             const totalFiltered = this.filteredStories.length;
             
+            // If there are more stories to show, load the next batch
             if (currentlyDisplayed < totalFiltered) {
                 this.renderStoriesBatch(currentlyDisplayed, this.storiesPerPage);
             }
