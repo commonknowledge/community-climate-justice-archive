@@ -1,3 +1,13 @@
+// Package util contains helpful functions for working with text throughout the archive.
+//
+// This file has three main jobs:
+//
+// 1. Making dates look nice - turning "2025-03-10T10:00:00Z" into "Monday 10 March 2025"
+// 2. Making sure text isn't too long - cutting it down when needed
+// 3. Making URLs from titles - turning "Climate Change" into "climate-change"
+//
+// These are used all over the place whenever we need to format text for the website.
+// By keeping them all here, everywhere in the archive formats things the same way.
 package util
 
 import (
@@ -8,14 +18,26 @@ import (
 	"unicode"
 )
 
-// FormatDate formats a date string to a human readable format.
+// FormatDate takes a date from the database and makes it nice to read.
 //
-// For example, "2025-03-10T10:00:00Z" becomes "Monday 10 March 2025".
+// Databases store dates in a technical format like "2025-03-10T10:00:00Z", but we
+// want to show visitors something friendly like "Monday 10 March 2025". That's what
+// this function does.
 //
-// If the date string is empty, it returns an empty string.
+// It's a bit flexible - it tries a few different date formats that NocoDB might
+// send us, so it should work even if the database changes how it stores dates.
 //
-// The database stores these in accordance with RFC3339 date format.
-// See https://www.rfc-editor.org/rfc/rfc3339 for the details of this.
+// If the date is empty or something goes wrong, it'll just return what it was given
+// rather than breaking everything.
+//
+// Here's what happens inside:
+// - First, try the standard RFC3339 format (the most common one)
+// - If that doesn't work, try NocoDB's specific format
+// - If that still doesn't work, log a warning and return the original
+// - If it works, convert it to "Monday 10 March 2025" format
+//
+// A nice thing about Go's date formatting: you show it an example of what you want
+// using a reference date, rather than remembering cryptic codes. Much easier!
 func FormatDate(dateString string) string {
 	if dateString == "" {
 		return ""
@@ -58,7 +80,15 @@ func FormatDate(dateString string) string {
 	return parsedTime.Format("Monday 2 January 2006")
 }
 
-// Safe way to truncate a string to maxLength characters
+// TruncateString cuts a string down if it's too long.
+//
+// Sometimes we need to make sure text isn't too long - like when creating URLs
+// or displaying previews. This function just chops it at a maximum length.
+//
+// If the text is already short enough, it gets returned as-is. If it's too long,
+// you get the first maxLength characters.
+//
+// Simple as that!
 func TruncateString(s string, maxLength int) string {
 	if len(s) <= maxLength {
 		return s
@@ -67,9 +97,25 @@ func TruncateString(s string, maxLength int) string {
 	return s[:maxLength]
 }
 
-// Make a string into a slug for use in URLs: downcasing it, removing special characters, and replacing spaces with hyphens.
+// Slugify turns any text into something safe to use in a URL.
 //
-// For example, "Climate Change" becomes "climate-change".
+// When we create web pages, we need URLs like "/stories/climate-change.html" but
+// our story titles might be "Climate Change!" or "Art, Music & Dance". This function
+// does the conversion.
+//
+// Here's what it does step by step:
+// 1. Makes everything lowercase
+// 2. Swaps special characters for normal ones (& becomes "and", £ becomes "gbp")
+// 3. Removes quotes and trademark symbols that don't belong in URLs
+// 4. Turns spaces and punctuation into hyphens
+// 5. Removes any double hyphens (-- becomes -)
+// 6. Trims hyphens from the start and end
+// 7. Cuts it down to 100 characters max (URLs shouldn't be too long)
+//
+// So "Climate Change!" becomes "climate-change"
+// And "Community & Nature" becomes "community-and-nature"
+//
+// This runs every time we create a URL from a title, theme name, or tag.
 func Slugify(s string) string {
 	s = TruncateString(s, 100)
 

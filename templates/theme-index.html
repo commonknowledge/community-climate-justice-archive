@@ -1,3 +1,19 @@
+{{/*
+    Theme Index Template
+    
+    Shows all stories tagged with a specific theme (like "Climate Change", "Community", etc.).
+    
+    This is a simple page that just filters stories by one theme and displays them
+    in a grid. The theme's colour is shown in the header tag.
+    
+    Similar templates exist for:
+    - Type (photo, poem, video, etc.)
+    - Weather (sunny, rainy, etc.)
+    - Gifted By (who contributed)
+    - Time Period (when it happened)
+    - What Was/Is/If (past/present/future)
+    - Scale of Permanence (permaculture concept)
+*/}}
 <!DOCTYPE html>
 <html lang="en-GB">
 
@@ -5,15 +21,21 @@
     <title>{{.Title}} Theme</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/styles.css">
+    {{/* Include the hover popup JavaScript */}}
     {{template "grid-code" .}}
 </head>
 
 <body>
     {{template "header" .}}
+    
+    {{/* Show the theme name as a coloured tag */}}
     <div class="theme-index-header">Items tagged: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
+    
+    {{/* Display the grid of stories with this theme */}}
     <div class="stories-list standard-margins">
         {{template "stories-list" .}}
     </div>
+    
     {{template "footer" .}}
 </body>
 

@@ -1,4 +1,18 @@
-// The archive command builds the archive and optionally serves it in development mode.
+// The archive command builds the static website for the Dudley Climate Justice Archive.
+//
+// This is where everything starts! When you run this, it:
+// 1. Loads settings from your environment variables
+// 2. Connects to the database (NocoDB)
+// 3. Processes all the images (resizing, converting to WebP)
+// 4. Generates all the HTML pages from the templates
+// 5. Optionally starts a local web server so you can view it
+//
+// You can use these flags:
+// --development or -d: Run in development mode (watches for template changes)
+// --skip-images or -s: Skip processing images (faster if you're just testing templates)
+//
+// Development mode is really handy - it watches your templates and regenerates
+// pages automatically when you change them, so you can see your edits right away.
 package main
 
 import (
@@ -19,11 +33,14 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// generateArchive builds the archive by taking the following steps:
-// - Getting the data from the database
-// - Getting the images from the images directory
-// - Adding this data to the templates to create pages which are static HTML files
-// - Copying the images to the output directory
+// generateArchive builds the entire website.
+//
+// This does the main work:
+// - Fetches all the story data from the database
+// - Processes all the images (unless you've skipped them)
+// - Fills in the HTML templates with the actual data
+// - Writes all the HTML files to the out/ folder
+// - Copies over the CSS and images
 func generateArchive(skipImages bool) error {
 	log.Println("Starting build process")
 
@@ -103,7 +120,6 @@ func generateArchive(skipImages bool) error {
 	if err := generate.CopyJSToOutput(); err != nil {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
-
 
 	log.Println("Build process completed successfully")
 

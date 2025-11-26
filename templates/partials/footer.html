@@ -1,12 +1,34 @@
+{{/*
+    Footer Partial Template
+    
+    This is the bottom part of every page - information about the project and how to get in touch.
+    Like the header, it's a "partial" that gets included everywhere so we don't duplicate code.
+    
+    What it includes:
+    - Description of the Dudley People's School for Climate Justice
+    - Link to learn more about the project
+    - Version information (which release this is)
+    - CoLab Dudley's physical address
+    
+    The address uses special classes (h-adr, p-name, etc.) which are from the hCard microformat.
+    This helps search engines and other tools understand that it's an address.
+*/}}
 {{define "footer"}}
 <footer>
     <div class="footer-content">
+        <!-- About the project -->
         <div>Dudley People's School for Climate Justice is an assemblage of community-led projects. The projects make it easier for people to learn from each other and connect with nature. Everyone is a teacher, and everyone is a learner. Using nature's guidebook, place-based peer learning will lead to action for people, planet and the future.</div>
+        
+        <!-- Link to main project website -->
         <a class="dashed-button" href="https://www.colabdudley.net/">Learn more about the project</a>
+        
+        <!-- Which version/release this is -->
         <div class="compilation-information">
             <div class="version">Version: Spring 2025</div>
         </div>
     </div>
+    
+    <!-- Physical address with microformat markup for better SEO -->
     <div class="address">
         <address class="h-adr">
             <span class="p-name"><a href="https://www.colabdudley.net">CoLab Dudley</a><br>

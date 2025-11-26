@@ -1,3 +1,15 @@
+{{/*
+    Wander Template
+    
+    This page shows all stories in a random order, creating a serendipitous browsing
+    experience. Like the homepage, but with all stories instead of a selection.
+    
+    The stories are shuffled using JavaScript when the page loads, so every visit
+    gives you a different order. This encourages exploration and unexpected discoveries.
+    
+    The shuffling uses the same optimised Fisher-Yates algorithm as the homepage
+    to keep things feeling fast even with hundreds of stories.
+*/}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,9 +22,12 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <script>
-        // Shuffle the stories list
-        // This contains a lot of optimisations to make this feel faster.
-        // It feels a bit propeller-headed to do this but overall makes the page feel more responsive.
+        /*
+         * Shuffle Stories Function
+         * 
+         * Randomly reorders all stories when the page loads. Same algorithm
+         * as the homepage, optimised for performance.
+         */
         function shuffleStories() {
             // Cache the stories list element
             const storiesList = document.querySelector('.stories-list.wander');

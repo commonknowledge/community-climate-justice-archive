@@ -1,9 +1,31 @@
+{{/*
+    Grid Code Partial Template
+    
+    This contains the JavaScript that makes the story grid interactive. When you hover
+    over a story, it shows a popup with a larger version and more details.
+    
+    How it works:
+    1. When you move your mouse over a story preview, wait 150ms
+    2. If you're still hovering, show the popup for that story
+    3. When you move your mouse away, wait 100ms then hide the popup
+    4. You can also hover over the popup itself to keep it open
+    
+    The delays prevent the popups from flickering when you move the mouse around.
+    
+    This code uses "event delegation" which means it watches for mouse events on the
+    whole page rather than attaching listeners to each story. This is more efficient
+    and works even when stories are added dynamically by the filter system.
+*/}}
 {{define "grid-code"}}
 <script>
+    // Wait for the page to finish loading before running this code
     document.addEventListener('DOMContentLoaded', () => {
-        const HOVER_SHOW_DELAY = 150;
-        const HOVER_HIDE_DELAY = 100;
+        // How long to wait before showing/hiding popups (in milliseconds)
+        // These delays prevent flickering when moving the mouse around
+        const HOVER_SHOW_DELAY = 150;  // Wait 150ms before showing a popup
+        const HOVER_HIDE_DELAY = 100;  // Wait 100ms before hiding a popup
 
+        // Find all the story previews and popups on the page
         const storyImageContainers = document.querySelectorAll('.story-image-container');
         const storyPopups = document.querySelectorAll('.story-popup');
 
@@ -11,28 +33,32 @@
             console.log('Could not find story containers');
         }
 
-        // Cache popup references for better performance
+        // Create a cache to quickly find popups by story ID
+        // This is faster than searching the page every time
         const popupCache = new Map();
         storyPopups.forEach(popup => {
             const storyId = popup.dataset.storyPopupId;
             if (storyId) {
+                // Add this popup to the cache so we can find it quickly later
                 popupCache.set(storyId, popup);
             }
         });
 
-        // Global timeout tracking to prevent race conditions
+        // Keep track of timeouts to prevent multiple popups showing at once
         let globalHideTimeout = null;
 
-        // Helper to coerce dataset boolean values
+        // Check if a popup is currently open
         const isOpen = (popup) => popup.dataset.storyOpen === 'true';
 
+        // Close all open popups
         function closeAllPopups() {
-            // Clear any pending hide timeout
+            // Cancel any pending hide timeout
             if (globalHideTimeout) {
                 clearTimeout(globalHideTimeout);
                 globalHideTimeout = null;
             }
 
+            // Find all open popups and close them
             const openStoryPopups = document.querySelectorAll('.story-popup[data-story-open="true"]');
             openStoryPopups.forEach(popup => {
                 popup.style.display = 'none';
@@ -40,16 +66,20 @@
             });
         }
 
+        // Show the popup for a specific story
         function showPopup(container) {
             const storyId = container.dataset.storyId;
             console.log(`Opening popup for story ${storyId}`);
 
+            // Try to find the popup in our cache first
             let storyPopup = popupCache.get(storyId);
 
-            // If popup not in cache, try to find it in DOM (for dynamically created popups)
+            // If it's not in the cache, look for it on the page
+            // (This handles popups created dynamically by the filter system)
             if (!storyPopup) {
                 storyPopup = document.querySelector(`[data-story-popup-id="${storyId}"]`);
                 if (storyPopup) {
+                    // Add it to the cache for next time
                     popupCache.set(storyId, storyPopup);
                 }
             }
@@ -59,16 +89,19 @@
                 return;
             }
 
-            // Lazy-load the popup image
+            // Performance trick: only load the large image when the popup is first shown
+            // This is called "lazy loading" and makes the page load faster
             const img = storyPopup.querySelector('.popup-img');
             if (img && !img.src) {
-                img.src = img.dataset.src;
+                img.src = img.dataset.src;  // Copy from data-src to src to load the image
             }
 
+            // Make the popup visible
             storyPopup.style.display = 'block';
             storyPopup.dataset.storyOpen = true;
         }
 
+        // Hide the popup for a specific story
         function hidePopup(storyId) {
             let storyPopup = popupCache.get(storyId);
             
@@ -86,30 +119,44 @@
             }
         }
 
-        // Use event delegation for story container hover events to handle dynamically created elements
+        /*
+         * Event Delegation for Hover Events
+         * 
+         * Instead of adding hover listeners to each story individually, we watch for
+         * mouse events on the whole page. This is called "event delegation" and it's
+         * more efficient. It also works for stories added by the filter system.
+         * 
+         * The 'true' parameter means we're listening during the "capture" phase,
+         * which lets us catch events before they bubble up through the page.
+         */
+        
+        // Keep track of timeouts for each story (so we can cancel them if needed)
         let hoverTimeouts = new Map();
         
+        // When the mouse enters a story preview...
         document.addEventListener('mouseenter', (e) => {
+            // Check if the mouse entered a story container
             const container = e.target.closest('.story-image-container');
-            if (!container) return;
+            if (!container) return;  // Not a story container, ignore
             
             const storyId = container.dataset.storyId;
             if (!storyId) return;
             
-            // Clear any existing timeouts for this story
+            // Cancel any existing timeout for this story
             if (hoverTimeouts.has(storyId)) {
                 clearTimeout(hoverTimeouts.get(storyId));
                 hoverTimeouts.delete(storyId);
             }
+            // Cancel any pending hide timeout
             if (globalHideTimeout) {
                 clearTimeout(globalHideTimeout);
                 globalHideTimeout = null;
             }
             
-            // Close other popups first
+            // Close any other open popups first (only show one at a time)
             closeAllPopups();
             
-            // Show popup after delay
+            // Wait a bit before showing the popup (prevents flickering)
             const timeout = setTimeout(() => {
                 showPopup(container);
                 hoverTimeouts.delete(storyId);
@@ -117,6 +164,7 @@
             hoverTimeouts.set(storyId, timeout);
         }, true);
 
+        // When the mouse leaves a story preview...
         document.addEventListener('mouseleave', (e) => {
             const container = e.target.closest('.story-image-container');
             if (!container) return;
@@ -124,21 +172,32 @@
             const storyId = container.dataset.storyId;
             if (!storyId) return;
             
-            // Clear the show timeout if still pending
+            // If we were about to show the popup, cancel that
             if (hoverTimeouts.has(storyId)) {
                 clearTimeout(hoverTimeouts.get(storyId));
                 hoverTimeouts.delete(storyId);
             }
             
-            // Schedule hide after delay
+            // Wait a bit before hiding the popup (in case they move to the popup itself)
             globalHideTimeout = setTimeout(() => {
                 hidePopup(storyId);
                 globalHideTimeout = null;
             }, HOVER_HIDE_DELAY);
         }, true);
 
-        // Use event delegation for popup hover events to handle dynamically created popups
-        // Target the text area which has pointer-events: auto
+        /*
+         * Popup Hover Events
+         * 
+         * These listeners let you hover over the popup itself to keep it open.
+         * Without these, the popup would close as soon as you moved your mouse
+         * off the story preview.
+         * 
+         * We only listen to the text area (.story-popup-text) because the rest
+         * of the popup has pointer-events disabled (so mouse events pass through it).
+         * This lets you move your mouse around the popup without it closing.
+         */
+        
+        // When the mouse enters the popup's text area...
         document.addEventListener('mouseenter', (e) => {
             const popupText = e.target.closest('.story-popup-text');
             if (!popupText) return;
@@ -146,7 +205,7 @@
             const popup = popupText.closest('.story-popup');
             if (!popup) return;
             
-            // Cancel any pending hide timeout
+            // Cancel any pending hide timeout (keep the popup open)
             if (globalHideTimeout) {
                 clearTimeout(globalHideTimeout);
                 globalHideTimeout = null;
@@ -154,6 +213,7 @@
             popup.dataset.storyOpen = true;
         }, true);
 
+        // When the mouse leaves the popup's text area...
         document.addEventListener('mouseleave', (e) => {
             const popupText = e.target.closest('.story-popup-text');
             if (!popupText) return;
@@ -161,6 +221,7 @@
             const popup = popupText.closest('.story-popup');
             if (!popup) return;
             
+            // Wait a bit then close the popup
             globalHideTimeout = setTimeout(() => {
                 popup.style.display = 'none';
                 popup.dataset.storyOpen = false;

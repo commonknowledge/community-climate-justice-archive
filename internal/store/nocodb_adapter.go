@@ -1,4 +1,21 @@
-// Package store provides NocoDB implementation of the data adapter
+// Package store has the NocoDB version of the adapter.
+//
+// This file is the "translator" that talks to NocoDB (our current database) and
+// turns what it sends back into Story structs that the rest of the code can use.
+//
+// When something calls GetAllStories(), this adapter:
+// - Makes a request to the NocoDB API
+// - Gets back JSON data
+// - Converts it into proper Story structs
+// - Sends those back
+//
+// Same thing for GetStoriesForTheme(), GetStoryByID(), and all the other functions.
+//
+// It also handles caching (storing data temporarily so we don't have to keep asking
+// NocoDB for the same thing over and over).
+//
+// Because this adapter implements the same interface as any other adapter would,
+// we could swap it for a SQLite adapter later without changing anything else.
 package store
 
 import (

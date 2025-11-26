@@ -1,41 +1,76 @@
+{{/*
+    Homepage Template
+    
+    This is the main landing page - the first thing people see when they visit the archive.
+    It's designed for exploration and serendipity, with stories displayed in a random order
+    that changes every time you visit.
+    
+    Key features:
+    - Rotating quotes about past/present/future ("What was", "What is", "What if")
+    - Randomised story grid that shuffles on every page load
+    - Link to explore the full archive with filters
+    
+    The randomisation happens in JavaScript after the page loads, using an optimised
+    shuffling algorithm (Fisher-Yates) to keep things feeling fast and responsive.
+*/}}
 <head>
 	<title>Dudley People's School for Climate Justice – time portal</title>
     <meta name="description" content="The time portal for the Dudley People's School for Climate Justice">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/styles.css">
     <script>
-        // Shuffle the stories list
-        // This contains a lot of optimisations to make this feel faster.
-        // It feels a bit propeller-headed to do this but overall makes the page feel more responsive.
+        /*
+         * Shuffle Stories Function
+         * 
+         * This randomly reorders the stories every time the page loads, giving
+         * people a different experience each visit. We call it the "wander" experience.
+         * 
+         * The code uses several optimisations to make the shuffle feel instant:
+         * - Fisher-Yates algorithm (efficient in-place shuffling)
+         * - DocumentFragment for batch DOM operations
+         * - Single DOM update instead of moving elements one by one
+         */
         function shuffleStories() {
-            // Cache the stories list element
+            // Find the container where stories are displayed
             const storiesList = document.querySelector('.stories-list.homepage');
 
-            // Use Array.prototype.slice.call for faster array creation from NodeList
+            // Get all story elements and convert to an array
             const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
             const len = stories.length;
             
-            // Fisher-Yates shuffle in place
+            // Fisher-Yates shuffle - the standard algorithm for random shuffling
+            // It goes backwards through the list, swapping each item with a random earlier item
             for (let i = len - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [stories[i], stories[j]] = [stories[j], stories[i]];
+                [stories[i], stories[j]] = [stories[j], stories[i]];  // Swap
             }
 
-            // Use DocumentFragment for batch operations
+            // Put all the shuffled stories into a DocumentFragment
+            // This is faster than moving them one by one
             const fragment = document.createDocumentFragment();
             for (let i = 0; i < len; i++) {
                 fragment.appendChild(stories[i]);
             }
             
-            // Make visible before DOM update
+            // Make the list visible
             storiesList.classList.add('visible');
 
-            // Single DOM operation to replace all children
+            // Clear the list and add all shuffled stories in one operation
             storiesList.textContent = '';
-            
             storiesList.appendChild(fragment);
         }
 
+        /*
+         * Rotate "What If" Quotes
+         * 
+         * The homepage has rotating quotes about past, present, and future:
+         * - "What was" (reflecting on the past)
+         * - "What is" (observing the present)
+         * - "What if" (imagining the future)
+         * 
+         * They fade in and out smoothly, changing every few seconds to create
+         * a contemplative, time-portal feeling.
+         */
         function rotateWhatIfs() {
             const items = document.querySelectorAll('.what-if-rotation-item');
             let currentIndex = 0;

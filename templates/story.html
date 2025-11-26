@@ -1,3 +1,21 @@
+{{/*
+    Story Template
+    
+    This displays a single story with all its details - the main image or media,
+    the story's text, tags, location, date, and connections to other stories.
+    
+    Key features:
+    - Multiple attachment support with navigation arrows
+    - Debug console (press 'D' to show/hide) with story metadata
+    - Related stories ("inspired by" and "has inspired")
+    - Rich metadata display (themes, types, weather, location, date)
+    - Responsive image galleries for stories with multiple images
+    
+    The page adapts based on what the story has:
+    - If there's no image, we show placeholders
+    - If there are multiple images, we show navigation arrows
+    - Audio and document attachments get appropriate players/links
+*/}}
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -8,7 +26,8 @@
 </head>
 
 <body>
-    <!-- Debug Console -->
+    {{/* Debug console for maintainers - shows technical info about the story */}}
+    {{/* Press 'D' on keyboard to show/hide */}}
     <div id="debug-console" class="debug-console">
         <div class="debug-console-content">
             <span class="debug-item">ID:<strong>{{.Story.ID}}</strong></span>
