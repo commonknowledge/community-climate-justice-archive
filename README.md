@@ -221,7 +221,7 @@ graph LR
 
 **Step by step:**
 
-1. **NocoDB JSON**: Raw data with field names like "Image / video / sound" (notice the spaces!)
+1. **NocoDB JSON**: Raw data with field names like "Image / video / sound" (notice the spaces)
 2. **NocoDBStoryDTO**: A Go struct with json tags that match NocoDB's field names exactly
 3. **Story Struct**: The proper struct everyone uses, with nice Go field names and proper types
 4. **HTML Template**: The template accesses fields like `{{.Story.Finding}}` to display them
