@@ -483,9 +483,6 @@ The archive templates should be straight forward to understand what they do, but
 - [**whatwasisif-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/whatwasisif-index.html): Shows all stories categorized by "What Was/Is/If" framework.
 - [**scalepermanence-index.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/scalepermanence-index.html): Shows all stories with a specific scale of permanence classification.
 
-**Helper templates:**
-- [**nocodb-test.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/nocodb-test.html): A testing page to check if the database connection is working properly.
-
 **Shared pieces (used by other templates):**
 - [**partials/header.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/header.html): The top part of every page with the site title and navigation menu.
 - [**partials/footer.html**](https://github.com/commonknowledge/community-climate-justice-archive/blob/main/templates/partials/footer.html): The bottom part of every page with project information and contact details.
