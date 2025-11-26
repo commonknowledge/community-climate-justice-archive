@@ -246,16 +246,11 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 		}
 	}
 
-	// Debug logging for specific stories
-	if s.ID == "1" || s.ID == "12" {
-		log.Printf("DEBUG: Total attachments for story %s: %d", s.ID, len(allAttachments))
-	}
 
 	// Only log when there are no attachments for debugging purposes
 	if len(allAttachments) == 0 && (s.Image != "" || s.ImageVideoSound != "" || s.SourceImage != "") {
 		log.Printf("Warning: Story %s has image data but no valid attachments parsed", s.ID)
 	}
-
 	return allAttachments
 }
 
