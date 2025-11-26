@@ -28,22 +28,6 @@ func GetTypes() []data.Type {
 	return types
 }
 
-// uniqueTypes returns a slice of unique types.
-func uniqueTypes(types []data.Type) []data.Type {
-	seen := make(map[string]bool)
-	unique := []data.Type{}
-
-	// Loop over the slice and only keep first occurrence of each type.
-	for _, t := range types {
-		if !seen[t.Title] {
-			seen[t.Title] = true
-			unique = append(unique, t)
-		}
-	}
-
-	return unique
-}
-
 // GetGiftedByTypes retrieves all gifted by types from the database and returns them as a slice of GiftedBy.
 func GetGiftedByTypes() []data.GiftedBy {
 	adapter := GetAdapter()

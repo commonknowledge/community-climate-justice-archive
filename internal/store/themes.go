@@ -27,19 +27,3 @@ func GetThemes() []data.Theme {
 	}
 	return themes
 }
-
-// uniqueThemes returns a slice of unique themes.
-func uniqueThemes(themes []data.Theme) []data.Theme {
-	seen := make(map[string]bool)
-	unique := []data.Theme{}
-
-	// Loop over the slice and only keep first occurrence of each theme.
-	for _, t := range themes {
-		if !seen[t.Title] {
-			seen[t.Title] = true
-			unique = append(unique, t)
-		}
-	}
-
-	return unique
-}
