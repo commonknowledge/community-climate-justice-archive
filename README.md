@@ -256,7 +256,7 @@ The following field types require **specialized handling** and are **not covered
 For these complex types, refer to existing examples in the codebase:
 - MultiSelect: See `ParseThemesFromNocoDB()`, `ParseTypesFromNocoDB()`, `ParseWeatherFromNocoDB()`
 - Links/LinkToAnotherRecord: See `fetchStoryConnectionsDirect()` 
-- Attachment: See `ParseAttachmentsFromNocoDB()`
+- Attachment: Raw JSON marshalling is used (see `ImageVideoSound` field mapping in `NocoDBRecordToStoryWithClient`)
 
 #### 6. Update Filtering Data (optional)
 **File**: `internal/generate/generate.go`
@@ -528,3 +528,23 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
 ```
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
+
+## Deprecated Tools
+
+### Image Field Consolidation Tool
+
+**Status: DEPRECATED - No longer needed**
+
+The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
+
+**Important Notes:**
+- The tool is **idempotent** and safe to run multiple times
+- Running it now will not cause any issues as it will detect no changes are needed
+- The tool is kept for historical reference and potential future migrations
+- All stories now use only the `ImageVideoSound` field for attachments
+
+**Usage (if needed):**
+```bash
+go build -o consolidate-image-fields ./cmd/consolidate-image-fields
+./consolidate-image-fields --checksum  # Verify consolidation is complete
+```
