@@ -48,7 +48,7 @@ html {
 */
 :root {
     /* Background Colours */
-    --background: #FFFAF3;          /* Cream background */
+    --background: #FF0000;          /* Bright Red background */
     --white: #ffffff;
     --highlight-yellow: #FFFF99;    /* Used for hovers */
     --light-gray: var(--light-gray);
