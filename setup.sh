@@ -7,8 +7,9 @@
 # This script helps you get the archive running on your Mac by:
 # 1. Installing Homebrew (if needed)
 # 2. Installing Go (if needed)
-# 3. Creating your .env configuration file
-# 4. Optionally launching the archive
+# 3. Checking for code editors and offering to install VS Code
+# 4. Creating your .env configuration file
+# 5. Building and optionally launching the archive
 #
 # Run this with: bash setup.sh
 
@@ -87,10 +88,59 @@ else
 fi
 
 # ============================================================================
-# Step 3: Create .env file
+# Step 3: Check for code editors
 # ============================================================================
 
-echo "Step 3: Setting up environment variables..."
+echo "Step 3: Checking for code editors..."
+echo ""
+
+# Check which editors are installed
+VSCODE_INSTALLED=false
+SUBLIME_INSTALLED=false
+ATOM_INSTALLED=false
+
+if command -v code &> /dev/null; then
+    VSCODE_INSTALLED=true
+    echo "✓ Visual Studio Code is installed"
+fi
+
+if [ -d "/Applications/Sublime Text.app" ]; then
+    SUBLIME_INSTALLED=true
+    echo "✓ Sublime Text is installed"
+fi
+
+if [ -d "/Applications/Atom.app" ]; then
+    ATOM_INSTALLED=true
+    echo "✓ Atom is installed"
+fi
+
+if [[ "$VSCODE_INSTALLED" == "false" && "$SUBLIME_INSTALLED" == "false" && "$ATOM_INSTALLED" == "false" ]]; then
+    echo "No common code editors detected."
+    echo ""
+    echo "A code editor makes it much easier to work with the archive."
+    echo ""
+    read -p "Would you like to install Visual Studio Code? (y/n): " INSTALL_VSCODE
+    echo ""
+    
+    if [[ "$INSTALL_VSCODE" =~ ^[Yy]$ ]]; then
+        echo "Installing Visual Studio Code..."
+        brew install --cask visual-studio-code
+        echo ""
+        echo "✓ Visual Studio Code installed successfully"
+        echo ""
+    else
+        echo "Skipping editor installation."
+        echo ""
+    fi
+else
+    echo ""
+fi
+
+# ============================================================================
+# Step 4: Create .env file
+# ============================================================================
+
+echo "Step 4: Setting up environment variables..."
 echo ""
 echo "The archive needs some configuration to connect to NocoDB."
 echo "I'll ask you for each setting now."
@@ -137,10 +187,10 @@ if [[ "$SKIP_ENV" != "true" ]]; then
 fi
 
 # ============================================================================
-# Step 4: Build and optionally run the archive
+# Step 5: Build and optionally run the archive
 # ============================================================================
 
-echo "Step 4: Building the archive..."
+echo "Step 5: Building the archive..."
 echo ""
 
 # Build the archive binary
