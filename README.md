@@ -372,6 +372,38 @@ When you push commits to the `main` branch, Render automatically:
 That's it! Render does all the work - building the site and hosting it. No GitHub Actions or manual deployment needed.
 ## Local Development
 
+### Prerequisites
+
+Before you start, you'll need **Git**[^git] installed on your Mac to download the repository.
+
+#### Installing Git on macOS
+
+You have two options:
+
+**Option 1: GitHub Desktop (Recommended for beginners)**
+
+GitHub Desktop includes Git and provides a visual interface:
+
+1. Download from [desktop.github.com](https://desktop.github.com/)
+2. Install the application
+3. Git will be available in your terminal automatically
+
+**Option 2: Command Line**
+
+Install Git via Xcode Command Line Tools (takes 5-15 minutes):
+
+```bash
+xcode-select --install
+```
+
+A dialogue will appear - click "Install" and wait for it to complete.
+
+To verify Git is installed:
+
+```bash
+git --version
+```
+
 ### Quick Start (macOS)
 
 We've created an automated setup script that handles everything for you.
@@ -392,6 +424,7 @@ bash setup.sh
 The script will:
 - Check for Homebrew[^homebrew] and install it if needed
 - Check for Go and prompt you to install it if needed
+- Check for code editors (VS Code, Sublime Text, Atom) and offer to install VS Code if none are found
 - Ask you for your NocoDB configuration (endpoint, API key, table ID)
 - Build the archive
 - Optionally launch it in development mode
