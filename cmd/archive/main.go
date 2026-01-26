@@ -17,7 +17,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -40,24 +39,28 @@ import (
 // - Processes all the images (unless you've skipped them)
 // - Fills in the HTML templates with the actual data
 // - Writes all the HTML files to the out/ folder
-// - Copies over the CSS and images
+// - Copies over the CSS, JS, and other assets
 //
-// Times the build and displays how long it took at the end.
-func generateArchive(skipImages bool) error {
+// The skipImages and skipImageCopy parameters let you skip parts of the build:
+// - skipImages: Don't process/resize images (for quick template testing)
+// - skipImageCopy: Don't copy images to output (for hot reloads where images haven't changed)
+func generateArchive(skipImages bool, skipImageCopy bool) error {
 	// Record when the build started so we can show how long it took
 	buildStartTime := time.Now()
-	
+
 	log.Println("Starting build process")
 
 	// Warm the cache to ensure all subsequent operations are fast
 	store.WarmCache()
 
+	// Process images (resize, convert to WebP) unless skipped
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {
 			return fmt.Errorf("failed to process images: %v", err)
 		}
 	}
 
+	// Generate all the HTML pages
 	if err := generate.WriteStories(); err != nil {
 		return fmt.Errorf("failed to write stories: %v", err)
 	}
@@ -106,8 +109,11 @@ func generateArchive(skipImages bool) error {
 		return fmt.Errorf("failed to write time period indexes: %v", err)
 	}
 
-	if err := generate.CopyImagesToOutput(); err != nil {
-		return fmt.Errorf("failed to copy images: %v", err)
+	// Copy assets to output folder
+	if !skipImageCopy {
+		if err := generate.CopyImagesToOutput(); err != nil {
+			return fmt.Errorf("failed to copy images: %v", err)
+		}
 	}
 
 	if err := generate.CopyAudioToOutput(); err != nil {
@@ -128,97 +134,19 @@ func generateArchive(skipImages bool) error {
 
 	// Calculate how long the build took
 	buildDuration := time.Since(buildStartTime)
-	
+
 	// Display completion message with build time
-	log.Printf("Build process completed successfully in %s", formatDuration(buildDuration))
+	if skipImages {
+		log.Printf("Build completed (images skipped) in %s", formatDuration(buildDuration))
+	} else {
+		log.Printf("Build completed in %s", formatDuration(buildDuration))
+	}
 
 	return nil
 }
 
-func hotRegenerate() error {
-	// Record when the regeneration started so we can show how long it took
-	regenStartTime := time.Now()
-	
-	log.Println("Starting partial build process")
-
-	// Warm the cache to ensure all subsequent operations are fast
-	store.WarmCache()
-
-	if err := generate.WriteStories(); err != nil {
-		return fmt.Errorf("failed to write stories: %v", err)
-	}
-
-	if err := generate.WriteHomePage(); err != nil {
-		return fmt.Errorf("failed to write homepage: %v", err)
-	}
-
-	if err := generate.WriteWanderPage(); err != nil {
-		return fmt.Errorf("failed to write wander page: %v", err)
-	}
-
-	if err := generate.WriteArchivePage(); err != nil {
-		return fmt.Errorf("failed to write archive page: %v", err)
-	}
-
-	if err := generate.WriteFilterData(); err != nil {
-		return fmt.Errorf("failed to write filter data: %v", err)
-	}
-
-	if err := generate.WriteTypesIndexes(); err != nil {
-		return fmt.Errorf("failed to write types indexes: %v", err)
-	}
-
-	if err := generate.WriteThemesIndexes(); err != nil {
-		return fmt.Errorf("failed to write themes indexes: %v", err)
-	}
-
-	if err := generate.WriteWeatherIndexes(); err != nil {
-		return fmt.Errorf("failed to write weather indexes: %v", err)
-	}
-
-	if err := generate.WriteGiftedByIndexPages(); err != nil {
-		return fmt.Errorf("failed to write gifted by indexes: %v", err)
-	}
-
-	if err := generate.WriteScalePermanenceIndexPages(); err != nil {
-		return fmt.Errorf("failed to write scale permanence indexes: %v", err)
-	}
-
-	if err := generate.WriteWhatWasIsIfIndexPages(); err != nil {
-		return fmt.Errorf("failed to write what was/is/if indexes: %v", err)
-	}
-
-	if err := generate.WriteTimePeriodIndexPages(); err != nil {
-		return fmt.Errorf("failed to write time period indexes: %v", err)
-	}
-
-	// Copy non-image files during hot regeneration
-	if err := generate.CopyAudioToOutput(); err != nil {
-		return fmt.Errorf("failed to copy audio files: %v", err)
-	}
-
-	if err := generate.CopyDocumentsToOutput(); err != nil {
-		return fmt.Errorf("failed to copy document files: %v", err)
-	}
-
-	if err := generate.CopyCSSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy CSS: %v", err)
-	}
-
-	if err := generate.CopyJSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy JavaScript: %v", err)
-	}
-
-	// Calculate how long the regeneration took
-	regenDuration := time.Since(regenStartTime)
-	
-	// Display completion message with regeneration time
-	log.Printf("Partial build process completed successfully in %s", formatDuration(regenDuration))
-
-	return nil
-}
-
-// watchCSS sets up a file watcher for the CSS directory and copies the CSS when changes are detected.
+// watchCSS sets up a file watcher for the CSS directory.
+// When CSS files change, they're automatically copied to the output folder.
 func watchCSS() (*fsnotify.Watcher, error) {
 	log.Println("Setting up CSS watcher...")
 	watcher, err := fsnotify.NewWatcher()
@@ -293,120 +221,34 @@ func watchCSS() (*fsnotify.Watcher, error) {
 //   - 1.234s → "1.2s"
 //   - 45.678s → "45.7s"
 //   - 1m30s → "1m 30s"
-//   - 2m5s → "2m 5s"
 func formatDuration(d time.Duration) string {
 	// For durations under a minute, show seconds with one decimal place
 	if d < time.Minute {
 		seconds := float64(d) / float64(time.Second)
 		return fmt.Sprintf("%.1fs", seconds)
 	}
-	
+
 	// For longer durations, show minutes and seconds
 	minutes := int(d.Minutes())
 	seconds := int(d.Seconds()) % 60
 	return fmt.Sprintf("%dm %ds", minutes, seconds)
 }
 
-// waitForInput waits for input and then rebuilds the archive when enter is pressed.
+// waitForInput waits for the user to press enter.
+// Used in development mode to trigger a rebuild.
 func waitForInput() {
-	log.Println("Press enter to generate the archive...")
+	log.Println("Press enter to regenerate the archive...")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadRune()
 }
 
-// dumpNocoDBData dumps raw NocoDB API response data to JSON file for debugging
-func dumpNocoDBData() error {
-	log.Println("Starting raw NocoDB API data dump for debugging...")
-
-	// Load configuration from environment variables and .env file
-	config.LoadConfig()
-
-	// We need to get the raw NocoDB records directly, bypassing the story conversion
-	adapter := store.GetAdapter()
-
-	// Check if we're using NocoDB adapter
-	nocodbAdapter, ok := adapter.(*store.NocoDBAdapter)
-	if !ok {
-		return fmt.Errorf("debug dump only works with NocoDB adapter, currently using: %T", adapter)
-	}
-
-	// Get raw records directly from NocoDB client
-	rawRecords, err := nocodbAdapter.GetRawRecords()
-	if err != nil {
-		return fmt.Errorf("failed to get raw records from NocoDB: %v", err)
-	}
-
-	log.Printf("Retrieved %d raw records from NocoDB API for debugging dump", len(rawRecords))
-
-	// Create debug data structure with raw NocoDB response
-	debugData := struct {
-		TotalRecords int                      `json:"total_records"`
-		RawRecords   []map[string]interface{} `json:"raw_records"`
-		DumpTime     string                   `json:"dump_time"`
-		Note         string                   `json:"note"`
-	}{
-		TotalRecords: len(rawRecords),
-		RawRecords:   rawRecords,
-		DumpTime:     time.Now().Format(time.RFC3339),
-		Note:         "This contains the raw NocoDB API response before any processing or conversion to Story structs",
-	}
-
-	// Write to JSON file
-	file, err := os.Create("debug-raw-nocodb-data.json")
-	if err != nil {
-		return fmt.Errorf("failed to create debug file: %v", err)
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(debugData); err != nil {
-		return fmt.Errorf("failed to write debug data: %v", err)
-	}
-
-	log.Println("Raw NocoDB API data dump completed successfully -> debug-raw-nocodb-data.json")
-	return nil
-}
-
-// generateSingleStory regenerates a single story by ID for debugging
-func generateSingleStory(storyID string) error {
-	log.Printf("Starting single story regeneration for ID: %s", storyID)
-
-	// Warm cache to ensure data is available
-	store.WarmCache()
-
-	// Get the specific story
-	adapter := store.GetAdapter()
-	story, err := adapter.GetStoryByID(storyID)
-	if err != nil {
-		return fmt.Errorf("failed to get story %s: %v", storyID, err)
-	}
-
-	if story.ID == "" {
-		return fmt.Errorf("story with ID %s not found", storyID)
-	}
-
-	log.Printf("Found story: %s", story.Finding)
-
-	// Generate just this story
-	if err := generate.WriteSingleStory(story); err != nil {
-		return fmt.Errorf("failed to write story %s: %v", storyID, err)
-	}
-
-	log.Printf("Single story regeneration completed successfully for: %s", storyID)
-	return nil
-}
-
 // main builds the archive and optionally serves it in development mode.
 func main() {
+	// Define command-line flags
 	devMode := flag.Bool("development", false, "Run in development mode with live reload")
 	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
 	skipImages := flag.Bool("skip-images", false, "Skip image processing and generation")
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
-	debugMode := flag.Bool("debug", false, "Enable verbose debug logging")
-	flag.BoolVar(debugMode, "v", false, "Enable verbose debug logging (shorthand)")
-	debugDump := flag.Bool("debug-dump", false, "Dump raw NocoDB data to JSON file for debugging")
-	storyID := flag.String("story-id", "", "Regenerate a specific story by ID (for debugging)")
 	clearCache := flag.Bool("clear-cache", false, "Clear the disk cache and fetch fresh data from NocoDB")
 	useCacheOnly := flag.Bool("cache-only", false, "Use only disk cache, fail if not available (for offline debugging)")
 	flag.Parse()
@@ -414,19 +256,18 @@ func main() {
 	// Load configuration from environment variables and .env file
 	config.LoadConfig()
 
-	// Initialize the data adapter based on configuration
-	if err := store.InitializeAdapter(); err != nil {
-		log.Fatalf("Failed to initialize data adapter: %v", err)
+	// Initialize the store (connects to NocoDB)
+	if err := store.Initialize(); err != nil {
+		log.Fatalf("Failed to initialize store: %v", err)
 	}
 
 	// Handle cache management flags
 	if *clearCache {
 		log.Println("Clearing all caches...")
-		adapter := store.GetAdapter()
-		if err := adapter.DropCache(); err != nil {
+		if err := store.DropCache(); err != nil {
 			log.Printf("Warning: Failed to drop in-memory cache: %v", err)
 		}
-		if err := adapter.ClearDiskCache(); err != nil {
+		if err := store.ClearDiskCache(); err != nil {
 			log.Printf("Warning: Failed to clear disk cache: %v", err)
 		}
 		log.Println("Cache clearing completed")
@@ -435,59 +276,42 @@ func main() {
 
 	if *useCacheOnly {
 		log.Println("Cache-only mode: Will only use disk cache, no API calls")
-		adapter := store.GetAdapter()
-		adapter.SetCacheOnlyMode(true)
-	}
-
-	// Handle debug dump flag
-	if *debugDump {
-		if err := dumpNocoDBData(); err != nil {
-			log.Fatalf("Debug dump failed: %v", err)
-		}
-		return
-	}
-
-	// Handle single story regeneration flag
-	if *storyID != "" {
-		if err := generateSingleStory(*storyID); err != nil {
-			log.Fatalf("Single story generation failed: %v", err)
-		}
-		return
+		store.SetCacheOnlyMode(true)
 	}
 
 	if *skipImages {
 		log.Println("Skipping image processing and generation")
 	}
 
-	// Build the archive.
-	if err := generateArchive(*skipImages); err != nil {
+	// Build the archive (full build on first run)
+	if err := generateArchive(*skipImages, false); err != nil {
 		log.Fatalf("Initial build failed: %v", err)
 	}
 
+	// If in development mode, start the server and watch for changes
 	if *devMode {
 		log.Println("Starting development server...")
+
 		// Start a simple HTTP server to serve the archive on port 8080.
-		// The "go" keyword is used to run the server in a separate "goroutine".
-		// A goroutine is a lightweight way of running a function in parallel with the main program.
-		// This allows the server to run concurrently with the main program.
-		// For more information see: https://go.dev/doc/effective_go#goroutines
+		// The "go" keyword runs the server in a separate goroutine (parallel thread).
+		// This allows the server to run while we wait for user input.
 		go server.Serve()
 
-		// Watch the CSS directory for changes and keep the watcher alive
+		// Watch the CSS directory for changes
 		watcher, err := watchCSS()
 		if err != nil {
 			log.Printf("Failed to initialize CSS watcher: %v", err)
 		} else {
-			// Defer closing the watcher until the program exits
 			defer watcher.Close()
 		}
 
 		log.Println("Development server running at http://localhost:8080")
 
-		// Wait for input and then rebuild the archive when enter is pressed.
+		// Wait for user to press enter, then rebuild
 		for {
 			waitForInput()
-			if err := hotRegenerate(); err != nil {
+			// Hot regenerate: skip image processing and image copying (they're unchanged)
+			if err := generateArchive(true, true); err != nil {
 				log.Printf("Hot regeneration failed: %v", err)
 			}
 		}
