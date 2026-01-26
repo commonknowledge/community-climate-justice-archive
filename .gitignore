@@ -1,48 +1,33 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# Compiled binary (at repo root only)
+/archive
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Build output
+out/
+out-*/
 
-# Go workspace file
+# Environment and config (may contain secrets)
+.env
+
+# Database files
+*.db
+*.db-journal
+
+# Cache files (auto-generated, safe to delete)
+debug-cache-nocodb.json
+
+# Go workspace
 go.work
 go.work.sum
 
-# env file
-.env
-
-# Configuration files that may contain sensitive data
-*.db
-.env
-
-# Cache files - auto-generated for performance (safe to delete/regenerate)
-debug-cache-nocodb.json
-
-# For the moment, we aren't commiting our output files
-out/*
-!out/.gitkeep
-
-# Ignore any CSV files that we generate for statistics
+# Generated files
 *.csv
-
-# Build directories
-out/
-out-*/
-*.db-journal
-.env
-
-# WebP encoding failure log
+*.out
 webp_failures.log
