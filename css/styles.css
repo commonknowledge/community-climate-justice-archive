@@ -2187,14 +2187,27 @@ Uses cream background with dashed border and flexible layout.
     text-decoration: underline;
 }
 
-/* .about-quote-right / .about-quote-left
-   Indentation for alternating quotes */
-.about-quote-right {
+/* .about-quote-indent
+   Indentation for first quote */
+.about-quote-indent {
     padding-left: 11.55556rem;
 }
 
-.about-quote-left {
-    padding-right: 11.55556rem;
+/* .about-quote-with-image
+   Quote displayed alongside image */
+.about-quote-with-image {
+    display: flex;
+    gap: 2.22222rem;
+    align-items: flex-start;
+}
+
+.about-quote-with-image .about-figure {
+    flex-shrink: 0;
+    max-width: 20rem;
+}
+
+.about-quote-with-image .about-quote {
+    flex: 1;
 }
 
 /* .about-what-if
@@ -2376,10 +2389,16 @@ Uses cream background with dashed border and flexible layout.
         padding-top: 0;
     }
 
-    .about-quote-right,
-    .about-quote-left {
+    .about-quote-indent {
         padding-left: 0;
-        padding-right: 0;
+    }
+
+    .about-quote-with-image {
+        flex-direction: column;
+    }
+
+    .about-quote-with-image .about-figure {
+        max-width: 100%;
     }
 
     .about-what-if {
