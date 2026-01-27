@@ -23,6 +23,7 @@
             <a class="dashed-button" href="/">Wander</a>
             <a class="dashed-button" href="/archive.html">Archive</a>
             <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
+            <a class="dashed-button" href="/about.html">About</a>
             <!-- Link to NocoDB form where people can add new stories -->
             <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
         </nav>
@@ -57,20 +58,47 @@
     })();
 
     // Highlight the current page's button
-    // So if you're on the Archive page, the Archive button gets a yellow background
+    // Automatically matches nav links to the current URL - no need to update when adding new pages
     (function() {
-        const navButtons = document.querySelectorAll('.header-nav .dashed-button');
-        const currentPath = window.location.pathname;  // Like "/archive.html"
-        
-        navButtons.forEach(button => {
+        function removeLeadingSlash(path) {
+            if (path.startsWith('/')) return path.slice(1);
+            return path;
+        }
+
+        function removeHtmlExtension(path) {
+            if (path.endsWith('.html')) return path.slice(0, -5);
+            return path;
+        }
+
+        function getPageName(href) {
+            let pageName = href;
+            pageName = removeLeadingSlash(pageName);
+            pageName = removeHtmlExtension(pageName);
+            return pageName;
+        }
+
+        const currentPath = window.location.pathname;
+
+        document.querySelectorAll('.header-nav .dashed-button').forEach(button => {
             const href = button.getAttribute('href');
-            
-            // Check if this button's link matches the current page
-            if (currentPath === href || 
-                (currentPath === '/' && href === '/') ||
-                (currentPath.includes('archive') && href === '/archive.html') ||
-                (currentPath.includes('wander') && href === '/wander.html')) {
-                button.style.backgroundColor = '#FFFF99';  // Yellow highlight
+
+            // Skip external links
+            if (href.startsWith('http')) return;
+
+            // Get the page name from the href, e.g. "/archive.html" becomes "archive"
+            const pageName = getPageName(href);
+
+            // Check if this button matches the current page
+            let isMatch = false;
+            if (currentPath === href) {
+                isMatch = true;
+            }
+            if (pageName && currentPath.includes(pageName)) {
+                isMatch = true;
+            }
+
+            if (isMatch) {
+                button.style.backgroundColor = '#FFFF99';
             }
         });
     })();
