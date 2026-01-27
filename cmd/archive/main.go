@@ -77,6 +77,10 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		return fmt.Errorf("failed to write archive page: %v", err)
 	}
 
+	if err := generate.WriteAboutPage(); err != nil {
+		return fmt.Errorf("failed to write about page: %v", err)
+	}
+
 	if err := generate.WriteFilterData(); err != nil {
 		return fmt.Errorf("failed to write filter data: %v", err)
 	}
