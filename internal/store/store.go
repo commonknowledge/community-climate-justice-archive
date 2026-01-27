@@ -369,6 +369,11 @@ func GetWeather() []data.Weather {
 		weather = append(weather, w)
 	}
 
+	// Sort alphabetically by title
+	sort.Slice(weather, func(i, j int) bool {
+		return weather[i].Title < weather[j].Title
+	})
+
 	return weather
 }
 
@@ -415,6 +420,11 @@ func GetGiftedByTypes() []data.GiftedBy {
 	for _, giftedBy := range giftedByMap {
 		giftedByTypes = append(giftedByTypes, giftedBy)
 	}
+
+	// Sort alphabetically by title
+	sort.Slice(giftedByTypes, func(i, j int) bool {
+		return giftedByTypes[i].Title < giftedByTypes[j].Title
+	})
 
 	return giftedByTypes
 }
@@ -463,6 +473,11 @@ func GetScalePermanenceTypes() []data.ScalePermanence {
 		scalePermanenceTypes = append(scalePermanenceTypes, sp)
 	}
 
+	// Sort alphabetically by title
+	sort.Slice(scalePermanenceTypes, func(i, j int) bool {
+		return scalePermanenceTypes[i].Title < scalePermanenceTypes[j].Title
+	})
+
 	return scalePermanenceTypes
 }
 
@@ -508,6 +523,11 @@ func GetWhatWasIsIfTypes() []data.WhatWasIsIf {
 	for _, wwii := range wwiiMap {
 		whatWasIsIfTypes = append(whatWasIsIfTypes, wwii)
 	}
+
+	// Sort alphabetically by title
+	sort.Slice(whatWasIsIfTypes, func(i, j int) bool {
+		return whatWasIsIfTypes[i].Title < whatWasIsIfTypes[j].Title
+	})
 
 	return whatWasIsIfTypes
 }
@@ -555,6 +575,11 @@ func GetTimePeriodTypes() []data.TimePeriod {
 	for _, tp := range tpMap {
 		timePeriodTypes = append(timePeriodTypes, tp)
 	}
+
+	// Sort alphabetically by title
+	sort.Slice(timePeriodTypes, func(i, j int) bool {
+		return timePeriodTypes[i].Title < timePeriodTypes[j].Title
+	})
 
 	return timePeriodTypes
 }
