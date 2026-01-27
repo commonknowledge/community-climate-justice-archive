@@ -15,6 +15,7 @@ import (
 	"log"
 	"math/rand"
 	"path/filepath"
+	"sort"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/nocodb"
@@ -266,6 +267,11 @@ func GetThemes() []data.Theme {
 		themes = append(themes, theme)
 	}
 
+	// Sort alphabetically by title
+	sort.Slice(themes, func(i, j int) bool {
+		return themes[i].Title < themes[j].Title
+	})
+
 	return themes
 }
 
@@ -311,6 +317,11 @@ func GetTypes() []data.Type {
 	for _, typ := range typeMap {
 		types = append(types, typ)
 	}
+
+	// Sort alphabetically by title
+	sort.Slice(types, func(i, j int) bool {
+		return types[i].Title < types[j].Title
+	})
 
 	return types
 }
