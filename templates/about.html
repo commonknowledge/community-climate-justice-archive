@@ -1,0 +1,197 @@
+{{/*
+    About Page Template
+
+    This page tells the story of the Dudley Time Portal project - its origins,
+    what you'll find in it, and how to get involved.
+
+    The page is organised into three time perspectives:
+    - In the past: How the project started and what inspired it
+    - In the present: What you'll find in the archive today
+    - In the future: Upcoming gatherings and events
+
+    Content is static - edit this template directly to update the page.
+*/}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the project - Dudley Time Portal</title>
+    <meta name="description" content="Learn about the Dudley Time Portal, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+
+<body>
+    {{template "header" .}}
+
+    <main class="about-page">
+        <h1 class="about-title">About the project</h1>
+
+        <div class="about-layout">
+            <!-- Sticky sidebar navigation -->
+            <nav class="about-sidebar">
+                <a href="#past" class="dashed-button about-nav-button active">In the past</a>
+                <a href="#present" class="dashed-button about-nav-button">In the present</a>
+                <a href="#future" class="dashed-button about-nav-button">In the future</a>
+            </nav>
+
+            <!-- Main content -->
+            <div class="about-content">
+
+                <!-- PAST SECTION -->
+                <section id="past" class="about-section">
+                    <div class="about-section-content">
+                        <p class="about-body">
+                            Back in 2021, folk who care about Dudley were curious about co-creating an archive that brings together local stories of the past with observations and activities of the present with imaginings of the future. We wanted to spend time with this archive to reveal many understandings of Dudley and inspire imaginings of futures in which all life can flourish so we can find ways to bring us closer to those futures.
+                        </p>
+
+                        <p class="about-lead">We were inspired by…</p>
+                    </div>
+
+                    <div class="about-quotes">
+                        <blockquote class="about-quote about-quote-right">
+                            <p>'In many Indigenous ways of knowing, time is not a river, but a lake in which the past, the present, and the future exist.'</p>
+                            <cite>Robin Wall Kimmerer, Braiding Sweetgrass: Indigenous Wisdom, Scientific Knowledge, and the Teaching of Plants</cite>
+                        </blockquote>
+
+                        <blockquote class="about-quote about-quote-left">
+                            <p>'In an Andean understanding of time, the past, present and future are directly interconnected and happening in the same moment… objects, people and places… transcend time, bringing a living past into the present to influence and inform the future.'</p>
+                            <cite><a href="https://www.britishmuseum.org/exhibitions/peru-journey-time">British Museum, Peru: A Journey in Time</a></cite>
+                        </blockquote>
+
+                        <blockquote class="about-quote about-quote-right">
+                            <p>'In many Indigenous ways of knowing, time is not a river, but a lake in which the past, the present, and the future exist.'</p>
+                            <cite>Robin Wall Kimmerer, Braiding Sweetgrass: Indigenous Wisdom, Scientific Knowledge, and the Teaching of Plants</cite>
+                        </blockquote>
+                    </div>
+
+                    <div class="about-section-content">
+                        <p class="about-body">
+                            The CoLab Dudley team created an online archive to get us started. In 2024, community technologists <a href="https://commonknowledge.coop/">Common Knowledge</a> joined us to co-create a more Nature, people and time friendly and inspiring Dudley Time Portal.
+                        </p>
+
+                        <a class="dashed-button" href="https://www.colabdudley.net/">Learn more about the design process</a>
+                    </div>
+
+                    <div class="about-what-if">
+                        <span class="about-what-if-label">What if…</span>
+                        <p class="about-what-if-text">people could develop deep connections with the places they live or work in: connections that invite care, relationships with life, and learning through creative doing that deepens the climate resilience of that place?</p>
+                    </div>
+                </section>
+
+                <!-- PRESENT SECTION -->
+                <section id="present" class="about-section">
+                    <h2 class="about-section-title">In the Dudley Time Portal you will find…</h2>
+
+                    <div class="about-category">
+                        <span class="about-pill">Gifts</span>
+                        <p class="about-body">
+                            ideas, photos, stories, doodles, knowledge, collages, models, poems, thoughts, sounds, experiments, drawings, research, videos that have been gifted to the archive by…
+                        </p>
+                    </div>
+
+                    <div class="about-category">
+                        <span class="about-pill">Co-creators</span>
+                        <p class="about-body">
+                            Many people who care about Dudley Borough have contributed to the evolution of Dudley Time Portal: learners, doers, history sharers, artists, film makers, architects, educators, photographers, researchers, Nature stewards, passersby… and maybe even you! You are welcome to become a co-creator of the Dudley Time Portal and add your own gifts through this form or join us at our collective archiving gatherings. You are also welcome to become part of our community of…
+                        </p>
+                    </div>
+
+                    <div class="about-category">
+                        <span class="about-pill">Stewards</span>
+                        <p class="about-body">
+                            Dudley Time Portal is a place of collective and distributed care - if one person looked after the archive, it wouldn't last long. Instead, several stewards tend to the archive in the hope it will become more resilient.
+                        </p>
+                    </div>
+
+                    <div class="about-category">
+                        <span class="about-pill">More-than-human companions</span>
+                        <p class="about-body">
+                            Throughout Dudley Time Portal you will meet beings from Nature. They invite us to experience the world in different ways so we can imagine futures where all life can flourish. You might want to find a companion to keep you company through your visit.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- FUTURE SECTION -->
+                <section id="future" class="about-section">
+                    <p class="about-body">
+                        This is where we will share upcoming gatherings to spend time with and add to Dudley Time Portal. You are also welcome to send us suggestions.
+                    </p>
+
+                    <div class="about-events">
+                        <a href="#" class="about-event">
+                            <div class="about-event-image">
+                                <img src="/images/event-placeholder.jpg" alt="Collective archiving gathering">
+                            </div>
+                            <div class="about-event-text">
+                                <h3 class="about-event-title">December collective archiving gathering</h3>
+                                <p class="about-event-date">6–8pm, Monday 8 December<br>CoLab Dudley</p>
+                                <span class="about-event-link">More info & RSVP</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="about-event">
+                            <div class="about-event-image">
+                                <img src="/images/event-placeholder.jpg" alt="Collective archiving gathering">
+                            </div>
+                            <div class="about-event-text">
+                                <h3 class="about-event-title">February collective archiving gathering</h3>
+                                <p class="about-event-date">6–8pm, Monday 13 February<br>CoLab Dudley</p>
+                                <span class="about-event-link">More info & RSVP</span>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- SHARING SECTION -->
+                <section class="about-section about-sharing">
+                    <h2 class="about-section-title">An invitation to share with care</h2>
+
+                    <p class="about-body">
+                        Everything in the Dudley Time Portal is licensed under CC BY-NC-SA 4.0 which requires reusers/evolvers to give credit to the co-creators. It allows reusers/evolvers to share, remix, adapt, and build upon the material in any medium or format, for noncommercial purposes only, under the same share-alike terms. We'd also love to hear about it too to gift learning to each other.
+                    </p>
+
+                    <p class="about-body">
+                        At various stages of its evolution, Dudley Time Portal has been funded by National Lottery Climate Action Fund and Arts Council England (via The Space).
+                    </p>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    {{template "footer" .}}
+
+    <script>
+        // Simple script to highlight active section in sidebar
+        (function() {
+            const sections = document.querySelectorAll('.about-section[id]');
+            const navButtons = document.querySelectorAll('.about-nav-button');
+
+            function updateActiveNav() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navButtons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.getAttribute('href') === '#' + current) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+            updateActiveNav();
+        })();
+    </script>
+</body>
+
+</html>
