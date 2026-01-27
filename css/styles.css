@@ -908,40 +908,90 @@ Document download display for main story attachments, centered between navigatio
     color: #fff;
 }
 
-/* Story No Attachments
+/* Text-Only Story Hero
 
-Discrete display when story has no attached media, centered and subtle.
+Display for stories without media attachments on the story page.
+Shows the Finding text as the primary content.
 */
-.story-no-attachments {
+.story-text-only-hero {
+    padding: 40px;
+    max-width: 787px;
+}
+
+.story-text-only-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    min-height: 150px;
-    text-align: center;
-    color: #999;
+    gap: 20px;
 }
 
-.no-attachment-placeholder {
-    margin-bottom: 0.75rem;
-    opacity: 0.6;
-}
-
-.no-attachment-placeholder svg {
-    width: 32px;
-    height: 32px;
-    stroke: #ccc;
-}
-
-.story-no-attachments p {
+.story-text-only-body {
     font-family: 'Times New Roman', serif;
-    font-size: 1.22222rem;
+    font-size: 1.5rem;
     font-weight: 400;
-    line-height: 140%;
-    letter-spacing: -0.02rem;
-    color: #aaa;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
     margin: 0;
+}
+
+/* Text-Only Card in Listings
+
+White card with text preview for stories without attachments.
+Used in archive grid, homepage, and related stories sections.
+*/
+.story-text-only-card {
+    background-color: #fff;
+}
+
+.story-text-only-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.story-text-only-preview-text {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+}
+
+/* Text-Only Popup
+
+Popup display for text-only stories in the grid view.
+*/
+.popup-text-only {
+    background-color: #fff;
+    padding: 30px;
+    min-height: 200px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.popup-text-only-content {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 12;
+    -webkit-box-orient: vertical;
 }
 
 /* Story Details
@@ -1660,6 +1710,10 @@ A button with a dashed border for navigation and actions.
     flex: 1;
     min-width: 0;
     height: 100%;
+}
+
+.big-button-content-text-only {
+    padding: 1.11111rem;
 }
 
 .big-button-title {
