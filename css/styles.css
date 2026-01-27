@@ -2343,6 +2343,25 @@ Uses cream background with dashed border and flexible layout.
     margin: 0;
 }
 
+/* .about-figure
+   Image with caption */
+.about-figure {
+    margin: 0;
+}
+
+.about-figure img {
+    max-width: 100%;
+    height: auto;
+}
+
+.about-figure figcaption {
+    color: var(--gray-text);
+    font-family: Arial, sans-serif;
+    font-size: 0.88889rem;
+    line-height: 1.4;
+    margin-top: 0.55556rem;
+}
+
 /* Responsive layout for About page */
 @media (max-width: 900px) {
     .about-layout {
