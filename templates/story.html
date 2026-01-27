@@ -150,21 +150,20 @@
         {{end}}
     </script>
     {{else}}
-    <div class="story-no-attachments">
-        <div class="no-attachment-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21,15 16,10 5,21"></polyline>
-            </svg>
+    {{/* Text-only story - display the Finding as the hero content */}}
+    <div class="story-text-only-hero">
+        <div class="story-text-only-content">
+            <p class="story-text-only-body">{{$story.Finding}}</p>
         </div>
-        <p>This story has no attached media</p>
     </div>
     {{end}}
     <div class="story-details">
+        {{/* Only show Finding in details if story has attachments - text-only shows it in hero */}}
+        {{if $attachments}}
         <div class="story-finding">
             {{$story.Finding}}
         </div>
+        {{end}}
         <div class="story-metadata">
             <div class="story-metadata-item-group">
                 {{if $story.CreatedTime}}
@@ -344,19 +343,9 @@
                             </div>
                         </div>
                     {{else}}
-                        <div class="big-button-image">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                        {{/* Text-only: no image area needed, text shows in content */}}
                     {{end}}
-                    <div class="big-button-content">
+                    <div class="big-button-content {{if eq .AttachmentType "none"}}big-button-content-text-only{{end}}">
                         <p class="big-button-title">{{.Finding}}</p>
                     </div>
                 </a>
@@ -399,19 +388,9 @@
                             </div>
                         </div>
                     {{else}}
-                        <div class="big-button-image">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                        {{/* Text-only: no image area needed, text shows in content */}}
                     {{end}}
-                    <div class="big-button-content">
+                    <div class="big-button-content {{if eq .AttachmentType "none"}}big-button-content-text-only{{end}}">
                         <p class="big-button-title">{{.Finding}}</p>
                     </div>
                 </a>
