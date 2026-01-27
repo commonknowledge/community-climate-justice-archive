@@ -121,24 +121,6 @@ func GetAllStories() []data.Story {
 	return approvedStories
 }
 
-// GetAllStoriesUnfiltered fetches every story in the archive, regardless of approval status.
-//
-// Use this for admin tools that need to see all stories, including hidden ones.
-// For normal archive building, use GetAllStories() instead which filters by approval.
-func GetAllStoriesUnfiltered() []data.Story {
-	if client == nil {
-		log.Fatal("Store not initialised - call Initialize() first")
-	}
-
-	records, err := client.GetAllRecords()
-	if err != nil {
-		log.Fatalf("Failed to get all records from NocoDB: %v", err)
-	}
-
-	stories := convertRecordsToStories(records)
-	return stories
-}
-
 // GetStoryByID finds a single story by its ID.
 //
 // This searches through all stories to find the one with the matching ID.
