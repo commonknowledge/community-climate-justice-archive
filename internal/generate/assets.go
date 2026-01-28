@@ -502,3 +502,81 @@ func CopyDocumentsToOutput() error {
 	log.Printf("Successfully copied %d document files to output directory", copyCount)
 	return nil
 }
+
+// CopyStaticToOutput copies static assets (images, etc.) from the static/ directory
+// to out/static/ for use by pages like the About page.
+func CopyStaticToOutput() error {
+	log.Println("Starting static assets copy process")
+
+	srcDir := "static"
+	dstDir := "out/static"
+
+	// Check if source directory exists
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		log.Println("No static directory found, skipping static copy")
+		return nil
+	}
+
+	// Create the output directory
+	if err := os.MkdirAll(dstDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output static directory: %w", err)
+	}
+
+	// Walk through the static directory and copy files (excluding js/ which is handled separately)
+	copyCount := 0
+	err := filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip the js subdirectory (handled by CopyJSToOutput)
+		if info.IsDir() && info.Name() == "js" {
+			return filepath.SkipDir
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		// Get relative path from static/
+		relPath, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path for %s: %w", path, err)
+		}
+
+		destPath := filepath.Join(dstDir, relPath)
+
+		// Create parent directories if needed
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return fmt.Errorf("failed to create directory for %s: %w", destPath, err)
+		}
+
+		// Copy the file
+		srcFile, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("failed to open source file %s: %w", path, err)
+		}
+		defer srcFile.Close()
+
+		dstFile, err := os.Create(destPath)
+		if err != nil {
+			return fmt.Errorf("failed to create destination file %s: %w", destPath, err)
+		}
+		defer dstFile.Close()
+
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			return fmt.Errorf("failed to copy file %s: %w", path, err)
+		}
+
+		copyCount++
+		log.Printf("Copied static file: %s", relPath)
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking static directory: %w", err)
+	}
+
+	log.Printf("Successfully copied %d static files to output directory", copyCount)
+	return nil
+}

@@ -136,6 +136,10 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
 	}
 
+	if err := generate.CopyStaticToOutput(); err != nil {
+		return fmt.Errorf("failed to copy static assets: %v", err)
+	}
+
 	// Calculate how long the build took
 	buildDuration := time.Since(buildStartTime)
 
