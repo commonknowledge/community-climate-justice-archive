@@ -594,22 +594,22 @@ class ArchiveFilters {
             `;
         }
         
-        // Build tag content with proper colors
+        // Build tag content with proper colors (sorted alphabetically)
         let tagContent = '';
         if (story.types && story.types.length > 0) {
-            story.types.forEach(type => {
+            [...story.types].sort((a, b) => a.localeCompare(b)).forEach(type => {
                 const color = this.getTagColor(type, 'types');
                 tagContent += `<span class="tag" style="background-color: ${color};">${type}</span>`;
             });
         }
         if (story.weather && story.weather.length > 0) {
-            story.weather.forEach(weather => {
+            [...story.weather].sort((a, b) => a.localeCompare(b)).forEach(weather => {
                 const color = this.getTagColor(weather, 'weather');
                 tagContent += `<span class="tag" style="background-color: ${color};">${weather}</span>`;
             });
         }
         if (story.themes && story.themes.length > 0) {
-            story.themes.forEach(theme => {
+            [...story.themes].sort((a, b) => a.localeCompare(b)).forEach(theme => {
                 const color = this.getTagColor(theme, 'themes');
                 tagContent += `<span class="tag" style="background-color: ${color};">${theme}</span>`;
             });
