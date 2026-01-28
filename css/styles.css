@@ -2240,6 +2240,26 @@ Uses cream background with dashed border and flexible layout.
     margin: 0;
 }
 
+/* About page rotation styles */
+.about-what-if.what-if-rotation {
+    position: relative;
+    min-height: 150px;
+}
+
+.about-what-if .what-if-rotation-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.about-what-if .what-if-rotation-item.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* .about-category
    Category sections (Gifts, Co-creators, etc.) */
 .about-category {

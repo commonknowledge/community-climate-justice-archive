@@ -78,11 +78,19 @@
                         </p>
                     </div>
 
-                    <div class="about-what-if">
-                        <span class="about-what-if-label">What if…</span>
-                        <p class="about-what-if-text">people could develop deep connections with the places they live or work in: connections that invite care, relationships with life in that place, and learning through creative doing that deepens the climate resilience of that place?</p>
-                        <p class="about-what-if-text">What if there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?</p>
-                        <p class="about-what-if-text">What if this archive was built to last 100 years, passing these knowledges down through generations?</p>
+                    <div class="about-what-if what-if-rotation">
+                        <div class="what-if-rotation-item">
+                            <span class="about-what-if-label">What if…</span>
+                            <p class="about-what-if-text">people could develop deep connections with the places they live or work in: connections that invite care, relationships with life in that place, and learning through creative doing that deepens the climate resilience of that place?</p>
+                        </div>
+                        <div class="what-if-rotation-item hide">
+                            <span class="about-what-if-label">What if…</span>
+                            <p class="about-what-if-text">there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?</p>
+                        </div>
+                        <div class="what-if-rotation-item hide">
+                            <span class="about-what-if-label">What if…</span>
+                            <p class="about-what-if-text">this archive was built to last 100 years, passing these knowledges down through generations?</p>
+                        </div>
                     </div>
 
                     <div class="about-section-content">
@@ -202,6 +210,37 @@
 
             window.addEventListener('scroll', updateActiveNav);
             updateActiveNav();
+        })();
+
+        /*
+         * Rotate "What If" Quotes
+         * Fades between different "What If" prompts every 7 seconds.
+         */
+        (function() {
+            const items = document.querySelectorAll('.what-if-rotation-item');
+            if (items.length === 0) return;
+
+            let currentIndex = 0;
+
+            function showNext() {
+                const nextIndex = (currentIndex + 1) % items.length;
+
+                items[currentIndex].style.opacity = '0';
+
+                setTimeout(() => {
+                    items[currentIndex].classList.add('hide');
+                    items[nextIndex].classList.remove('hide');
+
+                    requestAnimationFrame(() => {
+                        items[nextIndex].style.opacity = '1';
+                    });
+
+                    currentIndex = nextIndex;
+                }, 500);
+            }
+
+            items[0].style.opacity = '1';
+            setInterval(showNext, 7000);
         })();
     </script>
 </body>
