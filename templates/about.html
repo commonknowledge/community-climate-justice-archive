@@ -186,7 +186,7 @@
             const navButtons = document.querySelectorAll('.about-nav-button');
 
             function updateActiveNav() {
-                let current = '';
+                let current = 'past'; // Default to "In the past" section
                 sections.forEach(section => {
                     const sectionTop = section.offsetTop;
                     if (window.scrollY >= sectionTop - 200) {
