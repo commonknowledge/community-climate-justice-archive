@@ -25,7 +25,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"community-climate-justice-archive/data"
@@ -100,10 +99,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		log.Printf("Warning: failed to parse themes: %v", err)
 		themes = []data.Theme{}
 	}
-	// Sort themes alphabetically by Title
-	sort.Slice(themes, func(i, j int) bool {
-		return themes[i].Title < themes[j].Title
-	})
 
 	// Convert types
 	types, err := ParseTypesFromNocoDB(dto.Type)
@@ -111,10 +106,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		log.Printf("Warning: failed to parse types: %v", err)
 		types = []data.Type{}
 	}
-	// Sort types alphabetically by Title
-	sort.Slice(types, func(i, j int) bool {
-		return types[i].Title < types[j].Title
-	})
 
 	// Convert weather
 	weather, err := ParseWeatherFromNocoDB(dto.Weather)
@@ -122,10 +113,6 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		log.Printf("Warning: failed to parse weather: %v", err)
 		weather = []data.Weather{}
 	}
-	// Sort weather alphabetically by Title
-	sort.Slice(weather, func(i, j int) bool {
-		return weather[i].Title < weather[j].Title
-	})
 
 	// Convert gifted by
 	giftedBy, err := ParseGiftedByFromNocoDB(dto.GiftedBy)
