@@ -8,7 +8,7 @@ At the time of writing, this contains the second version of the archive, release
 
 ### Go
 
-[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled], which makes it more efficient in terms of energy consumption.
+[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled]. This makes it more efficient in terms of energy consumption.
 
 ### SQLite
 
