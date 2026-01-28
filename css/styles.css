@@ -2244,6 +2244,8 @@ Uses cream background with dashed border and flexible layout.
 .about-what-if.what-if-rotation {
     position: relative;
     min-height: 150px;
+    margin-top: 60px;
+    margin-bottom: 60px;
 }
 
 .about-what-if .what-if-rotation-item {
