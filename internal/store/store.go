@@ -136,6 +136,9 @@ func GetStoryByID(id string) (data.Story, error) {
 		story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 	}
 
+	// Sort tags alphabetically for consistent display
+	sortStoryTags(&story)
+
 	return story, nil
 }
 
@@ -212,10 +215,39 @@ func convertRecordsToStories(records []map[string]interface{}) []data.Story {
 			story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 		}
 
+		// Sort tags alphabetically for consistent display
+		sortStoryTags(&story)
+
 		stories = append(stories, story)
 	}
 
 	return stories
+}
+
+// sortStoryTags sorts all tag arrays on a story alphabetically by title.
+// This ensures consistent ordering when tags are displayed.
+func sortStoryTags(story *data.Story) {
+	sort.Slice(story.Themes, func(i, j int) bool {
+		return story.Themes[i].Title < story.Themes[j].Title
+	})
+	sort.Slice(story.Weather, func(i, j int) bool {
+		return story.Weather[i].Title < story.Weather[j].Title
+	})
+	sort.Slice(story.GiftedBy, func(i, j int) bool {
+		return story.GiftedBy[i].Title < story.GiftedBy[j].Title
+	})
+	sort.Slice(story.Type, func(i, j int) bool {
+		return story.Type[i].Title < story.Type[j].Title
+	})
+	sort.Slice(story.ScalePermanence, func(i, j int) bool {
+		return story.ScalePermanence[i].Title < story.ScalePermanence[j].Title
+	})
+	sort.Slice(story.WhatWasIsIf, func(i, j int) bool {
+		return story.WhatWasIsIf[i].Title < story.WhatWasIsIf[j].Title
+	})
+	sort.Slice(story.TimePeriod, func(i, j int) bool {
+		return story.TimePeriod[i].Title < story.TimePeriod[j].Title
+	})
 }
 
 // -------------------------------------------------------------------
