@@ -1543,7 +1543,7 @@ A button with a dashed border for navigation and actions.
 
 .filter-dropdown-button:hover {
     border: 2px solid var(--black);
-    background: none;
+    background: var(--background);
 }
 
 .filter-dropdown.open .filter-dropdown-button {
@@ -2017,4 +2017,6 @@ Uses cream background with dashed border and flexible layout.
     .story-nav-title {
         font-size: 0.77778rem;
     }
+}
+    background: #FFF5CF !important;
 }
