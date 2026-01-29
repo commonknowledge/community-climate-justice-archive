@@ -2014,8 +2014,357 @@ Uses cream background with dashed border and flexible layout.
     .story-nav-label {
         font-size: 1rem;
     }
-    
+
     .story-nav-title {
         font-size: 0.77778rem;
+    }
+}
+
+/* ============================================================================
+   MOBILE LAYOUTS
+   ============================================================================
+
+   Comprehensive mobile responsive styles for viewports under 768px.
+   Includes hamburger menu, mobile navigation overlay, and layout adjustments.
+*/
+
+/* Mobile Menu Toggle Button (Hamburger) - Hidden on desktop */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: transparent;
+    border: 2px dashed var(--black);
+    cursor: pointer;
+    gap: 5px;
+}
+
+.mobile-menu-toggle:hover {
+    border-style: solid;
+    background-color: var(--highlight-yellow);
+}
+
+.hamburger-line {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background-color: var(--black);
+}
+
+/* Mobile Menu Overlay - Full screen navigation */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--background);
+    z-index: 200;
+    flex-direction: column;
+    padding: 1.11111rem;
+    overflow-y: auto;
+}
+
+.mobile-menu-overlay.is-open {
+    display: flex;
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 2rem;
+}
+
+.mobile-menu-header h1 {
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin: 0;
+}
+
+.mobile-menu-header h1 a {
+    text-decoration: none;
+    color: var(--black);
+}
+
+/* Close button (X) */
+.mobile-menu-close {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: transparent;
+    border: 2px dashed var(--black);
+    cursor: pointer;
+    position: relative;
+}
+
+.mobile-menu-close:hover {
+    border-style: solid;
+    background-color: var(--highlight-yellow);
+}
+
+.close-line {
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background-color: var(--black);
+}
+
+.close-line:first-child {
+    transform: rotate(45deg);
+}
+
+.close-line:last-child {
+    transform: rotate(-45deg);
+}
+
+/* Mobile navigation links */
+.mobile-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding-top: 1rem;
+}
+
+.mobile-menu-link {
+    font-family: Arial, sans-serif;
+    font-size: 1.77778rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--black);
+    text-decoration: none;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--black);
+}
+
+.mobile-menu-link:hover,
+.mobile-menu-link:focus {
+    background-color: var(--highlight-yellow);
+}
+
+/* Mobile menu footer */
+.mobile-menu-footer {
+    padding-top: 2rem;
+    margin-top: auto;
+}
+
+.mobile-menu-footer p {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.11111rem;
+    line-height: 1.4;
+    color: var(--black);
+    margin-bottom: 1rem;
+}
+
+.mobile-menu-footer .dashed-button {
+    display: inline-block;
+}
+
+/* ============================================================================
+   MOBILE BREAKPOINT (max-width: 768px)
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    /* Header - Show hamburger, hide desktop nav */
+    .header-nav-desktop {
+        display: none;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    header {
+        margin-left: 1.11111rem;
+        margin-right: 1.11111rem;
+        padding: 0.77778rem 0;
+    }
+
+    header h1 {
+        font-size: 18px;
+    }
+
+    /* Main content margins */
+    .homepage-content,
+    .main-content.wander {
+        margin-left: 1.11111rem;
+        margin-right: 1.11111rem;
+    }
+
+    /* Archive page header */
+    .archive-header-title {
+        font-size: 1.55556rem;
+    }
+
+    /* Stories grid - 2 columns on mobile */
+    .stories-list {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1.11111rem !important;
+    }
+
+    /* Story popup adjustments */
+    .story-popup-container {
+        max-width: 90vw;
+    }
+
+    .story-popup-text-finding {
+        font-size: 1rem;
+    }
+
+    /* Story page layout */
+    .story-content {
+        flex-direction: column;
+    }
+
+    .story-hero {
+        max-width: 100%;
+    }
+
+    .story-details {
+        max-width: 100%;
+        margin-left: 1.11111rem;
+        margin-right: 1.11111rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .story-finding {
+        font-size: 1.22222rem;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .story-metadata {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .story-metadata-item {
+        font-size: 1rem;
+    }
+
+    .story-metadata-item-label {
+        font-size: 0.77778rem;
+    }
+
+    /* Related stories */
+    .related-stories {
+        margin-left: 1.11111rem;
+        margin-right: 1.11111rem;
+    }
+
+    .related-stories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.11111rem;
+    }
+
+    /* Footer mobile layout */
+    footer {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 2.5rem 1.11111rem;
+    }
+
+    .footer-content {
+        width: 100%;
+        font-size: 1.33333rem;
+    }
+
+    .footer-content div {
+        margin-bottom: 1rem;
+    }
+
+    .address {
+        order: -1;
+    }
+
+    footer address {
+        font-size: 1rem;
+    }
+
+    /* Wander page heading */
+    .wander-through-archive-header {
+        font-size: 2rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Tag lists */
+    .tag-list {
+        gap: 0.5rem;
+    }
+
+    .tag {
+        font-size: 1rem;
+        padding: 0.27778rem 0.5rem;
+    }
+
+    /* Text-only cards */
+    .story-text-only-preview {
+        padding: 1rem;
+    }
+
+    .story-text-only-preview-text {
+        font-size: 1rem;
+        -webkit-line-clamp: 5;
+    }
+
+    /* Big buttons (homepage) */
+    .big-button {
+        min-height: 8rem;
+    }
+
+    .big-button-title {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================================================
+   SMALL MOBILE BREAKPOINT (max-width: 480px)
+   ============================================================================ */
+
+@media (max-width: 480px) {
+    /* Single column grid on very small screens */
+    .stories-list {
+        grid-template-columns: 1fr !important;
+    }
+
+    .related-stories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Smaller typography */
+    .archive-header-title {
+        font-size: 1.33333rem;
+    }
+
+    .wander-through-archive-header {
+        font-size: 1.55556rem;
+    }
+
+    .story-finding {
+        font-size: 1.11111rem;
+    }
+
+    /* Mobile menu links smaller */
+    .mobile-menu-link {
+        font-size: 1.33333rem;
+    }
+
+    /* Filter dropdowns full width */
+    .filter-dropdown-content {
+        max-height: 50vh;
     }
 }

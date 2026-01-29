@@ -18,59 +18,128 @@
 <header>
     <div class="main-header">
         <h1><a href="/">Dudley Time Portal</a></h1>
-        <nav class="header-nav">
-            <!-- Navigation buttons -->
-            <a class="dashed-button" href="/">Wander</a>
-            <a class="dashed-button" href="/archive.html">Archive</a>
-            <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
-            <!-- Link to NocoDB form where people can add new stories -->
-            <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
+        <!-- Desktop navigation (hidden on mobile) -->
+        <nav class="header-nav header-nav-desktop">
+            <a class="dashed-button" href="/">wander</a>
+            <a class="dashed-button" href="/archive.html">archive</a>
+            <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">random</a>
+            <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
         </nav>
+        <!-- Mobile hamburger menu button (hidden on desktop) -->
+        <button class="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
     </div>
 </header>
+
+<!-- Mobile menu overlay (hidden by default) -->
+<div class="mobile-menu-overlay" aria-hidden="true">
+    <div class="mobile-menu-header">
+        <h1><a href="/">Dudley Time Portal</a></h1>
+        <button class="mobile-menu-close" aria-label="Close menu">
+            <span class="close-line"></span>
+            <span class="close-line"></span>
+        </button>
+    </div>
+    <nav class="mobile-menu-nav">
+        <a class="mobile-menu-link" href="/">wander</a>
+        <a class="mobile-menu-link" href="/archive.html">archive</a>
+        <a class="mobile-menu-link random-story-link-mobile" href="{{.RandomStoryURL}}">random</a>
+        <a class="mobile-menu-link" href="/about.html">about the project</a>
+        <a class="mobile-menu-link" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
+    </nav>
+    <div class="mobile-menu-footer">
+        <p>Dudley People's School for Climate Justice is an assemblage of community-led projects.</p>
+        <a class="dashed-button" href="/about.html">Learn more about the project</a>
+    </div>
+</div>
 <script>
     // Make the Random button work properly
     // The Go program gives us a list of all story URLs, and we pick one at random
-    
+
     window.storyUrls = {{.StoriesJSON}};  // List of all story URLs from the Go program
     (function() {
-        const randomLink = document.querySelector('.random-story-link');
-        if (!randomLink) return;  // Safety check - make sure the button exists
-        
-        // This function picks a random story from the list and updates the button's link
-        function updateRandomLink() {
+        // Update both desktop and mobile random links
+        const randomLinks = document.querySelectorAll('.random-story-link, .random-story-link-mobile');
+        if (randomLinks.length === 0) return;
+
+        // This function picks a random story from the list and updates all random buttons
+        function updateRandomLinks() {
             if (window.storyUrls && window.storyUrls.length > 0) {
-                // Pick a random story URL from the list
                 const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
-                const baseUrl = window.location.origin;  // Like "https://archive.example.com"
-                randomLink.href = baseUrl + '/' + randomUrl;  // Update the button's destination
+                const baseUrl = window.location.origin;
+                randomLinks.forEach(link => {
+                    link.href = baseUrl + '/' + randomUrl;
+                });
             }
         }
 
         // Pick a random story when the page first loads
-        updateRandomLink();
-        
-        // Pick a new random story each time someone clicks the button
-        randomLink.addEventListener('click', function(e) {
-            updateRandomLink();
+        updateRandomLinks();
+
+        // Pick a new random story each time someone clicks either random button
+        randomLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                updateRandomLinks();
+            });
         });
     })();
 
-    // Highlight the current page's button
-    // So if you're on the Archive page, the Archive button gets a yellow background
+    // Highlight the current page's button (desktop nav)
     (function() {
-        const navButtons = document.querySelectorAll('.header-nav .dashed-button');
-        const currentPath = window.location.pathname;  // Like "/archive.html"
-        
+        const navButtons = document.querySelectorAll('.header-nav-desktop .dashed-button');
+        const currentPath = window.location.pathname;
+
         navButtons.forEach(button => {
             const href = button.getAttribute('href');
-            
-            // Check if this button's link matches the current page
-            if (currentPath === href || 
+            if (currentPath === href ||
                 (currentPath === '/' && href === '/') ||
                 (currentPath.includes('archive') && href === '/archive.html') ||
                 (currentPath.includes('wander') && href === '/wander.html')) {
-                button.style.backgroundColor = '#FFFF99';  // Yellow highlight
+                button.style.backgroundColor = '#FFFF99';
+            }
+        });
+    })();
+
+    // Mobile menu toggle functionality
+    (function() {
+        const menuToggle = document.querySelector('.mobile-menu-toggle');
+        const menuClose = document.querySelector('.mobile-menu-close');
+        const menuOverlay = document.querySelector('.mobile-menu-overlay');
+
+        if (!menuToggle || !menuOverlay) return;
+
+        function openMenu() {
+            menuOverlay.classList.add('is-open');
+            menuOverlay.setAttribute('aria-hidden', 'false');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            menuOverlay.classList.remove('is-open');
+            menuOverlay.setAttribute('aria-hidden', 'true');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+
+        menuToggle.addEventListener('click', openMenu);
+        if (menuClose) {
+            menuClose.addEventListener('click', closeMenu);
+        }
+
+        // Close menu when clicking a link
+        const menuLinks = menuOverlay.querySelectorAll('.mobile-menu-link');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && menuOverlay.classList.contains('is-open')) {
+                closeMenu();
             }
         });
     })();
