@@ -2051,9 +2051,10 @@ Uses cream background with dashed border and flexible layout.
 /* .about-layout
    Two-column layout: sticky sidebar + main content */
 .about-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 5.55556rem;
-    align-items: flex-start;
+    align-items: start;
 }
 
 /* .about-sidebar
@@ -2083,13 +2084,14 @@ Uses cream background with dashed border and flexible layout.
 }
 
 /* .about-content
-   Main content column */
+   Main content column - centered within its grid cell on large screens */
 .about-content {
-    flex: 1;
     max-width: 787px;
     display: flex;
     flex-direction: column;
     gap: 6.66667rem;
+    justify-self: center;
+    overflow: visible;
 }
 
 /* .about-section
@@ -2188,22 +2190,24 @@ Uses cream background with dashed border and flexible layout.
 }
 
 /* .about-quote-indent
-   Indentation for first quote */
+   First quote breaks out to the right of the content frame */
 .about-quote-indent {
-    padding-left: 11.55556rem;
+    margin-left: 26%;
+    width: 100%;
 }
 
 /* .about-quote-with-image
-   Quote displayed alongside image */
+   Quote displayed alongside image - image at left edge, quote breaks out right */
 .about-quote-with-image {
     display: flex;
     gap: 2.22222rem;
     align-items: flex-start;
+    width: 126%;
 }
 
 .about-quote-with-image .about-figure {
     flex-shrink: 0;
-    max-width: 20rem;
+    width: 45%;
 }
 
 .about-quote-with-image .about-quote {
@@ -2211,9 +2215,10 @@ Uses cream background with dashed border and flexible layout.
 }
 
 /* .about-what-if
-   "What if..." highlighted section */
+   "What if..." section breaks out to the right of the content frame */
 .about-what-if {
-    padding-left: 11.55556rem;
+    margin-left: 26%;
+    width: 100%;
 }
 
 .about-what-if-label {
@@ -2387,6 +2392,7 @@ Uses cream background with dashed border and flexible layout.
 .about-figure img {
     max-width: 100%;
     height: auto;
+    mix-blend-mode: multiply;
 }
 
 .about-figure figcaption {
@@ -2398,8 +2404,41 @@ Uses cream background with dashed border and flexible layout.
 }
 
 /* Responsive layout for About page */
+
+/* Intermediate breakpoint - reduce offset */
+@media (max-width: 1400px) {
+    .about-quote-indent {
+        margin-left: 18%;
+    }
+
+    .about-quote-with-image {
+        width: 118%;
+    }
+
+    .about-what-if {
+        margin-left: 18%;
+    }
+}
+
+/* Smaller screens - further reduce offset */
+@media (max-width: 1100px) {
+    .about-quote-indent {
+        margin-left: 10%;
+    }
+
+    .about-quote-with-image {
+        width: 110%;
+    }
+
+    .about-what-if {
+        margin-left: 10%;
+    }
+}
+
+/* Mobile layout - no offset */
 @media (max-width: 900px) {
     .about-layout {
+        display: flex;
         flex-direction: column;
         gap: 2.22222rem;
     }
@@ -2412,19 +2451,22 @@ Uses cream background with dashed border and flexible layout.
     }
 
     .about-quote-indent {
-        padding-left: 0;
+        margin-left: 0;
+        width: 100%;
     }
 
     .about-quote-with-image {
         flex-direction: column;
+        width: 100%;
     }
 
     .about-quote-with-image .about-figure {
-        max-width: 100%;
+        width: 100%;
     }
 
     .about-what-if {
-        padding-left: 0;
+        margin-left: 0;
+        width: 100%;
     }
 }
 
