@@ -228,10 +228,10 @@ func (c *Client) UpdateRecord(id string, fieldData map[string]interface{}) error
 	}
 
 	log.Printf("Successfully updated record %s", id)
-	
+
 	// Invalidate cache since we've made changes
 	c.DropCache()
-	
+
 	return nil
 }
 
@@ -593,16 +593,6 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 	return connections
 }
 
-// getStoryImageFromRecords looks up a story by ID in the provided records and returns its image URL
-func (c *Client) getStoryImageFromRecords(storyID string, allRecords []map[string]interface{}) string {
-	// Use the Story object from provided records to get the proper image URL
-	if story, found := c.getStoryFromRecords(storyID, allRecords); found {
-		storyImage := story.GetStoryImage()
-		return storyImage.URL
-	}
-	return ""
-}
-
 // getStoryFromRecords looks up a story by ID in the provided records and returns a fully converted Story object
 func (c *Client) getStoryFromRecords(storyID string, allRecords []map[string]interface{}) (data.Story, bool) {
 	// Find the record with matching ID
@@ -621,17 +611,6 @@ func (c *Client) getStoryFromRecords(storyID string, allRecords []map[string]int
 	}
 
 	return data.Story{}, false
-}
-
-// getStoryFromCache looks up a story by ID in the cached records and returns a fully converted Story object
-func (c *Client) getStoryFromCache(storyID string) (data.Story, bool) {
-	allRecords, err := c.GetAllRecords()
-	if err != nil {
-		log.Printf("Warning: Failed to get cached records for story %s: %v", storyID, err)
-		return data.Story{}, false
-	}
-
-	return c.getStoryFromRecords(storyID, allRecords)
 }
 
 // toString converts interface{} to string safely
