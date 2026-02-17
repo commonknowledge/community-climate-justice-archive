@@ -1287,3 +1287,45 @@ func WriteTimePeriodIndexPages() error {
 
 	return nil
 }
+
+// WriteAboutPage generates the about page and writes it to out/about.html.
+// This is a static page with information about the project, its history, and how to get involved.
+func WriteAboutPage() error {
+	log.Println("Starting about page generation")
+	stories := store.GetAllStories()
+
+	// Select a random story for the random link in header
+	randomStory := stories[rand.Intn(len(stories))]
+
+	// Convert stories to JSON for the random button
+	storiesJSON, err := convertStoriesToJSON(stories)
+	if err != nil {
+		return err
+	}
+
+	page := data.Page{
+		Title:          "About the project – Dudley Time Portal",
+		Description:    "Learn about the Dudley Time Portal, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.",
+		RandomStoryURL: randomStory.URL,
+		StoriesJSON:    storiesJSON,
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	file, err := os.Create("out/about.html")
+	if err != nil {
+		return fmt.Errorf("failed to create about.html: %w", err)
+	}
+	defer file.Close()
+
+	err = tmpl.ExecuteTemplate(file, "about.html", page)
+	if err != nil {
+		return fmt.Errorf("failed to execute about template: %w", err)
+	}
+
+	log.Println("About page generated successfully")
+	return nil
+}
