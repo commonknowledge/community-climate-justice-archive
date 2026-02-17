@@ -8,7 +8,7 @@ At the time of writing, this contains the second version of the archive, release
 
 ### Go
 
-[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled], which makes it more efficient in terms of energy consumption.
+[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled]. This makes it more efficient in terms of energy consumption.
 
 ### SQLite
 
@@ -328,14 +328,19 @@ If you need to make changes, here's where to look:
 
 ### Caching: Keeping Things Fast
 
-The archive caches story data in a JSON file (`debug-cache-nocodb.json`) so it doesn't have to fetch from NocoDB every single time during development. 
+By default, the archive fetches fresh story data from NocoDB on each run.
 
-If you need fresh data (like after updating stories in NocoDB), just delete the cache file:
+Disk caching (`debug-cache-nocodb.json`) is **debug-only** and must be explicitly enabled with:
+
+```bash
+go run ./cmd/archive --debug-disk-cache
+```
+
+If you are using debug disk cache and need fresh data, delete the cache file:
+
 ```bash
 rm debug-cache-nocodb.json
 ```
-
-The next time you build, it'll fetch everything fresh from NocoDB.
 
 ### Troubleshooting Tips
 
@@ -349,7 +354,7 @@ The next time you build, it'll fetch everything fresh from NocoDB.
 - Or restart the archive
 
 **Story data seems stale?**
-- Delete `debug-cache-nocodb.json`
+- If you enabled debug disk cache, delete `debug-cache-nocodb.json`
 - Rebuild the archive
 
 **Build failing?**
