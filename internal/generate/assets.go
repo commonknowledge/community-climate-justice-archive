@@ -46,6 +46,44 @@ var ImageSizes = map[string]int{
 	"large":  1200, // full size
 }
 
+// getProcessedImagePaths returns all output WebP paths expected for a source image.
+func getProcessedImagePaths(srcPath string) []string {
+	baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
+
+	paths := make([]string, 0, len(ImageSizes)+1)
+	for suffix := range ImageSizes {
+		paths = append(paths, filepath.Join("images/processed", fmt.Sprintf("%s_%s.webp", baseName, suffix)))
+	}
+	paths = append(paths, filepath.Join("images/processed", fmt.Sprintf("%s.webp", baseName)))
+
+	return paths
+}
+
+func isOutputUpToDate(outputPath string, sourceModTime time.Time) bool {
+	outputInfo, err := os.Stat(outputPath)
+	if err != nil {
+		return false
+	}
+
+	// If output is as new or newer than source, we can reuse it.
+	return !outputInfo.ModTime().Before(sourceModTime)
+}
+
+func areProcessedImagesUpToDate(srcPath string) bool {
+	sourceInfo, err := os.Stat(srcPath)
+	if err != nil {
+		return false
+	}
+
+	for _, outputPath := range getProcessedImagePaths(srcPath) {
+		if !isOutputUpToDate(outputPath, sourceInfo.ModTime()) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // logWebPFailure logs WebP encoding failures to a file instead of crashing
 func logWebPFailure(imagePath string, err error) {
 	errorLog := "webp_failures.log"
@@ -129,6 +167,11 @@ func readImage(srcPath string) (image.Image, error) {
 
 // compressImage creates multiple WebP versions of an image at different sizes
 func compressImage(srcPath string) error {
+	sourceInfo, err := os.Stat(srcPath)
+	if err != nil {
+		return fmt.Errorf("failed to stat source image: %w", err)
+	}
+
 	// Read the original image
 	originalImg, err := readImage(srcPath)
 	if err != nil {
@@ -148,9 +191,8 @@ func compressImage(srcPath string) error {
 		// Create the output path
 		outPath := filepath.Join("images/processed", fmt.Sprintf("%s_%s.webp", baseName, suffix))
 
-		// Skip if file already exists
-		if _, err := os.Stat(outPath); err == nil {
-			log.Printf("Skipping existing image: %s", outPath)
+		// Skip if output exists and is already fresh.
+		if isOutputUpToDate(outPath, sourceInfo.ModTime()) {
 			continue
 		}
 
@@ -181,9 +223,8 @@ func compressImage(srcPath string) error {
 	// Create the main WebP version (original size)
 	mainOutPath := filepath.Join("images/processed", fmt.Sprintf("%s.webp", baseName))
 
-	// Skip if file already exists
-	if _, err := os.Stat(mainOutPath); err == nil {
-		log.Printf("Skipping existing main image: %s", mainOutPath)
+	// Skip if output exists and is already fresh.
+	if isOutputUpToDate(mainOutPath, sourceInfo.ModTime()) {
 		return nil
 	}
 
@@ -223,6 +264,10 @@ func ProcessImages() error {
 		return fmt.Errorf("failed to read images directory: %w", err)
 	}
 
+	processedCount := 0
+	skippedUpToDateCount := 0
+	failureCount := 0
+
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -243,13 +288,24 @@ func ProcessImages() error {
 			continue
 		}
 
+		sourcePath := filepath.Join("images", filename)
+		if areProcessedImagesUpToDate(sourcePath) {
+			skippedUpToDateCount++
+			continue
+		}
+
 		// Process the image
-		err := compressImage(filepath.Join("images", filename))
+		err := compressImage(sourcePath)
 		if err != nil {
+			failureCount++
 			log.Printf("Warning: Failed to process image %s: %v", filename, err)
 			continue
 		}
+
+		processedCount++
 	}
+
+	log.Printf("Image processing complete: processed=%d, skipped_up_to_date=%d, failures=%d", processedCount, skippedUpToDateCount, failureCount)
 
 	return nil
 }

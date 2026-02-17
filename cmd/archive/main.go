@@ -32,6 +32,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+const localDevServerURL = "http://localhost:8080"
+
 // generateArchive builds the entire website.
 //
 // This does the main work:
@@ -306,7 +308,7 @@ func main() {
 			defer watcher.Close()
 		}
 
-		log.Println("Development server running at http://localhost:8080")
+		log.Printf("Development server running at %s", localDevServerURL)
 
 		// Wait for user to press enter, then rebuild
 		for {

@@ -10,8 +10,8 @@
 // 3. The NocoDB client handles raw-record caching, reducing repeat API calls
 //
 // Important scope note:
-// - Store-level functions still convert raw records into []data.Story on each call.
-// - Per-build conversion caching is handled in internal/generate.
+// - Raw NocoDB records are cached in internal/nocodb.
+// - Converted []data.Story values are cached here for reuse across store calls.
 package store
 
 import (
@@ -27,6 +27,20 @@ import (
 // It gets set up once when Initialize() is called, then used by everything else.
 var client *nocodb.Client
 
+// storiesCache stores converted Story data so we only do raw->Story conversion once
+// per cache lifecycle.
+var storiesCache []data.Story
+
+// storiesCacheLoaded tracks whether storiesCache currently holds a valid dataset.
+// We need this separate flag so an empty dataset is still treated as cached.
+var storiesCacheLoaded bool
+
+// resetStoriesCache clears converted story cache.
+func resetStoriesCache() {
+	storiesCache = nil
+	storiesCacheLoaded = false
+}
+
 // Initialize sets up the connection to NocoDB.
 // Call this once when the application starts, before using any other functions.
 func Initialize() error {
@@ -35,6 +49,7 @@ func Initialize() error {
 	if err != nil {
 		return fmt.Errorf("failed to create NocoDB client: %w", err)
 	}
+	resetStoriesCache()
 	log.Println("Store initialised with NocoDB client")
 	return nil
 }
@@ -54,6 +69,7 @@ func DropCache() error {
 	if client == nil {
 		return fmt.Errorf("store not initialised")
 	}
+	resetStoriesCache()
 	client.DropCache()
 	return nil
 }
@@ -96,9 +112,9 @@ func GetRawRecords() ([]map[string]interface{}, error) {
 // This is probably the most-used function - it grabs all stories from NocoDB
 // and returns them as a list.
 //
-// The NocoDB client cache prevents repeated network calls. This function still
-// performs raw-record -> Story conversion per call. Generator-level caching avoids
-// repeating that conversion many times within a single build run.
+// The NocoDB client cache prevents repeated network calls. This function also caches
+// converted Story structs so raw-record -> Story conversion is done once per cache
+// lifecycle (until DropCache or re-initialization).
 //
 // If something goes wrong talking to the database, the program stops - we can't
 // really do anything useful without story data.
@@ -107,13 +123,18 @@ func GetAllStories() []data.Story {
 		log.Fatal("Store not initialised - call Initialize() first")
 	}
 
+	if storiesCacheLoaded {
+		return storiesCache
+	}
+
 	records, err := client.GetAllRecords()
 	if err != nil {
 		log.Fatalf("Failed to get all records from NocoDB: %v", err)
 	}
 
-	stories := convertRecordsToStories(records)
-	return stories
+	storiesCache = convertRecordsToStories(records)
+	storiesCacheLoaded = true
+	return storiesCache
 }
 
 // GetStoryByID finds a single story by its ID.

@@ -45,6 +45,8 @@ import (
 	"github.com/eduardolat/nocodbgo"
 )
 
+const defaultRecordsPageSize = 100
+
 // Client wraps the NocoDB client with our configuration.
 type Client struct {
 	client *nocodbgo.Client
@@ -112,7 +114,7 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 
 	// Fetch records from API and cache them
 	var allRecords []map[string]interface{}
-	limit := 100 // Records per page
+	limit := defaultRecordsPageSize
 	offset := 0
 
 	log.Printf("Starting paginated retrieval of all records from NocoDB (cache miss)...")

@@ -47,6 +47,12 @@ var (
 	cachedTemplates *template.Template
 )
 
+const (
+	initialStoriesDisplayCount = 40
+	connectedStoriesLimit      = 20
+	relatedStoriesLimit        = 5
+)
+
 // ResetBuildCache clears per-run cached data so each build starts fresh.
 func ResetBuildCache() {
 	cachedStories = nil
@@ -149,6 +155,20 @@ func getAllStories() []data.Story {
 
 	cachedStories = store.GetAllStories()
 	return cachedStories
+}
+
+func randomStoryURL(stories []data.Story) string {
+	if len(stories) == 0 {
+		return ""
+	}
+	return stories[rand.Intn(len(stories))].URL
+}
+
+func limitStories(stories []data.Story, count int) []data.Story {
+	if len(stories) <= count {
+		return stories
+	}
+	return stories[:count]
 }
 
 // convertStoriesToJSON converts a slice of stories to a JSON array of URLs.
@@ -362,6 +382,10 @@ func getTagType(tag interface{}) string {
 func WriteStories() error {
 	log.Println("Starting story generation")
 	stories := getAllStories()
+	if len(stories) == 0 {
+		log.Println("No stories found; skipping story page generation")
+		return nil
+	}
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(stories)
@@ -410,9 +434,6 @@ func WriteStories() error {
 			nextStory = stories[0]
 		}
 
-		// Select a random story for the random link
-		randomStory := stories[rand.Intn(len(stories))]
-
 		// Reformat the date fields to be more human readable
 		storyInQuestion.StartDateTime = util.FormatDate(storyInQuestion.StartDateTime)
 		storyInQuestion.EndDateTime = util.FormatDate(storyInQuestion.EndDateTime)
@@ -445,7 +466,7 @@ func WriteStories() error {
 
 		if len(allTagsWeHave) > 0 {
 			firstTag = allTagsWeHave[0]
-			firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, 5)
+			firstMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, firstTag, relatedStoriesLimit)
 		}
 
 		var secondMoreTaggedStories []data.Story
@@ -456,12 +477,12 @@ func WriteStories() error {
 
 		if len(allTagsWeHave) > 1 {
 			secondTag = allTagsWeHave[1]
-			secondMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, secondTag, 5)
+			secondMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, secondTag, relatedStoriesLimit)
 		}
 
 		if len(allTagsWeHave) > 2 {
 			thirdTag = allTagsWeHave[2]
-			thirdMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, thirdTag, 5)
+			thirdMoreTaggedStories = store.GetMoreTaggedStories(storyInQuestion, thirdTag, relatedStoriesLimit)
 		}
 
 		var firstRelated data.RelatedStories
@@ -506,7 +527,7 @@ func WriteStories() error {
 			FirstMoreTaggedStories:  firstRelated,
 			SecondMoreTaggedStories: secondRelated,
 			ThirdMoreTaggedStories:  thirdRelated,
-			RandomStoryURL:          randomStory.URL,
+			RandomStoryURL:          randomStoryURL(stories),
 			StoriesJSON:             storiesJSON,
 		})
 

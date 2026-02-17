@@ -18,16 +18,13 @@ func WriteWanderPage() error {
 	types := store.GetTypes()
 	stories := getAllStories()
 
-	// Only give the template the first 40 stories
-	stories = stories[:40]
+	// Only give the template a small initial slice of stories
+	stories = limitStories(stories, initialStoriesDisplayCount)
 
 	// Shuffle the stories
 	rand.Shuffle(len(stories), func(i, j int) {
 		stories[i], stories[j] = stories[j], stories[i]
 	})
-
-	// Select a random story for the initial random link
-	randomStory := stories[rand.Intn(len(stories))]
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(stories)
@@ -41,7 +38,7 @@ func WriteWanderPage() error {
 		Themes:         themes,
 		Types:          types,
 		Stories:        stories,
-		RandomStoryURL: randomStory.URL,
+		RandomStoryURL: randomStoryURL(stories),
 		StoriesJSON:    storiesJSON,
 	}
 
@@ -72,9 +69,6 @@ func WriteArchivePage() error {
 	types := store.GetTypes()
 	allStories := getAllStories()
 
-	// Select a random story for the initial random link
-	randomStory := allStories[rand.Intn(len(allStories))]
-
 	// Shuffle all stories and take first 40 for initial display
 	shuffledStories := make([]data.Story, len(allStories))
 	copy(shuffledStories, allStories)
@@ -82,11 +76,8 @@ func WriteArchivePage() error {
 		shuffledStories[i], shuffledStories[j] = shuffledStories[j], shuffledStories[i]
 	})
 
-	// Take first 40 stories for initial display
-	stories := shuffledStories
-	if len(stories) > 40 {
-		stories = stories[:40]
-	}
+	// Take a small initial subset for first page render
+	stories := limitStories(shuffledStories, initialStoriesDisplayCount)
 
 	// Convert stories to JSON (only the 40 displayed ones)
 	storiesJSON, err := convertStoriesToJSON(stories)
@@ -100,7 +91,7 @@ func WriteArchivePage() error {
 		Themes:         themes,
 		Types:          types,
 		Stories:        stories, // Only 40 random stories for initial display
-		RandomStoryURL: randomStory.URL,
+		RandomStoryURL: randomStoryURL(allStories),
 		StoriesJSON:    storiesJSON,
 	}
 
@@ -131,19 +122,16 @@ func WriteHomePage() error {
 	types := store.GetTypes()
 	allStories := getAllStories()
 
-	// Get connected stories for the connections view (max 20)
-	connectedStories := store.GetStoriesWithConnections(20)
+	// Get connected stories for the connections view
+	connectedStories := store.GetStoriesWithConnections(connectedStoriesLimit)
 
-	// Only give the template the first 40 stories for initial display
-	stories := allStories[:40]
+	// Only give the template a small initial subset for first page render
+	stories := limitStories(allStories, initialStoriesDisplayCount)
 
 	// Shuffle the stories
 	rand.Shuffle(len(stories), func(i, j int) {
 		stories[i], stories[j] = stories[j], stories[i]
 	})
-
-	// Select a random story for the initial random link
-	randomStory := stories[rand.Intn(len(stories))]
 
 	// Convert stories to JSON (keep existing functionality)
 	storiesJSON, err := convertStoriesToJSON(stories)
@@ -158,7 +146,7 @@ func WriteHomePage() error {
 		Types:            types,
 		Stories:          stories,
 		ConnectedStories: connectedStories,
-		RandomStoryURL:   randomStory.URL,
+		RandomStoryURL:   randomStoryURL(stories),
 		StoriesJSON:      storiesJSON,
 	}
 

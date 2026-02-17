@@ -3,7 +3,6 @@ package generate
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 
 	"community-climate-justice-archive/data"
@@ -45,15 +44,12 @@ func WriteWeatherIndexes() error {
 
 		stories := store.GetStoriesForWeather(weatherInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "weather-index.html", data.TaxonomyIndexPage{
 			Title:          weatherInQuestion.Title,
 			Description:    "A list of stories for the weather " + weatherInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: weatherInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -102,15 +98,12 @@ func WriteTypesIndexes() error {
 
 		stories := store.GetStoriesForType(typeInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "type-index.html", data.TaxonomyIndexPage{
 			Title:          typeInQuestion.Title,
 			Description:    "A list of stories for the type " + typeInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: typeInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -143,13 +136,13 @@ func WriteThemesIndexes() error {
 
 	err = os.MkdirAll("out/themes", 0755)
 	if err != nil {
-		return fmt.Errorf("failed to create output types directory: %w", err)
+		return fmt.Errorf("failed to create output themes directory: %w", err)
 	}
 
 	for _, themeInQuestion := range themes {
 		outputPath := createThemeIndexOutputPathFromTitle(themeInQuestion.Title)
 
-		log.Printf("Writing types %s to %s", themeInQuestion.Title, outputPath)
+		log.Printf("Writing theme %s to %s", themeInQuestion.Title, outputPath)
 
 		file, err := os.Create(outputPath)
 		if err != nil {
@@ -159,15 +152,12 @@ func WriteThemesIndexes() error {
 
 		stories := store.GetStoriesForTheme(themeInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "theme-index.html", data.TaxonomyIndexPage{
 			Title:          themeInQuestion.Title,
 			Description:    "A list of stories for the theme " + themeInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: themeInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -175,7 +165,7 @@ func WriteThemesIndexes() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote types to %s", outputPath)
+		log.Printf("Successfully wrote theme to %s", outputPath)
 	}
 
 	return nil
@@ -216,15 +206,12 @@ func WriteGiftedByIndexPages() error {
 
 		stories := store.GetStoriesForGiftedBy(giftedByInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "giftedby-index.html", data.TaxonomyIndexPage{
 			Title:          giftedByInQuestion.Title,
 			Description:    "A list of stories gifted or co-created by " + giftedByInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: giftedByInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -273,15 +260,12 @@ func WriteScalePermanenceIndexPages() error {
 
 		stories := store.GetStoriesForScalePermanence(scalePermanenceInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "scalepermanence-index.html", data.TaxonomyIndexPage{
 			Title:          scalePermanenceInQuestion.Title,
 			Description:    "A list of stories with scale of permanence " + scalePermanenceInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: scalePermanenceInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -330,15 +314,12 @@ func WriteWhatWasIsIfIndexPages() error {
 
 		stories := store.GetStoriesForWhatWasIsIf(whatWasIsIfInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "whatwasisif-index.html", data.TaxonomyIndexPage{
 			Title:          whatWasIsIfInQuestion.Title,
 			Description:    "A list of stories for " + whatWasIsIfInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: whatWasIsIfInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
@@ -387,15 +368,12 @@ func WriteTimePeriodIndexPages() error {
 
 		stories := store.GetStoriesForTimePeriod(timePeriodInQuestion.Title)
 
-		// Select a random story for the random link
-		randomStory := allStories[rand.Intn(len(allStories))]
-
 		err = tmpl.ExecuteTemplate(file, "timeperiod-index.html", data.TaxonomyIndexPage{
 			Title:          timePeriodInQuestion.Title,
 			Description:    "A list of stories from time period " + timePeriodInQuestion.Title,
 			Stories:        stories,
 			TaxonomyColour: timePeriodInQuestion.Colour,
-			RandomStoryURL: randomStory.URL,
+			RandomStoryURL: randomStoryURL(allStories),
 			StoriesJSON:    storiesJSON,
 		})
 
