@@ -4,24 +4,23 @@ This utility analyzes the NocoDB API fields by fetching the table schema directl
 
 ## Features
 
-✅ **Schema-Based Analysis**: Fetches field definitions directly from NocoDB API (no wasteful table scans)  
-✅ **Minimal Data Fetching**: Only fetches one sample record for field values (extremely efficient)  
-✅ **Multi-Select Detection**: Identifies multi-select fields used for tagging with their available options  
-✅ **Native Field Types**: Shows actual NocoDB field types (MultiSelect, SingleSelect, Links, etc.)  
-✅ **Comprehensive Mapping**: Compares against Go structs and template usage  
-✅ **Multiple Output Formats**: Console, CSV, and JSON outputs  
+- **Schema-Based Analysis**: Fetches field definitions directly from NocoDB API (no wasteful table scans)
+- **Minimal Data Fetching**: Only fetches one sample record for field values (extremely efficient)
+- **Multi-Select Detection**: Identifies multi-select fields used for tagging with their available options
+- **Native Field Types**: Shows actual NocoDB field types (MultiSelect, SingleSelect, Links, etc.)
+- **Comprehensive Mapping**: Compares against Go structs and template usage
+- **Multiple Output Formats**: Console, CSV, and JSON outputs
 
 ## Usage
 
 ```bash
-# Make sure NocoDB is enabled in your environment
-export USE_NOCODB=true
+# Set your NocoDB connection settings
 export NOCODB_ENDPOINT=your_endpoint
 export NOCODB_API_KEY=your_api_key
 export NOCODB_TABLE_ID=your_table_id
 
 # Run the analysis
-go run cmd/analyze-api-fields/main.go
+go run utilities/analyze-api-fields/main.go
 ```
 
 ## Output

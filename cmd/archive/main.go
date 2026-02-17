@@ -8,11 +8,11 @@
 // 5. Optionally starts a local web server so you can view it
 //
 // You can use these flags:
-// --development or -d: Run in development mode (watches for template changes)
+// --development or -d: Run in development mode (serves locally, CSS auto-copy, enter-to-regenerate)
 // --skip-images or -s: Skip processing images (faster if you're just testing templates)
 //
-// Development mode is really handy - it watches your templates and regenerates
-// pages automatically when you change them, so you can see your edits right away.
+// Development mode is really handy - it starts a local server, watches CSS
+// changes, and lets you press Enter to regenerate pages after template edits.
 package main
 
 import (

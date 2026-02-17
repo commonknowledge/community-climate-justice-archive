@@ -5,8 +5,8 @@
 // that shows you the generated HTML files from the out/ folder.
 //
 // This is only for local development - when you're testing changes before you deploy.
-// When the archive is deployed for real to GitHub Pages, GitHub's servers do the
-// serving instead.
+// When the archive is deployed for real to Render, Render serves the generated
+// static files.
 //
 // How to use it:
 // Run the archive with the --development flag, and it'll generate everything and
