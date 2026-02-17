@@ -60,7 +60,8 @@ html {
     --white-text: #FFF;
     --gray-text: #666;
     --black-alt: #000000;
-    
+    --border-color: #000;
+
     /* Shadow Colours - RGBA values for transparency */
     --shadow-light: rgba(0, 0, 0, 0.1);      /* 10% opacity */
     --shadow-medium: rgba(0, 0, 0, 0.15);    /* 15% opacity */
@@ -72,6 +73,60 @@ html {
     --shadow-scroll-thumb-hover: rgba(0, 0, 0, 0.5);
     --shadow-text: rgba(0, 0, 0, 0.50);
     --shadow-heavy: #00000040;
+}
+
+/* ============================================================================
+   DARK MODE
+   ============================================================================
+
+   Dark theme overrides. Activated by setting data-theme="dark" on <html>.
+   Falls back to the user's OS preference via prefers-color-scheme.
+*/
+
+/* When user explicitly selects dark mode */
+[data-theme="dark"] {
+    --background: #080339;
+    --white: #1a1a2e;
+    --highlight-yellow: #FFFF99;
+    --black: #fff;
+    --white-text: #fff;
+    --gray-text: #aaa;
+    --black-alt: #ffffff;
+    --border-color: #fff;
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-medium: rgba(255, 255, 255, 0.08);
+    --shadow-dark: rgba(255, 255, 255, 0.1);
+    --shadow-darker: rgba(255, 255, 255, 0.12);
+    --shadow-darkest: rgba(255, 255, 255, 0.15);
+    --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+    --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+    --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+    --shadow-text: rgba(255, 255, 255, 0.50);
+    --shadow-heavy: rgba(0, 0, 0, 0.4);
+}
+
+/* When no explicit preference is set, respect OS-level setting */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --background: #080339;
+        --white: #1a1a2e;
+        --highlight-yellow: #FFFF99;
+        --black: #fff;
+        --white-text: #fff;
+        --gray-text: #aaa;
+        --black-alt: #ffffff;
+        --border-color: #fff;
+        --shadow-light: rgba(255, 255, 255, 0.05);
+        --shadow-medium: rgba(255, 255, 255, 0.08);
+        --shadow-dark: rgba(255, 255, 255, 0.1);
+        --shadow-darker: rgba(255, 255, 255, 0.12);
+        --shadow-darkest: rgba(255, 255, 255, 0.15);
+        --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+        --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+        --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+        --shadow-text: rgba(255, 255, 255, 0.50);
+        --shadow-heavy: rgba(0, 0, 0, 0.4);
+    }
 }
 
 /* ============================================================================
@@ -176,6 +231,7 @@ header.homepage {
 /* header
    Main site header (sticks to top when scrolling) */
 header {
+    background-color: var(--background);
     font-family: Arial, sans-serif;
     margin-left: 2.222222rem;
     margin-right: 2.222222rem;
@@ -235,6 +291,28 @@ header p {
 .header-nav {
     display: flex;
     gap: 20px;                       /* Space between buttons */
+    align-items: center;
+}
+
+/* .theme-toggle
+   Dark/light mode toggle button in the header nav */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.22222rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--black);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
 }
 
 /* .header-nav .dashed-button
@@ -739,7 +817,7 @@ ul.tag-list {
 /* .tag:hover
    All tags turn black on hover (!important overrides inline styles) */
 .tag:hover {
-    background: #000 !important;
+    background: var(--black) !important;
 }
 
 /* a.tag
@@ -897,15 +975,15 @@ Document download display for main story attachments, centered between navigatio
 .story-document .download-link {
     font-size: 1.2rem;
     padding: 0.5rem 1rem;
-    border: 2px solid #000;
+    border: 2px solid var(--border-color);
     text-decoration: none;
-    color: #000;
+    color: var(--black);
     transition: background-color 0.3s ease;
 }
 
 .story-document .download-link:hover {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--black);
+    color: var(--background);
 }
 
 /* Story No Attachments
@@ -920,7 +998,7 @@ Discrete display when story has no attached media, centered and subtle.
     width: 100%;
     min-height: 150px;
     text-align: center;
-    color: #999;
+    color: var(--gray-text);
 }
 
 .no-attachment-placeholder {
@@ -931,7 +1009,7 @@ Discrete display when story has no attached media, centered and subtle.
 .no-attachment-placeholder svg {
     width: 32px;
     height: 32px;
-    stroke: #ccc;
+    stroke: var(--gray-text);
 }
 
 .story-no-attachments p {
@@ -940,7 +1018,7 @@ Discrete display when story has no attached media, centered and subtle.
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.02rem;
-    color: #aaa;
+    color: var(--gray-text);
     margin: 0;
 }
 
@@ -949,7 +1027,7 @@ Discrete display when story has no attached media, centered and subtle.
 The main content and metadata for a story.
 */
 .story-details {
-    border-top: 1px solid #000;
+    border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1591,7 +1669,7 @@ A button with a dashed border for navigation and actions.
  * New sections that appear at the bottom of story pages showing related content.
  */
 .story-connections {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 4.44444rem;
@@ -1917,13 +1995,13 @@ Uses cream background with dashed border and flexible layout.
 }
 
 .story-nav-button {
-    border: 2px dashed #000;
+    border: 2px dashed var(--border-color);
     box-sizing: border-box;
     display: flex;
     align-items: center;
     padding: 0.55556rem;
     text-decoration: none;
-    color: #000;
+    color: var(--black);
     flex: 1;
     min-height: 6.66667rem;
     gap: 1.11111rem;
