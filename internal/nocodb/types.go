@@ -31,6 +31,16 @@ import (
 	"community-climate-justice-archive/internal/util"
 )
 
+const (
+	// NocoDB field IDs for self-referential story connection fields.
+	relationshipFieldInspiredByID  = "ccsugv6du8wnisr"
+	relationshipFieldHasInspiredID = "cilfzk65ypiw6o4"
+
+	// Cache keys used by client.fetchAndCacheRelationships.
+	cachedInspiredByKey  = "__cached_inspired_by"
+	cachedHasInspiredKey = "__cached_has_inspired"
+)
+
 // NocoDBStoryDTO is what NocoDB sends us when we ask for a story.
 //
 // The field names match NocoDB's JSON exactly (notice they have spaces and slashes).
@@ -164,8 +174,8 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		Themes:                  themes,
 		Experience:              toString(dto.Experience),
 		TimeSpan:                toString(dto.TimeSpan),
-		InspiredBy:              fetchStoryConnectionsDirect(toString(dto.ID), "ccsugv6du8wnisr", client),
-		HasInspired:             fetchStoryConnectionsDirect(toString(dto.ID), "cilfzk65ypiw6o4", client),
+		InspiredBy:              fetchStoryConnectionsDirect(toString(dto.ID), relationshipFieldInspiredByID, client),
+		HasInspired:             fetchStoryConnectionsDirect(toString(dto.ID), relationshipFieldHasInspiredID, client),
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
@@ -792,10 +802,10 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 		if toString(record["Id"]) == recordID {
 			// Determine which cached field to read based on fieldID
 			var cacheKey string
-			if fieldID == "ccsugv6du8wnisr" { // Inspired by
-				cacheKey = "__cached_inspired_by"
-			} else if fieldID == "cilfzk65ypiw6o4" { // Has inspired
-				cacheKey = "__cached_has_inspired"
+			if fieldID == relationshipFieldInspiredByID {
+				cacheKey = cachedInspiredByKey
+			} else if fieldID == relationshipFieldHasInspiredID {
+				cacheKey = cachedHasInspiredKey
 			} else {
 				log.Printf("Warning: Unknown fieldID %s for record %s", fieldID, recordID)
 				return []data.StoryConnection{}

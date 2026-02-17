@@ -31,6 +31,8 @@ import (
 	"strings"
 )
 
+const nocodbStoryDashboardURLTemplate = "https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path="
+
 // StoryConnection is when one story is connected to another.
 //
 // Stories can inspire each other, creating links throughout the archive. When you
@@ -439,7 +441,7 @@ func hsbToRGB(hue, saturation, brightness float64) (uint8, uint8, uint8) {
 
 // GetNocoDBURL returns a direct link to this story in the NocoDB interface for debugging
 func (s Story) GetNocoDBURL() string {
-	return fmt.Sprintf("https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path=", s.ID)
+	return fmt.Sprintf(nocodbStoryDashboardURLTemplate, s.ID)
 }
 
 // convertNocoDBAttachment converts a NocoDB attachment object to StoryAttachment format
