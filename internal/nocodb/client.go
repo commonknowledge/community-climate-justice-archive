@@ -17,6 +17,11 @@
 // 1. In-memory cache: Stores fetched records for the duration of the program
 // 2. Disk cache: Saves records to a JSON file for faster startup on subsequent runs
 //
+// Important scope note:
+// - This cache stores raw NocoDB records.
+// - It does NOT cache converted Story structs or parsed templates.
+// - Story conversion caching is handled separately in internal/generate during each build run.
+//
 // The cache includes not just the basic record data, but also relationship
 // information (like "inspired by" connections between stories), making the
 // application fast even with hundreds of stories.
@@ -40,13 +45,16 @@ import (
 	"github.com/eduardolat/nocodbgo"
 )
 
-// Client wraps the NocoDB client with our configuration
+// Client wraps the NocoDB client with our configuration.
 type Client struct {
-	client        *nocodbgo.Client
-	table         *nocodbgo.Table
+	client *nocodbgo.Client
+	table  *nocodbgo.Table
+	// cachedRecords stores raw API records, not converted data.Story structs.
 	cachedRecords []map[string]interface{}
-	cacheLoaded   bool
-	cacheOnlyMode bool // If true, only use cache, never hit API
+	// cacheLoaded indicates whether cachedRecords currently represents a valid complete dataset.
+	cacheLoaded bool
+	// cacheOnlyMode forces reads to come from disk/in-memory cache and blocks API requests.
+	cacheOnlyMode bool
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables

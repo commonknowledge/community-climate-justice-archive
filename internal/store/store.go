@@ -7,7 +7,11 @@
 // How to use it:
 // 1. Call Initialize() when the app starts - this sets up the connection to NocoDB
 // 2. Then use functions like GetAllStories(), GetStoriesForTheme(), etc.
-// 3. The NocoDB client handles caching, so calling things multiple times is fast
+// 3. The NocoDB client handles raw-record caching, reducing repeat API calls
+//
+// Important scope note:
+// - Store-level functions still convert raw records into []data.Story on each call.
+// - Per-build conversion caching is handled in internal/generate.
 package store
 
 import (
@@ -93,8 +97,11 @@ func GetRawRecords() ([]map[string]interface{}, error) {
 // GetAllStories fetches every story in the archive.
 //
 // This is probably the most-used function - it grabs all stories from NocoDB
-// and returns them as a list. The NocoDB client handles caching, so calling
-// this multiple times doesn't hammer the database.
+// and returns them as a list.
+//
+// The NocoDB client cache prevents repeated network calls. This function still
+// performs raw-record -> Story conversion per call. Generator-level caching avoids
+// repeating that conversion many times within a single build run.
 //
 // If something goes wrong talking to the database, the program stops - we can't
 // really do anything useful without story data.

@@ -49,6 +49,7 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 	buildStartTime := time.Now()
 
 	log.Println("Starting build process")
+	generate.ResetBuildCache()
 
 	// Warm the cache to ensure all subsequent operations are fast
 	store.WarmCache()

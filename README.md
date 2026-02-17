@@ -301,17 +301,6 @@ If you need to make changes, here's where to look:
 - Edit templates in `templates/` for structure
 - Images in `images/` get processed automatically
 
-### Caching: Keeping Things Fast
-
-The archive caches story data in a JSON file (`debug-cache-nocodb.json`) so it doesn't have to fetch from NocoDB every single time during development. 
-
-If you need fresh data (like after updating stories in NocoDB), just delete the cache file:
-```bash
-rm debug-cache-nocodb.json
-```
-
-The next time you build, it'll fetch everything fresh from NocoDB.
-
 ### Troubleshooting Tips
 
 **Images not showing up?**

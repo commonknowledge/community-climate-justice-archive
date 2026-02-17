@@ -38,6 +38,21 @@ import (
 	"community-climate-justice-archive/internal/util"
 )
 
+var (
+	// cachedStories stores converted Story structs for one build run.
+	// This avoids repeated record->Story conversion across multiple page writers.
+	cachedStories []data.Story
+	// cachedTemplates stores parsed templates for one build run.
+	// This avoids parsing templates repeatedly in each writer function.
+	cachedTemplates *template.Template
+)
+
+// ResetBuildCache clears per-run cached data so each build starts fresh.
+func ResetBuildCache() {
+	cachedStories = nil
+	cachedTemplates = nil
+}
+
 // createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
 func createTypeIndexOutputPathFromTitle(title string) string {
 	slug := util.Slugify(title)
@@ -94,7 +109,7 @@ func createTimePeriodOutputPathFromTitle(title string) string {
 	return filepath.Join("out", "timeperiod", fileName)
 }
 
-// loadTemplates loads all templates and partials needed by the application
+// loadTemplates loads all templates and partials needed by the application.
 func loadTemplates() (*template.Template, error) {
 	tmpl := template.New("")
 
@@ -111,6 +126,29 @@ func loadTemplates() (*template.Template, error) {
 	}
 
 	return tmpl, nil
+}
+
+func loadTemplatesCached() (*template.Template, error) {
+	if cachedTemplates != nil {
+		return cachedTemplates, nil
+	}
+
+	tmpl, err := loadTemplates()
+	if err != nil {
+		return nil, err
+	}
+
+	cachedTemplates = tmpl
+	return cachedTemplates, nil
+}
+
+func getAllStories() []data.Story {
+	if cachedStories != nil {
+		return cachedStories
+	}
+
+	cachedStories = store.GetAllStories()
+	return cachedStories
 }
 
 // convertStoriesToJSON converts a slice of stories to a JSON array of URLs.
@@ -296,7 +334,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 func WriteWeatherIndexes() error {
 	log.Println("Starting weather generation")
 	weathers := store.GetWeather()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -304,7 +342,7 @@ func WriteWeatherIndexes() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -353,7 +391,7 @@ func WriteWeatherIndexes() error {
 func WriteTypesIndexes() error {
 	log.Println("Starting types generation")
 	types := store.GetTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -361,7 +399,7 @@ func WriteTypesIndexes() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -435,7 +473,7 @@ func getTagType(tag interface{}) string {
 // WriteStories generates a story page for each story and writes them to the out/stories directory.
 func WriteStories() error {
 	log.Println("Starting story generation")
-	stories := store.GetAllStories()
+	stories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(stories)
@@ -443,7 +481,7 @@ func WriteStories() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -603,7 +641,7 @@ func WriteStories() error {
 func WriteThemesIndexes() error {
 	log.Println("Starting themes generation")
 	themes := store.GetThemes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -611,7 +649,7 @@ func WriteThemesIndexes() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -662,7 +700,7 @@ func WriteFilterData() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	weather := store.GetWeather()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert to filter data JSON
 	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather)
@@ -693,7 +731,7 @@ func WriteWanderPage() error {
 	log.Println("Starting wander page generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
-	stories := store.GetAllStories()
+	stories := getAllStories()
 
 	// Only give the template the first 40 stories
 	stories = stories[:40]
@@ -722,7 +760,7 @@ func WriteWanderPage() error {
 		StoriesJSON:    storiesJSON,
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -747,7 +785,7 @@ func WriteArchivePage() error {
 	log.Println("Starting archive page generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Select a random story for the initial random link
 	randomStory := allStories[rand.Intn(len(allStories))]
@@ -781,7 +819,7 @@ func WriteArchivePage() error {
 		StoriesJSON:    storiesJSON,
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -806,7 +844,7 @@ func WriteHomePage() error {
 	log.Println("Starting homepage generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Get connected stories for the connections view (max 20)
 	connectedStories := store.GetStoriesWithConnections(20)
@@ -839,7 +877,7 @@ func WriteHomePage() error {
 		StoriesJSON:      storiesJSON,
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -867,7 +905,7 @@ func WriteHomePage() error {
 func WriteGiftedByIndexPages() error {
 	log.Println("Starting gifted by generation")
 	giftedByTypes := store.GetGiftedByTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -875,7 +913,7 @@ func WriteGiftedByIndexPages() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -924,7 +962,7 @@ func WriteGiftedByIndexPages() error {
 func WriteScalePermanenceIndexPages() error {
 	log.Println("Starting scale permanence generation")
 	scalePermanenceTypes := store.GetScalePermanenceTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -932,7 +970,7 @@ func WriteScalePermanenceIndexPages() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -981,7 +1019,7 @@ func WriteScalePermanenceIndexPages() error {
 func WriteWhatWasIsIfIndexPages() error {
 	log.Println("Starting what was/is/if generation")
 	whatWasIsIfTypes := store.GetWhatWasIsIfTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -989,7 +1027,7 @@ func WriteWhatWasIsIfIndexPages() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
@@ -1038,7 +1076,7 @@ func WriteWhatWasIsIfIndexPages() error {
 func WriteTimePeriodIndexPages() error {
 	log.Println("Starting time period generation")
 	timePeriodTypes := store.GetTimePeriodTypes()
-	allStories := store.GetAllStories()
+	allStories := getAllStories()
 
 	// Convert stories to JSON
 	storiesJSON, err := convertStoriesToJSON(allStories)
@@ -1046,7 +1084,7 @@ func WriteTimePeriodIndexPages() error {
 		return err
 	}
 
-	tmpl, err := loadTemplates()
+	tmpl, err := loadTemplatesCached()
 	if err != nil {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
