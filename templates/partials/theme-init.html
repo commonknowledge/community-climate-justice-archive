@@ -1,0 +1,14 @@
+{{/*
+    Theme Initialisation Partial
+
+    Prevents flash of wrong theme by applying the saved dark/light mode preference
+    before the page renders. Must be included in the <head> of every template.
+*/}}
+{{define "theme-init"}}
+<script>
+    (function() {
+        var t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+</script>
+{{end}}
