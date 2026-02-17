@@ -47,6 +47,7 @@ type Client struct {
 	cachedRecords []map[string]interface{}
 	cacheLoaded   bool
 	cacheOnlyMode bool // If true, only use cache, never hit API
+	diskCacheMode bool // If true, allow reading/writing debug-cache-nocodb.json
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables
@@ -85,8 +86,8 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 		return c.cachedRecords, nil
 	}
 
-	// Try loading from disk cache first
-	if c.IsDiskCacheAvailable() {
+	// Try loading from disk cache first (debug mode only)
+	if c.diskCacheMode && c.IsDiskCacheAvailable() {
 		if err := c.LoadCacheFromDisk(); err != nil {
 			log.Printf("Warning: Failed to load disk cache: %v", err)
 			if c.cacheOnlyMode {
@@ -147,9 +148,11 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	c.cacheLoaded = true
 	log.Printf("Successfully retrieved and cached all %d records from NocoDB with relationships", len(allRecords))
 
-	// Save cache to disk for faster future loading
-	if err := c.SaveCacheToDisk(); err != nil {
-		log.Printf("Warning: Failed to save cache to disk: %v", err)
+	// Save cache to disk for faster future debugging (debug mode only)
+	if c.diskCacheMode {
+		if err := c.SaveCacheToDisk(); err != nil {
+			log.Printf("Warning: Failed to save cache to disk: %v", err)
+		}
 	}
 
 	return allRecords, nil
@@ -228,10 +231,10 @@ func (c *Client) UpdateRecord(id string, fieldData map[string]interface{}) error
 	}
 
 	log.Printf("Successfully updated record %s", id)
-	
+
 	// Invalidate cache since we've made changes
 	c.DropCache()
-	
+
 	return nil
 }
 
@@ -319,7 +322,17 @@ func (c *Client) ClearDiskCache() error {
 func (c *Client) SetCacheOnlyMode(enabled bool) {
 	c.cacheOnlyMode = enabled
 	if enabled {
-		log.Println("NocoDB client set to cache-only mode")
+		// Cache-only mode requires disk cache to be enabled.
+		c.diskCacheMode = true
+		log.Println("NocoDB client set to cache-only mode (disk cache enabled)")
+	}
+}
+
+// SetDiskCacheMode enables/disables reading and writing the on-disk debug cache.
+func (c *Client) SetDiskCacheMode(enabled bool) {
+	c.diskCacheMode = enabled
+	if enabled {
+		log.Println("NocoDB disk cache mode enabled")
 	}
 }
 

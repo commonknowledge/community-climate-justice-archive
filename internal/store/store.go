@@ -67,6 +67,16 @@ func ClearDiskCache() error {
 	return client.ClearDiskCache()
 }
 
+// SetDiskCacheMode enables/disables disk cache for debugging.
+//
+// When disabled (default), the app always fetches fresh data from NocoDB and
+// only keeps it in memory for the current run.
+func SetDiskCacheMode(enabled bool) {
+	if client != nil {
+		client.SetDiskCacheMode(enabled)
+	}
+}
+
 // SetCacheOnlyMode tells the store to only use cached data, never hitting the API.
 // Really handy for offline debugging when you've got a cached copy of the data
 // and don't want to (or can't) connect to NocoDB.

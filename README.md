@@ -328,14 +328,19 @@ If you need to make changes, here's where to look:
 
 ### Caching: Keeping Things Fast
 
-The archive caches story data in a JSON file (`debug-cache-nocodb.json`) so it doesn't have to fetch from NocoDB every single time during development. 
+By default, the archive fetches fresh story data from NocoDB on each run.
 
-If you need fresh data (like after updating stories in NocoDB), just delete the cache file:
+Disk caching (`debug-cache-nocodb.json`) is **debug-only** and must be explicitly enabled with:
+
+```bash
+go run ./cmd/archive --debug-disk-cache
+```
+
+If you are using debug disk cache and need fresh data, delete the cache file:
+
 ```bash
 rm debug-cache-nocodb.json
 ```
-
-The next time you build, it'll fetch everything fresh from NocoDB.
 
 ### Troubleshooting Tips
 
@@ -349,7 +354,7 @@ The next time you build, it'll fetch everything fresh from NocoDB.
 - Or restart the archive
 
 **Story data seems stale?**
-- Delete `debug-cache-nocodb.json`
+- If you enabled debug disk cache, delete `debug-cache-nocodb.json`
 - Rebuild the archive
 
 **Build failing?**
