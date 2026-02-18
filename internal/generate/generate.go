@@ -147,6 +147,7 @@ type StoryData struct {
 	Themes        []string        `json:"themes"`
 	Types         []string        `json:"types"`
 	Weather       []string        `json:"weather"`
+	TimePeriods   []string        `json:"timePeriods"`
 	Attachment    StoryAttachment `json:"attachment"`
 }
 
@@ -163,10 +164,11 @@ type StoryAttachment struct {
 
 // FilterData represents all the data needed for client-side filtering
 type FilterData struct {
-	Themes  []FilterOption `json:"themes"`
-	Types   []FilterOption `json:"types"`
-	Weather []FilterOption `json:"weather"`
-	Stories []StoryData    `json:"stories"`
+	Themes      []FilterOption `json:"themes"`
+	Types       []FilterOption `json:"types"`
+	Weather     []FilterOption `json:"weather"`
+	TimePeriods []FilterOption `json:"timePeriods"`
+	Stories     []StoryData    `json:"stories"`
 }
 
 // FilterOption represents a filter option with title and count
@@ -178,7 +180,7 @@ type FilterOption struct {
 }
 
 // convertStoriesToFilterData converts stories to comprehensive filter data
-func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather) (string, error) {
+func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather, timePeriods []data.TimePeriod) (string, error) {
 	// Create story data
 	storyData := make([]StoryData, len(stories))
 	for i, story := range stories {
@@ -202,6 +204,12 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			weatherNames[j] = w.Title
 		}
 
+		// Extract time period titles
+		timePeriodNames := make([]string, len(story.TimePeriod))
+		for j, tp := range story.TimePeriod {
+			timePeriodNames[j] = tp.Title
+		}
+
 		storyData[i] = StoryData{
 			ID:            story.ID,
 			Finding:       story.Finding,
@@ -215,6 +223,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Themes:        themeNames,
 			Types:         typeNames,
 			Weather:       weatherNames,
+			TimePeriods:   timePeriodNames,
 			Attachment: StoryAttachment{
 				URL:       attachment.URL,
 				ThumbURL:  attachment.ThumbURL,
@@ -285,11 +294,31 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		}
 	}
 
+	timePeriodOptions := make([]FilterOption, len(timePeriods))
+	for i, tp := range timePeriods {
+		count := 0
+		for _, story := range stories {
+			for _, storyTP := range story.TimePeriod {
+				if storyTP.Title == tp.Title {
+					count++
+					break
+				}
+			}
+		}
+		timePeriodOptions[i] = FilterOption{
+			Title: tp.Title,
+			URL:   tp.URL,
+			Count: count,
+			Color: tp.Colour,
+		}
+	}
+
 	filterData := FilterData{
-		Themes:  themeOptions,
-		Types:   typeOptions,
-		Weather: weatherOptions,
-		Stories: storyData,
+		Themes:      themeOptions,
+		Types:       typeOptions,
+		Weather:     weatherOptions,
+		TimePeriods: timePeriodOptions,
+		Stories:     storyData,
 	}
 
 	jsonData, err := json.Marshal(filterData)
@@ -859,10 +888,11 @@ func WriteFilterData() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	weather := store.GetWeather()
+	timePeriods := store.GetTimePeriodTypes()
 	allStories := store.GetAllStories()
 
 	// Convert to filter data JSON
-	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather)
+	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather, timePeriods)
 	if err != nil {
 		return err
 	}
