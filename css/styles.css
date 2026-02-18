@@ -190,6 +190,23 @@ header h1 a:hover::before {
     background: var(--highlight-yellow);  /* Makes the box visible */
 }
 
+/* In dark mode, links with yellow highlight need black text for contrast */
+[data-theme="dark"] .story-finding a:hover,
+[data-theme="dark"] .story-metadata a:not(.tag):hover,
+[data-theme="dark"] .footer-content a:hover,
+[data-theme="dark"] header h1 a:hover {
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .story-finding a:hover,
+    :root:not([data-theme="light"]) .story-metadata a:not(.tag):hover,
+    :root:not([data-theme="light"]) .footer-content a:hover,
+    :root:not([data-theme="light"]) header h1 a:hover {
+        color: #000;
+    }
+}
+
 /* These links don't get the hover effect */
 .related-story a:hover,
 .story a:hover,
