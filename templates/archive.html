@@ -48,8 +48,10 @@
         
         <!-- Sticky Filter Controls -->
         <div class="archive-filters-container">
-            <span class="filter-group-label">Filter by:</span>
-            <div class="archive-filters" id="archive-filters">
+            <div class="filter-sort-row">
+                <div class="filter-group">
+                    <span class="filter-group-label">Filter by:</span>
+                    <div class="archive-filters" id="archive-filters">
                 <div class="filter-dropdown" id="theme-dropdown">
                     <button class="filter-dropdown-button" id="theme-button">
                         <span class="filter-dropdown-text">Themes</span>
@@ -80,6 +82,22 @@
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="weather-content"></div>
+                </div>
+                </div>
+
+                <div class="sort-group">
+                    <span class="filter-group-label">Sort by:</span>
+                    <div class="sort-dropdown" id="sort-dropdown">
+                        <button class="filter-dropdown-button" id="sort-button">
+                            <span class="sort-dropdown-text" id="sort-text">Date experienced</span>
+                            <span class="filter-dropdown-arrow">▼</span>
+                        </button>
+                        <div class="filter-dropdown-content sort-dropdown-content" id="sort-content">
+                            <button class="sort-option selected" data-sort="dateExperienced">Date experienced</button>
+                            <button class="sort-option" data-sort="dateCreated">Date created</button>
+                            <button class="sort-option" data-sort="random">Random</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

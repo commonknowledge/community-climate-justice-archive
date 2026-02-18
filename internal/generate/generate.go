@@ -151,6 +151,7 @@ type StoryData struct {
 	GiftedBy         []string        `json:"giftedBy"`
 	ScalePermanence  []string        `json:"scalePermanence"`
 	TimePeriod       []string        `json:"timePeriod"`
+	CreatedTime      string          `json:"createdTime"`
 	Attachment       StoryAttachment `json:"attachment"`
 }
 
@@ -251,6 +252,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			GiftedBy:        giftedByNames,
 			ScalePermanence: scalePermanenceNames,
 			TimePeriod:      timePeriodNames,
+			CreatedTime:     story.CreatedTime,
 			Attachment: StoryAttachment{
 				URL:       attachment.URL,
 				ThumbURL:  attachment.ThumbURL,

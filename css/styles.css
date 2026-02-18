@@ -1482,12 +1482,73 @@ A button with a dashed border for navigation and actions.
     color: var(--black);
 }
 
+/* Filter / Sort row layout */
+.filter-sort-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2.22222rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55556rem;
+    flex: 1;
+}
+
+.sort-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55556rem;
+    flex-shrink: 0;
+}
+
 /* Archive Filters */
 .archive-filters {
     display: flex;
     gap: 1.11111rem;
     align-items: center;
     flex-wrap: wrap;
+}
+
+/* Sort dropdown */
+.sort-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.sort-dropdown-content {
+    min-width: 100%;
+}
+
+.sort-option {
+    display: block;
+    width: 100%;
+    padding: 0.55556rem;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    color: var(--black);
+}
+
+.sort-option:hover {
+    background-color: var(--highlight-yellow);
+}
+
+.sort-option.selected {
+    font-weight: 700;
+}
+
+.sort-dropdown.open .filter-dropdown-content {
+    display: block;
+}
+
+.sort-dropdown.open .filter-dropdown-button {
+    border: 2px solid var(--black);
 }
 
 /* More Filters toggle */

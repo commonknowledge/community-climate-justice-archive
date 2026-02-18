@@ -42,6 +42,7 @@ class ArchiveFilters {
             timePeriod: []
         };
         this.filteredStories = [];
+        this.currentSort = 'dateExperienced';
         this.currentPage = 0;
         this.storiesPerPage = 20;
         
@@ -91,6 +92,11 @@ class ArchiveFilters {
             // More filters toggle
             moreFiltersToggle: document.getElementById('more-filters-toggle'),
             moreFiltersContainer: document.getElementById('more-filters'),
+            // Sort elements
+            sortDropdown: document.getElementById('sort-dropdown'),
+            sortButton: document.getElementById('sort-button'),
+            sortContent: document.getElementById('sort-content'),
+            sortText: document.getElementById('sort-text'),
             // The "Clear filters" button
             clearFilters: document.getElementById('clear-filters'),
             // Text showing "X of Y stories"
@@ -354,10 +360,37 @@ class ArchiveFilters {
             });
         }
 
+        // Sort dropdown toggle
+        if (this.elements.sortButton) {
+            this.elements.sortButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const dropdown = this.elements.sortDropdown;
+                if (!dropdown) return;
+                const isOpen = dropdown.classList.contains('open');
+                this.closeAllDropdowns();
+                this.closeSortDropdown();
+                if (!isOpen) {
+                    dropdown.classList.add('open');
+                }
+            });
+        }
+
+        // Sort option selection
+        if (this.elements.sortContent) {
+            this.elements.sortContent.addEventListener('click', (e) => {
+                const option = e.target.closest('.sort-option');
+                if (!option) return;
+                e.stopPropagation();
+                this.setSort(option.dataset.sort);
+            });
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.filter-dropdown')) {
+            if (!e.target.closest('.filter-dropdown') && !e.target.closest('.sort-dropdown')) {
                 this.closeAllDropdowns();
+                this.closeSortDropdown();
             }
         });
         
@@ -376,12 +409,12 @@ class ArchiveFilters {
     toggleDropdown(dropdownType) {
         const dropdown = this.elements[`${dropdownType}Dropdown`];
         if (!dropdown) return;
-        
+
         const isOpen = dropdown.classList.contains('open');
-        
-        // Close all dropdowns first
+
+        // Close all dropdowns (including sort) first
         this.closeAllDropdowns();
-        
+
         // Toggle the clicked dropdown
         if (!isOpen) {
             dropdown.classList.add('open');
@@ -395,8 +428,64 @@ class ArchiveFilters {
                 dropdown.classList.remove('open');
             }
         });
+        this.closeSortDropdown();
     }
-    
+
+    closeSortDropdown() {
+        if (this.elements.sortDropdown) {
+            this.elements.sortDropdown.classList.remove('open');
+        }
+    }
+
+    setSort(sortKey) {
+        this.currentSort = sortKey;
+
+        // Update button text
+        const labels = {
+            dateExperienced: 'Date experienced',
+            dateCreated: 'Date created',
+            random: 'Random'
+        };
+        if (this.elements.sortText) {
+            this.elements.sortText.textContent = labels[sortKey] || sortKey;
+        }
+
+        // Update selected state in dropdown
+        if (this.elements.sortContent) {
+            this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.sort === sortKey);
+            });
+        }
+
+        this.closeSortDropdown();
+        this.sortStories();
+        this.currentPage = 0;
+        this.renderStories();
+        this.updateURL();
+    }
+
+    sortStories() {
+        if (this.currentSort === 'random') {
+            // Fisher-Yates shuffle
+            for (let i = this.filteredStories.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.filteredStories[i], this.filteredStories[j]] = [this.filteredStories[j], this.filteredStories[i]];
+            }
+        } else if (this.currentSort === 'dateExperienced') {
+            this.filteredStories.sort((a, b) => {
+                const dateA = a.startDateTime || '';
+                const dateB = b.startDateTime || '';
+                return dateB.localeCompare(dateA);
+            });
+        } else if (this.currentSort === 'dateCreated') {
+            this.filteredStories.sort((a, b) => {
+                const dateA = a.createdTime || '';
+                const dateB = b.createdTime || '';
+                return dateB.localeCompare(dateA);
+            });
+        }
+    }
+
     toggleFilter(value, filterType) {
         const filters = this.currentFilters[filterType];
         const index = filters.indexOf(value);
@@ -525,9 +614,12 @@ class ArchiveFilters {
             return true;
         });
         
+        // Apply current sort
+        this.sortStories();
+
         // Reset to the first page
         this.currentPage = 0;
-        
+
         // Redraw the story grid with the filtered results
         this.renderStories();
         
@@ -970,6 +1062,10 @@ class ArchiveFilters {
             params.set('timePeriod', this.currentFilters.timePeriod.join(','));
         }
 
+        if (this.currentSort && this.currentSort !== 'dateExperienced') {
+            params.set('sort', this.currentSort);
+        }
+
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
         window.history.pushState(null, '', newURL);
     }
@@ -984,6 +1080,21 @@ class ArchiveFilters {
         this.currentFilters.giftedBy = params.get('giftedBy') ? params.get('giftedBy').split(',') : [];
         this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
         this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
+
+        // Restore sort from URL
+        const sortParam = params.get('sort');
+        if (sortParam && ['dateExperienced', 'dateCreated', 'random'].includes(sortParam)) {
+            this.currentSort = sortParam;
+            const labels = { dateExperienced: 'Date experienced', dateCreated: 'Date created', random: 'Random' };
+            if (this.elements.sortText) {
+                this.elements.sortText.textContent = labels[sortParam];
+            }
+            if (this.elements.sortContent) {
+                this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.sort === sortParam);
+                });
+            }
+        }
 
         // If any "more" filters are active from URL, auto-expand the more filters section
         const hasMoreFilterParams = this.currentFilters.giftedBy.length > 0 ||
