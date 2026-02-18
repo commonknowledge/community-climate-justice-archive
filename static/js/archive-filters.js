@@ -35,7 +35,8 @@ class ArchiveFilters {
         this.currentFilters = {
             themes: [],
             types: [],
-            weather: []
+            weather: [],
+            timePeriods: []
         };
         this.filteredStories = [];
         this.currentPage = 0;
@@ -63,14 +64,17 @@ class ArchiveFilters {
             themeDropdown: document.getElementById('theme-dropdown'),
             typeDropdown: document.getElementById('type-dropdown'),
             weatherDropdown: document.getElementById('weather-dropdown'),
+            timeperiodDropdown: document.getElementById('timeperiod-dropdown'),
             // The buttons that open the dropdowns
             themeButton: document.getElementById('theme-button'),
             typeButton: document.getElementById('type-button'),
             weatherButton: document.getElementById('weather-button'),
+            timeperiodButton: document.getElementById('timeperiod-button'),
             // The content areas inside the dropdowns (where the filter options go)
             themeContent: document.getElementById('theme-content'),
             typeContent: document.getElementById('type-content'),
             weatherContent: document.getElementById('weather-content'),
+            timeperiodContent: document.getElementById('timeperiod-content'),
             // The "Clear filters" button
             clearFilters: document.getElementById('clear-filters'),
             // Text showing "X of Y stories"
@@ -142,6 +146,9 @@ class ArchiveFilters {
         
         // Populate weather
         this.populateDropdown(this.elements.weatherContent, this.filterData.weather, 'weather');
+
+        // Populate time periods
+        this.populateDropdown(this.elements.timeperiodContent, this.filterData.timePeriods, 'timePeriods');
     }
     
     populateDropdown(contentElement, options, filterType) {
@@ -279,7 +286,14 @@ class ArchiveFilters {
                 this.toggleDropdown('weather');
             });
         }
-        
+
+        if (this.elements.timeperiodButton) {
+            this.elements.timeperiodButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('timeperiod');
+            });
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.filter-dropdown')) {
@@ -315,7 +329,7 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather'].forEach(type => {
+        ['theme', 'type', 'weather', 'timeperiod'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
@@ -346,8 +360,14 @@ class ArchiveFilters {
     
     updateDropdownDisplay() {
         // Update the visual state of filter options to show which are selected
-        ['themes', 'types', 'weather'].forEach(filterType => {
-            const contentElement = this.elements[`${filterType.slice(0, -1)}Content`];
+        const filterTypeToElement = {
+            themes: this.elements.themeContent,
+            types: this.elements.typeContent,
+            weather: this.elements.weatherContent,
+            timePeriods: this.elements.timeperiodContent
+        };
+        ['themes', 'types', 'weather', 'timePeriods'].forEach(filterType => {
+            const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
             const options = contentElement.querySelectorAll('.filter-tag-option');
@@ -400,12 +420,20 @@ class ArchiveFilters {
             // Check weather filters
             if (this.currentFilters.weather.length > 0) {
                 // Does this story have at least one of the selected weather conditions?
-                const hasMatchingWeather = this.currentFilters.weather.some(weather => 
+                const hasMatchingWeather = this.currentFilters.weather.some(weather =>
                     story.weather.includes(weather)
                 );
                 if (!hasMatchingWeather) return false;  // Doesn't match, hide it
             }
-            
+
+            // Check time period filters
+            if (this.currentFilters.timePeriods.length > 0) {
+                const hasMatchingTimePeriod = this.currentFilters.timePeriods.some(tp =>
+                    story.timePeriods.includes(tp)
+                );
+                if (!hasMatchingTimePeriod) return false;
+            }
+
             // If we get here, the story matches all filters
             return true;
         });
@@ -703,6 +731,13 @@ class ArchiveFilters {
                 this.createActiveFilterTag(weather, 'weather')
             );
         });
+
+        // Add time period filters
+        this.currentFilters.timePeriods.forEach(tp => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(tp, 'timePeriods')
+            );
+        });
     }
     
     createActiveFilterTag(value, filterType) {
@@ -749,7 +784,8 @@ class ArchiveFilters {
         this.currentFilters = {
             themes: [],
             types: [],
-            weather: []
+            weather: [],
+            timePeriods: []
         };
         
         this.updateDropdownDisplay();
@@ -806,7 +842,11 @@ class ArchiveFilters {
         if (this.currentFilters.weather.length > 0) {
             params.set('weather', this.currentFilters.weather.join(','));
         }
-        
+
+        if (this.currentFilters.timePeriods.length > 0) {
+            params.set('timePeriods', this.currentFilters.timePeriods.join(','));
+        }
+
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
         window.history.pushState(null, '', newURL);
     }
@@ -817,6 +857,7 @@ class ArchiveFilters {
         this.currentFilters.themes = params.get('themes') ? params.get('themes').split(',') : [];
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];
+        this.currentFilters.timePeriods = params.get('timePeriods') ? params.get('timePeriods').split(',') : [];
         
         // Update dropdown displays
         if (this.filterData) {
