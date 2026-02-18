@@ -2344,7 +2344,7 @@ Uses cream background with dashed border and flexible layout.
 .about-what-if-label {
     display: inline-block;
     background-color: var(--highlight-yellow);
-    color: var(--black);
+    color: #000;
     font-family: "Times New Roman", serif;
     font-size: 1.77778rem;
     font-weight: 400;
