@@ -2514,6 +2514,16 @@ Uses cream background with dashed border and flexible layout.
     mix-blend-mode: multiply;
 }
 
+[data-theme="dark"] .about-figure img {
+    mix-blend-mode: normal;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .about-figure img {
+        mix-blend-mode: normal;
+    }
+}
+
 .about-figure figcaption {
     color: var(--gray-text);
     font-family: Arial, sans-serif;
