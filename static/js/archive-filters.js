@@ -36,7 +36,10 @@ class ArchiveFilters {
             themes: [],
             types: [],
             weather: [],
-            whatWasIsIf: []
+            whatWasIsIf: [],
+            giftedBy: [],
+            scalePermanence: [],
+            timePeriod: []
         };
         this.filteredStories = [];
         this.currentPage = 0;
@@ -60,21 +63,34 @@ class ArchiveFilters {
     initializeElements() {
         // Store all the HTML elements we'll need
         this.elements = {
-            // The three dropdown menus for filters
+            // Primary filter dropdowns
             themeDropdown: document.getElementById('theme-dropdown'),
             typeDropdown: document.getElementById('type-dropdown'),
+            whatwasisifDropdown: document.getElementById('whatwasisif-dropdown'),
             weatherDropdown: document.getElementById('weather-dropdown'),
-            whatwasisifDropdown: document.getElementById('timeperiod-dropdown'),
-            // The buttons that open the dropdowns
+            // More filter dropdowns
+            giftedbyDropdown: document.getElementById('giftedby-dropdown'),
+            scalepermanenceDropdown: document.getElementById('scalepermanence-dropdown'),
+            timeperiodDropdown: document.getElementById('timeperiod-dropdown'),
+            // Buttons that open the dropdowns
             themeButton: document.getElementById('theme-button'),
             typeButton: document.getElementById('type-button'),
+            whatwasisifButton: document.getElementById('whatwasisif-button'),
             weatherButton: document.getElementById('weather-button'),
-            whatwasisifButton: document.getElementById('timeperiod-button'),
-            // The content areas inside the dropdowns (where the filter options go)
+            giftedbyButton: document.getElementById('giftedby-button'),
+            scalepermanenceButton: document.getElementById('scalepermanence-button'),
+            timeperiodButton: document.getElementById('timeperiod-button'),
+            // Content areas inside the dropdowns
             themeContent: document.getElementById('theme-content'),
             typeContent: document.getElementById('type-content'),
+            whatwasisifContent: document.getElementById('whatwasisif-content'),
             weatherContent: document.getElementById('weather-content'),
-            whatwasisifContent: document.getElementById('timeperiod-content'),
+            giftedbyContent: document.getElementById('giftedby-content'),
+            scalepermanenceContent: document.getElementById('scalepermanence-content'),
+            timeperiodContent: document.getElementById('timeperiod-content'),
+            // More filters toggle
+            moreFiltersToggle: document.getElementById('more-filters-toggle'),
+            moreFiltersContainer: document.getElementById('more-filters'),
             // The "Clear filters" button
             clearFilters: document.getElementById('clear-filters'),
             // Text showing "X of Y stories"
@@ -137,18 +153,26 @@ class ArchiveFilters {
     
     populateFilterDropdowns() {
         if (!this.filterData) return;
-        
-        // Populate themes
+
+        // Populate primary filters
         this.populateDropdown(this.elements.themeContent, this.filterData.themes, 'themes');
-        
-        // Populate types
         this.populateDropdown(this.elements.typeContent, this.filterData.types, 'types');
-        
-        // Populate weather
+        this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
         this.populateDropdown(this.elements.weatherContent, this.filterData.weather, 'weather');
 
-        // Populate what was/is/if
-        this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
+        // Populate "more" filters
+        this.populateDropdown(this.elements.giftedbyContent, this.filterData.giftedBy, 'giftedBy');
+        this.populateDropdown(this.elements.scalepermanenceContent, this.filterData.scalePermanence, 'scalePermanence');
+        this.populateDropdown(this.elements.timeperiodContent, this.filterData.timePeriod, 'timePeriod');
+
+        // Show "More filters" toggle only if any of the extra filter types have data
+        const hasMoreFilters = (this.filterData.giftedBy && this.filterData.giftedBy.length > 0) ||
+            (this.filterData.scalePermanence && this.filterData.scalePermanence.length > 0) ||
+            (this.filterData.timePeriod && this.filterData.timePeriod.length > 0);
+
+        if (hasMoreFilters && this.elements.moreFiltersToggle) {
+            this.elements.moreFiltersToggle.style.display = '';
+        }
     }
     
     populateDropdown(contentElement, options, filterType) {
@@ -294,6 +318,42 @@ class ArchiveFilters {
             });
         }
 
+        if (this.elements.giftedbyButton) {
+            this.elements.giftedbyButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('giftedby');
+            });
+        }
+
+        if (this.elements.scalepermanenceButton) {
+            this.elements.scalepermanenceButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('scalepermanence');
+            });
+        }
+
+        if (this.elements.timeperiodButton) {
+            this.elements.timeperiodButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('timeperiod');
+            });
+        }
+
+        // More filters toggle
+        if (this.elements.moreFiltersToggle) {
+            this.elements.moreFiltersToggle.addEventListener('click', () => {
+                const container = this.elements.moreFiltersContainer;
+                if (!container) return;
+                const isOpen = container.style.display !== 'none';
+                container.style.display = isOpen ? 'none' : '';
+                this.elements.moreFiltersToggle.classList.toggle('open', !isOpen);
+                const textEl = this.elements.moreFiltersToggle.querySelector('.more-filters-text');
+                if (textEl) {
+                    textEl.textContent = isOpen ? 'More filters' : 'Fewer filters';
+                }
+            });
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.filter-dropdown')) {
@@ -329,7 +389,7 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather', 'whatwasisif'].forEach(type => {
+        ['theme', 'type', 'weather', 'whatwasisif', 'giftedby', 'scalepermanence', 'timeperiod'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
@@ -364,9 +424,12 @@ class ArchiveFilters {
             themes: this.elements.themeContent,
             types: this.elements.typeContent,
             weather: this.elements.weatherContent,
-            whatWasIsIf: this.elements.whatwasisifContent
+            whatWasIsIf: this.elements.whatwasisifContent,
+            giftedBy: this.elements.giftedbyContent,
+            scalePermanence: this.elements.scalepermanenceContent,
+            timePeriod: this.elements.timeperiodContent
         };
-        ['themes', 'types', 'weather', 'whatWasIsIf'].forEach(filterType => {
+        ['themes', 'types', 'weather', 'whatWasIsIf', 'giftedBy', 'scalePermanence', 'timePeriod'].forEach(filterType => {
             const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
@@ -432,6 +495,30 @@ class ArchiveFilters {
                     story.whatWasIsIf.includes(wwii)
                 );
                 if (!hasMatchingWhatWasIsIf) return false;
+            }
+
+            // Check gifted by filters
+            if (this.currentFilters.giftedBy.length > 0) {
+                const hasMatchingGiftedBy = this.currentFilters.giftedBy.some(gb =>
+                    story.giftedBy.includes(gb)
+                );
+                if (!hasMatchingGiftedBy) return false;
+            }
+
+            // Check scale permanence filters
+            if (this.currentFilters.scalePermanence.length > 0) {
+                const hasMatchingScalePermanence = this.currentFilters.scalePermanence.some(sp =>
+                    story.scalePermanence.includes(sp)
+                );
+                if (!hasMatchingScalePermanence) return false;
+            }
+
+            // Check time period filters
+            if (this.currentFilters.timePeriod.length > 0) {
+                const hasMatchingTimePeriod = this.currentFilters.timePeriod.some(tp =>
+                    story.timePeriod.includes(tp)
+                );
+                if (!hasMatchingTimePeriod) return false;
             }
 
             // If we get here, the story matches all filters
@@ -738,6 +825,27 @@ class ArchiveFilters {
                 this.createActiveFilterTag(wwii, 'whatWasIsIf')
             );
         });
+
+        // Add gifted by filters
+        this.currentFilters.giftedBy.forEach(gb => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(gb, 'giftedBy')
+            );
+        });
+
+        // Add scale permanence filters
+        this.currentFilters.scalePermanence.forEach(sp => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(sp, 'scalePermanence')
+            );
+        });
+
+        // Add time period filters
+        this.currentFilters.timePeriod.forEach(tp => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(tp, 'timePeriod')
+            );
+        });
     }
     
     createActiveFilterTag(value, filterType) {
@@ -785,7 +893,10 @@ class ArchiveFilters {
             themes: [],
             types: [],
             weather: [],
-            whatWasIsIf: []
+            whatWasIsIf: [],
+            giftedBy: [],
+            scalePermanence: [],
+            timePeriod: []
         };
         
         this.updateDropdownDisplay();
@@ -847,6 +958,18 @@ class ArchiveFilters {
             params.set('whatWasIsIf', this.currentFilters.whatWasIsIf.join(','));
         }
 
+        if (this.currentFilters.giftedBy.length > 0) {
+            params.set('giftedBy', this.currentFilters.giftedBy.join(','));
+        }
+
+        if (this.currentFilters.scalePermanence.length > 0) {
+            params.set('scalePermanence', this.currentFilters.scalePermanence.join(','));
+        }
+
+        if (this.currentFilters.timePeriod.length > 0) {
+            params.set('timePeriod', this.currentFilters.timePeriod.join(','));
+        }
+
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
         window.history.pushState(null, '', newURL);
     }
@@ -858,7 +981,21 @@ class ArchiveFilters {
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];
         this.currentFilters.whatWasIsIf = params.get('whatWasIsIf') ? params.get('whatWasIsIf').split(',') : [];
-        
+        this.currentFilters.giftedBy = params.get('giftedBy') ? params.get('giftedBy').split(',') : [];
+        this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
+        this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
+
+        // If any "more" filters are active from URL, auto-expand the more filters section
+        const hasMoreFilterParams = this.currentFilters.giftedBy.length > 0 ||
+            this.currentFilters.scalePermanence.length > 0 ||
+            this.currentFilters.timePeriod.length > 0;
+        if (hasMoreFilterParams && this.elements.moreFiltersContainer) {
+            this.elements.moreFiltersContainer.style.display = '';
+            if (this.elements.moreFiltersToggle) {
+                this.elements.moreFiltersToggle.classList.add('open');
+            }
+        }
+
         // Update dropdown displays
         if (this.filterData) {
             this.updateDropdownDisplay();
