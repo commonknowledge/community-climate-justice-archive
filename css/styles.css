@@ -137,6 +137,7 @@ html {
 */
 body {
     background-color: var(--background);    /* #FFFAF3 cream colour */
+    color: var(--black);                    /* Default text colour for all elements */
     font-family: 'Times New Roman', serif;  /* Serif font */
     max-width: 100vw;                       /* 100% of viewport width */
     overflow-x: hidden;                     /* Hides horizontal scrollbar */
@@ -259,6 +260,9 @@ header h1 {
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* header h1 a
@@ -313,6 +317,17 @@ header p {
     width: 24px;
     height: 24px;
     fill: currentColor;
+}
+
+/* In dark mode, active nav buttons with yellow highlight need black text for contrast */
+[data-theme="dark"] .dashed-button[style*="background-color"] {
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .dashed-button[style*="background-color"] {
+        color: #000;
+    }
 }
 
 /* .header-nav .dashed-button
@@ -970,6 +985,11 @@ Document download display for main story attachments, centered between navigatio
 
 .story-document .document-icon {
     margin-bottom: 1rem;
+    color: var(--black);
+}
+
+.story-document .document-icon svg {
+    stroke: currentColor;
 }
 
 .story-document .download-link {
@@ -1827,7 +1847,7 @@ A button with a dashed border for navigation and actions.
     position: relative;
     width: 5000px; /* Large internal canvas width */
     height: 3500px; /* Large internal canvas height */
-    background-color: var(--white); /* White background */
+    background-color: #ffffff; /* Always white — the canvas well should not change with theme */
     box-shadow: 0 0 5px 0 var(--shadow-darker) inset; /* Inset shadow for depth */
 }
 
