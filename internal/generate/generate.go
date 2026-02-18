@@ -147,7 +147,7 @@ type StoryData struct {
 	Themes        []string        `json:"themes"`
 	Types         []string        `json:"types"`
 	Weather       []string        `json:"weather"`
-	TimePeriods   []string        `json:"timePeriods"`
+	WhatWasIsIf   []string        `json:"whatWasIsIf"`
 	Attachment    StoryAttachment `json:"attachment"`
 }
 
@@ -167,7 +167,7 @@ type FilterData struct {
 	Themes      []FilterOption `json:"themes"`
 	Types       []FilterOption `json:"types"`
 	Weather     []FilterOption `json:"weather"`
-	TimePeriods []FilterOption `json:"timePeriods"`
+	WhatWasIsIf []FilterOption `json:"whatWasIsIf"`
 	Stories     []StoryData    `json:"stories"`
 }
 
@@ -180,7 +180,7 @@ type FilterOption struct {
 }
 
 // convertStoriesToFilterData converts stories to comprehensive filter data
-func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather, timePeriods []data.TimePeriod) (string, error) {
+func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather, whatWasIsIf []data.WhatWasIsIf) (string, error) {
 	// Create story data
 	storyData := make([]StoryData, len(stories))
 	for i, story := range stories {
@@ -204,10 +204,10 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			weatherNames[j] = w.Title
 		}
 
-		// Extract time period titles
-		timePeriodNames := make([]string, len(story.TimePeriod))
-		for j, tp := range story.TimePeriod {
-			timePeriodNames[j] = tp.Title
+		// Extract what was/is/if titles
+		whatWasIsIfNames := make([]string, len(story.WhatWasIsIf))
+		for j, wwii := range story.WhatWasIsIf {
+			whatWasIsIfNames[j] = wwii.Title
 		}
 
 		storyData[i] = StoryData{
@@ -223,7 +223,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Themes:        themeNames,
 			Types:         typeNames,
 			Weather:       weatherNames,
-			TimePeriods:   timePeriodNames,
+			WhatWasIsIf:   whatWasIsIfNames,
 			Attachment: StoryAttachment{
 				URL:       attachment.URL,
 				ThumbURL:  attachment.ThumbURL,
@@ -294,22 +294,22 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		}
 	}
 
-	timePeriodOptions := make([]FilterOption, len(timePeriods))
-	for i, tp := range timePeriods {
+	whatWasIsIfOptions := make([]FilterOption, len(whatWasIsIf))
+	for i, wwii := range whatWasIsIf {
 		count := 0
 		for _, story := range stories {
-			for _, storyTP := range story.TimePeriod {
-				if storyTP.Title == tp.Title {
+			for _, storyWWII := range story.WhatWasIsIf {
+				if storyWWII.Title == wwii.Title {
 					count++
 					break
 				}
 			}
 		}
-		timePeriodOptions[i] = FilterOption{
-			Title: tp.Title,
-			URL:   tp.URL,
+		whatWasIsIfOptions[i] = FilterOption{
+			Title: wwii.Title,
+			URL:   wwii.URL,
 			Count: count,
-			Color: tp.Colour,
+			Color: wwii.Colour,
 		}
 	}
 
@@ -317,7 +317,7 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		Themes:      themeOptions,
 		Types:       typeOptions,
 		Weather:     weatherOptions,
-		TimePeriods: timePeriodOptions,
+		WhatWasIsIf: whatWasIsIfOptions,
 		Stories:     storyData,
 	}
 
@@ -888,11 +888,11 @@ func WriteFilterData() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	weather := store.GetWeather()
-	timePeriods := store.GetTimePeriodTypes()
+	whatWasIsIfTypes := store.GetWhatWasIsIfTypes()
 	allStories := store.GetAllStories()
 
 	// Convert to filter data JSON
-	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather, timePeriods)
+	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather, whatWasIsIfTypes)
 	if err != nil {
 		return err
 	}

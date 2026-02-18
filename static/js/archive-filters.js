@@ -36,7 +36,7 @@ class ArchiveFilters {
             themes: [],
             types: [],
             weather: [],
-            timePeriods: []
+            whatWasIsIf: []
         };
         this.filteredStories = [];
         this.currentPage = 0;
@@ -64,17 +64,17 @@ class ArchiveFilters {
             themeDropdown: document.getElementById('theme-dropdown'),
             typeDropdown: document.getElementById('type-dropdown'),
             weatherDropdown: document.getElementById('weather-dropdown'),
-            timeperiodDropdown: document.getElementById('timeperiod-dropdown'),
+            whatwasisifDropdown: document.getElementById('timeperiod-dropdown'),
             // The buttons that open the dropdowns
             themeButton: document.getElementById('theme-button'),
             typeButton: document.getElementById('type-button'),
             weatherButton: document.getElementById('weather-button'),
-            timeperiodButton: document.getElementById('timeperiod-button'),
+            whatwasisifButton: document.getElementById('timeperiod-button'),
             // The content areas inside the dropdowns (where the filter options go)
             themeContent: document.getElementById('theme-content'),
             typeContent: document.getElementById('type-content'),
             weatherContent: document.getElementById('weather-content'),
-            timeperiodContent: document.getElementById('timeperiod-content'),
+            whatwasisifContent: document.getElementById('timeperiod-content'),
             // The "Clear filters" button
             clearFilters: document.getElementById('clear-filters'),
             // Text showing "X of Y stories"
@@ -147,8 +147,8 @@ class ArchiveFilters {
         // Populate weather
         this.populateDropdown(this.elements.weatherContent, this.filterData.weather, 'weather');
 
-        // Populate time periods
-        this.populateDropdown(this.elements.timeperiodContent, this.filterData.timePeriods, 'timePeriods');
+        // Populate what was/is/if
+        this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
     }
     
     populateDropdown(contentElement, options, filterType) {
@@ -287,10 +287,10 @@ class ArchiveFilters {
             });
         }
 
-        if (this.elements.timeperiodButton) {
-            this.elements.timeperiodButton.addEventListener('click', (e) => {
+        if (this.elements.whatwasisifButton) {
+            this.elements.whatwasisifButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.toggleDropdown('timeperiod');
+                this.toggleDropdown('whatwasisif');
             });
         }
 
@@ -329,7 +329,7 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather', 'timeperiod'].forEach(type => {
+        ['theme', 'type', 'weather', 'whatwasisif'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
@@ -364,9 +364,9 @@ class ArchiveFilters {
             themes: this.elements.themeContent,
             types: this.elements.typeContent,
             weather: this.elements.weatherContent,
-            timePeriods: this.elements.timeperiodContent
+            whatWasIsIf: this.elements.whatwasisifContent
         };
-        ['themes', 'types', 'weather', 'timePeriods'].forEach(filterType => {
+        ['themes', 'types', 'weather', 'whatWasIsIf'].forEach(filterType => {
             const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
@@ -426,12 +426,12 @@ class ArchiveFilters {
                 if (!hasMatchingWeather) return false;  // Doesn't match, hide it
             }
 
-            // Check time period filters
-            if (this.currentFilters.timePeriods.length > 0) {
-                const hasMatchingTimePeriod = this.currentFilters.timePeriods.some(tp =>
-                    story.timePeriods.includes(tp)
+            // Check what was/is/if filters
+            if (this.currentFilters.whatWasIsIf.length > 0) {
+                const hasMatchingWhatWasIsIf = this.currentFilters.whatWasIsIf.some(wwii =>
+                    story.whatWasIsIf.includes(wwii)
                 );
-                if (!hasMatchingTimePeriod) return false;
+                if (!hasMatchingWhatWasIsIf) return false;
             }
 
             // If we get here, the story matches all filters
@@ -732,10 +732,10 @@ class ArchiveFilters {
             );
         });
 
-        // Add time period filters
-        this.currentFilters.timePeriods.forEach(tp => {
+        // Add what was/is/if filters
+        this.currentFilters.whatWasIsIf.forEach(wwii => {
             this.elements.activeFiltersList.appendChild(
-                this.createActiveFilterTag(tp, 'timePeriods')
+                this.createActiveFilterTag(wwii, 'whatWasIsIf')
             );
         });
     }
@@ -785,7 +785,7 @@ class ArchiveFilters {
             themes: [],
             types: [],
             weather: [],
-            timePeriods: []
+            whatWasIsIf: []
         };
         
         this.updateDropdownDisplay();
@@ -843,8 +843,8 @@ class ArchiveFilters {
             params.set('weather', this.currentFilters.weather.join(','));
         }
 
-        if (this.currentFilters.timePeriods.length > 0) {
-            params.set('timePeriods', this.currentFilters.timePeriods.join(','));
+        if (this.currentFilters.whatWasIsIf.length > 0) {
+            params.set('whatWasIsIf', this.currentFilters.whatWasIsIf.join(','));
         }
 
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
@@ -857,7 +857,7 @@ class ArchiveFilters {
         this.currentFilters.themes = params.get('themes') ? params.get('themes').split(',') : [];
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];
-        this.currentFilters.timePeriods = params.get('timePeriods') ? params.get('timePeriods').split(',') : [];
+        this.currentFilters.whatWasIsIf = params.get('whatWasIsIf') ? params.get('whatWasIsIf').split(',') : [];
         
         // Update dropdown displays
         if (this.filterData) {
