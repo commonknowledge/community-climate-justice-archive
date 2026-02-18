@@ -2199,6 +2199,7 @@ Uses cream background with dashed border and flexible layout.
 .about-nav-button.active {
     background-color: var(--highlight-yellow);
     border-style: solid;
+    color: #000;
 }
 
 /* .about-content
