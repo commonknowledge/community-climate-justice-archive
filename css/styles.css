@@ -1232,6 +1232,7 @@ Navigation arrows between stories.
 .story-nav-arrow {
     padding: 0 1.82rem;
     flex-shrink: 0;
+    background-color: #ffffff;
 }
 
 .standard-margins {
