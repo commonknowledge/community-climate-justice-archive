@@ -1238,9 +1238,18 @@ Navigation arrows between stories.
     fill: #ffffff;
 }
 
+[data-theme="dark"] .story-connections,
+[data-theme="dark"] .related-stories-container {
+    background-color: #514C80;
+}
+
 @media (prefers-color-scheme: dark) {
     html:not([data-theme="light"]) .story-nav-arrow svg path {
         fill: #ffffff;
+    }
+    html:not([data-theme="light"]) .story-connections,
+    html:not([data-theme="light"]) .related-stories-container {
+        background-color: #514C80;
     }
 }
 
