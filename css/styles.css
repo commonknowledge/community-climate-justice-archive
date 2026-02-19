@@ -306,7 +306,6 @@ header p {
     display: flex;
     flex-wrap: wrap;                 /* Stack on small screens */
     gap: 1.11111rem;                 /* 20px between dropdowns */
-    margin-bottom: 2.22222rem;       /* 40px below filters */
     align-items: flex-start;
 }
 
@@ -639,11 +638,19 @@ Shows currently applied filters as removable tags below the filter controls.
         padding: 0 1.11111rem;
     }
     
+    .filter-sort-row {
+        flex-direction: column;
+    }
+
+    .sort-group {
+        margin-left: 0;
+    }
+
     .archive-filters {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .filter-dropdown {
         min-width: auto;
         width: 100%;
@@ -1487,21 +1494,24 @@ A button with a dashed border for navigation and actions.
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 2.22222rem;
+    gap: 1.11111rem;
+    flex-wrap: wrap;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 0.55556rem;
-    flex: 1;
+    min-width: 0;
 }
 
 .sort-group {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: 0.55556rem;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 /* Archive Filters */
