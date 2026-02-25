@@ -1243,7 +1243,7 @@ Navigation arrows between stories.
     background-color: #514C80;
 }
 
-[data-theme="dark"] body:has(.main-content.wander) {
+[data-theme="dark"] .connections-canvas {
     background-color: #514C80;
 }
 
@@ -1255,7 +1255,7 @@ Navigation arrows between stories.
     html:not([data-theme="light"]) .related-stories-container {
         background-color: #514C80;
     }
-    html:not([data-theme="light"]) body:has(.main-content.wander) {
+    html:not([data-theme="light"]) .connections-canvas {
         background-color: #514C80;
     }
 }
