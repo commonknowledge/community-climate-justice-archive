@@ -1561,6 +1561,10 @@ A button with a dashed border for navigation and actions.
     border: 2px solid var(--black);
 }
 
+.sort-group .filter-dropdown-button {
+    min-width: 180px;
+}
+
 /* More Filters toggle */
 .more-filters-toggle {
     background: none;
