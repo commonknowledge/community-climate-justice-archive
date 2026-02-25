@@ -1522,6 +1522,14 @@ A button with a dashed border for navigation and actions.
     flex-wrap: wrap;
 }
 
+.archive-filters .filter-dropdown {
+    flex: 1;
+}
+
+.archive-filters .filter-dropdown-button {
+    width: 100%;
+}
+
 /* Sort dropdown */
 .sort-dropdown {
     position: relative;
