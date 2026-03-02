@@ -60,7 +60,8 @@ html {
     --white-text: #FFF;
     --gray-text: #666;
     --black-alt: #000000;
-    
+    --border-color: #000;
+
     /* Shadow Colours - RGBA values for transparency */
     --shadow-light: rgba(0, 0, 0, 0.1);      /* 10% opacity */
     --shadow-medium: rgba(0, 0, 0, 0.15);    /* 15% opacity */
@@ -75,6 +76,60 @@ html {
 }
 
 /* ============================================================================
+   DARK MODE
+   ============================================================================
+
+   Dark theme overrides. Activated by setting data-theme="dark" on <html>.
+   Falls back to the user's OS preference via prefers-color-scheme.
+*/
+
+/* When user explicitly selects dark mode */
+[data-theme="dark"] {
+    --background: #080339;
+    --white: #1a1a2e;
+    --highlight-yellow: #FFFF99;
+    --black: #fff;
+    --white-text: #fff;
+    --gray-text: #aaa;
+    --black-alt: #ffffff;
+    --border-color: #fff;
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-medium: rgba(255, 255, 255, 0.08);
+    --shadow-dark: rgba(255, 255, 255, 0.1);
+    --shadow-darker: rgba(255, 255, 255, 0.12);
+    --shadow-darkest: rgba(255, 255, 255, 0.15);
+    --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+    --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+    --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+    --shadow-text: rgba(255, 255, 255, 0.50);
+    --shadow-heavy: rgba(0, 0, 0, 0.4);
+}
+
+/* When no explicit preference is set, respect OS-level setting */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --background: #080339;
+        --white: #1a1a2e;
+        --highlight-yellow: #FFFF99;
+        --black: #fff;
+        --white-text: #fff;
+        --gray-text: #aaa;
+        --black-alt: #ffffff;
+        --border-color: #fff;
+        --shadow-light: rgba(255, 255, 255, 0.05);
+        --shadow-medium: rgba(255, 255, 255, 0.08);
+        --shadow-dark: rgba(255, 255, 255, 0.1);
+        --shadow-darker: rgba(255, 255, 255, 0.12);
+        --shadow-darkest: rgba(255, 255, 255, 0.15);
+        --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+        --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+        --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+        --shadow-text: rgba(255, 255, 255, 0.50);
+        --shadow-heavy: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================================================
    BODY
    ============================================================================
    
@@ -82,6 +137,7 @@ html {
 */
 body {
     background-color: var(--background);    /* #FFFAF3 cream colour */
+    color: var(--black);                    /* Default text colour for all elements */
     font-family: 'Times New Roman', serif;  /* Serif font */
     max-width: 100vw;                       /* 100% of viewport width */
     overflow-x: hidden;                     /* Hides horizontal scrollbar */
@@ -134,6 +190,23 @@ header h1 a:hover::before {
     background: var(--highlight-yellow);  /* Makes the box visible */
 }
 
+/* In dark mode, links with yellow highlight need black text for contrast */
+[data-theme="dark"] .story-finding a:hover,
+[data-theme="dark"] .story-metadata a:not(.tag):hover,
+[data-theme="dark"] .footer-content a:hover,
+[data-theme="dark"] header h1 a:hover {
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .story-finding a:hover,
+    :root:not([data-theme="light"]) .story-metadata a:not(.tag):hover,
+    :root:not([data-theme="light"]) .footer-content a:hover,
+    :root:not([data-theme="light"]) header h1 a:hover {
+        color: #000;
+    }
+}
+
 /* These links don't get the hover effect */
 .related-story a:hover,
 .story a:hover,
@@ -176,6 +249,7 @@ header.homepage {
 /* header
    Main site header (sticks to top when scrolling) */
 header {
+    background-color: var(--background);
     font-family: Arial, sans-serif;
     margin-left: 2.222222rem;
     margin-right: 2.222222rem;
@@ -203,6 +277,9 @@ header h1 {
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* header h1 a
@@ -235,6 +312,39 @@ header p {
 .header-nav {
     display: flex;
     gap: 20px;                       /* Space between buttons */
+    align-items: center;
+}
+
+/* .theme-toggle
+   Dark/light mode toggle button in the header nav */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.22222rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--black);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* In dark mode, active nav buttons with yellow highlight need black text for contrast */
+[data-theme="dark"] .dashed-button[style*="background-color"] {
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .dashed-button[style*="background-color"] {
+        color: #000;
+    }
 }
 
 /* .header-nav .dashed-button
@@ -739,7 +849,8 @@ ul.tag-list {
 /* .tag:hover
    All tags turn black on hover (!important overrides inline styles) */
 .tag:hover {
-    background: #000 !important;
+    background: var(--black) !important;
+    color: var(--background) !important;
 }
 
 /* a.tag
@@ -892,20 +1003,25 @@ Document download display for main story attachments, centered between navigatio
 
 .story-document .document-icon {
     margin-bottom: 1rem;
+    color: var(--black);
+}
+
+.story-document .document-icon svg {
+    stroke: currentColor;
 }
 
 .story-document .download-link {
     font-size: 1.2rem;
     padding: 0.5rem 1rem;
-    border: 2px solid #000;
+    border: 2px solid var(--border-color);
     text-decoration: none;
-    color: #000;
+    color: var(--black);
     transition: background-color 0.3s ease;
 }
 
 .story-document .download-link:hover {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--black);
+    color: var(--background);
 }
 
 /* Story No Attachments
@@ -920,7 +1036,7 @@ Discrete display when story has no attached media, centered and subtle.
     width: 100%;
     min-height: 150px;
     text-align: center;
-    color: #999;
+    color: var(--gray-text);
 }
 
 .no-attachment-placeholder {
@@ -931,7 +1047,7 @@ Discrete display when story has no attached media, centered and subtle.
 .no-attachment-placeholder svg {
     width: 32px;
     height: 32px;
-    stroke: #ccc;
+    stroke: var(--gray-text);
 }
 
 .story-no-attachments p {
@@ -940,7 +1056,7 @@ Discrete display when story has no attached media, centered and subtle.
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.02rem;
-    color: #aaa;
+    color: var(--gray-text);
     margin: 0;
 }
 
@@ -949,7 +1065,7 @@ Discrete display when story has no attached media, centered and subtle.
 The main content and metadata for a story.
 */
 .story-details {
-    border-top: 1px solid #000;
+    border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1118,6 +1234,32 @@ Navigation arrows between stories.
     flex-shrink: 0;
 }
 
+[data-theme="dark"] .story-nav-arrow svg path {
+    fill: #ffffff;
+}
+
+[data-theme="dark"] .story-connections,
+[data-theme="dark"] .related-stories-container {
+    background-color: #514C80;
+}
+
+[data-theme="dark"] .connections-canvas {
+    background-color: #514C80;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .story-nav-arrow svg path {
+        fill: #ffffff;
+    }
+    html:not([data-theme="light"]) .story-connections,
+    html:not([data-theme="light"]) .related-stories-container {
+        background-color: #514C80;
+    }
+    html:not([data-theme="light"]) .connections-canvas {
+        background-color: #514C80;
+    }
+}
+
 .standard-margins {
     margin-left: 40px;
     margin-right: 40px;
@@ -1280,6 +1422,7 @@ Copyright and compilation information in the footer.
     gap: 10px;
     padding: 5px;
     background: var(--highlight-yellow);
+    color: #000;
     font-family: Times New Roman;
     font-weight: 400;
     font-style: italic;
@@ -1591,7 +1734,7 @@ A button with a dashed border for navigation and actions.
  * New sections that appear at the bottom of story pages showing related content.
  */
 .story-connections {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 4.44444rem;
@@ -1749,7 +1892,7 @@ A button with a dashed border for navigation and actions.
     position: relative;
     width: 5000px; /* Large internal canvas width */
     height: 3500px; /* Large internal canvas height */
-    background-color: var(--white); /* White background */
+    background-color: #ffffff; /* Always white — the canvas well should not change with theme */
     box-shadow: 0 0 5px 0 var(--shadow-darker) inset; /* Inset shadow for depth */
 }
 
@@ -1917,13 +2060,13 @@ Uses cream background with dashed border and flexible layout.
 }
 
 .story-nav-button {
-    border: 2px dashed #000;
+    border: 2px dashed var(--border-color);
     box-sizing: border-box;
     display: flex;
     align-items: center;
     padding: 0.55556rem;
     text-decoration: none;
-    color: #000;
+    color: var(--black);
     flex: 1;
     min-height: 6.66667rem;
     gap: 1.11111rem;
@@ -2082,6 +2225,7 @@ Uses cream background with dashed border and flexible layout.
 .about-nav-button.active {
     background-color: var(--highlight-yellow);
     border-style: solid;
+    color: #000;
 }
 
 /* .about-content
@@ -2225,7 +2369,7 @@ Uses cream background with dashed border and flexible layout.
 .about-what-if-label {
     display: inline-block;
     background-color: var(--highlight-yellow);
-    color: var(--black);
+    color: #000;
     font-family: "Times New Roman", serif;
     font-size: 1.77778rem;
     font-weight: 400;
@@ -2394,6 +2538,16 @@ Uses cream background with dashed border and flexible layout.
     max-width: 100%;
     height: auto;
     mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .about-figure img {
+    mix-blend-mode: normal;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .about-figure img {
+        mix-blend-mode: normal;
+    }
 }
 
 .about-figure figcaption {
