@@ -1523,11 +1523,7 @@ A button with a dashed border for navigation and actions.
 }
 
 .archive-filters .filter-dropdown {
-    flex: 1;
-}
-
-.archive-filters .filter-dropdown-button {
-    width: 100%;
+    flex: none;
 }
 
 /* Sort dropdown */
@@ -1570,7 +1566,9 @@ A button with a dashed border for navigation and actions.
 }
 
 .sort-group .filter-dropdown-button {
-    min-width: 180px;
+    justify-content: center;
+    gap: 0.27778rem;
+    width: 100%;
 }
 
 /* More Filters toggle */
@@ -1636,6 +1634,7 @@ A button with a dashed border for navigation and actions.
 .filter-dropdown {
     position: relative;
     display: inline-block;
+    min-width: 0;
 }
 
 .filter-dropdown-button {
@@ -1648,15 +1647,20 @@ A button with a dashed border for navigation and actions.
     font-size: 1.22222rem;
     font-style: normal;
     font-weight: 400;
-    gap: 0.55556rem;
-    justify-content: center;
+    gap: 0.27778rem;
+    justify-content: flex-start;
     letter-spacing: -0.01222rem;
     line-height: 140%;
     padding: 0.27778rem 0.55556rem;
     text-decoration: none;
     width: max-content;
     cursor: pointer;
-    min-width: 120px;
+    height: 2.27778rem;
+}
+
+.sort-arrow-icon {
+    flex-shrink: 0;
+    display: block;
 }
 
 .filter-dropdown-button:hover {
