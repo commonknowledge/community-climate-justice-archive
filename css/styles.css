@@ -271,9 +271,9 @@ header {
     align-items: center;             /* Vertically centers */
 }
 
-/* header h1
-   Site title "Dudley Time Portal" */
-header h1 {
+/* Site title "Dudley Time Portal" — shared by header and mobile overlay */
+header h1,
+.mobile-menu-header h1 {
     color: var(--black);
     font-family: Arial;
     font-size: 22px;
@@ -281,10 +281,14 @@ header h1 {
     font-weight: 400;
     line-height: 140%;
     letter-spacing: -0.22px;
+    margin: 0;
+}
+
+/* header h1 layout — flex row to sit alongside the theme toggle */
+header h1 {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0;
 }
 
 /* header h1 a
@@ -2213,14 +2217,6 @@ Uses cream background with dashed border and flexible layout.
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.mobile-menu-header h1 {
-    font-family: Arial, sans-serif;
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 140%;
-    margin: 0;
 }
 
 .mobile-menu-header h1 a {
