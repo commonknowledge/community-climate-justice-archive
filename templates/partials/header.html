@@ -36,12 +36,8 @@
             <!-- Link to NocoDB form where people can add new stories -->
             <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
         </nav>
-        <!-- Mobile hamburger menu button (hidden on desktop) -->
-        <button class="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false">
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        </button>
+        <!-- Mobile menu button (hidden on desktop) -->
+        <button class="dashed-button mobile-menu-toggle" aria-label="Open menu" aria-expanded="false">menu</button>
     </div>
 </header>
 
@@ -49,22 +45,15 @@
 <div class="mobile-menu-overlay" aria-hidden="true">
     <div class="mobile-menu-header">
         <h1><a href="/">Dudley Time Portal</a></h1>
-        <button class="mobile-menu-close" aria-label="Close menu">
-            <span class="close-line"></span>
-            <span class="close-line"></span>
-        </button>
+        <button class="dashed-button mobile-menu-close" aria-label="Close menu">close</button>
     </div>
     <nav class="mobile-menu-nav">
-        <a class="mobile-menu-link" href="/">wander</a>
-        <a class="mobile-menu-link" href="/archive.html">archive</a>
-        <a class="mobile-menu-link random-story-link-mobile" href="{{.RandomStoryURL}}">random</a>
-        <a class="mobile-menu-link" href="/about.html">about the project</a>
-        <a class="mobile-menu-link" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
+        <a class="dashed-button mobile-menu-link" href="/">wander</a>
+        <a class="dashed-button mobile-menu-link" href="/archive.html">archive</a>
+        <a class="dashed-button mobile-menu-link random-story-link-mobile" href="{{.RandomStoryURL}}">random</a>
+        <a class="dashed-button mobile-menu-link" href="/about.html">about the project</a>
+        <a class="dashed-button mobile-menu-link" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
     </nav>
-    <div class="mobile-menu-footer">
-        <p>Dudley People's School for Climate Justice is an assemblage of community-led projects.</p>
-        <a class="dashed-button" href="/about.html">Learn more about the project</a>
-    </div>
 </div>
 <script>
     // Theme toggle (dark/light mode)
@@ -204,6 +193,19 @@
 
             if (isMatch) {
                 button.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--highlight-yellow').trim();
+            }
+        });
+    })();
+
+    // Highlight the current page's link in the mobile menu
+    (function() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.mobile-menu-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('http')) return;
+            const pageName = href.replace(/^\//, '').replace(/\.html$/, '');
+            if (currentPath === href || (pageName && currentPath.includes(pageName))) {
+                link.classList.add('active');
             }
         });
     })();
