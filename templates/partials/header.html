@@ -45,7 +45,13 @@
 <div class="mobile-menu-overlay" aria-hidden="true">
     <div class="mobile-menu-header">
         <h1><a href="/">Dudley Time Portal</a></h1>
-        <button class="dashed-button mobile-menu-close" aria-label="Close menu">close</button>
+        <div class="mobile-menu-header-actions">
+            <button class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+            </button>
+            <button class="dashed-button mobile-menu-close" aria-label="Close menu">close</button>
+        </div>
     </div>
     <nav class="mobile-menu-nav">
         <a class="dashed-button mobile-menu-link" href="/">wander</a>
@@ -57,12 +63,10 @@
 </div>
 <script>
     // Theme toggle (dark/light mode)
+    // Handles all .theme-toggle buttons on the page (desktop header + mobile overlay)
     (function() {
-        var toggle = document.querySelector('.theme-toggle');
-        if (!toggle) return;
-
-        var moonIcon = toggle.querySelector('.icon-moon');
-        var sunIcon = toggle.querySelector('.icon-sun');
+        var toggles = document.querySelectorAll('.theme-toggle');
+        if (toggles.length === 0) return;
 
         function getPreferredTheme() {
             var stored = localStorage.getItem('theme');
@@ -87,29 +91,34 @@
 
         function updateIcons() {
             var effective = getEffectiveTheme();
-            if (effective === 'dark') {
-                moonIcon.style.display = 'none';
-                sunIcon.style.display = 'block';
-                toggle.title = 'Switch to light mode';
-                toggle.setAttribute('aria-label', 'Switch to light mode');
-            } else {
-                moonIcon.style.display = 'block';
-                sunIcon.style.display = 'none';
-                toggle.title = 'Switch to dark mode';
-                toggle.setAttribute('aria-label', 'Switch to dark mode');
-            }
+            var label = effective === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            toggles.forEach(function(toggle) {
+                var moonIcon = toggle.querySelector('.icon-moon');
+                var sunIcon = toggle.querySelector('.icon-sun');
+                if (effective === 'dark') {
+                    if (moonIcon) moonIcon.style.display = 'none';
+                    if (sunIcon) sunIcon.style.display = 'block';
+                } else {
+                    if (moonIcon) moonIcon.style.display = 'block';
+                    if (sunIcon) sunIcon.style.display = 'none';
+                }
+                toggle.title = label;
+                toggle.setAttribute('aria-label', label);
+            });
         }
 
         // Apply saved preference on load
         var preferred = getPreferredTheme();
         applyTheme(preferred);
 
-        // Toggle on click
-        toggle.addEventListener('click', function() {
-            var current = getEffectiveTheme();
-            var next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', next);
-            applyTheme(next);
+        // Toggle on click — any toggle button toggles theme for all
+        toggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                var current = getEffectiveTheme();
+                var next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                applyTheme(next);
+            });
         });
 
         // Listen for OS theme changes when no explicit preference is stored

@@ -2190,8 +2190,11 @@ Uses cream background with dashed border and flexible layout.
     overflow-y: auto;
 }
 
-.mobile-menu-overlay.is-open {
-    display: flex;
+/* Only open on mobile — never show on desktop regardless of JS state */
+@media (max-width: 768px) {
+    .mobile-menu-overlay.is-open {
+        display: flex;
+    }
 }
 
 .mobile-menu-header {
@@ -2199,6 +2202,12 @@ Uses cream background with dashed border and flexible layout.
     justify-content: space-between;
     align-items: center;
     padding-bottom: 2rem;
+}
+
+.mobile-menu-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .mobile-menu-header h1 {
@@ -2249,7 +2258,7 @@ Uses cream background with dashed border and flexible layout.
     header {
         margin-left: 1.11111rem;
         margin-right: 1.11111rem;
-        padding: 0.77778rem 0;
+        padding: 1.11111rem 0;
     }
 
     header h1 {
