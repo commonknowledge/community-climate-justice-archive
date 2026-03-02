@@ -1066,6 +1066,10 @@ func WriteArchivePage() error {
 	log.Println("Starting archive page generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
+	weather := store.GetWeather()
+	whatWasIsIf := store.GetWhatWasIsIfTypes()
+	scalePermanence := store.GetScalePermanenceTypes()
+	timePeriod := store.GetTimePeriodTypes()
 	allStories := store.GetAllStories()
 
 	// Select a random story for the initial random link
@@ -1091,13 +1095,17 @@ func WriteArchivePage() error {
 	}
 
 	page := data.Page{
-		Title:          "Archive – Dudley People's School for Climate Justice",
-		Description:    "Explore the complete Dudley Climate Justice Archive with filters for themes, types, and weather",
-		Themes:         themes,
-		Types:          types,
-		Stories:        stories, // Only 40 random stories for initial display
-		RandomStoryURL: randomStory.URL,
-		StoriesJSON:    storiesJSON,
+		Title:           "Archive – Dudley People's School for Climate Justice",
+		Description:     "Explore the complete Dudley Climate Justice Archive with filters for themes, types, and weather",
+		Themes:          themes,
+		Types:           types,
+		Weather:         weather,
+		WhatWasIsIf:     whatWasIsIf,
+		ScalePermanence: scalePermanence,
+		TimePeriod:      timePeriod,
+		Stories:         stories, // Only 40 random stories for initial display
+		RandomStoryURL:  randomStory.URL,
+		StoriesJSON:     storiesJSON,
 	}
 
 	tmpl, err := loadTemplates()

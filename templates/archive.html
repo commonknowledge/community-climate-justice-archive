@@ -52,37 +52,37 @@
                 <div class="filter-group">
                     <span class="filter-group-label">Filter by:</span>
                     <div class="archive-filters" id="archive-filters">
-                <div class="filter-dropdown" id="theme-dropdown">
+                {{if .Themes}}<div class="filter-dropdown" id="theme-dropdown">
                     <button class="filter-dropdown-button" id="theme-button">
                         <span class="filter-dropdown-text">Themes</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="theme-content"></div>
-                </div>
+                </div>{{end}}
 
-                <div class="filter-dropdown" id="type-dropdown">
+                {{if .Types}}<div class="filter-dropdown" id="type-dropdown">
                     <button class="filter-dropdown-button" id="type-button">
                         <span class="filter-dropdown-text">Types</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="type-content"></div>
-                </div>
+                </div>{{end}}
 
-                <div class="filter-dropdown" id="whatwasisif-dropdown">
+                {{if .WhatWasIsIf}}<div class="filter-dropdown" id="whatwasisif-dropdown">
                     <button class="filter-dropdown-button" id="whatwasisif-button">
                         <span class="filter-dropdown-text">What was/is/if</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="whatwasisif-content"></div>
-                </div>
+                </div>{{end}}
 
-                <div class="filter-dropdown" id="weather-dropdown">
+                {{if .Weather}}<div class="filter-dropdown" id="weather-dropdown">
                     <button class="filter-dropdown-button" id="weather-button">
                         <span class="filter-dropdown-text">Weather</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="weather-content"></div>
-                </div>
+                </div>{{end}}
                 </div>
                 </div>
 
@@ -107,29 +107,21 @@
                 <span class="more-filters-text">More filters</span>
             </button>
             <div class="archive-filters more-filters" id="more-filters" style="display: none;">
-                <div class="filter-dropdown" id="giftedby-dropdown">
-                    <button class="filter-dropdown-button" id="giftedby-button">
-                        <span class="filter-dropdown-text">Gifted by</span>
-                        <span class="filter-dropdown-arrow">▼</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="giftedby-content"></div>
-                </div>
-
-                <div class="filter-dropdown" id="scalepermanence-dropdown">
+                {{if .ScalePermanence}}<div class="filter-dropdown" id="scalepermanence-dropdown">
                     <button class="filter-dropdown-button" id="scalepermanence-button">
                         <span class="filter-dropdown-text">Scale of permanence</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="scalepermanence-content"></div>
-                </div>
+                </div>{{end}}
 
-                <div class="filter-dropdown" id="timeperiod-dropdown">
+                {{if .TimePeriod}}<div class="filter-dropdown" id="timeperiod-dropdown">
                     <button class="filter-dropdown-button" id="timeperiod-button">
                         <span class="filter-dropdown-text">Time period</span>
                         <span class="filter-dropdown-arrow">▼</span>
                     </button>
                     <div class="filter-dropdown-content" id="timeperiod-content"></div>
-                </div>
+                </div>{{end}}
             </div>
 
             <!-- Active Filters Display -->

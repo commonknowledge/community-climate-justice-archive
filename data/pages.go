@@ -24,6 +24,10 @@ type Page struct {
 	Description      string
 	Themes           []Theme
 	Types            []Type
+	Weather          []Weather
+	WhatWasIsIf      []WhatWasIsIf
+	ScalePermanence  []ScalePermanence
+	TimePeriod       []TimePeriod
 	Stories          []Story
 	ConnectedStories []Story
 	RandomStoryURL   string
