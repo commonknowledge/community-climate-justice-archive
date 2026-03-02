@@ -259,7 +259,7 @@
                 line.setAttribute('y1', fromY);
                 line.setAttribute('x2', toX);
                 line.setAttribute('y2', toY);
-                line.setAttribute('stroke', '#000');
+                line.setAttribute('stroke', 'currentColor');
                 line.setAttribute('stroke-width', '2');
                 line.setAttribute('stroke-dasharray', '8,4');
                 connectionLines.appendChild(line);
@@ -292,7 +292,7 @@
                 }
                 
                 path.setAttribute('d', pathData);
-                path.setAttribute('stroke', '#000');
+                path.setAttribute('stroke', 'currentColor');
                 path.setAttribute('stroke-width', '2');
                 path.setAttribute('fill', 'none');
                 connectionLines.appendChild(path);
@@ -313,6 +313,7 @@
         window.addEventListener('load', initializeConnectionsView);
     </script>
     {{template "grid-code" .}}
+{{template "theme-init" .}}
 </head>
 <body>
     {{template "header" .}}
