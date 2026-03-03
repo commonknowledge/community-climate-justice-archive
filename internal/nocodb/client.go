@@ -46,13 +46,21 @@ import (
 )
 
 const defaultRecordsPageSize = 100
+const (
+	relationshipCountInspiredByField  = "Inspired by"
+	relationshipCountHasInspiredField = "Has inspired"
+)
 
 // Client wraps the NocoDB client with our configuration.
 type Client struct {
 	client *nocodbgo.Client
 	table  *nocodbgo.Table
+	// httpClient is reused for all outbound requests to avoid recreating transports.
+	httpClient *http.Client
 	// cachedRecords stores raw API records, not converted data.Story structs.
 	cachedRecords []map[string]interface{}
+	// cachedRecordByID provides fast lookup by record ID for cachedRecords.
+	cachedRecordByID map[string]map[string]interface{}
 	// cacheLoaded indicates whether cachedRecords currently represents a valid complete dataset.
 	cacheLoaded bool
 	// cacheOnlyMode forces reads to come from disk/in-memory cache and blocks API requests.
@@ -79,8 +87,9 @@ func NewClient() (*Client, error) {
 		config.AppConfig.NocoDBEndpoint, config.AppConfig.NocoDBTableID)
 
 	return &Client{
-		client: client,
-		table:  table,
+		client:     client,
+		table:      table,
+		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}, nil
 }
 
@@ -150,6 +159,7 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 
 	// Cache the results
 	c.cachedRecords = allRecords
+	c.rebuildRecordIndex()
 
 	// Now fetch relationships for all records and add to cache
 	log.Printf("Fetching relationships for all %d records...", len(allRecords))
@@ -174,19 +184,10 @@ func (c *Client) GetRecordByID(id string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("table not initialized")
 	}
 
-	// First try to find it in cache if available
+	// First try to find it in cache if available.
 	if c.cacheLoaded {
-		for _, record := range c.cachedRecords {
-			// Try both string and numeric ID comparisons
-			if recordID, ok := record["Id"].(string); ok && recordID == id {
-				return record, nil
-			}
-			if recordID, ok := record["Id"].(float64); ok && fmt.Sprintf("%.0f", recordID) == id {
-				return record, nil
-			}
-			if recordID, ok := record["Id"].(int); ok && fmt.Sprintf("%d", recordID) == id {
-				return record, nil
-			}
+		if record, found := c.getCachedRecordByID(id); found {
+			return record, nil
 		}
 		return nil, fmt.Errorf("record with ID %s not found in cache", id)
 	}
@@ -198,18 +199,9 @@ func (c *Client) GetRecordByID(id string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("failed to load cache for record search: %w", err)
 	}
 
-	// Search in cache again
-	for _, record := range c.cachedRecords {
-		// Try both string and numeric ID comparisons
-		if recordID, ok := record["Id"].(string); ok && recordID == id {
-			return record, nil
-		}
-		if recordID, ok := record["Id"].(float64); ok && fmt.Sprintf("%.0f", recordID) == id {
-			return record, nil
-		}
-		if recordID, ok := record["Id"].(int); ok && fmt.Sprintf("%d", recordID) == id {
-			return record, nil
-		}
+	// Search in cache again.
+	if record, found := c.getCachedRecordByID(id); found {
+		return record, nil
 	}
 
 	return nil, fmt.Errorf("record with ID %s not found", id)
@@ -303,6 +295,7 @@ func (c *Client) LoadCacheFromDisk() error {
 	}
 
 	c.cachedRecords = cacheData.Records
+	c.rebuildRecordIndex()
 	c.cacheLoaded = true
 
 	age := time.Since(cacheData.Timestamp)
@@ -387,8 +380,7 @@ func (c *Client) DownloadAttachment(imagePath, outputPath string) error {
 	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
 
 	// Make the request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to download file: %w", err)
 	}
@@ -424,8 +416,28 @@ func (c *Client) DownloadAttachment(imagePath, outputPath string) error {
 // DropCache clears the cached records, forcing fresh retrieval on next call
 func (c *Client) DropCache() {
 	c.cachedRecords = nil
+	c.cachedRecordByID = nil
 	c.cacheLoaded = false
 	log.Println("NocoDB cache dropped")
+}
+
+func (c *Client) rebuildRecordIndex() {
+	c.cachedRecordByID = make(map[string]map[string]interface{}, len(c.cachedRecords))
+	for _, record := range c.cachedRecords {
+		recordID := toString(record["Id"])
+		if recordID == "" {
+			continue
+		}
+		c.cachedRecordByID[recordID] = record
+	}
+}
+
+func (c *Client) getCachedRecordByID(id string) (map[string]interface{}, bool) {
+	if c.cachedRecordByID == nil {
+		c.rebuildRecordIndex()
+	}
+	record, found := c.cachedRecordByID[id]
+	return record, found
 }
 
 // recordContainsValue checks if a record's field contains the specified value
@@ -496,9 +508,11 @@ func contains(s, substr string) bool {
 
 // fetchAndCacheRelationships fetches relationship data for all records and stores it in the cache
 func (c *Client) fetchAndCacheRelationships(records []map[string]interface{}) {
-	// NocoDB field IDs for relationships
-	inspiredByFieldID := "ccsugv6du8wnisr"
-	hasInspiredFieldID := "cilfzk65ypiw6o4"
+	attachmentLookup := buildConnectionAttachmentLookup(records)
+	skippedInspiredBy := 0
+	skippedHasInspired := 0
+	fetchedInspiredBy := 0
+	fetchedHasInspired := 0
 
 	for i, record := range records {
 		recordID := toString(record["Id"])
@@ -506,26 +520,114 @@ func (c *Client) fetchAndCacheRelationships(records []map[string]interface{}) {
 			continue
 		}
 
-		// Fetch "Inspired by" relationships
-		inspiredBy := c.fetchRelationshipDataWithCache(recordID, inspiredByFieldID, records)
+		// Only fetch links when count is unknown or greater than zero.
+		inspiredBy := []data.StoryConnection{}
+		if !isKnownZeroRelationshipCount(record[relationshipCountInspiredByField]) {
+			inspiredBy = c.fetchRelationshipDataWithCache(recordID, relationshipFieldInspiredByID, attachmentLookup)
+			fetchedInspiredBy++
+		} else {
+			skippedInspiredBy++
+		}
 		records[i]["__cached_inspired_by"] = inspiredBy
 
-		// Fetch "Has inspired" relationships
-		hasInspired := c.fetchRelationshipDataWithCache(recordID, hasInspiredFieldID, records)
-		records[i]["__cached_has_inspired"] = hasInspired
-
-		// Log progress every 50 records
-		if (i+1)%50 == 0 {
-			log.Printf("Fetched relationships for %d/%d records", i+1, len(records))
+		// Only fetch links when count is unknown or greater than zero.
+		hasInspired := []data.StoryConnection{}
+		if !isKnownZeroRelationshipCount(record[relationshipCountHasInspiredField]) {
+			hasInspired = c.fetchRelationshipDataWithCache(recordID, relationshipFieldHasInspiredID, attachmentLookup)
+			fetchedHasInspired++
+		} else {
+			skippedHasInspired++
 		}
+		records[i]["__cached_has_inspired"] = hasInspired
 	}
 
-	log.Printf("Completed fetching relationships for all %d records", len(records))
+	log.Printf(
+		"Completed relationship fetch for %d records (inspiredBy: fetched=%d skipped_zero=%d, hasInspired: fetched=%d skipped_zero=%d)",
+		len(records),
+		fetchedInspiredBy,
+		skippedInspiredBy,
+		fetchedHasInspired,
+		skippedHasInspired,
+	)
+}
+
+func isKnownZeroRelationshipCount(value interface{}) bool {
+	switch v := value.(type) {
+	case nil:
+		return false
+	case int:
+		return v == 0
+	case int64:
+		return v == 0
+	case float64:
+		return int(v) == 0
+	case string:
+		if v == "" {
+			return false
+		}
+		parsed, err := strconv.Atoi(v)
+		if err != nil {
+			return false
+		}
+		return parsed == 0
+	default:
+		return false
+	}
+}
+
+type connectionAttachmentInfo struct {
+	image              string
+	thumbURL           string
+	attachmentType     string
+	attachmentFilename string
+}
+
+func buildConnectionAttachmentLookup(records []map[string]interface{}) map[string]connectionAttachmentInfo {
+	lookup := make(map[string]connectionAttachmentInfo, len(records))
+
+	for _, record := range records {
+		storyID := toString(record["Id"])
+		if storyID == "" {
+			continue
+		}
+
+		// Convert each record once to reuse attachment info across all link lookups.
+		story, err := NocoDBRecordToStoryWithClient(record, nil)
+		if err != nil {
+			log.Printf("Warning: Failed to convert record to story %s: %v", storyID, err)
+			lookup[storyID] = connectionAttachmentInfo{attachmentType: "none"}
+			continue
+		}
+
+		info := connectionAttachmentInfo{attachmentType: "none"}
+		storyImage := story.GetStoryImage()
+		if storyImage.URL != "" {
+			info.image = storyImage.URL
+			info.thumbURL = storyImage.ThumbURL
+			info.attachmentType = "image"
+			info.attachmentFilename = storyImage.Filename
+			lookup[storyID] = info
+			continue
+		}
+
+		attachment := story.GetFirstNonImageAttachment()
+		if attachment.URL != "" && attachment.IsAudio() {
+			info.attachmentType = "audio"
+			info.attachmentFilename = attachment.Filename
+		} else if attachment.URL != "" && attachment.IsDocument() {
+			info.attachmentType = "document"
+			info.attachmentFilename = attachment.Filename
+		}
+
+		lookup[storyID] = info
+	}
+
+	return lookup
 }
 
 // fetchRelationshipDataWithCache makes the HTTP call to get relationship data for a single record/field
-// and uses the provided records cache to look up images
-func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRecords []map[string]interface{}) []data.StoryConnection {
+// and uses a precomputed attachment lookup for connected stories.
+func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, attachmentLookup map[string]connectionAttachmentInfo) []data.StoryConnection {
 	url := fmt.Sprintf("%s/api/v2/tables/%s/links/%s/records/%s",
 		config.AppConfig.NocoDBEndpoint,
 		config.AppConfig.NocoDBTableID,
@@ -541,8 +643,7 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Printf("Warning: Failed to fetch links for record %s field %s: %v", recordID, fieldID, err)
 		return []data.StoryConnection{}
@@ -575,36 +676,19 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 	var connections []data.StoryConnection
 	for _, item := range linkResponse.List {
 		if item.Title != "" {
+			storyID := strconv.Itoa(item.Id)
 			connection := data.StoryConnection{
 				ID:      strconv.Itoa(item.Id),
 				Title:   item.Title,
 				Finding: item.Title,
-				URL:     "/stories/" + util.Slugify(item.Title) + "-" + strconv.Itoa(item.Id) + ".html",
+				URL:     "/stories/" + util.Slugify(item.Title) + "-" + storyID + ".html",
 			}
 
-			// Look up the full story data from provided records to get proper attachment info
-			storyIDStr := strconv.Itoa(item.Id)
-			if cachedStory, found := c.getStoryFromRecords(storyIDStr, allRecords); found {
-				// First try to get an image attachment
-				storyImage := cachedStory.GetStoryImage()
-				if storyImage.URL != "" {
-					connection.Image = storyImage.URL
-					connection.ThumbURL = storyImage.ThumbURL
-					connection.AttachmentType = "image"
-					connection.AttachmentFilename = storyImage.Filename
-				} else {
-					// No image, check for audio attachment
-					audioAttachment := cachedStory.GetFirstNonImageAttachment()
-					if audioAttachment.URL != "" && audioAttachment.IsAudio() {
-						connection.AttachmentType = "audio"
-						connection.AttachmentFilename = audioAttachment.Filename
-					} else if audioAttachment.URL != "" && audioAttachment.IsDocument() {
-						connection.AttachmentType = "document"
-						connection.AttachmentFilename = audioAttachment.Filename
-					} else {
-						connection.AttachmentType = "none"
-					}
-				}
+			if info, found := attachmentLookup[storyID]; found {
+				connection.Image = info.image
+				connection.ThumbURL = info.thumbURL
+				connection.AttachmentType = info.attachmentType
+				connection.AttachmentFilename = info.attachmentFilename
 			} else {
 				connection.AttachmentType = "none"
 			}
@@ -614,26 +698,6 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, allRec
 	}
 
 	return connections
-}
-
-// getStoryFromRecords looks up a story by ID in the provided records and returns a fully converted Story object
-func (c *Client) getStoryFromRecords(storyID string, allRecords []map[string]interface{}) (data.Story, bool) {
-	// Find the record with matching ID
-	for _, record := range allRecords {
-		recordID := toString(record["Id"])
-		if recordID == storyID {
-			// Convert the raw record to a full Story object
-			// Note: We pass nil for client to avoid infinite recursion on relationships
-			story, err := NocoDBRecordToStoryWithClient(record, nil)
-			if err != nil {
-				log.Printf("Warning: Failed to convert record to story %s: %v", storyID, err)
-				return data.Story{}, false
-			}
-			return story, true
-		}
-	}
-
-	return data.Story{}, false
 }
 
 // toString converts interface{} to string safely

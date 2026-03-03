@@ -59,6 +59,18 @@ func ResetBuildCache() {
 	cachedTemplates = nil
 }
 
+// WarmBuildCache primes story and template caches before parallel build steps run.
+// This keeps cache writes out of concurrent page writers.
+func WarmBuildCache() error {
+	_ = getAllStories()
+
+	if _, err := loadTemplatesCached(); err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
+
+	return nil
+}
+
 // createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
 func createTypeIndexOutputPathFromTitle(title string) string {
 	slug := util.Slugify(title)
@@ -415,8 +427,6 @@ func WriteStories() error {
 	for i, storyInQuestion := range stories {
 		outputPath := createStoryOutputPathFromFindingWithID(storyInQuestion.Finding, storyInQuestion.ID)
 
-		log.Printf("Writing story with finding %s to %s", storyInQuestion.Finding, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -542,14 +552,12 @@ func WriteStories() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		// Explicit sync to ensure content is written
-		if err := file.Sync(); err != nil {
-			log.Printf("Warning: Failed to sync file: %v", err)
+		if (i+1)%100 == 0 {
+			log.Printf("Story generation progress: %d/%d", i+1, totalStories)
 		}
-
-		log.Printf("Successfully wrote story to %s", outputPath)
 	}
 
+	log.Printf("Story generation complete: %d pages", totalStories)
 	return nil
 }
 

@@ -34,8 +34,6 @@ func WriteWeatherIndexes() error {
 	for _, weatherInQuestion := range weathers {
 		outputPath := createWeatherOutputPathFromTitle(weatherInQuestion.Title)
 
-		log.Printf("Writing weather %s to %s", weatherInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -57,9 +55,9 @@ func WriteWeatherIndexes() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote weather to %s", outputPath)
 	}
 
+	log.Printf("Weather index generation complete: %d pages", len(weathers))
 	return nil
 }
 
@@ -88,8 +86,6 @@ func WriteTypesIndexes() error {
 	for _, typeInQuestion := range types {
 		outputPath := createTypeIndexOutputPathFromTitle(typeInQuestion.Title)
 
-		log.Printf("Writing types %s to %s", typeInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -111,9 +107,9 @@ func WriteTypesIndexes() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote types to %s", outputPath)
 	}
 
+	log.Printf("Type index generation complete: %d pages", len(types))
 	return nil
 }
 
@@ -142,8 +138,6 @@ func WriteThemesIndexes() error {
 	for _, themeInQuestion := range themes {
 		outputPath := createThemeIndexOutputPathFromTitle(themeInQuestion.Title)
 
-		log.Printf("Writing theme %s to %s", themeInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -165,9 +159,9 @@ func WriteThemesIndexes() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote theme to %s", outputPath)
 	}
 
+	log.Printf("Theme index generation complete: %d pages", len(themes))
 	return nil
 }
 
@@ -196,8 +190,6 @@ func WriteGiftedByIndexPages() error {
 	for _, giftedByInQuestion := range giftedByTypes {
 		outputPath := createGiftedByOutputPathFromTitle(giftedByInQuestion.Title)
 
-		log.Printf("Writing gifted by %s to %s", giftedByInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -219,9 +211,9 @@ func WriteGiftedByIndexPages() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote gifted by to %s", outputPath)
 	}
 
+	log.Printf("Gifted-by index generation complete: %d pages", len(giftedByTypes))
 	return nil
 }
 
@@ -250,8 +242,6 @@ func WriteScalePermanenceIndexPages() error {
 	for _, scalePermanenceInQuestion := range scalePermanenceTypes {
 		outputPath := createScalePermanenceOutputPathFromTitle(scalePermanenceInQuestion.Title)
 
-		log.Printf("Writing scale permanence %s to %s", scalePermanenceInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -273,9 +263,9 @@ func WriteScalePermanenceIndexPages() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote scale permanence to %s", outputPath)
 	}
 
+	log.Printf("Scale permanence index generation complete: %d pages", len(scalePermanenceTypes))
 	return nil
 }
 
@@ -304,8 +294,6 @@ func WriteWhatWasIsIfIndexPages() error {
 	for _, whatWasIsIfInQuestion := range whatWasIsIfTypes {
 		outputPath := createWhatWasIsIfOutputPathFromTitle(whatWasIsIfInQuestion.Title)
 
-		log.Printf("Writing what was/is/if %s to %s", whatWasIsIfInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -327,9 +315,9 @@ func WriteWhatWasIsIfIndexPages() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote what was/is/if to %s", outputPath)
 	}
 
+	log.Printf("What-was-is-if index generation complete: %d pages", len(whatWasIsIfTypes))
 	return nil
 }
 
@@ -358,8 +346,6 @@ func WriteTimePeriodIndexPages() error {
 	for _, timePeriodInQuestion := range timePeriodTypes {
 		outputPath := createTimePeriodOutputPathFromTitle(timePeriodInQuestion.Title)
 
-		log.Printf("Writing time period %s to %s", timePeriodInQuestion.Title, outputPath)
-
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to create output file %s: %w", outputPath, err)
@@ -381,8 +367,8 @@ func WriteTimePeriodIndexPages() error {
 			return fmt.Errorf("failed to execute template: %w", err)
 		}
 
-		log.Printf("Successfully wrote time period to %s", outputPath)
 	}
 
+	log.Printf("Time-period index generation complete: %d pages", len(timePeriodTypes))
 	return nil
 }

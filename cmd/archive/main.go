@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"community-climate-justice-archive/internal/config"
@@ -33,6 +34,41 @@ import (
 )
 
 const localDevServerURL = "http://localhost:8080"
+
+type buildTask struct {
+	name string
+	run  func() error
+}
+
+func runBuildTasks(tasks []buildTask) error {
+	if len(tasks) == 0 {
+		return nil
+	}
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, len(tasks))
+
+	for _, task := range tasks {
+		task := task
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			if err := task.run(); err != nil {
+				errCh <- fmt.Errorf("%s: %w", task.name, err)
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		return err
+	}
+
+	return nil
+}
 
 // generateArchive builds the entire website.
 //
@@ -55,6 +91,9 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 
 	// Warm the cache to ensure all subsequent operations are fast
 	store.WarmCache()
+	if err := generate.WarmBuildCache(); err != nil {
+		return fmt.Errorf("failed to warm generator cache: %v", err)
+	}
 
 	// Process images (resize, convert to WebP) unless skipped
 	if !skipImages {
@@ -63,80 +102,38 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		}
 	}
 
-	// Generate all the HTML pages
-	if err := generate.WriteStories(); err != nil {
-		return fmt.Errorf("failed to write stories: %v", err)
+	// Generate independent page groups in parallel.
+	pageTasks := []buildTask{
+		{name: "write stories", run: generate.WriteStories},
+		{name: "write homepage", run: generate.WriteHomePage},
+		{name: "write wander page", run: generate.WriteWanderPage},
+		{name: "write archive page", run: generate.WriteArchivePage},
+		{name: "write about page", run: generate.WriteAboutPage},
+		{name: "write filter data", run: generate.WriteFilterData},
+		{name: "write types indexes", run: generate.WriteTypesIndexes},
+		{name: "write themes indexes", run: generate.WriteThemesIndexes},
+		{name: "write weather indexes", run: generate.WriteWeatherIndexes},
+		{name: "write gifted by indexes", run: generate.WriteGiftedByIndexPages},
+		{name: "write scale permanence indexes", run: generate.WriteScalePermanenceIndexPages},
+		{name: "write what was/is/if indexes", run: generate.WriteWhatWasIsIfIndexPages},
+		{name: "write time period indexes", run: generate.WriteTimePeriodIndexPages},
+	}
+	if err := runBuildTasks(pageTasks); err != nil {
+		return err
 	}
 
-	if err := generate.WriteHomePage(); err != nil {
-		return fmt.Errorf("failed to write homepage: %v", err)
+	// Copy assets to output folder in parallel.
+	assetTasks := []buildTask{
+		{name: "copy audio files", run: generate.CopyAudioToOutput},
+		{name: "copy document files", run: generate.CopyDocumentsToOutput},
+		{name: "copy CSS", run: generate.CopyCSSToOutput},
+		{name: "copy JavaScript", run: generate.CopyJSToOutput},
 	}
-
-	if err := generate.WriteWanderPage(); err != nil {
-		return fmt.Errorf("failed to write wander page: %v", err)
-	}
-
-	if err := generate.WriteArchivePage(); err != nil {
-		return fmt.Errorf("failed to write archive page: %v", err)
-	}
-
-	if err := generate.WriteAboutPage(); err != nil {
-		return fmt.Errorf("failed to write about page: %v", err)
-	}
-
-	if err := generate.WriteFilterData(); err != nil {
-		return fmt.Errorf("failed to write filter data: %v", err)
-	}
-
-	if err := generate.WriteTypesIndexes(); err != nil {
-		return fmt.Errorf("failed to write types indexes: %v", err)
-	}
-
-	if err := generate.WriteThemesIndexes(); err != nil {
-		return fmt.Errorf("failed to write themes indexes: %v", err)
-	}
-
-	if err := generate.WriteWeatherIndexes(); err != nil {
-		return fmt.Errorf("failed to write weather indexes: %v", err)
-	}
-
-	if err := generate.WriteGiftedByIndexPages(); err != nil {
-		return fmt.Errorf("failed to write gifted by indexes: %v", err)
-	}
-
-	if err := generate.WriteScalePermanenceIndexPages(); err != nil {
-		return fmt.Errorf("failed to write scale permanence indexes: %v", err)
-	}
-
-	if err := generate.WriteWhatWasIsIfIndexPages(); err != nil {
-		return fmt.Errorf("failed to write what was/is/if indexes: %v", err)
-	}
-
-	if err := generate.WriteTimePeriodIndexPages(); err != nil {
-		return fmt.Errorf("failed to write time period indexes: %v", err)
-	}
-
-	// Copy assets to output folder
 	if !skipImageCopy {
-		if err := generate.CopyImagesToOutput(); err != nil {
-			return fmt.Errorf("failed to copy images: %v", err)
-		}
+		assetTasks = append(assetTasks, buildTask{name: "copy images", run: generate.CopyImagesToOutput})
 	}
-
-	if err := generate.CopyAudioToOutput(); err != nil {
-		return fmt.Errorf("failed to copy audio files: %v", err)
-	}
-
-	if err := generate.CopyDocumentsToOutput(); err != nil {
-		return fmt.Errorf("failed to copy document files: %v", err)
-	}
-
-	if err := generate.CopyCSSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy CSS: %v", err)
-	}
-
-	if err := generate.CopyJSToOutput(); err != nil {
-		return fmt.Errorf("failed to copy JavaScript: %v", err)
+	if err := runBuildTasks(assetTasks); err != nil {
+		return err
 	}
 
 	if err := generate.CopyStaticToOutput(); err != nil {

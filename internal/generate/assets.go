@@ -46,6 +46,50 @@ var ImageSizes = map[string]int{
 	"large":  1200, // full size
 }
 
+func copyFileIfChanged(sourcePath string, destinationPath string) (bool, error) {
+	sourceInfo, err := os.Stat(sourcePath)
+	if err != nil {
+		return false, fmt.Errorf("failed to stat source file %s: %w", sourcePath, err)
+	}
+
+	destinationInfo, err := os.Stat(destinationPath)
+	if err == nil {
+		// Skip when destination is already up to date and file size matches.
+		if destinationInfo.Size() == sourceInfo.Size() && !destinationInfo.ModTime().Before(sourceInfo.ModTime()) {
+			return false, nil
+		}
+	} else if !os.IsNotExist(err) {
+		return false, fmt.Errorf("failed to stat destination file %s: %w", destinationPath, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(destinationPath), 0755); err != nil {
+		return false, fmt.Errorf("failed to create destination directory for %s: %w", destinationPath, err)
+	}
+
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return false, fmt.Errorf("failed to open source file %s: %w", sourcePath, err)
+	}
+	defer sourceFile.Close()
+
+	destinationFile, err := os.Create(destinationPath)
+	if err != nil {
+		return false, fmt.Errorf("failed to create destination file %s: %w", destinationPath, err)
+	}
+	defer destinationFile.Close()
+
+	if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+		return false, fmt.Errorf("failed to copy file %s: %w", sourcePath, err)
+	}
+
+	// Preserve source timestamps so future incremental copies can compare accurately.
+	if err := os.Chtimes(destinationPath, sourceInfo.ModTime(), sourceInfo.ModTime()); err != nil {
+		log.Printf("Warning: failed to preserve timestamps for %s: %v", destinationPath, err)
+	}
+
+	return true, nil
+}
+
 // getProcessedImagePaths returns all output WebP paths expected for a source image.
 func getProcessedImagePaths(srcPath string) []string {
 	baseName := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
@@ -267,6 +311,7 @@ func ProcessImages() error {
 	processedCount := 0
 	skippedUpToDateCount := 0
 	failureCount := 0
+	skippedUnsupportedCount := 0
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -278,13 +323,13 @@ func ProcessImages() error {
 
 		// Skip if it's already a WebP file
 		if ext == ".webp" {
-			log.Printf("Skipping WebP file: %s", filename)
+			skippedUnsupportedCount++
 			continue
 		}
 
 		// Skip if the file is not a JPEG or PNG
 		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
-			log.Printf("Skipping non-image file: %s", filename)
+			skippedUnsupportedCount++
 			continue
 		}
 
@@ -305,7 +350,13 @@ func ProcessImages() error {
 		processedCount++
 	}
 
-	log.Printf("Image processing complete: processed=%d, skipped_up_to_date=%d, failures=%d", processedCount, skippedUpToDateCount, failureCount)
+	log.Printf(
+		"Image processing complete: processed=%d skipped_up_to_date=%d skipped_unsupported=%d failures=%d",
+		processedCount,
+		skippedUpToDateCount,
+		skippedUnsupportedCount,
+		failureCount,
+	)
 
 	return nil
 }
@@ -322,7 +373,8 @@ func CopyImagesToOutput() error {
 
 	// Walk through the images directory recursively
 	copyCount := 0
-	skippedCount := 0
+	unchangedCount := 0
+	skippedNonImageCount := 0
 	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -349,28 +401,18 @@ func CopyImagesToOutput() error {
 		ext := strings.ToLower(filepath.Ext(path))
 		switch ext {
 		case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp":
-			// Copy the file
-			sourceFile, err := os.Open(path)
+			copied, err := copyFileIfChanged(path, destinationPath)
 			if err != nil {
-				return fmt.Errorf("failed to open source image %s: %w", path, err)
-			}
-			defer sourceFile.Close()
-
-			destinationFile, err := os.Create(destinationPath)
-			if err != nil {
-				return fmt.Errorf("failed to create destination image %s: %w", destinationPath, err)
-			}
-			defer destinationFile.Close()
-
-			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
 				return fmt.Errorf("failed to copy image %s: %w", path, err)
 			}
 
-			copyCount++
-			log.Printf("Copied %s", relativePath)
+			if copied {
+				copyCount++
+			} else {
+				unchangedCount++
+			}
 		default:
-			skippedCount++
-			log.Printf("Skipped non-image file: %s", path)
+			skippedNonImageCount++
 		}
 
 		return nil
@@ -380,7 +422,7 @@ func CopyImagesToOutput() error {
 		return fmt.Errorf("error walking images directory: %w", err)
 	}
 
-	log.Printf("Successfully copied %d images to output directory (skipped %d non-image files)", copyCount, skippedCount)
+	log.Printf("Image copy complete: copied=%d unchanged=%d skipped_non_image=%d", copyCount, unchangedCount, skippedNonImageCount)
 	return nil
 }
 
@@ -403,6 +445,9 @@ func CopyJSToOutput() error {
 		return fmt.Errorf("failed to read static/js directory: %w", err)
 	}
 
+	copyCount := 0
+	unchangedCount := 0
+
 	for _, file := range jsFiles {
 		if file.IsDir() {
 			continue
@@ -416,26 +461,19 @@ func CopyJSToOutput() error {
 		srcPath := filepath.Join("static/js", filename)
 		dstPath := filepath.Join("out/js", filename)
 
-		src, err := os.Open(srcPath)
-		if err != nil {
-			return fmt.Errorf("failed to open source JS file %s: %w", srcPath, err)
-		}
-		defer src.Close()
-
-		dst, err := os.Create(dstPath)
-		if err != nil {
-			return fmt.Errorf("failed to create destination JS file %s: %w", dstPath, err)
-		}
-		defer dst.Close()
-
-		_, err = io.Copy(dst, src)
+		copied, err := copyFileIfChanged(srcPath, dstPath)
 		if err != nil {
 			return fmt.Errorf("failed to copy JS file %s: %w", srcPath, err)
 		}
 
-		log.Printf("Successfully copied JS file to %s", dstPath)
+		if copied {
+			copyCount++
+		} else {
+			unchangedCount++
+		}
 	}
 
+	log.Printf("JavaScript copy complete: copied=%d unchanged=%d", copyCount, unchangedCount)
 	return nil
 }
 
@@ -451,6 +489,7 @@ func CopyAudioToOutput() error {
 
 	// Walk through the images directory to find audio files (they might be mixed in)
 	copyCount := 0
+	unchangedCount := 0
 	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -467,25 +506,16 @@ func CopyAudioToOutput() error {
 			filename := filepath.Base(path)
 			destinationPath := filepath.Join("out/audio", filename)
 
-			// Copy the file
-			sourceFile, err := os.Open(path)
+			copied, err := copyFileIfChanged(path, destinationPath)
 			if err != nil {
-				return fmt.Errorf("failed to open source audio %s: %w", path, err)
-			}
-			defer sourceFile.Close()
-
-			destinationFile, err := os.Create(destinationPath)
-			if err != nil {
-				return fmt.Errorf("failed to create destination audio %s: %w", destinationPath, err)
-			}
-			defer destinationFile.Close()
-
-			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
 				return fmt.Errorf("failed to copy audio %s: %w", path, err)
 			}
 
-			copyCount++
-			log.Printf("Copied audio file: %s", filename)
+			if copied {
+				copyCount++
+			} else {
+				unchangedCount++
+			}
 		}
 
 		return nil
@@ -495,7 +525,7 @@ func CopyAudioToOutput() error {
 		return fmt.Errorf("error walking directories for audio files: %w", err)
 	}
 
-	log.Printf("Successfully copied %d audio files to output directory", copyCount)
+	log.Printf("Audio copy complete: copied=%d unchanged=%d", copyCount, unchangedCount)
 	return nil
 }
 
@@ -511,6 +541,7 @@ func CopyDocumentsToOutput() error {
 
 	// Walk through the images directory to find document files (they might be mixed in)
 	copyCount := 0
+	unchangedCount := 0
 	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -527,25 +558,16 @@ func CopyDocumentsToOutput() error {
 			filename := filepath.Base(path)
 			destinationPath := filepath.Join("out/documents", filename)
 
-			// Copy the file
-			sourceFile, err := os.Open(path)
+			copied, err := copyFileIfChanged(path, destinationPath)
 			if err != nil {
-				return fmt.Errorf("failed to open source document %s: %w", path, err)
-			}
-			defer sourceFile.Close()
-
-			destinationFile, err := os.Create(destinationPath)
-			if err != nil {
-				return fmt.Errorf("failed to create destination document %s: %w", destinationPath, err)
-			}
-			defer destinationFile.Close()
-
-			if _, err := io.Copy(destinationFile, sourceFile); err != nil {
 				return fmt.Errorf("failed to copy document %s: %w", path, err)
 			}
 
-			copyCount++
-			log.Printf("Copied document file: %s", filename)
+			if copied {
+				copyCount++
+			} else {
+				unchangedCount++
+			}
 		}
 
 		return nil
@@ -555,7 +577,7 @@ func CopyDocumentsToOutput() error {
 		return fmt.Errorf("error walking directories for document files: %w", err)
 	}
 
-	log.Printf("Successfully copied %d document files to output directory", copyCount)
+	log.Printf("Document copy complete: copied=%d unchanged=%d", copyCount, unchangedCount)
 	return nil
 }
 
@@ -607,25 +629,14 @@ func CopyStaticToOutput() error {
 			return fmt.Errorf("failed to create directory for %s: %w", destPath, err)
 		}
 
-		// Copy the file
-		srcFile, err := os.Open(path)
+		copied, err := copyFileIfChanged(path, destPath)
 		if err != nil {
-			return fmt.Errorf("failed to open source file %s: %w", path, err)
-		}
-		defer srcFile.Close()
-
-		dstFile, err := os.Create(destPath)
-		if err != nil {
-			return fmt.Errorf("failed to create destination file %s: %w", destPath, err)
-		}
-		defer dstFile.Close()
-
-		if _, err := io.Copy(dstFile, srcFile); err != nil {
 			return fmt.Errorf("failed to copy file %s: %w", path, err)
 		}
 
-		copyCount++
-		log.Printf("Copied static file: %s", relPath)
+		if copied {
+			copyCount++
+		}
 		return nil
 	})
 
