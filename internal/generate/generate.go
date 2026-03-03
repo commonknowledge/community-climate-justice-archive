@@ -161,12 +161,14 @@ func loadTemplatesCached() (*template.Template, error) {
 }
 
 func getAllStories() []data.Story {
-	if cachedStories != nil {
-		return cachedStories
+	if cachedStories == nil {
+		cachedStories = store.GetAllStories()
 	}
 
-	cachedStories = store.GetAllStories()
-	return cachedStories
+	// Return a copy so page generators can shuffle/limit without mutating shared cache.
+	stories := make([]data.Story, len(cachedStories))
+	copy(stories, cachedStories)
+	return stories
 }
 
 func randomStoryURL(stories []data.Story) string {
