@@ -155,6 +155,7 @@ type Story struct {
 	ReflectionLearning      string            // Reflections or learnings associated with the story
 	UpdatedAt               string            // When this story was last modified
 	URL                     string            // The URL path to this story's page in the archive
+	Approved                string            // Approval status ("Yes-Live" means visible, "No-Hidden" means hidden)
 }
 
 // StoryAttachment is a file attached to a story.

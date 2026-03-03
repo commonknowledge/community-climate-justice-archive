@@ -398,6 +398,13 @@ func WriteStories() error {
 		return fmt.Errorf("failed to load templates: %w", err)
 	}
 
+	// Clean out the stories directory to remove any files from filtered-out stories
+	// This ensures that unapproved stories don't persist from previous builds
+	if err := os.RemoveAll("out/stories"); err != nil {
+		return fmt.Errorf("failed to clean output stories directory: %w", err)
+	}
+	log.Println("Cleaned out/stories directory")
+
 	err = os.MkdirAll("out/stories", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output stories directory: %w", err)

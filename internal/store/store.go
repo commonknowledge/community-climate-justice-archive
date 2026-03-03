@@ -84,6 +84,16 @@ func ClearDiskCache() error {
 	return client.ClearDiskCache()
 }
 
+// SetDiskCacheMode enables/disables disk cache for debugging.
+//
+// When disabled (default), the app always fetches fresh data from NocoDB and
+// only keeps it in memory for the current run.
+func SetDiskCacheMode(enabled bool) {
+	if client != nil {
+		client.SetDiskCacheMode(enabled)
+	}
+}
+
 // SetCacheOnlyMode tells the store to only use cached data, never hitting the API.
 // Really handy for offline debugging when you've got a cached copy of the data
 // and don't want to (or can't) connect to NocoDB.
@@ -107,14 +117,14 @@ func GetRawRecords() ([]map[string]interface{}, error) {
 // Stories
 // -------------------------------------------------------------------
 
-// GetAllStories fetches every story in the archive.
+// GetAllStories fetches every approved story in the archive.
 //
-// This is probably the most-used function - it grabs all stories from NocoDB
-// and returns them as a list.
+// This is probably the most-used function - it grabs all stories from NocoDB,
+// converts them once per cache lifecycle, then filters to only include approved
+// stories (Approved = "Yes-Live") before returning them.
 //
-// The NocoDB client cache prevents repeated network calls. This function also caches
-// converted Story structs so raw-record -> Story conversion is done once per cache
-// lifecycle (until DropCache or re-initialization).
+// The NocoDB client cache prevents repeated network calls. Store-level story
+// conversion caching prevents repeated raw-record conversion across store calls.
 //
 // If something goes wrong talking to the database, the program stops - we can't
 // really do anything useful without story data.
@@ -132,7 +142,17 @@ func GetAllStories() []data.Story {
 		log.Fatalf("Failed to get all records from NocoDB: %v", err)
 	}
 
-	storiesCache = convertRecordsToStories(records)
+	allStories := convertRecordsToStories(records)
+
+	// Filter to only include approved stories
+	var approvedStories []data.Story
+	for _, story := range allStories {
+		if story.Approved == "Yes-Live" {
+			approvedStories = append(approvedStories, story)
+		}
+	}
+
+	storiesCache = approvedStories
 	storiesCacheLoaded = true
 	return storiesCache
 }

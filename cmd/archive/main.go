@@ -80,6 +80,10 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		return fmt.Errorf("failed to write archive page: %v", err)
 	}
 
+	if err := generate.WriteAboutPage(); err != nil {
+		return fmt.Errorf("failed to write about page: %v", err)
+	}
+
 	if err := generate.WriteFilterData(); err != nil {
 		return fmt.Errorf("failed to write filter data: %v", err)
 	}
@@ -133,6 +137,10 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 
 	if err := generate.CopyJSToOutput(); err != nil {
 		return fmt.Errorf("failed to copy JavaScript: %v", err)
+	}
+
+	if err := generate.CopyStaticToOutput(); err != nil {
+		return fmt.Errorf("failed to copy static assets: %v", err)
 	}
 
 	// Calculate how long the build took
@@ -252,7 +260,9 @@ func main() {
 	flag.BoolVar(devMode, "d", false, "Run in development mode with live reload (shorthand)")
 	skipImages := flag.Bool("skip-images", false, "Skip image processing and generation")
 	flag.BoolVar(skipImages, "s", false, "Skip image processing and generation (shorthand)")
-	clearCache := flag.Bool("clear-cache", false, "Clear the disk cache and fetch fresh data from NocoDB")
+	diskCacheMode := flag.Bool("debug-disk-cache", false, "Enable disk cache reads/writes for debugging")
+	flag.BoolVar(diskCacheMode, "disk-cache", false, "Enable disk cache reads/writes for debugging")
+	clearCache := flag.Bool("clear-cache", false, "Clear the disk cache file and exit")
 	useCacheOnly := flag.Bool("cache-only", false, "Use only disk cache, fail if not available (for offline debugging)")
 	flag.Parse()
 
@@ -262,6 +272,12 @@ func main() {
 	// Initialize the store (connects to NocoDB)
 	if err := store.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize store: %v", err)
+	}
+
+	// Enable on-disk cache only when explicitly requested for debugging.
+	if *diskCacheMode {
+		log.Println("Debug disk cache mode enabled")
+		store.SetDiskCacheMode(true)
 	}
 
 	// Handle cache management flags

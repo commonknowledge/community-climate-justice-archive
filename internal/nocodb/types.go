@@ -88,6 +88,7 @@ type NocoDBStoryDTO struct {
 	InstaImage              interface{} `json:"Insta image"`
 	ReflectionLearning      interface{} `json:"Reflection / learning"`
 	UpdatedAt               interface{} `json:"UpdatedAt"`
+	Approved                interface{} `json:"Approved"`
 }
 
 // ToStory converts a NocoDB record map to a Story struct
@@ -199,6 +200,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		InstaImage:              toString(dto.InstaImage),
 		ReflectionLearning:      toString(dto.ReflectionLearning),
 		UpdatedAt:               toString(dto.UpdatedAt),
+		Approved:                toString(dto.Approved),
 	}
 
 	// Set URL based on finding with ID suffix

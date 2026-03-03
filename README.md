@@ -8,7 +8,7 @@ At the time of writing, this contains the second version of the archive, release
 
 ### Go
 
-[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled], which makes it more efficient in terms of energy consumption.
+[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled]. This makes it more efficient in terms of energy consumption.
 
 ### SQLite
 
@@ -301,6 +301,22 @@ If you need to make changes, here's where to look:
 - Edit templates in `templates/` for structure
 - Images in `images/` get processed automatically
 
+### Caching: Keeping Things Fast
+
+By default, the archive fetches fresh story data from NocoDB on each run.
+
+Disk caching (`debug-cache-nocodb.json`) is **debug-only** and must be explicitly enabled with:
+
+```bash
+go run ./cmd/archive --debug-disk-cache
+```
+
+If you are using debug disk cache and need fresh data, delete the cache file:
+
+```bash
+rm debug-cache-nocodb.json
+```
+
 ### Troubleshooting Tips
 
 **Images not showing up?**
@@ -313,7 +329,7 @@ If you need to make changes, here's where to look:
 - Or restart the archive
 
 **Story data seems stale?**
-- Delete `debug-cache-nocodb.json`
+- If you enabled debug disk cache, delete `debug-cache-nocodb.json`
 - Rebuild the archive
 
 **Build failing?**
