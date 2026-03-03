@@ -2176,9 +2176,10 @@ Uses cream background with dashed border and flexible layout.
 */
 
 /* Mobile Menu Toggle Button - Hidden on desktop, shown on mobile */
-/* Uses header selector for higher specificity than .dashed-button */
-header .mobile-menu-toggle {
-    display: none;
+@media (min-width: 769px) {
+    .mobile-menu-toggle {
+        display: none !important;
+    }
 }
 
 /* Mobile Menu Overlay - Full screen navigation */
