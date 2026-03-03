@@ -1304,8 +1304,8 @@ func WriteAboutPage() error {
 	}
 
 	page := data.Page{
-		Title:          "About the project – Dudley Time Portal",
-		Description:    "Learn about the Dudley Time Portal, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.",
+		Title:          "About the project – Dudley Climate Coalition",
+		Description:    "Learn about the Dudley Climate Coalition, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.",
 		RandomStoryURL: randomStory.URL,
 		StoriesJSON:    storiesJSON,
 	}
