@@ -2175,11 +2175,9 @@ Uses cream background with dashed border and flexible layout.
    Includes hamburger menu, mobile navigation overlay, and layout adjustments.
 */
 
-/* Mobile Menu Toggle Button - Hidden on desktop, shown on mobile */
-@media (min-width: 769px) {
-    .mobile-menu-toggle {
-        display: none !important;
-    }
+/* Mobile Menu Toggle Button - Hidden by default (desktop), shown only on mobile */
+.mobile-menu-toggle {
+    display: none;
 }
 
 /* Mobile Menu Overlay - Full screen navigation */
@@ -2246,7 +2244,7 @@ Uses cream background with dashed border and flexible layout.
         display: none;
     }
 
-    header .mobile-menu-toggle {
+    .mobile-menu-toggle {
         display: inline-flex;
     }
 
