@@ -271,7 +271,7 @@ header {
     align-items: center;             /* Vertically centers */
 }
 
-/* Site title "Dudley Climate Coalition" — shared by header and mobile overlay */
+/* Site title "Dudley Time Portal" — shared by header and mobile overlay */
 header h1,
 .mobile-menu-header h1 {
     color: var(--black);
@@ -2438,7 +2438,7 @@ header .mobile-menu-toggle {
    About Page
    ============================================================================
 
-   Styles for the About page, which tells the story of the Dudley Climate Coalition
+   Styles for the About page, which tells the story of the Dudley Time Portal
    project through past, present, and future perspectives.
 */
 
