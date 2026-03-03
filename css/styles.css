@@ -282,10 +282,6 @@ header h1,
     line-height: 140%;
     letter-spacing: -0.22px;
     margin: 0;
-}
-
-/* header h1 layout — flex row to sit alongside the theme toggle */
-header h1 {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2180,7 +2176,8 @@ Uses cream background with dashed border and flexible layout.
 */
 
 /* Mobile Menu Toggle Button - Hidden on desktop, shown on mobile */
-.mobile-menu-toggle {
+/* Uses header selector for higher specificity than .dashed-button */
+header .mobile-menu-toggle {
     display: none;
 }
 
@@ -2213,11 +2210,6 @@ Uses cream background with dashed border and flexible layout.
     padding-bottom: 2rem;
 }
 
-.mobile-menu-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
 
 .mobile-menu-header h1 a {
     text-decoration: none;
@@ -2253,7 +2245,7 @@ Uses cream background with dashed border and flexible layout.
         display: none;
     }
 
-    .mobile-menu-toggle {
+    header .mobile-menu-toggle {
         display: inline-flex;
     }
 
