@@ -326,7 +326,6 @@ Shows currently applied filters as removable tags below the filter controls.
 /* Stories Container Spacing */
 .archive .stories-list {
   margin-top: 2.22222rem;
-  padding: 0 2.22222rem;
 }
 
 /* Responsive Filter Layout */
@@ -335,15 +334,10 @@ Shows currently applied filters as removable tags below the filter controls.
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-    padding: 0 1.11111rem;
   }
 
   .archive-filters-container {
-    padding: 1rem 1.11111rem;
-  }
-
-  .archive .stories-list {
-    padding: 0 1.11111rem;
+    padding: 1rem 0;
   }
 
   .archive-filters {
@@ -397,9 +391,7 @@ Shows currently applied filters as removable tags below the filter controls.
 .archive-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
-  padding: 0 2.22222rem;
   padding-top: 40px;
 }
 
@@ -437,7 +429,7 @@ Shows currently applied filters as removable tags below the filter controls.
   position: sticky;
   top: 5.88889rem;
   z-index: 100;
-  padding:  1.11111rem;
+  padding:  1.11111rem 0;
   padding-top: 0;
 }
 

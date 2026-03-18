@@ -9,8 +9,6 @@
 /* .about-page
    Main container for the about page content */
 .about-page {
-  margin-left: 2.22222rem;
-  margin-right: 2.22222rem;
   padding-bottom: 6.66667rem;
 }
 
@@ -69,9 +67,13 @@
   max-width: 787px;
   display: flex;
   flex-direction: column;
-  gap: 6.66667rem;
+  gap: 2.5rem;
   justify-self: center;
   overflow: visible;
+
+  @media (min-width: 768px) {
+    gap: 6.66667rem;
+  }
 }
 
 /* .about-section
@@ -80,7 +82,6 @@
   display: flex;
   flex-direction: column;
   gap: 3.33333rem;
-  padding-top: 5rem;
 }
 
 /* .about-section-content
@@ -172,7 +173,7 @@
 /* .about-quote-indent
    First quote breaks out to the right of the content frame */
 .about-quote-indent {
-  margin-left: 26%;
+  padding-left: 26%;
   width: 100%;
 }
 
@@ -182,7 +183,6 @@
   display: flex;
   gap: 2.22222rem;
   align-items: flex-start;
-  width: 126%;
 }
 
 .about-quote-with-image .about-figure {
@@ -197,54 +197,47 @@
 /* .about-what-if
    "What if..." section breaks out to the right of the content frame */
 .about-what-if {
-  margin-left: 26%;
-  width: 100%;
+  @media (min-width: 768px) {
+    margin-left: 26%;
+    margin-right: 0;
+  }
 }
 
-.about-what-if-label {
+.text-rotation__label {
   display: inline-block;
   background-color: var(--highlight-yellow);
   color: #000;
-  font-family: "Times New Roman", serif;
   font-size: 1.77778rem;
   font-weight: 400;
   font-style: italic;
   line-height: normal;
   letter-spacing: -0.64px;
   padding: 0.27778rem;
-  margin-bottom: 0.27778rem;
+  margin: 0 0 0.27778rem;
 }
 
-.about-what-if-text {
-  color: var(--black);
-  font-family: "Times New Roman", serif;
+.text-rotation__items {
+  display: grid;
+  padding: 0;
+  list-style: none;
+}
+
+.text-rotation__item {
+  /* stack the items on top of each other in the same grid cell */
+  grid-column: 1;
+  grid-row: 1;
+
   font-size: 1.77778rem;
   font-weight: 400;
   line-height: normal;
   letter-spacing: -0.64px;
   margin: 0;
-}
-
-/* About page rotation styles */
-.about-what-if.what-if-rotation {
-  position: relative;
-  min-height: 150px;
-  margin-top: 60px;
-  margin-bottom: 60px;
-}
-
-.about-what-if .what-if-rotation-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
 
-.about-what-if .what-if-rotation-item.hide {
+.text-rotation__item.hidden {
+  visibility: hidden;
   opacity: 0;
-  pointer-events: none;
 }
 
 /* .about-category
@@ -398,30 +391,14 @@
 /* Intermediate breakpoint - reduce offset */
 @media (max-width: 1400px) {
   .about-quote-indent {
-    margin-left: 18%;
-  }
-
-  .about-quote-with-image {
-    width: 118%;
-  }
-
-  .about-what-if {
-    margin-left: 18%;
+    padding-left: 18%;
   }
 }
 
 /* Smaller screens - further reduce offset */
 @media (max-width: 1100px) {
   .about-quote-indent {
-    margin-left: 10%;
-  }
-
-  .about-quote-with-image {
-    width: 110%;
-  }
-
-  .about-what-if {
-    margin-left: 10%;
+    padding-left: 10%;
   }
 }
 
@@ -441,7 +418,7 @@
   }
 
   .about-quote-indent {
-    margin-left: 0;
+    padding-left: 0;
     width: 100%;
   }
 
@@ -453,19 +430,9 @@
   .about-quote-with-image .about-figure {
     width: 100%;
   }
-
-  .about-what-if {
-    margin-left: 0;
-    width: 100%;
-  }
 }
 
 @media (max-width: 600px) {
-  .about-page {
-    margin-left: 1.11111rem;
-    margin-right: 1.11111rem;
-  }
-
   .about-title {
     font-size: 2.22222rem;
   }
@@ -476,7 +443,6 @@
 
   .about-section {
     gap: 2.22222rem;
-    padding-top: 3.33333rem;
   }
 
   .about-event {

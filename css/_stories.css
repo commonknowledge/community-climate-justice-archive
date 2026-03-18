@@ -185,12 +185,8 @@ The main content and metadata for a story.
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-bottom: 60px;
-  margin-left: 2.22222rem;
-  margin-right: 2.22222rem;
-  margin-top: 60px;
-  padding-bottom: 60px;
-  padding-top: 60px;
+  margin-block: 60px;
+  padding-block: 60px;
 }
 
 /* Story Finding
@@ -286,14 +282,14 @@ The related stories section.
 .related-stories-container {
   display: flex;
   flex-direction: column;
-  gap: 6.66667rem;
-  padding-inline: 1.11111rem;
-  margin-bottom: 6.66667rem;
+  gap: 2.22222rem;
+  margin-bottom: 4.4444rem;
   width: 100%;
   overflow: hidden;
 
   @media (min-width: 768px) {
-    padding-inline: 2.22222rem;
+    gap: 6.66667rem;
+    margin-bottom: 6.66667rem;
   }
 }
 
@@ -313,8 +309,10 @@ A grid of related stories.
 */
 .related-stories {
   display: flex;
-  gap: 2rem;
-  overflow: hidden;
+  gap: 1.5rem;
+  justify-content: space-between;
+  overflow: auto;
+  min-width: 100%;
 
   @media (min-width: 768px) {
     gap: 5.56rem;
@@ -388,10 +386,6 @@ Navigation arrows between stories.
   }
 }
 
-.standard-margins {
-  margin-left: 40px;
-  margin-right: 40px;
-}
 
 /* Story Navigation Buttons
 
@@ -603,15 +597,13 @@ Uses cream background with dashed border and flexible layout.
   display: flex;
   flex-direction: column;
   gap: 4.44444rem;
-  margin-bottom: 6.66667rem;
+  margin-bottom: 60px;
   padding-bottom: 60px;
-  margin-left: 2.22222rem;
-  margin-right: 2.22222rem;
 
   @media (max-width: 768px) {
-    padding-left: 1.11111rem;
-    padding-right: 1.11111rem;
     gap: 3.33333rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 }
 
@@ -746,12 +738,8 @@ Uses cream background with dashed border and flexible layout.
 
   .story-details {
     max-width: 100%;
-    margin-left: 1.11111rem;
-    margin-right: 1.11111rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
+    margin-block: 1.5rem;
+    padding-block: 1.5rem;
   }
 
   .story-finding {

@@ -318,69 +318,71 @@
 <body>
     {{template "header" .}}
 
-    <div class="homepage-content">
-        <div class="what-if-rotation">
-            <div class="what-if-rotation-item">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    people could develop deep connections with the places they live or work in: connections that invite care, relationships with life, and learning through creative doing that deepens the climate resilience of that place? 
+    <div class="container">
+        <div class="homepage-content">
+            <div class="what-if-rotation">
+                <div class="what-if-rotation-item">
+                    <div class="what-if-rotation-item-title">What if...</div>
+                    <div class="what-if-rotation-item-text">
+                        people could develop deep connections with the places they live or work in: connections that invite care, relationships with life, and learning through creative doing that deepens the climate resilience of that place? 
+                    </div>
+                </div>
+                <div class="what-if-rotation-item hide">
+                    <div class="what-if-rotation-item-title">What if...</div>
+                    <div class="what-if-rotation-item-text">
+                        there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?
+                    </div>
+                </div>
+                <div class="what-if-rotation-item hide">
+                    <div class="what-if-rotation-item-title">What if...</div>
+                    <div class="what-if-rotation-item-text">
+                        this archive was built to last 100 years, passing these knowledges down through generations?
+                    </div>
                 </div>
             </div>
-            <div class="what-if-rotation-item hide">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?
-                </div>
+            <div class="homepage-collage">
+                <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
             </div>
-            <div class="what-if-rotation-item hide">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    this archive was built to last 100 years, passing these knowledges down through generations?
-                </div>
+            <div class="tag-list-container">
+                <h2 class="tag-list-header">Themes</h2>
+                <ul class="tag-list">{{range .Themes}}
+                    <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                </ul>
             </div>
-        </div>
-        <div class="homepage-collage">
-            <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
-        </div>
-        <div class="tag-list-container">
-            <h2 class="tag-list-header">Themes</h2>
-            <ul class="tag-list">{{range .Themes}}
-                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-            </ul>
-        </div>
 
-        <div class="tag-list-container">
-            <h2 class="tag-list-header">Types</h2>
-            <ul class="tag-list">{{range .Types}}
-                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-            </ul>
-        </div>
+            <div class="tag-list-container">
+                <h2 class="tag-list-header">Types</h2>
+                <ul class="tag-list">{{range .Types}}
+                    <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                </ul>
+            </div>
 
-        <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive…</h2>
-        
-        <!-- Connections View replaces the archive grid -->
-        <div class="connections-view" id="connections-view">
-            <div class="connections-canvas" id="connections-canvas">
-                <svg class="connection-lines"></svg>
-                
-                {{range $index, $story := .ConnectedStories}}
-                {{$storyImage := $story.GetStoryImage}}
-                {{if $storyImage.URL}}
-                <a href="{{$story.URL}}" class="story-link-scattered">
-                    <img 
-                        class="story-image-scattered" 
-                        src="{{$storyImage.ThumbURL}}"
-                        alt="{{$story.Finding}}"
-                        data-story-id="{{$story.ID}}"
-                        data-story-title="{{$story.Finding}}"
-                        data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
-                        data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
-                        data-index="{{$index}}"
-                        loading="lazy"
-                    />
-                </a>
-                {{end}}
-                {{end}}
+            <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive…</h2>
+            
+            <!-- Connections View replaces the archive grid -->
+            <div class="connections-view" id="connections-view">
+                <div class="connections-canvas" id="connections-canvas">
+                    <svg class="connection-lines"></svg>
+                    
+                    {{range $index, $story := .ConnectedStories}}
+                    {{$storyImage := $story.GetStoryImage}}
+                    {{if $storyImage.URL}}
+                    <a href="{{$story.URL}}" class="story-link-scattered">
+                        <img 
+                            class="story-image-scattered" 
+                            src="{{$storyImage.ThumbURL}}"
+                            alt="{{$story.Finding}}"
+                            data-story-id="{{$story.ID}}"
+                            data-story-title="{{$story.Finding}}"
+                            data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
+                            data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
+                            data-index="{{$index}}"
+                            loading="lazy"
+                        />
+                    </a>
+                    {{end}}
+                    {{end}}
+                </div>
             </div>
         </div>
     </div>

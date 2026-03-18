@@ -24,7 +24,7 @@
     <script>
         /*
          * Shuffle Stories Function
-         * 
+         *
          * Randomly reorders all stories when the page loads. Same algorithm
          * as the homepage, optimised for performance.
          */
@@ -33,13 +33,20 @@
             const storiesList = document.querySelector('.stories-list.wander');
 
             // Use Array.prototype.slice.call for faster array creation from NodeList
-            const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
+            const stories = Array
+                .prototype
+                .slice
+                .call(document.querySelectorAll('.story'));
             const len = stories.length;
-            
+
             // Fisher-Yates shuffle in place
             for (let i = len - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [stories[i], stories[j]] = [stories[j], stories[i]];
+                [
+                    stories[i], stories[j]
+                ] = [
+                    stories[j], stories[i]
+                ];
             }
 
             // Use DocumentFragment for batch operations
@@ -47,13 +54,15 @@
             for (let i = 0; i < len; i++) {
                 fragment.appendChild(stories[i]);
             }
-            
+
             // Make visible before DOM update
-            storiesList.classList.add('visible');
+            storiesList
+                .classList
+                .add('visible');
 
             // Single DOM operation to replace all children
             storiesList.textContent = '';
-            
+
             storiesList.appendChild(fragment);
         }
 
@@ -64,17 +73,19 @@
         window.addEventListener('load', pageLoaded);
     </script>
     {{template "grid-code" .}}
-{{template "theme-init" .}}
+    {{template "theme-init" .}}
 </head>
 
 <body>
     {{template "header" .}}
 
-    <main class="main-content wander">
-        <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive…</h2>
-        
-        <div class="stories-list wander">
-            {{template "stories-list" .}}
+    <main class="container">
+        <div class="main-content wander">
+            <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive…</h2>
+
+            <div class="stories-list wander">
+                {{template "stories-list" .}}
+            </div>
         </div>
     </main>
 

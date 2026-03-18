@@ -37,47 +37,49 @@
 <body>
     {{template "header" .}}
 
-    <main class="main-content archive">
-        {{/* Top section with total count and clear filters button */}}
-        <div class="archive-header">
-            <h2 id="explore-archive" class="archive-header-title">All items from the archive (<span id="total-count">0</span>)</h2>
-            <button type="button" id="clear-filters" class="clear-filters-button-top">
-                <span class="clear-filters-text">Clear filters</span>
-                <span class="clear-filters-icon">×</span>
-            </button>
-        </div>
-        
-        <!-- Sticky Filter Controls -->
-        <div class="archive-filters-container">
-            <div class="archive-filters" id="archive-filters">
-                <div class="filter-dropdown" id="theme-dropdown">
-                    <button class="filter-dropdown-button" id="theme-button">
-                        <span class="filter-dropdown-text">Themes</span>
-                        <span class="filter-dropdown-arrow">▼</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="theme-content"></div>
-                </div>
-                
-                <div class="filter-dropdown" id="type-dropdown">
-                    <button class="filter-dropdown-button" id="type-button">
-                        <span class="filter-dropdown-text">Types</span>
-                        <span class="filter-dropdown-arrow">▼</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="type-content"></div>
-                </div>
-                
+    <main class="container">
+        <div class="main-content archive">
+            {{/* Top section with total count and clear filters button */}}
+            <div class="archive-header">
+                <h2 id="explore-archive" class="archive-header-title">All items from the archive (<span id="total-count">0</span>)</h2>
+                <button type="button" id="clear-filters" class="clear-filters-button-top">
+                    <span class="clear-filters-text">Clear filters</span>
+                    <span class="clear-filters-icon">×</span>
+                </button>
             </div>
             
-            <!-- Active Filters Display -->
-            <div class="active-filters" id="active-filters" style="display: none;">
-                <span class="active-filters-label">Active filters:</span>
-                <div class="active-filters-list" id="active-filters-list"></div>
+            <!-- Sticky Filter Controls -->
+            <div class="archive-filters-container">
+                <div class="archive-filters" id="archive-filters">
+                    <div class="filter-dropdown" id="theme-dropdown">
+                        <button class="filter-dropdown-button" id="theme-button">
+                            <span class="filter-dropdown-text">Themes</span>
+                            <span class="filter-dropdown-arrow">▼</span>
+                        </button>
+                        <div class="filter-dropdown-content" id="theme-content"></div>
+                    </div>
+                    
+                    <div class="filter-dropdown" id="type-dropdown">
+                        <button class="filter-dropdown-button" id="type-button">
+                            <span class="filter-dropdown-text">Types</span>
+                            <span class="filter-dropdown-arrow">▼</span>
+                        </button>
+                        <div class="filter-dropdown-content" id="type-content"></div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Active Filters Display -->
+                <div class="active-filters" id="active-filters" style="display: none;">
+                    <span class="active-filters-label">Active filters:</span>
+                    <div class="active-filters-list" id="active-filters-list"></div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Stories Container -->
-        <div class="stories-list" id="stories-container">
-            {{template "stories-list" .}}
+            
+            <!-- Stories Container -->
+            <div class="stories-list" id="stories-container">
+                {{template "stories-list" .}}
+            </div>
         </div>
     </main>
 
