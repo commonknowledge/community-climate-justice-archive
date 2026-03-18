@@ -284,7 +284,6 @@ The related stories section.
   flex-direction: column;
   gap: 2.22222rem;
   margin-bottom: 4.4444rem;
-  width: 100%;
   overflow: hidden;
 
   @media (min-width: 768px) {
@@ -364,10 +363,6 @@ Navigation arrows between stories.
   fill: #ffffff;
 }
 
-[data-theme="dark"] .story-connections,
-[data-theme="dark"] .related-stories-container {
-  background-color: #514c80;
-}
 
 [data-theme="dark"] .connections-canvas {
   background-color: #514c80;
@@ -377,15 +372,10 @@ Navigation arrows between stories.
   html:not([data-theme="light"]) .story-nav-arrow svg path {
     fill: #ffffff;
   }
-  html:not([data-theme="light"]) .story-connections,
-  html:not([data-theme="light"]) .related-stories-container {
-    background-color: #514c80;
-  }
   html:not([data-theme="light"]) .connections-canvas {
     background-color: #514c80;
   }
 }
-
 
 /* Story Navigation Buttons
 
