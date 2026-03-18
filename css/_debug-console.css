@@ -26,7 +26,7 @@ Inspired by Quake console, using existing design elements.
 .debug-console-content {
   display: flex;
   align-items: center;
-  padding: 0.55556rem 1.11111rem;
+  padding: 0.55556rem 1.25rem;
   gap: 0.55556rem;
   max-width: 100vw;
   overflow: hidden;

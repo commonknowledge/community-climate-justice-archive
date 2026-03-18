@@ -1,8 +1,8 @@
 .container,
 .standard-margins {
-  margin-inline: 1.11111rem;
+  margin-inline: 1.25rem;
 
   @media (min-width: 768px) {
-    margin-inline: 2.22222rem;
+    margin-inline: 2.5rem;
   }
 }

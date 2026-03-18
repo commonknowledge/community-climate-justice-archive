@@ -210,7 +210,7 @@ All metadata items for a story.
 .story-metadata {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.11111rem;
+  gap: 1.25rem;
   width: 100%;
 
   @media (min-width: 768px) {
@@ -221,7 +221,7 @@ All metadata items for a story.
 .story-metadata-item-group {
   display: flex;
   flex-direction: column;
-  gap: 1.11111rem;
+  gap: 1.25rem;
 }
 
 /* Story Metadata Item
@@ -282,7 +282,7 @@ The related stories section.
 .related-stories-container {
   display: flex;
   flex-direction: column;
-  gap: 2.22222rem;
+  gap: 2.5rem;
   margin-bottom: 4.4444rem;
   overflow: hidden;
 
@@ -339,7 +339,7 @@ The title of a related story.
   line-height: 140%;
   letter-spacing: -0.01222rem;
   text-transform: lowercase;
-  margin-bottom: 1.11111rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Related Story Title Tag
@@ -383,9 +383,9 @@ Uses cream background with dashed border and flexible layout.
 */
 .story-navigation {
   display: flex;
-  gap: 1.11111rem;
+  gap: 1.25rem;
   margin-top: 3.33333rem;
-  margin-bottom: 2.22222rem;
+  margin-bottom: 2.5rem;
 }
 
 .story-nav-button {
@@ -398,7 +398,7 @@ Uses cream background with dashed border and flexible layout.
   color: var(--black);
   flex: 1;
   min-height: 6.66667rem;
-  gap: 1.11111rem;
+  gap: 1.25rem;
   transition: border-style 0.2s ease;
 }
 
@@ -599,7 +599,7 @@ Uses cream background with dashed border and flexible layout.
 .story-connections-section {
   display: flex;
   flex-direction: column;
-  gap: 2.22222rem;
+  gap: 2.5rem;
 }
 
 .story-connections-title {
@@ -614,7 +614,7 @@ Uses cream background with dashed border and flexible layout.
 
 .story-connections-grid {
   display: flex;
-  gap: 2.22222rem;
+  gap: 2.5rem;
   flex-wrap: wrap;
 }
 
@@ -625,7 +625,7 @@ Uses cream background with dashed border and flexible layout.
 .big-button {
   border: 2px dashed var(--black);
   display: flex;
-  gap: 1.11111rem;
+  gap: 1.25rem;
   height: 6.66667rem;
   padding: 0.55556rem;
   align-items: center;
@@ -693,7 +693,7 @@ Uses cream background with dashed border and flexible layout.
 @media (max-width: 768px) {
   .story-connections-grid {
     flex-direction: column;
-    gap: 1.11111rem;
+    gap: 1.25rem;
   }
 
   .big-button {
@@ -704,7 +704,7 @@ Uses cream background with dashed border and flexible layout.
   /* Stories grid - 2 columns on mobile */
   .stories-list {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1.11111rem !important;
+    gap: 1.25rem !important;
   }
 
   /* Story popup adjustments */
@@ -741,7 +741,7 @@ Uses cream background with dashed border and flexible layout.
 
   .related-stories-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.11111rem;
+    gap: 1.25rem;
   }
 
   /* Text-only cards */

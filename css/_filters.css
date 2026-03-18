@@ -13,8 +13,8 @@
 .archive-filters {
   display: flex;
   flex-wrap: wrap; /* Stack on small screens */
-  gap: 1.11111rem; /* 20px between dropdowns */
-  margin-bottom: 2.22222rem; /* 40px below filters */
+  gap: 1.25rem; /* 20px between dropdowns */
+  margin-bottom: 2.5rem; /* 40px below filters */
   align-items: flex-start;
 }
 
@@ -124,7 +124,7 @@
 .filter-tag-option.selected::after {
   content: "✓";
   position: absolute;
-  right: -1.11111rem;
+  right: -1.25rem;
   top: 50%;
   transform: translateY(-50%);
   font-weight: bold;
@@ -211,7 +211,7 @@ Shows currently applied filters as removable tags below the filter controls.
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.11111rem; /* Slightly larger than tag text */
+  font-size: 1.25rem; /* Slightly larger than tag text */
   line-height: 1; /* Tight line height for × */
   padding: 0;
   margin: 0;
@@ -247,7 +247,7 @@ Shows currently applied filters as removable tags below the filter controls.
   font-size: 0.88889rem;
   color: var(--gray-text);
   text-align: center;
-  padding: 1.11111rem;
+  padding: 1.25rem;
 }
 
 /* .filter-loading.visible
@@ -274,7 +274,7 @@ Shows currently applied filters as removable tags below the filter controls.
   justify-content: center;
   align-items: center;
   min-height: 20rem; /* Tall enough to be noticeable */
-  padding: 2.22222rem;
+  padding: 2.5rem;
   background: var(--background);
   border: 2px dashed var(--black); /* Matches filter dropdowns */
   text-align: center;
@@ -286,7 +286,7 @@ Shows currently applied filters as removable tags below the filter controls.
   font-family: Arial, sans-serif;
   font-size: 1.66667rem; /* 30px - prominent */
   font-weight: 400; /* Regular weight */
-  margin-bottom: 1.11111rem;
+  margin-bottom: 1.25rem;
   color: var(--black);
 }
 
@@ -325,7 +325,7 @@ Shows currently applied filters as removable tags below the filter controls.
 
 /* Stories Container Spacing */
 .archive .stories-list {
-  margin-top: 2.22222rem;
+  margin-top: 2.5rem;
 }
 
 /* Responsive Filter Layout */
@@ -355,7 +355,7 @@ Shows currently applied filters as removable tags below the filter controls.
   }
 
   .filter-tag-option {
-    font-size: 1.11111rem;
+    font-size: 1.25rem;
     padding: 0.33333rem 0.55556rem;
   }
 
@@ -379,7 +379,7 @@ Shows currently applied filters as removable tags below the filter controls.
 
   .no-results {
     min-height: 15rem;
-    padding: 1.11111rem;
+    padding: 1.25rem;
   }
 
   .no-results-content h3 {
@@ -429,16 +429,16 @@ Shows currently applied filters as removable tags below the filter controls.
   position: sticky;
   top: 5.88889rem;
   z-index: 100;
-  padding:  1.11111rem 0;
+  padding:  1.25rem 0;
   padding-top: 0;
 }
 
 /* Archive Filters */
 .archive-filters {
   display: flex;
-  gap: 2.22222rem; /* 40px from Figma spacing */
+  gap: 2.5rem; /* 40px from Figma spacing */
   align-items: center;
-  margin: 0 0 1.11111rem 0;
+  margin: 0 0 1.25rem 0;
   flex-wrap: wrap;
 }
 

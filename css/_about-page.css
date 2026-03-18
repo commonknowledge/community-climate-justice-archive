@@ -181,7 +181,7 @@
    Quote displayed alongside image - image at left edge, quote breaks out right */
 .about-quote-with-image {
   display: flex;
-  gap: 2.22222rem;
+  gap: 2.5rem;
   align-items: flex-start;
 }
 
@@ -242,12 +242,12 @@
    Individual event card */
 .about-event {
   display: flex;
-  gap: 1.11111rem;
+  gap: 1.25rem;
   padding: 0.55556rem;
   border: 2px dashed var(--black);
   text-decoration: none;
   color: var(--black);
-  max-width: 32.22222rem;
+  max-width: 32.5rem;
 }
 
 .about-event:hover {
@@ -372,7 +372,7 @@
   .about-layout {
     display: flex;
     flex-direction: column;
-    gap: 2.22222rem;
+    gap: 2.5rem;
   }
 
   .about-sidebar {
@@ -399,7 +399,7 @@
 
 @media (max-width: 600px) {
   .about-title {
-    font-size: 2.22222rem;
+    font-size: 2.5rem;
   }
 
   .about-content {
@@ -407,7 +407,7 @@
   }
 
   .about-section {
-    gap: 2.22222rem;
+    gap: 2.5rem;
   }
 
   .about-event {

@@ -9,7 +9,7 @@ header {
   position: sticky; /* Remains visible during scroll */
   top: 0;
   z-index: 101; /* Above popups (z-index: 100) */
-  padding: 1.11111rem 0; /* 20px top and bottom */
+  padding: 1.25rem 0; /* 20px top and bottom */
 }
 
 /* .main-header
@@ -111,7 +111,7 @@ header h1 a:hover {
   background-color: var(--background);
   z-index: 200;
   flex-direction: column;
-  padding: 1.11111rem;
+  padding: 1.25rem;
   overflow-y: auto;
 }
 
@@ -138,8 +138,8 @@ header h1 a:hover {
 .mobile-menu-nav {
   display: flex;
   flex-direction: column;
-  gap: 1.11111rem;
-  padding-top: 1.11111rem;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
 }
 
 .mobile-menu-link {
