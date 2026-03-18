@@ -1,0 +1,106 @@
+.homepage-collage {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.homepage-collage img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  display: block;
+}
+
+/* Connections View
+ *
+ * Interactive scattered layout for showing story connections on homepage
+ * Creates an "infinite canvas" effect with a fixed viewport height
+ */
+.connections-view {
+  position: relative;
+  width: 100%;
+  height: 843px;
+  overflow: auto;
+  scroll-behavior: smooth;
+  margin-bottom: 6.66667rem;
+  box-shadow: 0 0 5px 0 var(--shadow-darker) inset;
+}
+
+.connections-view::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.connections-view::-webkit-scrollbar-track {
+  background: var(--shadow-light);
+}
+
+.connections-view::-webkit-scrollbar-thumb {
+  background: var(--shadow-darkest);
+  border-radius: 4px;
+}
+
+.connections-view::-webkit-scrollbar-thumb:hover {
+  background: var(--shadow-scroll-thumb-hover);
+}
+
+.connections-canvas {
+  position: relative;
+  width: 5000px; /* Large internal canvas width */
+  height: 3500px; /* Large internal canvas height */
+  background-color: #ffffff; /* Always white — the canvas well should not change with theme */
+  box-shadow: 0 0 5px 0 var(--shadow-darker) inset; /* Inset shadow for depth */
+}
+
+.connection-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5000px; /* Match canvas width */
+  height: 3500px; /* Match canvas height */
+  pointer-events: none;
+  z-index: 5;
+}
+
+.story-link-scattered {
+  position: absolute;
+  display: block;
+  text-decoration: none;
+  z-index: 2;
+  width: auto;
+  height: auto;
+  box-shadow: 0 2px 8px var(--shadow-light);
+  transition: all 0.3s ease;
+}
+
+.story-link-scattered:hover {
+  transform: scale(1.05);
+  z-index: 2;
+  box-shadow: 0 8px 25px var(--shadow-dark);
+}
+
+.story-image-scattered {
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.story-link-scattered.connected {
+  box-shadow: 0 4px 15px var(--shadow-medium);
+  z-index: 10;
+}
+
+.story-link-scattered.highlighted {
+  transform: scale(1.1);
+  z-index: 10;
+  box-shadow: 0 12px 35px var(--shadow-darkest);
+}
+
+.connections-view {
+  margin-bottom: 6.66667rem;
+}

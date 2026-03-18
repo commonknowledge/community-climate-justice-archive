@@ -1,0 +1,205 @@
+/* ============================================================================
+   HEADER & NAVIGATION
+   ============================================================================ */
+
+/* header
+   Main site header (sticks to top when scrolling) */
+header {
+  background-color: var(--background);
+  font-family: Arial, sans-serif;
+  margin-left: 2.222222rem;
+  margin-right: 2.222222rem;
+  position: sticky; /* Remains visible during scroll */
+  top: 0;
+  z-index: 101; /* Above popups (z-index: 100) */
+  padding: 1.11111rem 0; /* 20px top and bottom */
+}
+
+/* .main-header
+   Layout for header - site title on left, navigation on right */
+.main-header {
+  display: flex;
+  justify-content: space-between; /* Pushes children apart */
+  align-items: center; /* Vertically centers */
+}
+
+/* Site title "Dudley Time Portal" — shared by header and mobile overlay */
+header h1,
+.mobile-menu-header h1 {
+  color: var(--black);
+  font-family: Arial;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.22px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* header h1 a
+   Site title link (no underline by default) */
+header h1 a {
+  text-decoration: none;
+}
+
+/* header h1 a:hover
+   Site title link hover (adds underline) */
+header h1 a:hover {
+  text-decoration: underline;
+}
+
+/* header p
+   Paragraphs in header area */
+header p {
+  text-transform: lowercase;
+  color: var(--black);
+  font-family: Arial;
+  font-size: 1.22222rem; /* 22px */
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%;
+  letter-spacing: -0.01222rem;
+}
+
+/* .header-nav
+   Holds the Wander/Archive/Random/Add navigation buttons */
+.header-nav {
+  display: flex;
+  gap: 20px; /* Space between buttons */
+  align-items: center;
+}
+
+/* .theme-toggle
+   Dark/light mode toggle button in the header nav */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.22222rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--black);
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* In dark mode, active nav buttons with yellow highlight need black text for contrast */
+[data-theme="dark"] .dashed-button[style*="background-color"] {
+  color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .dashed-button[style*="background-color"] {
+    color: #000;
+  }
+}
+
+/* .header-nav .dashed-button
+   Navigation buttons (Wander, Archive, Random, Add) */
+.header-nav .dashed-button {
+  height: 41px;
+  padding: 5px 10px;
+  text-transform: lowercase;
+}
+
+/* .header-nav .dashed-button:hover
+   Navigation button hover state (repeats padding to prevent movement) */
+.header-nav .dashed-button:hover {
+  padding: 5px 10px;
+}
+
+/* Mobile Menu Toggle Button - Hidden by default (desktop), shown only on mobile */
+.mobile-menu-toggle {
+  display: none;
+}
+
+/* Mobile Menu Overlay - Full screen navigation */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background);
+  z-index: 200;
+  flex-direction: column;
+  padding: 1.11111rem;
+  overflow-y: auto;
+}
+
+/* Only open on mobile — never show on desktop regardless of JS state */
+@media (max-width: 768px) {
+  .mobile-menu-overlay.is-open {
+    display: flex;
+  }
+}
+
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2rem;
+}
+
+.mobile-menu-header h1 a {
+  text-decoration: none;
+  color: var(--black);
+}
+
+/* Mobile navigation links */
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.11111rem;
+  padding-top: 1.11111rem;
+}
+
+.mobile-menu-link {
+  width: 100%;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.mobile-menu-link.active {
+  background-color: var(--highlight-yellow);
+  border-style: solid;
+}
+
+@media (max-width: 768px) {
+  /* Header - Show menu button, hide desktop nav */
+  .header-nav-desktop {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  header {
+    margin-left: 1.11111rem;
+    margin-right: 1.11111rem;
+    padding: 1.11111rem 0;
+  }
+
+  header h1 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Mobile menu links smaller */
+  .mobile-menu-link {
+    font-size: 1.33333rem;
+  }
+}

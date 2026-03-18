@@ -1,0 +1,485 @@
+/* ============================================================================
+   About Page
+   ============================================================================
+
+   Styles for the About page, which tells the story of the Dudley Time Portal
+   project through past, present, and future perspectives.
+*/
+
+/* .about-page
+   Main container for the about page content */
+.about-page {
+  margin-left: 2.22222rem;
+  margin-right: 2.22222rem;
+  padding-bottom: 6.66667rem;
+}
+
+/* .about-title
+   Main page heading "About the project" */
+.about-title {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 52px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -1.04px;
+  margin-top: 40px;
+  margin-bottom: 1.66667rem;
+}
+
+/* .about-layout
+   Two-column layout: sticky sidebar + main content */
+.about-layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5.55556rem;
+  align-items: start;
+}
+
+/* .about-sidebar
+   Sticky navigation on the left side */
+.about-sidebar {
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.22222rem;
+  flex-shrink: 0;
+  padding-top: 5rem;
+}
+
+/* .about-nav-button
+   Navigation buttons in sidebar */
+.about-nav-button {
+  text-align: left;
+  justify-content: flex-start;
+}
+
+/* .about-nav-button.active
+   Currently active section button */
+.about-nav-button.active {
+  background-color: var(--highlight-yellow);
+  border-style: solid;
+  color: #000;
+}
+
+/* .about-content
+   Main content column - centered within its grid cell on large screens */
+.about-content {
+  max-width: 787px;
+  display: flex;
+  flex-direction: column;
+  gap: 6.66667rem;
+  justify-self: center;
+  overflow: visible;
+}
+
+/* .about-section
+   Individual content section (past, present, future) */
+.about-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3.33333rem;
+  padding-top: 5rem;
+}
+
+/* .about-section-content
+   Text content within a section */
+.about-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.66667rem;
+}
+
+/* .about-section-title
+   Section headings */
+.about-section-title {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 1.77778rem;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.64px;
+  margin: 0;
+}
+
+/* .about-body
+   Body text paragraphs */
+.about-body {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 1.33333rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.48px;
+  margin: 0;
+}
+
+/* .about-lead
+   Lead-in text (e.g., "We were inspired by...") */
+.about-lead {
+  color: var(--black);
+  font-family: Arial, sans-serif;
+  font-size: 1.22222rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.22px;
+  margin: 0;
+}
+
+/* .about-quotes
+   Container for inspirational quotes */
+.about-quotes {
+  display: flex;
+  flex-direction: column;
+  gap: 3.33333rem;
+}
+
+/* .about-quote
+   Blockquote styling for inspirational quotes */
+.about-quote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55556rem;
+}
+
+.about-quote p {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 1.77778rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: normal;
+  letter-spacing: -0.64px;
+  margin: 0;
+}
+
+.about-quote cite {
+  color: var(--black);
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.4;
+  letter-spacing: -0.16px;
+}
+
+.about-quote cite a {
+  text-decoration: underline;
+}
+
+/* .about-quote-indent
+   First quote breaks out to the right of the content frame */
+.about-quote-indent {
+  margin-left: 26%;
+  width: 100%;
+}
+
+/* .about-quote-with-image
+   Quote displayed alongside image - image at left edge, quote breaks out right */
+.about-quote-with-image {
+  display: flex;
+  gap: 2.22222rem;
+  align-items: flex-start;
+  width: 126%;
+}
+
+.about-quote-with-image .about-figure {
+  flex-shrink: 0;
+  width: 45%;
+}
+
+.about-quote-with-image .about-quote {
+  flex: 1;
+}
+
+/* .about-what-if
+   "What if..." section breaks out to the right of the content frame */
+.about-what-if {
+  margin-left: 26%;
+  width: 100%;
+}
+
+.about-what-if-label {
+  display: inline-block;
+  background-color: var(--highlight-yellow);
+  color: #000;
+  font-family: "Times New Roman", serif;
+  font-size: 1.77778rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: normal;
+  letter-spacing: -0.64px;
+  padding: 0.27778rem;
+  margin-bottom: 0.27778rem;
+}
+
+.about-what-if-text {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 1.77778rem;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.64px;
+  margin: 0;
+}
+
+/* About page rotation styles */
+.about-what-if.what-if-rotation {
+  position: relative;
+  min-height: 150px;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.about-what-if .what-if-rotation-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.about-what-if .what-if-rotation-item.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* .about-category
+   Category sections (Gifts, Co-creators, etc.) */
+.about-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55556rem;
+}
+
+/* .about-pill
+   Rounded pill labels for categories */
+.about-pill {
+  display: inline-block;
+  width: fit-content;
+  background-color: var(--background);
+  border: 2px solid var(--black);
+  border-radius: 100px;
+  color: var(--black);
+  font-family: Arial, sans-serif;
+  font-size: 1.22222rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.22px;
+  padding: 0.27778rem 0.55556rem;
+}
+
+/* .about-events
+   Container for event cards */
+.about-events {
+  display: flex;
+  flex-direction: column;
+  gap: 1.66667rem;
+}
+
+/* .about-event
+   Individual event card */
+.about-event {
+  display: flex;
+  gap: 1.11111rem;
+  padding: 0.55556rem;
+  border: 2px dashed var(--black);
+  text-decoration: none;
+  color: var(--black);
+  max-width: 32.22222rem;
+}
+
+.about-event:hover {
+  border-style: solid;
+}
+
+/* .about-event-image
+   Event thumbnail */
+.about-event-image {
+  width: 5.55556rem;
+  height: 5.55556rem;
+  flex-shrink: 0;
+}
+
+.about-event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* .about-event-text
+   Event details text */
+.about-event-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55556rem;
+  justify-content: center;
+}
+
+.about-event-title {
+  font-family: Arial, sans-serif;
+  font-size: 1.22222rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.22px;
+  margin: 0;
+}
+
+.about-event-date {
+  font-family: "Times New Roman", serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.36px;
+  margin: 0;
+}
+
+.about-event-link {
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.16px;
+  text-decoration: underline;
+}
+
+/* .about-sharing
+   Licensing/sharing section */
+.about-sharing {
+  padding-top: 0;
+}
+
+/* .about-footnote
+   Footnote text for explanations */
+.about-footnote {
+  color: var(--gray-text);
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  font-style: italic;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* .about-figure
+   Image with caption */
+.about-figure {
+  margin: 0;
+}
+
+.about-figure img {
+  max-width: 100%;
+  height: auto;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] .about-figure img {
+  mix-blend-mode: normal;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .about-figure img {
+    mix-blend-mode: normal;
+  }
+}
+
+.about-figure figcaption {
+  color: var(--gray-text);
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  line-height: 1.4;
+  margin-top: 0.55556rem;
+}
+
+/* Responsive layout for About page */
+
+/* Intermediate breakpoint - reduce offset */
+@media (max-width: 1400px) {
+  .about-quote-indent {
+    margin-left: 18%;
+  }
+
+  .about-quote-with-image {
+    width: 118%;
+  }
+
+  .about-what-if {
+    margin-left: 18%;
+  }
+}
+
+/* Smaller screens - further reduce offset */
+@media (max-width: 1100px) {
+  .about-quote-indent {
+    margin-left: 10%;
+  }
+
+  .about-quote-with-image {
+    width: 110%;
+  }
+
+  .about-what-if {
+    margin-left: 10%;
+  }
+}
+
+/* Mobile layout - no offset */
+@media (max-width: 900px) {
+  .about-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.22222rem;
+  }
+
+  .about-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding-top: 0;
+  }
+
+  .about-quote-indent {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .about-quote-with-image {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .about-quote-with-image .about-figure {
+    width: 100%;
+  }
+
+  .about-what-if {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-page {
+    margin-left: 1.11111rem;
+    margin-right: 1.11111rem;
+  }
+
+  .about-title {
+    font-size: 2.22222rem;
+  }
+
+  .about-content {
+    gap: 4.44444rem;
+  }
+
+  .about-section {
+    gap: 2.22222rem;
+    padding-top: 3.33333rem;
+  }
+
+  .about-event {
+    max-width: 100%;
+  }
+}

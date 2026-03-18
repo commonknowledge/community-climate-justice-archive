@@ -1,0 +1,202 @@
+body {
+  font-family: "Times New Roman", serif; /* Serif font */
+  /* 4. Add accessible line-height */
+  line-height: 1.5;
+  /* 5. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================================
+   LINKS & HOVER EFFECTS
+   ============================================================================ */
+
+/* a - Base link style */
+a {
+  color: currentColor;
+}
+
+/*
+   Content Link Hover Effect
+   
+   Uses a ::before pseudo-element positioned absolutely behind the link
+   to create a yellow highlight box on hover.
+   
+   Applied to links in: .story-finding, .story-metadata, .footer-content,
+   and header h1. Excludes .tag elements.
+*/
+
+/* Sets positioning context for the ::before pseudo-element */
+.story-finding a,
+.story-metadata a:not(.tag),
+.footer-content a,
+header h1 a {
+  position: relative; /* Creates positioning context */
+}
+
+/* Creates the highlight box */
+.story-finding a::before,
+.story-metadata a:not(.tag)::before,
+.footer-content a::before,
+header h1 a::before {
+  content: ""; /* Required for pseudo-element */
+  position: absolute; /* Positions relative to the link */
+  inset: -5px; /* Shorthand for top/right/bottom/left: -5px */
+  background: transparent; /* Invisible by default */
+  z-index: -1; /* Behind the link text */
+}
+
+/* Shows the yellow background on hover */
+.story-finding a:hover::before,
+.story-metadata a:not(.tag):hover::before,
+.footer-content a:hover::before,
+header h1 a:hover::before {
+  background: var(--highlight-yellow); /* Makes the box visible */
+}
+
+/* In dark mode, links with yellow highlight need black text for contrast */
+[data-theme="dark"] .story-finding a:hover,
+[data-theme="dark"] .story-metadata a:not(.tag):hover,
+[data-theme="dark"] .footer-content a:hover,
+[data-theme="dark"] header h1 a:hover {
+  color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .story-finding a:hover,
+  :root:not([data-theme="light"]) .story-metadata a:not(.tag):hover,
+  :root:not([data-theme="light"]) .footer-content a:hover,
+  :root:not([data-theme="light"]) header h1 a:hover {
+    color: #000;
+  }
+}
+
+/* These links don't get the hover effect */
+.related-story a:hover,
+.story a:hover,
+.story-nav-arrow a:hover {
+  background: none;
+}
+
+/* ============================================================================
+   PAGE HEADINGS
+   ============================================================================
+   
+   Headers for different sections and index pages.
+*/
+
+/* .tag-list-header, .wander-through-archive-header, .theme-index-header, .type-index-header
+   Standard headers for tag/category pages
+   - Serif font (Times New Roman) matches the body text
+   - Larger size (32px) makes them prominent
+   - Negative letter spacing tightens large text */
+.tag-list-header,
+.wander-through-archive-header,
+.theme-index-header,
+.type-index-header {
+  color: var(--black);
+  font-family: "Times New Roman";
+  font-size: 1.77778rem; /* 32px */
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.03556rem; /* Tighten large text */
+}
+
+/* .wander-through-archive-header (specific override)
+   Extra large size for the main "Wander through archive" heading */
+.wander-through-archive-header {
+  margin-top: 40px;
+  color: var(--black);
+  font-family: "Times New Roman";
+  font-size: 52px; /* Much larger than other headers */
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -1.04px !important; /* Proportionally tighter */
+  margin-bottom: 1.66667rem; /* 30px spacing below */
+}
+
+.archive-header-title {
+  color: var(--black);
+  font-family: "Times New Roman", serif;
+  font-size: 2.88889rem;
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -0.05778rem;
+}
+
+@media (max-width: 768px) {
+  .archive-header-title {
+    font-size: 1.55556rem;
+  }
+
+  .wander-through-archive-header {
+    font-size: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Smaller typography */
+  .archive-header-title {
+    font-size: 1.33333rem;
+  }
+
+  .wander-through-archive-header {
+    font-size: 1.55556rem;
+  }
+
+  .story-finding {
+    font-size: 1.11111rem;
+  }
+}
+
+/* Theme and Type Index Headers
+
+Headers for theme and type index pages.
+*/
+.theme-index-header,
+.type-index-header,
+.weather-index-header {
+  margin-bottom: 4rem;
+  font-family: Arial;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 140%;
+  letter-spacing: -1%;
+  text-transform: lowercase;
+  margin-left: 40px;
+  margin-right: 40px;
+  margin-top: 20px;
+}
+
+/* Dashed Button
+
+A button with a dashed border for navigation and actions.
+*/
+.dashed-button {
+  align-items: center;
+  background: var(--background);
+  border: 2px dashed var(--black);
+  color: var(--black);
+  display: flex;
+  font-family: Arial;
+  font-size: 1.22222rem;
+  font-style: normal;
+  font-weight: 400;
+  gap: 0.55556rem;
+  justify-content: center;
+  letter-spacing: -0.01222rem;
+  line-height: 140%;
+  padding: 0.27778rem 0.55556rem;
+  text-decoration: none;
+  width: max-content;
+}
+
+.dashed-button:hover {
+  border: 2px solid var(--black);
+  background: none;
+  padding: 0.27778rem 0.55556rem;
+}
