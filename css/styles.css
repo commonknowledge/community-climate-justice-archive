@@ -1,3 +1,6 @@
+@import "reset.css";
+
+
 /* ============================================================================
    CSS for Dudley Community Climate Justice Archive
    ============================================================================
@@ -19,28 +22,7 @@
    https://web.dev/responsive-web-design-basics/
 */
 
-/* ============================================================================
-   GLOBAL RESET
-   ============================================================================
-   
-   Sets box-sizing to border-box for all elements. This means padding and
-   border are included in width/height calculations instead of being added.
-*/
-* {
-    box-sizing: border-box;
-}
 
-body {
-    margin: 0;
-}
-
-html {
-    /* 
-       Base font size - all rem units calculate from this
-       1rem = 18px
-    */
-    font-size: 18px;
-}
 
 /* ============================================================================
    CSS VARIABLES (Custom Properties)
@@ -2168,6 +2150,7 @@ Uses cream background with dashed border and flexible layout.
     }
 }
 
+/*
    MOBILE LAYOUTS
    ============================================================================
 

@@ -70,36 +70,51 @@ func logWebPFailure(imagePath string, err error) {
 	log.Printf("Warning: WebP encoding failed for %s (logged to %s): %v", imagePath, errorLog, err)
 }
 
-// CopyCSSToOutput copies the CSS file to the out/css directory.
+// CopyCSSToOutput copies all CSS files to the out/css directory.
 func CopyCSSToOutput() error {
 	log.Println("Starting CSS copy process")
-
-	srcPath := "css/styles.css"
-	dstPath := "out/css/styles.css"
 
 	err := os.MkdirAll("out/css", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output CSS directory: %w", err)
 	}
 
-	src, err := os.Open(srcPath)
+	entries, err := os.ReadDir("css")
 	if err != nil {
-		return fmt.Errorf("failed to open source CSS file %s: %w", srcPath, err)
-	}
-	defer src.Close()
-
-	dst, err := os.Create(dstPath)
-	if err != nil {
-		return fmt.Errorf("failed to create destination CSS file %s: %w", dstPath, err)
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
-	if err != nil {
-		return fmt.Errorf("failed to copy CSS file %s: %w", srcPath, err)
+		return fmt.Errorf("failed to read CSS directory: %w", err)
 	}
 
-	log.Printf("Successfully copied CSS file to %s", dstPath)
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".css" {
+			continue
+		}
+
+		srcPath := filepath.Join("css", entry.Name())
+		dstPath := filepath.Join("out/css", entry.Name())
+
+		src, err := os.Open(srcPath)
+		if err != nil {
+			return fmt.Errorf("failed to open source CSS file %s: %w", srcPath, err)
+		}
+
+		dst, err := os.Create(dstPath)
+		if err != nil {
+			src.Close()
+			return fmt.Errorf("failed to create destination CSS file %s: %w", dstPath, err)
+		}
+
+		_, err = io.Copy(dst, src)
+		src.Close()
+		closeErr := dst.Close()
+		if err != nil {
+			return fmt.Errorf("failed to copy CSS file %s: %w", srcPath, err)
+		}
+		if closeErr != nil {
+			return fmt.Errorf("failed to close destination CSS file %s: %w", dstPath, closeErr)
+		}
+
+		log.Printf("Successfully copied CSS file to %s", dstPath)
+	}
 
 	return nil
 }
