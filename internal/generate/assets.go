@@ -14,7 +14,7 @@
 // 1. Read the original image from the images/ folder
 // 2. Create three versions: thumbnail, medium, and large
 // 3. Convert all of them to WebP format (it compresses better than JPG or PNG)
-// 4. Save them in out/images/processed/
+// 4. Save them in images/processed/ so they can be copied into out/images/processed/
 //
 // Why WebP? It makes images much smaller without losing quality, so pages load
 // faster for visitors. Good for accessibility and better for the environment too

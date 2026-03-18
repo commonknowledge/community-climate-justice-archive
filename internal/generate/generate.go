@@ -71,18 +71,11 @@ func WarmBuildCache() error {
 	return nil
 }
 
-// createTypeIndexOutputPathFromTitle creates a path to the output file for a type index page.
-func createTypeIndexOutputPathFromTitle(title string) string {
+// createTaxonomyOutputPathFromTitle creates a path to the output file for a taxonomy index page.
+func createTaxonomyOutputPathFromTitle(directory string, title string) string {
 	slug := util.Slugify(title)
 	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "types", fileName)
-}
-
-// createThemeIndexOutputPathFromTitle creates a path to the output file for a theme index page.
-func createThemeIndexOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "themes", fileName)
+	return filepath.Join("out", directory, fileName)
 }
 
 // createStoryOutputPathFromFindingWithID creates a path to the output file for a story page with ID suffix.
@@ -90,41 +83,6 @@ func createStoryOutputPathFromFindingWithID(finding, id string) string {
 	slug := util.Slugify(finding)
 	fileName := fmt.Sprintf("%s-%s.html", slug, id)
 	return filepath.Join("out", "stories", fileName)
-}
-
-// createWeatherOutputPathFromTitle creates a path to the output file for a weather page.
-func createWeatherOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "weather", fileName)
-}
-
-// createGiftedByOutputPathFromTitle creates a path to the output file for a gifted by page.
-func createGiftedByOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "giftedby", fileName)
-}
-
-// createScalePermanenceOutputPathFromTitle creates a path to the output file for a scale permanence page.
-func createScalePermanenceOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "scalepermanence", fileName)
-}
-
-// createWhatWasIsIfOutputPathFromTitle creates a path to the output file for a what was/is/if page.
-func createWhatWasIsIfOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "whatwasisif", fileName)
-}
-
-// createTimePeriodOutputPathFromTitle creates a path to the output file for a time period page.
-func createTimePeriodOutputPathFromTitle(title string) string {
-	slug := util.Slugify(title)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("out", "timeperiod", fileName)
 }
 
 // loadTemplates loads all templates and partials needed by the application.
@@ -364,8 +322,6 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 	return string(jsonData), nil
 }
 
-// WriteWeatherIndexes generates the weather index pages and writes them to the out/weather directory.
-
 // extractURLsAndMakeLinks extracts URLs from a string and makes them links.
 //
 // These links open in a new tab.
@@ -596,5 +552,3 @@ func WriteFilterData() error {
 	log.Printf("Successfully wrote filter data to %s", outputPath)
 	return nil
 }
-
-// WriteWanderPage generates the wander page HTML file and writes it to the out/ directory.
