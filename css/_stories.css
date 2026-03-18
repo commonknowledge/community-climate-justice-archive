@@ -184,7 +184,7 @@ The main content and metadata for a story.
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 60px;
   margin-block: 60px;
   padding-block: 60px;
 }
@@ -193,20 +193,20 @@ The main content and metadata for a story.
 
 The main text content of a story.
 */
+
 .story-finding {
-  font-family: "Times New Roman", serif;
-  font-size: 1.22222rem;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.02rem;
-  width: 32.22222rem;
-  margin-bottom: 60px;
+  max-width: 780px;
+}
+
+.story-finding-title {
+  margin: 0 0 0.75rem;
 }
 
 /* Story Metadata
 
 All metadata items for a story.
 */
+
 .story-metadata {
   display: grid;
   grid-template-columns: 1fr;
@@ -362,7 +362,6 @@ Navigation arrows between stories.
 [data-theme="dark"] .story-nav-arrow svg path {
   fill: #ffffff;
 }
-
 
 [data-theme="dark"] .connections-canvas {
   background-color: #514c80;
@@ -732,12 +731,6 @@ Uses cream background with dashed border and flexible layout.
     padding-block: 1.5rem;
   }
 
-  .story-finding {
-    font-size: 1.22222rem;
-    width: 100%;
-    margin-bottom: 2rem;
-  }
-
   .story-metadata-item {
     font-size: 1rem;
   }
@@ -779,9 +772,5 @@ Uses cream background with dashed border and flexible layout.
 
   .related-stories-grid {
     grid-template-columns: 1fr;
-  }
-
-  .story-finding {
-    font-size: 1.11111rem;
   }
 }

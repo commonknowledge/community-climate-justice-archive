@@ -1,9 +1,37 @@
 body {
+  font-size: 1.5rem;
+  line-height: 140%;
+  letter-spacing: -0.02em;
   font-family: "Times New Roman", serif; /* Serif font */
-  /* 4. Add accessible line-height */
-  line-height: 1.5;
-  /* 5. Improve text rendering */
   -webkit-font-smoothing: antialiased;
+}
+
+.body-lg {
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+
+  @media (min-width: 1040px) {
+    font-size: 2rem;
+    line-height: 115%;
+  }
+}
+
+.body-sans-lg,
+.dashed-button {
+  font-weight: 400;
+  font-family: Arial, sans-serif; /* Sans-serif font */
+  font-size: 1.375rem;
+  line-height: 140%;
+  letter-spacing: -0.01em;
+}
+
+.h2 {
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 115%;
+  letter-spacing: -0.02em;
 }
 
 /* ============================================================================
@@ -182,14 +210,10 @@ A button with a dashed border for navigation and actions.
   border: 2px dashed var(--black);
   color: var(--black);
   display: flex;
-  font-family: Arial;
-  font-size: 1.22222rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.55556rem;
   justify-content: center;
-  letter-spacing: -0.01222rem;
-  line-height: 140%;
   padding: 0.27778rem 0.55556rem;
   text-decoration: none;
   width: max-content;

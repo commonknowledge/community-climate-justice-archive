@@ -4,16 +4,14 @@
   align-items: flex-start;
   gap: 0.25rem;
   max-width: 48ch;
-  font-size: 1.77778rem;
-  line-height: normal;
-  letter-spacing: -0.64px;
 }
 
 .text-rotation__label {
   display: inline-block;
   background-color: var(--highlight-yellow);
-  color: #000;
+  color: black;
   font-style: italic;
+  font-size: inherit;
   font-weight: 400;
   padding: 0.27778rem;
   margin: 0;
