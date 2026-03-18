@@ -84,9 +84,9 @@ graph TB
         ASSETS[internal/generate/assets.go<br/>Processes images]
     end
     
-    subgraph "Store Layer - The Adapter"
-        ADAPTER[internal/store/adapter.go<br/>Defines how to fetch data]
-        NOCODB[internal/store/nocodb_adapter.go<br/>Talks to NocoDB]
+    subgraph "Store Layer"
+        STORE[internal/store/store.go<br/>Data access and filtering]
+        NOCODB[internal/nocodb/client.go<br/>NocoDB API + caching]
     end
     
     subgraph "Data Layer"
@@ -100,8 +100,8 @@ graph TB
     
     CMD --> GEN
     CMD --> ASSETS
-    GEN --> ADAPTER
-    ADAPTER --> NOCODB
+    GEN --> STORE
+    STORE --> NOCODB
     NOCODB --> TYPES
     TYPES --> STORY
     GEN --> TMPL
@@ -109,7 +109,7 @@ graph TB
     style CMD fill:#ffebee
     style GEN fill:#e1f5ff
     style ASSETS fill:#e1f5ff
-    style ADAPTER fill:#fff9c4
+    style STORE fill:#fff9c4
     style NOCODB fill:#fff9c4
     style TYPES fill:#e8f5e9
     style STORY fill:#e8f5e9
@@ -144,36 +144,11 @@ flowchart TD
     style Done fill:#e8f5e9
 ```
 
-### The Store Layer: The Adapter Pattern
+### The Store Layer
 
-The store layer is like a translator. The rest of the code just asks "give me stories" and doesn't need to know if they're coming from NocoDB, SQLite, or anywhere else.
+The `internal/store` package is a single place for data access and filtering. It uses the NocoDB client under the hood, then exposes archive-focused functions like `GetAllStories()`, `GetThemes()`, and `GetStoriesForTheme()`.
 
-**Why we have this:**
-- We can swap NocoDB for SQLite later without rewriting everything
-- The code is cleaner because fetching data is separate from displaying it
-- Testing is easier because we can create fake adapters
-
-```go
-// The interface - what the adapter promises to do
-type DataAdapter interface {
-    GetAllStories() ([]data.Story, error)
-    GetStoryByID(id string) (data.Story, error)
-    GetStoriesForTheme(theme string) ([]data.Story, error)
-    // ... and so on
-}
-
-// The NocoDB version - how we do it right now
-type NocoDBAdapter struct {
-    client *nocodb.Client
-}
-
-// In the future, we might have:
-type SQLiteAdapter struct {
-    db *sql.DB
-}
-```
-
-The rest of the code just uses `GetAdapter()` and doesn't care which adapter it is.
+This keeps generation code simple because page builders can ask the store for exactly the data they need without handling NocoDB API details directly.
 
 ### How Stories Get Transformed
 
@@ -266,7 +241,7 @@ graph TB
     OTHER --> CSS
     
     CSS[Copy CSS to out/] --> DONE{Development mode?}
-    DONE -->|Yes -d flag| SERVER[Start local server<br/>http://localhost:8080<br/>Watch for template changes]
+    DONE -->|Yes -d flag| SERVER[Start local server<br/>http://localhost:8080<br/>Press Enter to regenerate templates<br/>Watch CSS for copy-on-change]
     DONE -->|No| FINISH([Done! Website in out/ folder])
     
     style START fill:#e8f5e9
@@ -281,8 +256,8 @@ graph TB
 **Development Mode** (`-d` flag):
 - Builds the website
 - Starts a local web server on http://localhost:8080
-- Watches for template changes
-- Press Enter to regenerate pages
+- Watches CSS for changes and copies it automatically
+- Press Enter to regenerate pages after template/content changes
 - Perfect for testing changes quickly
 
 **Production Mode** (no flags):
@@ -299,8 +274,8 @@ If you need to make changes, here's where to look:
 |------|-------------|
 | `cmd/archive/main.go` | Entry point - starts everything |
 | `internal/config/config.go` | Loads settings from .env |
-| `internal/store/adapter.go` | Defines the adapter interface |
-| `internal/store/nocodb_adapter.go` | NocoDB implementation |
+| `internal/store/store.go` | Story retrieval, filtering, and taxonomy helpers |
+| `internal/nocodb/client.go` | NocoDB API client and cache handling |
 | `internal/nocodb/types.go` | Translates NocoDB → Go structs |
 | `data/story.go` | Main Story struct & helpers |
 | `data/tags.go` | Theme, Type, Weather structs |
@@ -319,7 +294,7 @@ If you need to make changes, here's where to look:
 **Want to add a new page type?**
 1. Create a template in `templates/`
 2. Add a generation function in `internal/generate/generate.go`
-3. Call it from `cmd/archive/main.go` in both `generateArchive()` and `hotRegenerate()`
+3. Call it from `generateArchive()` in `cmd/archive/main.go`
 
 **Want to change how pages look?**
 - Edit `css/styles.css` for styling
@@ -640,7 +615,7 @@ type StoryData struct {
 Run the field analysis utility to verify the field shows as `FULLY_MAPPED`:
 
 ```bash
-go run cmd/analyze-api-fields/main.go
+go run utilities/analyze-api-fields/main.go
 ```
 
 The field should appear with `processing_category: "standard"` and `status: "FULLY_MAPPED"` if properly integrated.
@@ -789,17 +764,17 @@ Add the field display using the tag pattern:
 ```
 
 #### 7. Add Store Functions
-**File**: `internal/store/` (add to appropriate adapter file)
+**File**: `internal/store/store.go`
 
 Add functions to retrieve and filter by the new field:
 
 ```go
-func (s *SQLiteAdapter) GetNewFieldTypes() []data.NewFieldType {
+func GetNewFieldTypes() []data.NewFieldType {
     // Get all unique values for the new field
     // Similar to GetThemes(), GetTypes(), GetWeather()
 }
 
-func (s *SQLiteAdapter) GetStoriesForNewFieldType(fieldValue string) ([]data.Story, error) {
+func GetStoriesForNewFieldType(fieldValue string) []data.Story {
     // Filter stories by the new field value
     // Similar to GetStoriesForTheme(), GetStoriesForType(), GetStoriesForWeather()
 }
@@ -878,7 +853,7 @@ Ensure the new field tags have consistent styling with existing tags:
 #### 11. Integrate Index Generation into Main Build Process
 **File**: `cmd/archive/main.go`
 
-Add calls to your new index generation functions in both `generateArchive()` and `hotRegenerate()` functions:
+Add a call to your new index generation function in `generateArchive()`:
 
 ```go
 // In generateArchive() function, after WriteWeatherIndexes():
@@ -886,10 +861,6 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
     return fmt.Errorf("failed to write new field indexes: %v", err)
 }
 
-// In hotRegenerate() function, after WriteWeatherIndexes():
-if err := generate.WriteNewFieldIndexPages(); err != nil {
-    return fmt.Errorf("failed to write new field indexes: %v", err)
-}
 ```
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
@@ -900,7 +871,7 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
 
 **Status: DEPRECATED - No longer needed**
 
-The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
+The `utilities/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
 
 **Important Notes:**
 - The tool is **idempotent** and safe to run multiple times
@@ -910,7 +881,7 @@ The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy
 
 **Usage (if needed):**
 ```bash
-go build -o consolidate-image-fields ./cmd/consolidate-image-fields
+go build -o consolidate-image-fields ./utilities/consolidate-image-fields
 ./consolidate-image-fields --checksum  # Verify consolidation is complete
 ```
 
