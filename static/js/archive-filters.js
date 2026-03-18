@@ -826,14 +826,6 @@ class ArchiveFilters {
         }
     }
     
-    updateSelectFromFilters(dropdownType, filterValues) {
-        // This method is now handled by updateDropdownDisplay()
-        // but we keep it for compatibility with loadFiltersFromURL
-        if (this.filterData) {
-            this.updateDropdownDisplay();
-        }
-    }
-    
     showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'filter-error';
