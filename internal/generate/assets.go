@@ -46,6 +46,11 @@ var ImageSizes = map[string]int{
 	"large":  1200, // full size
 }
 
+// copyFileIfChanged copies one file only when the destination is missing or stale.
+//
+// This keeps rebuilds fast because unchanged assets do not get rewritten on every
+// run. When we do copy a file, we also preserve the source modification time so
+// the next build can make the same freshness check reliably.
 func copyFileIfChanged(sourcePath string, destinationPath string) (bool, error) {
 	sourceInfo, err := os.Stat(sourcePath)
 	if err != nil {
@@ -84,7 +89,13 @@ func copyFileIfChanged(sourcePath string, destinationPath string) (bool, error) 
 
 	// Preserve source timestamps so future incremental copies can compare accurately.
 	if err := os.Chtimes(destinationPath, sourceInfo.ModTime(), sourceInfo.ModTime()); err != nil {
-		log.Printf("Warning: failed to preserve timestamps for %s: %v", destinationPath, err)
+		log.Printf(
+			"Warning: copied %s to %s but could not preserve the source timestamp (%s): %v",
+			sourcePath,
+			destinationPath,
+			sourceInfo.ModTime().Format(time.RFC3339),
+			err,
+		)
 	}
 
 	return true, nil
@@ -103,6 +114,10 @@ func getProcessedImagePaths(srcPath string) []string {
 	return paths
 }
 
+// isOutputUpToDate reports whether one generated file is at least as new as its source.
+//
+// We use this small helper in both image processing and asset copying so the
+// build can skip work that has already been done.
 func isOutputUpToDate(outputPath string, sourceModTime time.Time) bool {
 	outputInfo, err := os.Stat(outputPath)
 	if err != nil {
@@ -113,6 +128,8 @@ func isOutputUpToDate(outputPath string, sourceModTime time.Time) bool {
 	return !outputInfo.ModTime().Before(sourceModTime)
 }
 
+// areProcessedImagesUpToDate checks whether every expected WebP derivative exists
+// and is newer than the original source image.
 func areProcessedImagesUpToDate(srcPath string) bool {
 	sourceInfo, err := os.Stat(srcPath)
 	if err != nil {
@@ -186,6 +203,10 @@ func CopyCSSToOutput() error {
 	return nil
 }
 
+// readImage opens an image file and decodes it into Go's generic image type.
+//
+// The archive only processes JPEG and PNG source files, so unsupported formats
+// are rejected here with a clear error before any resize work starts.
 func readImage(srcPath string) (image.Image, error) {
 	file, err := os.Open(srcPath)
 	if err != nil {
@@ -295,6 +316,11 @@ func compressImage(srcPath string) error {
 	return nil
 }
 
+// ProcessImages updates the generated WebP image set in place.
+//
+// It only reprocesses source files whose derived outputs are missing or older
+// than the source image, then logs a full summary so it is obvious how much work
+// the build actually had to do.
 func ProcessImages() error {
 	log.Println("Starting image processing process")
 

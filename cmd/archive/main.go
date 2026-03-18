@@ -35,11 +35,16 @@ import (
 
 const localDevServerURL = "http://localhost:8080"
 
+// buildTask pairs a short label with the work function for one build step.
 type buildTask struct {
 	name string
 	run  func() error
 }
 
+// runBuildTasks launches a group of independent build steps in parallel.
+//
+// Each task writes its own output files, so we can safely run them concurrently
+// and then return the first error that came back from the group.
 func runBuildTasks(tasks []buildTask) error {
 	if len(tasks) == 0 {
 		return nil
@@ -52,6 +57,7 @@ func runBuildTasks(tasks []buildTask) error {
 		task := task
 		wg.Add(1)
 
+		// Each task runs in its own goroutine so unrelated build work can happen at once.
 		go func() {
 			defer wg.Done()
 			if err := task.run(); err != nil {
