@@ -203,42 +203,7 @@
   }
 }
 
-.text-rotation__label {
-  display: inline-block;
-  background-color: var(--highlight-yellow);
-  color: #000;
-  font-size: 1.77778rem;
-  font-weight: 400;
-  font-style: italic;
-  line-height: normal;
-  letter-spacing: -0.64px;
-  padding: 0.27778rem;
-  margin: 0 0 0.27778rem;
-}
 
-.text-rotation__items {
-  display: grid;
-  padding: 0;
-  list-style: none;
-}
-
-.text-rotation__item {
-  /* stack the items on top of each other in the same grid cell */
-  grid-column: 1;
-  grid-row: 1;
-
-  font-size: 1.77778rem;
-  font-weight: 400;
-  line-height: normal;
-  letter-spacing: -0.64px;
-  margin: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.text-rotation__item.hidden {
-  visibility: hidden;
-  opacity: 0;
-}
 
 /* .about-category
    Category sections (Gifts, Co-creators, etc.) */
