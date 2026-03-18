@@ -213,9 +213,13 @@ All metadata items for a story.
 */
 .story-metadata {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.11111rem;
   width: 100%;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .story-metadata-item-group {
@@ -283,9 +287,14 @@ The related stories section.
   display: flex;
   flex-direction: column;
   gap: 6.66667rem;
-  padding-left: 2.22222rem;
-  padding-right: 2.22222rem;
+  padding-inline: 1.11111rem;
   margin-bottom: 6.66667rem;
+  width: 100%;
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    padding-inline: 2.22222rem;
+  }
 }
 
 /* Related Story Image
@@ -303,9 +312,13 @@ Thumbnail images for related stories.
 A grid of related stories.
 */
 .related-stories {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5.56rem;
+  display: flex;
+  gap: 2rem;
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    gap: 5.56rem;
+  }
 }
 
 /* Related Story Item
@@ -594,6 +607,12 @@ Uses cream background with dashed border and flexible layout.
   padding-bottom: 60px;
   margin-left: 2.22222rem;
   margin-right: 2.22222rem;
+
+  @media (max-width: 768px) {
+    padding-left: 1.11111rem;
+    padding-right: 1.11111rem;
+    gap: 3.33333rem;
+  }
 }
 
 .story-connections-section {
@@ -691,12 +710,6 @@ Uses cream background with dashed border and flexible layout.
 }
 
 @media (max-width: 768px) {
-  .story-connections {
-    padding-left: 1.11111rem;
-    padding-right: 1.11111rem;
-    gap: 3.33333rem;
-  }
-
   .story-connections-grid {
     flex-direction: column;
     gap: 1.11111rem;
@@ -747,23 +760,12 @@ Uses cream background with dashed border and flexible layout.
     margin-bottom: 2rem;
   }
 
-  .story-metadata {
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
   .story-metadata-item {
     font-size: 1rem;
   }
 
   .story-metadata-item-label {
     font-size: 0.77778rem;
-  }
-
-  /* Related stories */
-  .related-stories {
-    margin-left: 1.11111rem;
-    margin-right: 1.11111rem;
   }
 
   .related-stories-grid {
@@ -791,7 +793,6 @@ Uses cream background with dashed border and flexible layout.
   }
 }
 
-
 @media (max-width: 480px) {
   /* Single column grid on very small screens */
   .stories-list {
@@ -802,9 +803,7 @@ Uses cream background with dashed border and flexible layout.
     grid-template-columns: 1fr;
   }
 
-
   .story-finding {
     font-size: 1.11111rem;
   }
-
 }

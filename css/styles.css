@@ -34,47 +34,7 @@
 @import "_filters.css";
 @import "_stories.css";
 @import "_tags.css";
-@import "_what-if-rotation.css";
 
 /* Pages */
 @import "_about-page.css";
 @import "_homepage.css";
-
-
-/* ============================================================================
-   SMALL MOBILE BREAKPOINT (max-width: 480px)
-   ============================================================================ */
-
-@media (max-width: 480px) {
-  /* Single column grid on very small screens */
-  .stories-list {
-    grid-template-columns: 1fr !important;
-  }
-
-  .related-stories-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Smaller typography */
-  .archive-header-title {
-    font-size: 1.33333rem;
-  }
-
-  .wander-through-archive-header {
-    font-size: 1.55556rem;
-  }
-
-  .story-finding {
-    font-size: 1.11111rem;
-  }
-
-  /* Mobile menu links smaller */
-  .mobile-menu-link {
-    font-size: 1.33333rem;
-  }
-
-  /* Filter dropdowns full width */
-  .filter-dropdown-content {
-    max-height: 50vh;
-  }
-}

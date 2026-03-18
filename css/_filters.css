@@ -437,7 +437,7 @@ Shows currently applied filters as removable tags below the filter controls.
   position: sticky;
   top: 5.88889rem;
   z-index: 100;
-  padding: 1.66667rem 2.22222rem;
+  padding:  1.11111rem;
   padding-top: 0;
 }
 
