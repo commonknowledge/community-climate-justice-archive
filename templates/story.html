@@ -19,11 +19,12 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <title>{{.Title}} - A story in the Dudley People's School for Climate Justice</title>
+    {{ template "head" .}}
+
+    <title>{{.Title}} - A story in the Dudley Time Portal</title>
     <meta name="description" content="{{.Description}}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/styles.css">
-{{template "theme-init" .}}
+
+    {{template "theme-init" .}}
 </head>
 
 <body>
