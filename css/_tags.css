@@ -103,10 +103,7 @@ a.tag {
 
 Tags within theme and type index headers.
 */
-.theme-index-header .tag,
-.type-index-header .tag,
-.weather-index-header .tag {
+.h2 .tag {
   display: inline-block;
   margin-right: 1rem;
 }
-

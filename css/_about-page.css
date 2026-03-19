@@ -12,23 +12,6 @@
   padding-bottom: 6.66667rem;
 }
 
-/* .about-title
-   Main page heading "About the project" */
-.about-title {
-  color: var(--black);
-  font-family: "Times New Roman", serif;
-  font-size: 52px;
-  font-weight: 400;
-  line-height: normal;
-  letter-spacing: -1.04px;
-  margin-top: 40px;
-  margin-bottom: 1.66667rem;
-
-  @media (max-width: 600px) {
-    font-size: 2.5rem;
-  }
-}
-
 /* .about-layout
    Two-column layout: sticky sidebar + main content */
 .about-layout {

@@ -163,15 +163,3 @@ header h1 a:hover {
     display: inline-flex;
   }
 }
-
-header h1 {
-  @media (max-width: 768px) {
-    font-size: 22px;
-  }
-}
-
-.mobile-menu-link {
-  @media (max-width: 480px) {
-    font-size: 1.33333rem;
-  }
-}
