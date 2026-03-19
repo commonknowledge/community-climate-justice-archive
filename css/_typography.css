@@ -87,14 +87,11 @@ header h1 a:hover::before {
 [data-theme="dark"] .footer-content a:hover,
 [data-theme="dark"] header h1 a:hover {
   color: #000;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .story-finding a:hover,
-  :root:not([data-theme="light"]) .story-metadata a:not(.tag):hover,
-  :root:not([data-theme="light"]) .footer-content a:hover,
-  :root:not([data-theme="light"]) header h1 a:hover {
-    color: #000;
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      color: #000;
+    }
   }
 }
 
@@ -142,6 +139,16 @@ header h1 a:hover::before {
   line-height: normal;
   letter-spacing: -1.04px !important; /* Proportionally tighter */
   margin-bottom: 1.66667rem; /* 30px spacing below */
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.55556rem;
+  }
 }
 
 .archive-header-title {
@@ -152,31 +159,18 @@ header h1 a:hover::before {
   line-height: 1;
   margin: 0;
   letter-spacing: -0.05778rem;
-}
 
-@media (max-width: 768px) {
-  .archive-header-title {
+  @media (max-width: 768px) {
     font-size: 1.55556rem;
   }
 
-  .wander-through-archive-header {
-    font-size: 2rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Smaller typography */
-  .archive-header-title {
+  @media (max-width: 480px) {
     font-size: 1.33333rem;
   }
+}
 
-  .wander-through-archive-header {
-    font-size: 1.55556rem;
-  }
-
-  .story-finding {
+.story-finding {
+  @media (max-width: 480px) {
     font-size: 1.25rem;
   }
 }

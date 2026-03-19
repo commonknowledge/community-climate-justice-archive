@@ -34,6 +34,29 @@
   --shadow-scroll-thumb-hover: rgba(0, 0, 0, 0.5);
   --shadow-text: rgba(0, 0, 0, 0.5);
   --shadow-heavy: #00000040;
+
+  @media (prefers-color-scheme: dark) {
+    &:not([data-theme="light"]) {
+      --background: #080339;
+      --white: #1a1a2e;
+      --highlight-yellow: #ffff99;
+      --black: #fff;
+      --white-text: #fff;
+      --gray-text: #aaa;
+      --black-alt: #ffffff;
+      --border-color: #fff;
+      --shadow-light: rgba(255, 255, 255, 0.05);
+      --shadow-medium: rgba(255, 255, 255, 0.08);
+      --shadow-dark: rgba(255, 255, 255, 0.1);
+      --shadow-darker: rgba(255, 255, 255, 0.12);
+      --shadow-darkest: rgba(255, 255, 255, 0.15);
+      --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+      --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+      --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+      --shadow-text: rgba(255, 255, 255, 0.5);
+      --shadow-heavy: rgba(0, 0, 0, 0.4);
+    }
+  }
 }
 
 /* ============================================================================
@@ -67,25 +90,3 @@
 }
 
 /* When no explicit preference is set, respect OS-level setting */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #080339;
-    --white: #1a1a2e;
-    --highlight-yellow: #ffff99;
-    --black: #fff;
-    --white-text: #fff;
-    --gray-text: #aaa;
-    --black-alt: #ffffff;
-    --border-color: #fff;
-    --shadow-light: rgba(255, 255, 255, 0.05);
-    --shadow-medium: rgba(255, 255, 255, 0.08);
-    --shadow-dark: rgba(255, 255, 255, 0.1);
-    --shadow-darker: rgba(255, 255, 255, 0.12);
-    --shadow-darkest: rgba(255, 255, 255, 0.15);
-    --shadow-scroll-track: rgba(255, 255, 255, 0.05);
-    --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
-    --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
-    --shadow-text: rgba(255, 255, 255, 0.5);
-    --shadow-heavy: rgba(0, 0, 0, 0.4);
-  }
-}

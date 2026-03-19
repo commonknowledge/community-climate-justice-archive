@@ -10,10 +10,9 @@
   box-sizing: border-box;
 }
 
-
 /* 3. Enable keyword animations */
-@media (prefers-reduced-motion: no-preference) {
-  html {
+html {
+  @media (prefers-reduced-motion: no-preference) {
     interpolate-size: allow-keywords;
   }
 }

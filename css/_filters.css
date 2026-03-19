@@ -164,6 +164,11 @@ Shows currently applied filters as removable tags below the filter controls.
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55556rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .active-filters-label {
@@ -172,6 +177,11 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   font-weight: 400;
   margin-right: 0.55556rem;
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+    margin-bottom: 0.33333rem;
+  }
 }
 
 .active-filters-list {
@@ -278,6 +288,11 @@ Shows currently applied filters as removable tags below the filter controls.
   background: var(--background);
   border: 2px dashed var(--black); /* Matches filter dropdowns */
   text-align: center;
+
+  @media (max-width: 768px) {
+    min-height: 15rem;
+    padding: 1.25rem;
+  }
 }
 
 /* .no-results-content h3
@@ -288,6 +303,10 @@ Shows currently applied filters as removable tags below the filter controls.
   font-weight: 400; /* Regular weight */
   margin-bottom: 1.25rem;
   color: var(--black);
+
+  @media (max-width: 768px) {
+    font-size: 1.33333rem;
+  }
 }
 
 /* .no-results-content p
@@ -328,71 +347,18 @@ Shows currently applied filters as removable tags below the filter controls.
   margin-top: 2.5rem;
 }
 
-/* Responsive Filter Layout */
-@media (max-width: 768px) {
-  .archive-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .archive-filters-container {
-    padding: 1rem 0;
-  }
-
-  .archive-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-dropdown {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .filter-dropdown-content {
-    max-height: 300px;
-  }
-
-  .filter-tag-option {
-    font-size: 1.25rem;
-    padding: 0.33333rem 0.55556rem;
-  }
-
-  .filter-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.55556rem;
-    width: 100%;
-  }
-
-  .active-filters {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .active-filters-label {
-    margin-right: 0;
-    margin-bottom: 0.33333rem;
-  }
-
-  .no-results {
-    min-height: 15rem;
-    padding: 1.25rem;
-  }
-
-  .no-results-content h3 {
-    font-size: 1.33333rem;
-  }
-}
-
 /* Archive Header with Count and Clear Filters */
 .archive-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 2rem;
   padding-top: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
 
 .clear-filters-button-top {
@@ -431,6 +397,10 @@ Shows currently applied filters as removable tags below the filter controls.
   z-index: 100;
   padding:  1.25rem 0;
   padding-top: 0;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
 }
 
 /* Archive Filters */
@@ -440,6 +410,11 @@ Shows currently applied filters as removable tags below the filter controls.
   align-items: center;
   margin: 0 0 1.25rem 0;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .filter-actions {
@@ -447,6 +422,14 @@ Shows currently applied filters as removable tags below the filter controls.
   align-items: center;
   gap: 1rem;
   margin-left: auto;
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.55556rem;
+    width: 100%;
+  }
 }
 
 .clear-filters-button {
@@ -484,6 +467,11 @@ Shows currently applied filters as removable tags below the filter controls.
 .filter-dropdown {
   position: relative;
   display: inline-block;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+    width: 100%;
+  }
 }
 
 .filter-dropdown-button {
@@ -527,6 +515,14 @@ Shows currently applied filters as removable tags below the filter controls.
   z-index: 1000;
   top: 100%;
   left: 0;
+
+  @media (max-width: 768px) {
+    max-height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 50vh;
+  }
 }
 
 .filter-dropdown.open .filter-dropdown-content {
@@ -541,6 +537,11 @@ Shows currently applied filters as removable tags below the filter controls.
   font-family: Arial;
   font-size: 1rem;
   border-bottom: 1px solid var(--border-gray);
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+    padding: 0.33333rem 0.55556rem;
+  }
 }
 
 .filter-tag-option:hover {
@@ -549,11 +550,4 @@ Shows currently applied filters as removable tags below the filter controls.
 
 .filter-tag-option.selected {
   background-color: var(--light-blue);
-}
-
-@media (max-width: 480px) {
-  /* Filter dropdowns full width */
-  .filter-dropdown-content {
-    max-height: 50vh;
-  }
 }

@@ -73,11 +73,11 @@ header h1 a:hover {
 /* In dark mode, active nav buttons with yellow highlight need black text for contrast */
 [data-theme="dark"] .dashed-button[style*="background-color"] {
   color: #000;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .dashed-button[style*="background-color"] {
-    color: #000;
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      color: #000;
+    }
   }
 }
 
@@ -113,12 +113,11 @@ header h1 a:hover {
   flex-direction: column;
   padding: 1.25rem;
   overflow-y: auto;
-}
 
-/* Only open on mobile — never show on desktop regardless of JS state */
-@media (max-width: 768px) {
-  .mobile-menu-overlay.is-open {
-    display: flex;
+  @media (max-width: 768px) {
+    &.is-open {
+      display: flex;
+    }
   }
 }
 
@@ -153,24 +152,26 @@ header h1 a:hover {
   border-style: solid;
 }
 
-@media (max-width: 768px) {
-  /* Header - Show menu button, hide desktop nav */
-  .header-nav-desktop {
+.header-nav-desktop {
+  @media (max-width: 768px) {
     display: none;
   }
+}
 
-  .mobile-menu-toggle {
+.mobile-menu-toggle {
+  @media (max-width: 768px) {
     display: inline-flex;
   }
-  
-  header h1 {
+}
+
+header h1 {
+  @media (max-width: 768px) {
     font-size: 22px;
   }
 }
 
-@media (max-width: 480px) {
-  /* Mobile menu links smaller */
-  .mobile-menu-link {
+.mobile-menu-link {
+  @media (max-width: 480px) {
     font-size: 1.33333rem;
   }
 }

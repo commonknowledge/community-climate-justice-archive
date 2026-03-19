@@ -30,11 +30,34 @@ Inspired by Quake console, using existing design elements.
   gap: 0.55556rem;
   max-width: 100vw;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 0.33333rem 0.55556rem;
+    font-size: 0.77778rem;
+    gap: 0.33333rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.66667rem;
+    gap: 0.22222rem;
+  }
 }
 
 .debug-item {
   color: #ccc;
   white-space: nowrap;
+
+  @media (max-width: 768px) {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .debug-item strong {
@@ -64,37 +87,8 @@ Inspired by Quake console, using existing design elements.
   color: #888;
   font-size: 0.77778rem;
   margin-left: auto;
-}
 
-/* Mobile responsiveness for debug console */
-@media (max-width: 768px) {
-  .debug-console-content {
-    padding: 0.33333rem 0.55556rem;
-    font-size: 0.77778rem;
-    gap: 0.33333rem;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .debug-close {
+  @media (max-width: 768px) {
     display: none;
-  }
-
-  .debug-item {
-    flex-shrink: 0;
-  }
-}
-
-/* Handle very long content gracefully */
-@media (max-width: 480px) {
-  .debug-console-content {
-    font-size: 0.66667rem;
-    gap: 0.22222rem;
-  }
-
-  .debug-item {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }

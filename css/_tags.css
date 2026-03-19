@@ -14,6 +14,10 @@
   flex-wrap: wrap; /* Tags wrap to new lines */
   gap: 10px; /* 10px between each tag */
   list-style-type: none; /* No bullets */
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
 }
 
 /* .tag-list-container
@@ -47,6 +51,11 @@ ul.tag-list {
   text-decoration: none;
   text-transform: lowercase;
   width: fit-content;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.27778rem 0.5rem;
+  }
 }
 
 /* .tag:hover
@@ -101,14 +110,3 @@ Tags within theme and type index headers.
   margin-right: 1rem;
 }
 
-@media (max-width: 768px) {
-  /* Tag lists */
-  .tag-list {
-    gap: 0.5rem;
-  }
-
-  .tag {
-    font-size: 1rem;
-    padding: 0.27778rem 0.5rem;
-  }
-}
