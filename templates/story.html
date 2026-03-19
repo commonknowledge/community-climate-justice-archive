@@ -442,7 +442,7 @@
                         
                         {{if and $attachment.URL $attachment.IsImage}}
                             <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}">
+                        <a href="{{$story.URL}}" class="related-story-link">
                             <img 
                                 class="related-story-image" 
                                     src="{{$attachment.ThumbURL}}" 
@@ -521,7 +521,7 @@
                         
                         {{if and $attachment.URL $attachment.IsImage}}
                             <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}">
+                        <a href="{{$story.URL}}" class="related-story-link">
                             <img 
                                 class="related-story-image" 
                                     src="{{$attachment.ThumbURL}}" 
@@ -600,7 +600,7 @@
                         
                         {{if and $attachment.URL $attachment.IsImage}}
                             <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}">
+                        <a href="{{$story.URL}}" class="related-story-link">
                             <img 
                                 class="related-story-image" 
                                     src="{{$attachment.ThumbURL}}" 

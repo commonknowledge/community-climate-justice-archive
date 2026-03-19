@@ -35,7 +35,7 @@
   background: var(--background);
   border: 2px dashed var(--black); /* Dashed = not active */
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem; /* 22px */
+  font-size: 1.375rem; /* 22px */
   font-weight: 400;
   color: var(--black);
   padding: 0.27778rem 0.55556rem; /* 5px 10px */
@@ -105,7 +105,7 @@
   border: none;
   cursor: pointer;
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   letter-spacing: -0.01222rem;
   text-transform: lowercase;
@@ -148,7 +148,7 @@
 
 .filter-count {
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   color: var(--gray-text);
   text-align: center;
   line-height: 1.2;
@@ -199,7 +199,7 @@ Shows currently applied filters as removable tags below the filter controls.
   display: inline-flex;
   align-items: center;
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem; /* 16px - slightly smaller than body */
+  font-size: 1rem; /* 16px - slightly smaller than body */
   padding: 0.22222rem 0.44444rem; /* 4px 8px */
   gap: 0.33333rem; /* Space between text and × */
   border: none;
@@ -254,7 +254,7 @@ Shows currently applied filters as removable tags below the filter controls.
 .filter-loading {
   display: none; /* Hidden by default */
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   color: var(--gray-text);
   text-align: center;
   padding: 1.25rem;
@@ -299,13 +299,13 @@ Shows currently applied filters as removable tags below the filter controls.
    "No stories found" heading */
 .no-results-content h3 {
   font-family: Arial, sans-serif;
-  font-size: 1.66667rem; /* 30px - prominent */
+  font-size: 2rem; /* 32px - prominent */
   font-weight: 400; /* Regular weight */
   margin-bottom: 1.25rem;
   color: var(--black);
 
   @media (max-width: 768px) {
-    font-size: 1.33333rem;
+    font-size: 1.375rem;
   }
 }
 
@@ -371,7 +371,7 @@ Shows currently applied filters as removable tags below the filter controls.
   align-items: center;
   gap: 0.27778rem;
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   text-decoration: underline;
   padding: 0.27778rem 0.55556rem;
   letter-spacing: -0.01222rem;
@@ -386,7 +386,7 @@ Shows currently applied filters as removable tags below the filter controls.
 }
 
 .clear-filters-icon {
-  font-size: 1.33333rem;
+  font-size: 1.375rem;
   font-weight: bold;
 }
 
@@ -439,7 +439,7 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   display: flex;
   font-family: Arial;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.55556rem;
@@ -481,7 +481,7 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   display: flex;
   font-family: Arial;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.55556rem;

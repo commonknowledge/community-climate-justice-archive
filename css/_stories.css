@@ -24,6 +24,15 @@ A responsive 3-column layout for stories.
     minmax(min(100%, calc((100% - 11.11112rem) / 3)), 1fr)
   );
   gap: 5.55556rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.25rem !important;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* Homepage Stories
@@ -127,7 +136,7 @@ Document download display for main story attachments, centered between navigatio
 }
 
 .story-document .download-link {
-  font-size: 1.2rem;
+  font-size: 1.375rem;
   padding: 0.5rem 1rem;
   border: 2px solid var(--border-color);
   text-decoration: none;
@@ -168,7 +177,7 @@ Discrete display when story has no attached media, centered and subtle.
 
 .story-no-attachments p {
   font-family: "Times New Roman", serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   line-height: 140%;
   letter-spacing: -0.02rem;
@@ -187,6 +196,12 @@ The main content and metadata for a story.
   gap: 60px;
   margin-block: 60px;
   padding-block: 60px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin-block: 1.5rem;
+    padding-block: 1.5rem;
+  }
 }
 
 /* Story Finding
@@ -232,7 +247,7 @@ A single metadata item with label and value.
   display: flex;
   flex-direction: column;
   font-family: Arial;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.27778rem;
@@ -246,7 +261,7 @@ A single metadata item with label and value.
 Labels for metadata fields (e.g., "Date", "Location").
 */
 .story-metadata-item-label {
-  font-size: 0.88889rem;
+  font-size: 1rem;
   color: var(--shadow-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -272,7 +287,7 @@ Tag-based metadata like themes and types.
 }
 
 .story-metadata-item-value.tags .tag {
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
 }
 
 /* Related Stories Container
@@ -283,12 +298,12 @@ The related stories section.
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  margin-bottom: 4.4444rem;
+  margin-bottom: 4rem;
   overflow: hidden;
 
   @media (min-width: 768px) {
-    gap: 6.66667rem;
-    margin-bottom: 6.66667rem;
+    gap: 7.5rem;
+    margin-bottom: 7.5rem;
   }
 }
 
@@ -298,7 +313,7 @@ Thumbnail images for related stories.
 */
 .related-story-image {
   height: auto;
-  max-width: 8.33333rem;
+  max-width: 8.5rem;
   object-fit: cover;
 }
 
@@ -314,7 +329,9 @@ A grid of related stories.
   min-width: 100%;
 
   @media (min-width: 768px) {
-    gap: 5.56rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    overflow: hidden;
   }
 }
 
@@ -331,7 +348,7 @@ A single related story in the grid.
 Navigation arrows between stories.
 */
 .story-nav-arrow {
-  padding: 0 1.82rem;
+  padding: 0 2rem;
   flex-shrink: 0;
 
   [data-theme="dark"] & svg path {
@@ -445,7 +462,7 @@ Uses cream background with dashed border and flexible layout.
 
 .story-nav-label {
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.01222rem;
@@ -458,16 +475,12 @@ Uses cream background with dashed border and flexible layout.
 
 .story-nav-title {
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.00889rem;
   margin: 0.22222rem 0 0 0;
   opacity: 0.7;
-
-  @media (max-width: 768px) {
-    font-size: 0.77778rem;
-  }
 }
 
 .story-popup {
@@ -531,7 +544,7 @@ Uses cream background with dashed border and flexible layout.
 .story-popup-text-finding-content {
   font-family: Times New Roman;
   font-weight: 400;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 140%;
   letter-spacing: -2%;
   color: var(--black);
@@ -591,7 +604,7 @@ Uses cream background with dashed border and flexible layout.
 .story-connections-title {
   color: var(--black);
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.01222rem;
@@ -657,7 +670,7 @@ Uses cream background with dashed border and flexible layout.
 
 .big-button-title {
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.01222rem;
@@ -677,7 +690,7 @@ Uses cream background with dashed border and flexible layout.
 
 .big-button-description {
   font-family: "Times New Roman", serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.01778rem;
@@ -691,17 +704,6 @@ Uses cream background with dashed border and flexible layout.
   text-overflow: ellipsis;
 }
 
-.stories-list {
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1.25rem !important;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr !important;
-  }
-}
-
 .story-content {
   @media (max-width: 768px) {
     flex-direction: column;
@@ -711,26 +713,6 @@ Uses cream background with dashed border and flexible layout.
 .story-hero {
   @media (max-width: 768px) {
     max-width: 100%;
-  }
-}
-
-.story-details {
-  @media (max-width: 768px) {
-    max-width: 100%;
-    margin-block: 1.5rem;
-    padding-block: 1.5rem;
-  }
-}
-
-.story-metadata-item {
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-}
-
-.story-metadata-item-label {
-  @media (max-width: 768px) {
-    font-size: 0.77778rem;
   }
 }
 

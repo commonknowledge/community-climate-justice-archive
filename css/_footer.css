@@ -3,7 +3,6 @@
 The site footer with contact information and additional content.
 */
 .footer {
- 
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -38,24 +37,9 @@ Contact information in the footer.
   }
 }
 
-.footer address {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 1rem;
+.address address {
+  text-decoration: underline;
   font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.00778rem;
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-skip-ink: auto;
-  text-decoration-thickness: auto;
-  text-underline-offset: auto;
-  text-underline-position: from-font;
-
-  @media (min-width: 768px) {
-    font-size: 1.22222rem;
-  }
 }
 
 /* Compilation Information
@@ -63,12 +47,5 @@ Contact information in the footer.
 Copyright and compilation information in the footer.
 */
 .compilation-information {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 0.77778rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.00778rem;
   margin-top: 2.5rem;
 }
