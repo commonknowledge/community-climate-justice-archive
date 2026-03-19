@@ -18,9 +18,13 @@
 
 <body>
     {{template "header" .}}
-    <div class="h2">Items with scale of permanence: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
-    <div class="stories-list standard-margins">
-        {{template "stories-list" .}}
+    <div class="container">
+        <h2 class="h2">
+            Items with scale of permanence: <span class="tag large" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>
+        </h2>
+        <div class="stories-list">
+            {{template "stories-list" .}}
+        </div>
     </div>
     {{template "footer" .}}
 </body>

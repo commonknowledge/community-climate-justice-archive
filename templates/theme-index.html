@@ -23,18 +23,23 @@
     <link rel="stylesheet" href="/css/styles.css">
     {{/* Include the hover popup JavaScript */}}
     {{template "grid-code" .}}
-{{template "theme-init" .}}
+    {{template "theme-init" .}}
 </head>
 
 <body>
     {{template "header" .}}
+
+    <div class="container">
     
-    {{/* Show the theme name as a coloured tag */}}
-    <div class="h2">Items tagged: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
-    
-    {{/* Display the grid of stories with this theme */}}
-    <div class="stories-list standard-margins">
-        {{template "stories-list" .}}
+        {{/* Show the theme name as a coloured tag */}}
+        <h2 class="h2">
+            Items tagged: <span class="tag large" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>
+        </h2>
+        
+        {{/* Display the grid of stories with this theme */}}
+        <div class="stories-list">
+            {{template "stories-list" .}}
+        </div>
     </div>
     
     {{template "footer" .}}

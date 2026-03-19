@@ -26,7 +26,8 @@ body,
 }
 
 /* Sans-serif body text used for labels and small text */
-.body-sans-sm {
+.body-sans-sm,
+.tag:not(.large) {
   font-weight: 400;
   font-family: Arial, sans-serif; /* Sans-serif font */
   font-size: 1rem; /* 16px */
@@ -35,7 +36,8 @@ body,
 }
 
 /* Sans-serif body text used for descriptions, tags */
-.body-sans-lg {
+.body-sans-lg,
+.tag.large {
   font-weight: 400;
   font-family: Arial, sans-serif; /* Sans-serif font */
   font-size: 1.375rem;
@@ -94,22 +96,23 @@ a:not([class]):hover::before {
 
 /* Dashed Button - button with a dashed border for navigation and actions. */
 .dashed-button {
-  align-items: center;
-  background: var(--background);
-  border: 2px dashed var(--black);
-  color: var(--black);
-  display: flex;
-  font-style: normal;
-  font-weight: 400;
-  gap: 0.55556rem;
+  display: inline-flex;
   justify-content: center;
-  padding: 0.27778rem 0.55556rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border: 2px dashed var(--black);
+  background: var(--background);
+  color: var(--black);
+
+  font-weight: 400;
+  font-family: Arial, sans-serif;
+  font-size: 1.375rem;
+  line-height: 140%;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  width: max-content;
 }
 
 .dashed-button:hover {
-  border: 2px solid var(--black);
-  background: none;
-  padding: 0.27778rem 0.55556rem;
+  border-style: solid;
 }
