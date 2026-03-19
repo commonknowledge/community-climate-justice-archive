@@ -326,30 +326,6 @@ A single related story in the grid.
   grid-column: auto;
 }
 
-/* Related Story Title
-
-The title of a related story.
-*/
-.related-stories-item-title {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 1.22222rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.01222rem;
-  text-transform: lowercase;
-  margin-bottom: 1.25rem;
-}
-
-/* Related Story Title Tag
-
-Tags within related story titles.
-*/
-.related-stories-item-title .tag {
-  display: inline-block;
-}
-
 /* Story Navigation Arrow
 
 Navigation arrows between stories.

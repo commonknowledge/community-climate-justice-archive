@@ -8,30 +8,18 @@
 */
 
 /* .tag-list
-   Displays tags in a wrapping row (used on index pages and story pages) */
+   Displays tags in a wrapping row */
 .tag-list {
   display: flex;
   flex-wrap: wrap; /* Tags wrap to new lines */
   gap: 0.625rem; /* 10px between each tag */
   list-style-type: none; /* No bullets */
+  padding-inline-start: 0; /* Remove default left padding */
   margin: 0; /* Remove default margins */
 }
 
-/* .tag-list-container
-   Adds large bottom margin to sections containing tag lists */
-.tag-list-container {
-  margin-bottom: 6.66667rem; /* 120px */
-}
-
-/* ul.tag-list
-   Removes default left padding when tag list is a <ul> element */
-ul.tag-list {
-  padding-inline-start: 0;
-}
-
 /* .tag
-   Small pill-shaped tags for themes, types, weather (background color set inline) */
-
+   Small pill-shaped tags for themes, types, weather (typography is defined in _typography.css) */
 .tag {
   display: inline-flex;
   justify-content: center;

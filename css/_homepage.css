@@ -3,7 +3,7 @@
 
   @media (min-width: 768px) {
     padding-top: 5rem;
-  } 
+  }
 }
 
 .homepage-collage {
@@ -22,6 +22,10 @@
   display: block;
 }
 
+.homepage-tags {
+  margin-bottom: 4rem;
+}
+
 /* Connections View
  *
  * Interactive scattered layout for showing story connections on homepage
@@ -33,7 +37,7 @@
   height: 843px;
   overflow: auto;
   scroll-behavior: smooth;
-  margin-bottom: 6.66667rem;
+  margin-bottom: 4rem;
   box-shadow: 0 0 5px 0 var(--shadow-darker) inset;
 }
 
