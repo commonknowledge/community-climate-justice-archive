@@ -37,7 +37,8 @@ body,
 
 /* Sans-serif body text used for descriptions, tags */
 .body-sans-lg,
-.tag.large {
+.tag.large,
+.about-pill {
   font-weight: 400;
   font-family: Arial, sans-serif; /* Sans-serif font */
   font-size: 1.375rem;
