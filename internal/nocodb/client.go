@@ -600,7 +600,9 @@ func (c *Client) getRelationshipFieldIDByTitle(title string) string {
 	}
 
 	if err := c.populateRelationshipFieldIDMapFromV2(); err != nil {
-		log.Printf("Warning: Failed loading relationship metadata from v2 endpoint: %v", err)
+		if !strings.Contains(err.Error(), "status 404") {
+			log.Printf("Warning: Failed loading relationship metadata from v2 endpoint: %v", err)
+		}
 		if fallbackErr := c.populateRelationshipFieldIDMapFromV1(); fallbackErr != nil {
 			log.Printf("Warning: Failed loading relationship metadata from v1 endpoint: %v", fallbackErr)
 		}
