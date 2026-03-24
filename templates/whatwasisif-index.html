@@ -12,11 +12,12 @@
 <html lang="en-GB">
 
 <head>
+    {{ template "head" .}}
+
     <title>{{.Title}} - What Was/Is/If</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/styles.css">
+
+   {{template "theme-init" .}}
     {{template "grid-code" .}}
-    {{template "theme-init" .}}
 </head>
 
 <body>

@@ -33,8 +33,8 @@ func WriteWanderPage() error {
 	}
 
 	page := data.Page{
-		Title:          "Wander – Dudley People's School for Climate Justice",
-		Description:    "Wander through a random selection of stories from the Dudley Climate Justice Archive",
+		Title:          "Wander – Dudley Time Portal",
+		Description:    "Wander through a random selection of stories from the Dudley Time Portal",
 		Themes:         themes,
 		Types:          types,
 		Stories:        stories,
@@ -86,8 +86,8 @@ func WriteArchivePage() error {
 	}
 
 	page := data.Page{
-		Title:          "Archive – Dudley People's School for Climate Justice",
-		Description:    "Explore the complete Dudley Climate Justice Archive with filters for themes, types, and weather",
+		Title:          "Archive – Dudley Time Portal",
+		Description:    "Explore the complete Dudley Time Portal with filters for themes, types, and weather",
 		Themes:         themes,
 		Types:          types,
 		Stories:        stories, // Only 40 random stories for initial display

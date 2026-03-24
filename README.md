@@ -85,7 +85,7 @@ graph TB
     end
     
     subgraph "Store Layer"
-        STORE[internal/store/store.go<br/>Data access and filtering]
+        STORE[internal/store/<br/>Data access and taxonomy filtering]
         NOCODB[internal/nocodb/client.go<br/>NocoDB API + caching]
     end
     
@@ -193,8 +193,8 @@ graph TB
     D --> G[Convert to WebP]
     E --> G
     F --> G
-    G --> H[Save to out/images/processed/]
-    H --> I[Templates reference<br/>processed/photo-thumb.webp<br/>processed/photo-medium.webp<br/>processed/photo-large.webp]
+    G --> H[Save to images/processed/]
+    H --> I[Templates reference<br/>/images/processed/photo-thumb.webp<br/>/images/processed/photo-medium.webp<br/>/images/processed/photo-large.webp]
     
     style A fill:#ffebee
     style G fill:#e8f5e9
@@ -274,12 +274,15 @@ If you need to make changes, here's where to look:
 |------|-------------|
 | `cmd/archive/main.go` | Entry point - starts everything |
 | `internal/config/config.go` | Loads settings from .env |
-| `internal/store/store.go` | Story retrieval, filtering, and taxonomy helpers |
+| `internal/store/store.go` | Story retrieval, cache warming, and connection helpers |
+| `internal/store/store_taxonomies.go` | Theme/type/weather taxonomy retrieval and filtering |
 | `internal/nocodb/client.go` | NocoDB API client and cache handling |
 | `internal/nocodb/types.go` | Translates NocoDB → Go structs |
 | `data/story.go` | Main Story struct & helpers |
 | `data/tags.go` | Theme, Type, Weather structs |
-| `internal/generate/generate.go` | Creates all HTML pages |
+| `internal/generate/generate.go` | Story pages, filter data, and shared generation helpers |
+| `internal/generate/pages.go` | Homepage, archive, wander, and about page writers |
+| `internal/generate/taxonomy_indexes.go` | Theme/type/weather and other taxonomy index writers |
 | `internal/generate/assets.go` | Processes images & copies CSS |
 | `templates/*.html` | HTML templates |
 
@@ -293,7 +296,7 @@ If you need to make changes, here's where to look:
 
 **Want to add a new page type?**
 1. Create a template in `templates/`
-2. Add a generation function in `internal/generate/generate.go`
+2. Add a generation function in the relevant file under `internal/generate/` (`pages.go`, `taxonomy_indexes.go`, or another writer file)
 3. Call it from `generateArchive()` in `cmd/archive/main.go`
 
 **Want to change how pages look?**
@@ -764,7 +767,7 @@ Add the field display using the tag pattern:
 ```
 
 #### 7. Add Store Functions
-**File**: `internal/store/store.go`
+**File**: `internal/store/store_taxonomies.go`
 
 Add functions to retrieve and filter by the new field:
 
@@ -781,33 +784,22 @@ func GetStoriesForNewFieldType(fieldValue string) []data.Story {
 ```
 
 #### 8. Add Index Page Generation
-**File**: `internal/generate/generate.go`
+**File**: `internal/generate/taxonomy_indexes.go`
 
 Add a function to generate individual pages for each field value:
 
 ```go
-func WriteNewFieldIndexPages(stories []data.Story, store store.Adapter) error {
-    newFieldTypes := store.GetNewFieldTypes()
-    
-    for _, fieldType := range newFieldTypes {
-        fieldStories, err := store.GetStoriesForNewFieldType(fieldType.Title)
-        if err != nil {
-            return fmt.Errorf("failed to get stories for new field %s: %w", fieldType.Title, err)
-        }
-
-        page := data.Page{
-            Title:       fieldType.Title,
-            Stories:     fieldStories,
-            NewFieldType: &fieldType,
-        }
-
-        filename := fmt.Sprintf("newfield/%s.html", fieldType.URL)
-        if err := writePageToFile(filename, "newfield-index.html", page); err != nil {
-            return fmt.Errorf("failed to write new field page %s: %w", filename, err)
-        }
-    }
-
-    return nil
+func WriteNewFieldIndexPages() error {
+    return writeTaxonomyIndexPages(taxonomyIndexConfig[data.NewFieldType]{
+        label:       "new-field index",
+        outputDir:   "newfield",
+        template:    "newfield-index.html",
+        description: func(title string) string { return "Stories tagged with " + title },
+        list:        store.GetNewFieldTypes,
+        storiesFor:  store.GetStoriesForNewFieldType,
+        title:       func(item data.NewFieldType) string { return item.Title },
+        color:       func(item data.NewFieldType) string { return item.Colour },
+    })
 }
 ```
 
@@ -820,7 +812,7 @@ Create a template similar to `theme-index.html`, `type-index.html`, `weather-ind
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{.Title}} - Community Climate Justice Archive</title>
+    <title>{{.Title}} - Dudley Time Portal</title>
     <!-- ... head content similar to other index templates ... -->
 </head>
 <body>
@@ -864,28 +856,6 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
 ```
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
-
-## Deprecated Tools
-
-### Image Field Consolidation Tool
-
-**Status: DEPRECATED - No longer needed**
-
-The `utilities/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
-
-**Important Notes:**
-- The tool is **idempotent** and safe to run multiple times
-- Running it now will not cause any issues as it will detect no changes are needed
-- The tool is kept for historical reference and potential future migrations
-- All stories now use only the `ImageVideoSound` field for attachments
-
-**Usage (if needed):**
-```bash
-go build -o consolidate-image-fields ./utilities/consolidate-image-fields
-./consolidate-image-fields --checksum  # Verify consolidation is complete
-```
-
----
 
 ## Technical Terms Glossary
 

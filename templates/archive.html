@@ -20,13 +20,11 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "head" .}}
+
     <title>{{.Title}}</title>
     <meta name="description" content="{{.Description}}">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
     {{/* The JavaScript that makes filtering work */}}
     <script src="/js/archive-filters.js"></script>
     {{/* The JavaScript that makes story popups work */}}
