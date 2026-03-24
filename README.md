@@ -812,7 +812,7 @@ Create a template similar to `theme-index.html`, `type-index.html`, `weather-ind
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{.Title}} - Community Climate Justice Archive</title>
+    <title>{{.Title}} - Dudley Time Portal</title>
     <!-- ... head content similar to other index templates ... -->
 </head>
 <body>

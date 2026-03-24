@@ -15,14 +15,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "head" .}}
+    
     <title>About the project - Dudley Time Portal</title>
     <meta name="description" content="Learn about the Dudley Time Portal, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-{{template "theme-init" .}}
+
+    {{template "theme-init" .}}
 </head>
 
 <body>
@@ -67,7 +65,9 @@
 
                             <blockquote class="about-quote">
                                 <p>'In an Andean understanding of time, the past, present and future are directly interconnected and happening in the same moment… objects, people and places… transcend time, bringing a living past into the present to influence and inform the future.'</p>
-                                <cite><a href="https://www.britishmuseum.org/exhibitions/peru-journey-time" target="_blank" rel="noopener noreferrer">British Museum, Peru: A Journey in Time</a></cite>
+                                <cite>
+                                    <a href="https://www.britishmuseum.org/exhibitions/peru-journey-time" target="_blank" rel="noopener noreferrer">British Museum, Peru: A Journey in Time</a>
+                                </cite>
                             </blockquote>
                         </div>
                     </div>
@@ -187,7 +187,7 @@
 
     <script>
         // Simple script to highlight active section in sidebar
-        (function() {
+        (function () {
             const sections = document.querySelectorAll('.about-section[id]');
             const navButtons = document.querySelectorAll('.about-nav-button');
 
@@ -201,9 +201,13 @@
                 });
 
                 navButtons.forEach(button => {
-                    button.classList.remove('active');
+                    button
+                        .classList
+                        .remove('active');
                     if (button.getAttribute('href') === '#' + current) {
-                        button.classList.add('active');
+                        button
+                            .classList
+                            .add('active');
                     }
                 });
             }
@@ -216,10 +220,11 @@
          * Rotate "What If" Quotes
          * Fades between different "What If" prompts every 7 seconds.
          */
-        (function() {
+        (function () {
             const items = document.querySelectorAll('.what-if-rotation-item');
-            if (items.length === 0) return;
-
+            if (items.length === 0) 
+                return;
+            
             let currentIndex = 0;
 
             function showNext() {
@@ -228,8 +233,12 @@
                 items[currentIndex].style.opacity = '0';
 
                 setTimeout(() => {
-                    items[currentIndex].classList.add('hide');
-                    items[nextIndex].classList.remove('hide');
+                    items[currentIndex]
+                        .classList
+                        .add('hide');
+                    items[nextIndex]
+                        .classList
+                        .remove('hide');
 
                     requestAnimationFrame(() => {
                         items[nextIndex].style.opacity = '1';

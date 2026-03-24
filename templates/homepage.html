@@ -2,7 +2,7 @@
     Homepage Template
     
     This is the main landing page - the first thing people see when they visit the archive.
-    It's designed for exploration and serendipity, with stories displayed in a random order
+    It is designed for exploration and serendipity, with stories displayed in a random order
     that changes every time you visit.
     
     Key features:
@@ -14,8 +14,10 @@
     shuffling algorithm (Fisher-Yates) to keep things feeling fast and responsive.
 */}}
 <head>
-	<title>Dudley People's School for Climate Justice – time portal</title>
-    <meta name="description" content="The time portal for the Dudley People's School for Climate Justice">
+    {{template "head" .}}
+
+	<title> Dudley Time Portal</title>
+    <meta name="description" content="Dudley Time Portal is a living archive of gifts: observations, creations and experiments from the past, present and future of Dudley Borough.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/styles.css">
     <script>
@@ -313,7 +315,8 @@
         window.addEventListener('load', initializeConnectionsView);
     </script>
     {{template "grid-code" .}}
-{{template "theme-init" .}}
+    
+    {{template "theme-init" .}}
 </head>
 <body>
     {{template "header" .}}
@@ -340,7 +343,7 @@
             </div>
         </div>
         <div class="homepage-collage">
-            <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+            <img src="/images/processed/Collage.webp" alt="Dudley Time Portal collage" />
         </div>
         <div class="tag-list-container">
             <h2 class="tag-list-header">Themes</h2>
