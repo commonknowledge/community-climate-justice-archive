@@ -171,6 +171,14 @@
         </div>
         <div class="story-metadata">
             <div class="story-metadata-item-group">
+                {{if $story.PublicContributors}}
+                <div class="story-metadata-item">
+                    <span class="story-metadata-item-label">
+                        {{if eq (len $story.PublicContributors) 1}}Contributor{{else}}Contributors{{end}}
+                    </span>
+                    <span class="story-metadata-item-value">{{range $index, $contributor := $story.PublicContributors}}{{if ne $index 0}}, {{end}}{{$contributor.Name}}{{end}}</span>
+                </div>
+                {{end}}
                 {{if $story.CreatedTime}}
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Created</span>
@@ -201,14 +209,7 @@
                     <span class="story-metadata-item-value">{{$story.Location}}</span>
                 </div>
                 {{end}}
-                {{if $story.PublicContributors}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">
-                        {{if eq (len $story.PublicContributors) 1}}Contributor{{else}}Contributors{{end}}
-                    </span>
-                    <span class="story-metadata-item-value">{{range $index, $contributor := $story.PublicContributors}}{{if ne $index 0}}, {{end}}{{$contributor.Name}}{{end}}</span>
-                </div>
-                {{end}}
+             
                 {{if $story.Season}}
                 <div class="story-metadata-item">
                     <span class="story-metadata-item-label">Season</span>
