@@ -10,20 +10,20 @@
   box-sizing: border-box;
 }
 
-
 /* 3. Enable keyword animations */
-@media (prefers-reduced-motion: no-preference) {
-  html {
+html {
+  @media (prefers-reduced-motion: no-preference) {
     interpolate-size: allow-keywords;
   }
 }
 
 :root {
-  font-size: 18px; /* Base font size for rem calculations */
+  font-size: 16px; /* Base font size for rem calculations */
 }
 
 
 body {
+  margin: 0;
   background-color: var(--background); /* #FFFAF3 cream colour */
   color: var(--black); /* Default text colour for all elements */
   max-width: 100%; /* 100% of viewport width */

@@ -2,31 +2,16 @@
 
 The site footer with contact information and additional content.
 */
-footer {
-  padding: 5.55556rem 2.22222rem;
+.footer {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
+  flex-direction: column;
+  gap: 2rem;
 
-/* Footer Address
-
-Contact information in the footer.
-*/
-footer address {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 1.22222rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.00778rem;
-  text-decoration-line: underline;
-  text-decoration-style: solid;
-  text-decoration-skip-ink: auto;
-  text-decoration-thickness: auto;
-  text-underline-offset: auto;
-  text-underline-position: from-font;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 5rem 0;
+  }
 }
 
 /* Footer Content
@@ -34,22 +19,27 @@ footer address {
 The main content area in the footer.
 */
 .footer-content {
-  color: var(--black);
-  font-family: "Times New Roman";
-  font-size: 1.77778rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  letter-spacing: -0.03556rem;
-  width: 43.72222rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 50ch;
 }
 
-/* Footer Content Paragraphs
+/* Footer Address
 
-Paragraphs within the footer content.
+Contact information in the footer.
 */
-.footer-content div {
-  margin-bottom: 1.11111rem;
+.address {
+  order: -1;
+
+  @media (min-width: 768px) {
+    order: 0;
+  }
+}
+
+.address address {
+  text-decoration: underline;
+  font-style: normal;
 }
 
 /* Compilation Information
@@ -57,38 +47,5 @@ Paragraphs within the footer content.
 Copyright and compilation information in the footer.
 */
 .compilation-information {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 0.77778rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.00778rem;
-  margin-top: 2.22222rem;
-}
-
-@media (max-width: 768px) {
-  /* Footer mobile layout */
-  footer {
-    flex-direction: column;
-    gap: 2rem;
-    padding: 2.5rem 1.11111rem;
-  }
-
-  .footer-content {
-    width: 100%;
-    font-size: 1.33333rem;
-  }
-
-  .footer-content div {
-    margin-bottom: 1rem;
-  }
-
-  .address {
-    order: -1;
-  }
-
-  footer address {
-    font-size: 1rem;
-  }
+  margin-top: 2.5rem;
 }

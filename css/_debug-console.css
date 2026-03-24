@@ -12,7 +12,7 @@ Inspired by Quake console, using existing design elements.
   background: rgba(0, 0, 0, 0.85);
   color: #fff;
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 0.875rem;
   border-bottom: 2px solid #333;
   transform: translateY(-100%);
   transition: transform 0.3s ease-in-out;
@@ -26,15 +26,38 @@ Inspired by Quake console, using existing design elements.
 .debug-console-content {
   display: flex;
   align-items: center;
-  padding: 0.55556rem 1.11111rem;
-  gap: 0.55556rem;
+  padding: 0.5rem 1.25rem;
+  gap: 0.5rem;
   max-width: 100vw;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    gap: 0.25rem;
+  }
 }
 
 .debug-item {
   color: #ccc;
   white-space: nowrap;
+
+  @media (max-width: 768px) {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .debug-item strong {
@@ -49,7 +72,7 @@ Inspired by Quake console, using existing design elements.
 .debug-link {
   color: #fff;
   text-decoration: none;
-  padding: 0.11111rem 0.27778rem;
+  padding: 0.15rem 0.25rem;
   border: 1px solid #555;
   background: rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
@@ -62,39 +85,10 @@ Inspired by Quake console, using existing design elements.
 
 .debug-close {
   color: #888;
-  font-size: 0.77778rem;
+  font-size: 0.875rem;
   margin-left: auto;
-}
 
-/* Mobile responsiveness for debug console */
-@media (max-width: 768px) {
-  .debug-console-content {
-    padding: 0.33333rem 0.55556rem;
-    font-size: 0.77778rem;
-    gap: 0.33333rem;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .debug-close {
+  @media (max-width: 768px) {
     display: none;
-  }
-
-  .debug-item {
-    flex-shrink: 0;
-  }
-}
-
-/* Handle very long content gracefully */
-@media (max-width: 480px) {
-  .debug-console-content {
-    font-size: 0.66667rem;
-    gap: 0.22222rem;
-  }
-
-  .debug-item {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }

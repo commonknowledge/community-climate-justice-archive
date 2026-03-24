@@ -1,3 +1,11 @@
+.homepage-content {
+  padding-top: 2rem;
+
+  @media (min-width: 768px) {
+    padding-top: 5rem;
+  }
+}
+
 .homepage-collage {
   position: relative;
   width: 100vw;
@@ -14,67 +22,8 @@
   display: block;
 }
 
-.what-if-rotation {
-  margin-top: 80px;
-  position: relative;
-  min-height: 300px;
-  max-width: 900px;
-
-  @media (min-width: 768px) {
-    min-height: 200px;
-  }
-}
-
-.what-if-rotation-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  visibility: visible;
-}
-
-.what-if-rotation-item.hide {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.what-if-rotation-item-text {
-  opacity: 1;
-  transition: opacity 2.5s cubic-bezier(0.4, 0, 0.6, 1);
-  position: absolute;
-  width: 100%;
-}
-
-.what-if-rotation-item.hide .what-if-rotation-item-text {
-  opacity: 0;
-}
-
-.what-if-rotation-item.fade-out .what-if-rotation-item-text {
-  opacity: 0;
-}
-
-.what-if-rotation-item-title {
-  width: fit-content;
-  height: 47px;
-  gap: 10px;
-  padding: 5px;
-  background: var(--highlight-yellow);
-  color: #000;
-  font-family: Times New Roman;
-  font-weight: 400;
-  font-style: italic;
-  font-size: 32px;
-  line-height: 100%;
-  letter-spacing: -2%;
-  margin-bottom: 5px;
-}
-
-.what-if-rotation-item-text {
-  font-family: Times New Roman;
-  font-weight: 400;
-  font-size: 32px;
-  line-height: 100%;
-  letter-spacing: -2%;
+.homepage-tags {
+  margin-bottom: 4rem;
 }
 
 /* Connections View
@@ -88,7 +37,7 @@
   height: 843px;
   overflow: auto;
   scroll-behavior: smooth;
-  margin-bottom: 6.66667rem;
+  margin-bottom: 4rem;
   box-shadow: 0 0 5px 0 var(--shadow-darker) inset;
 }
 

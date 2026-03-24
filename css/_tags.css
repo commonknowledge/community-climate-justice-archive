@@ -8,45 +8,28 @@
 */
 
 /* .tag-list
-   Displays tags in a wrapping row (used on index pages and story pages) */
+   Displays tags in a wrapping row */
 .tag-list {
   display: flex;
   flex-wrap: wrap; /* Tags wrap to new lines */
-  gap: 10px; /* 10px between each tag */
+  gap: 0.625rem; /* 10px between each tag */
   list-style-type: none; /* No bullets */
-}
-
-/* .tag-list-container
-   Adds large bottom margin to sections containing tag lists */
-.tag-list-container {
-  margin-bottom: 6.66667rem; /* 120px */
-}
-
-/* ul.tag-list
-   Removes default left padding when tag list is a <ul> element */
-ul.tag-list {
-  padding-inline-start: 0;
+  padding-inline-start: 0; /* Remove default left padding */
+  margin: 0; /* Remove default margins */
 }
 
 /* .tag
-   Small pill-shaped tags for themes, types, weather (background color set inline) */
+   Small pill-shaped tags for themes, types, weather (typography is defined in _typography.css) */
 .tag {
+  display: inline-flex;
+  justify-content: center;
   align-items: center;
+  gap: 0.75rem;
+  padding: 0.1em 0.25em; /* Relative to font size */
   background-color: var(--black); /* Default background */
   color: var(--white-text);
-  display: flex;
-  font-family: Arial;
-  font-size: 0.77778rem; /* 14px */
-  font-style: normal;
-  font-weight: 400;
-  gap: 0.55556rem;
-  justify-content: center;
-  letter-spacing: -0.00778rem;
-  line-height: 140%;
-  padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem; /* 2px 5px 3px 5px */
   text-decoration: none;
   text-transform: lowercase;
-  width: fit-content;
 }
 
 /* .tag:hover
@@ -54,61 +37,4 @@ ul.tag-list {
 .tag:hover {
   background: var(--black) !important;
   color: var(--background) !important;
-}
-
-/* a.tag
-   Maintains tag padding when tag is a link */
-a.tag {
-  margin: 0;
-  padding: 0.11111rem 0.27778rem 0.16667rem 0.27778rem;
-}
-
-/* .tag.large
-   Larger tag size used in headers */
-.tag.large {
-  font-size: 1.22222rem; /* 22px */
-  justify-content: center;
-  letter-spacing: -0.01222rem;
-  padding: 0.27778rem 0.55556rem; /* 5px 10px */
-}
-
-/* .tag.medium
-   Medium-sized tags (between default and large) */
-.tag.medium {
-  font-family: Arial;
-  gap: 10px;
-  height: 41;
-  padding-bottom: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  width: 82;
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -1%;
-  line-height: 140%;
-  text-transform: lowercase;
-}
-
-/* Theme and Type Index Tags
-
-Tags within theme and type index headers.
-*/
-.theme-index-header .tag,
-.type-index-header .tag,
-.weather-index-header .tag {
-  display: inline-block;
-  margin-right: 1rem;
-}
-
-@media (max-width: 768px) {
-  /* Tag lists */
-  .tag-list {
-    gap: 0.5rem;
-  }
-
-  .tag {
-    font-size: 1rem;
-    padding: 0.27778rem 0.5rem;
-  }
 }

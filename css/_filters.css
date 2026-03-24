@@ -13,8 +13,8 @@
 .archive-filters {
   display: flex;
   flex-wrap: wrap; /* Stack on small screens */
-  gap: 1.11111rem; /* 20px between dropdowns */
-  margin-bottom: 2.22222rem; /* 40px below filters */
+  gap: 1.25rem; /* 20px between dropdowns */
+  margin-bottom: 2.5rem; /* 40px below filters */
   align-items: flex-start;
 }
 
@@ -35,7 +35,7 @@
   background: var(--background);
   border: 2px dashed var(--black); /* Dashed = not active */
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem; /* 22px */
+  font-size: 1.375rem; /* 22px */
   font-weight: 400;
   color: var(--black);
   padding: 0.27778rem 0.55556rem; /* 5px 10px */
@@ -105,7 +105,7 @@
   border: none;
   cursor: pointer;
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-weight: 400;
   letter-spacing: -0.01222rem;
   text-transform: lowercase;
@@ -124,7 +124,7 @@
 .filter-tag-option.selected::after {
   content: "✓";
   position: absolute;
-  right: -1.11111rem;
+  right: -1.25rem;
   top: 50%;
   transform: translateY(-50%);
   font-weight: bold;
@@ -148,7 +148,7 @@
 
 .filter-count {
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   color: var(--gray-text);
   text-align: center;
   line-height: 1.2;
@@ -164,6 +164,11 @@ Shows currently applied filters as removable tags below the filter controls.
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55556rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .active-filters-label {
@@ -172,6 +177,11 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   font-weight: 400;
   margin-right: 0.55556rem;
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+    margin-bottom: 0.33333rem;
+  }
 }
 
 .active-filters-list {
@@ -189,7 +199,7 @@ Shows currently applied filters as removable tags below the filter controls.
   display: inline-flex;
   align-items: center;
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem; /* 16px - slightly smaller than body */
+  font-size: 1rem; /* 16px - slightly smaller than body */
   padding: 0.22222rem 0.44444rem; /* 4px 8px */
   gap: 0.33333rem; /* Space between text and × */
   border: none;
@@ -211,7 +221,7 @@ Shows currently applied filters as removable tags below the filter controls.
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.11111rem; /* Slightly larger than tag text */
+  font-size: 1.25rem; /* Slightly larger than tag text */
   line-height: 1; /* Tight line height for × */
   padding: 0;
   margin: 0;
@@ -244,10 +254,10 @@ Shows currently applied filters as removable tags below the filter controls.
 .filter-loading {
   display: none; /* Hidden by default */
   font-family: Arial, sans-serif;
-  font-size: 0.88889rem;
+  font-size: 1rem;
   color: var(--gray-text);
   text-align: center;
-  padding: 1.11111rem;
+  padding: 1.25rem;
 }
 
 /* .filter-loading.visible
@@ -274,20 +284,29 @@ Shows currently applied filters as removable tags below the filter controls.
   justify-content: center;
   align-items: center;
   min-height: 20rem; /* Tall enough to be noticeable */
-  padding: 2.22222rem;
+  padding: 2.5rem;
   background: var(--background);
   border: 2px dashed var(--black); /* Matches filter dropdowns */
   text-align: center;
+
+  @media (max-width: 768px) {
+    min-height: 15rem;
+    padding: 1.25rem;
+  }
 }
 
 /* .no-results-content h3
    "No stories found" heading */
 .no-results-content h3 {
   font-family: Arial, sans-serif;
-  font-size: 1.66667rem; /* 30px - prominent */
+  font-size: 2rem; /* 32px - prominent */
   font-weight: 400; /* Regular weight */
-  margin-bottom: 1.11111rem;
+  margin-bottom: 1.25rem;
   color: var(--black);
+
+  @media (max-width: 768px) {
+    font-size: 1.375rem;
+  }
 }
 
 /* .no-results-content p
@@ -325,82 +344,21 @@ Shows currently applied filters as removable tags below the filter controls.
 
 /* Stories Container Spacing */
 .archive .stories-list {
-  margin-top: 2.22222rem;
-  padding: 0 2.22222rem;
-}
-
-/* Responsive Filter Layout */
-@media (max-width: 768px) {
-  .archive-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 0 1.11111rem;
-  }
-
-  .archive-filters-container {
-    padding: 1rem 1.11111rem;
-  }
-
-  .archive .stories-list {
-    padding: 0 1.11111rem;
-  }
-
-  .archive-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-dropdown {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .filter-dropdown-content {
-    max-height: 300px;
-  }
-
-  .filter-tag-option {
-    font-size: 1.11111rem;
-    padding: 0.33333rem 0.55556rem;
-  }
-
-  .filter-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.55556rem;
-    width: 100%;
-  }
-
-  .active-filters {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .active-filters-label {
-    margin-right: 0;
-    margin-bottom: 0.33333rem;
-  }
-
-  .no-results {
-    min-height: 15rem;
-    padding: 1.11111rem;
-  }
-
-  .no-results-content h3 {
-    font-size: 1.33333rem;
-  }
+  margin-top: 2.5rem;
 }
 
 /* Archive Header with Count and Clear Filters */
 .archive-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
-  padding: 0 2.22222rem;
   padding-top: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
 
 .clear-filters-button-top {
@@ -413,7 +371,7 @@ Shows currently applied filters as removable tags below the filter controls.
   align-items: center;
   gap: 0.27778rem;
   font-family: Arial, sans-serif;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   text-decoration: underline;
   padding: 0.27778rem 0.55556rem;
   letter-spacing: -0.01222rem;
@@ -428,7 +386,7 @@ Shows currently applied filters as removable tags below the filter controls.
 }
 
 .clear-filters-icon {
-  font-size: 1.33333rem;
+  font-size: 1.375rem;
   font-weight: bold;
 }
 
@@ -437,17 +395,26 @@ Shows currently applied filters as removable tags below the filter controls.
   position: sticky;
   top: 5.88889rem;
   z-index: 100;
-  padding:  1.11111rem;
+  padding:  1.25rem 0;
   padding-top: 0;
+
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
 }
 
 /* Archive Filters */
 .archive-filters {
   display: flex;
-  gap: 2.22222rem; /* 40px from Figma spacing */
+  gap: 2.5rem; /* 40px from Figma spacing */
   align-items: center;
-  margin: 0 0 1.11111rem 0;
+  margin: 0 0 1.25rem 0;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .filter-actions {
@@ -455,6 +422,14 @@ Shows currently applied filters as removable tags below the filter controls.
   align-items: center;
   gap: 1rem;
   margin-left: auto;
+
+  @media (max-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.55556rem;
+    width: 100%;
+  }
 }
 
 .clear-filters-button {
@@ -464,7 +439,7 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   display: flex;
   font-family: Arial;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.55556rem;
@@ -492,6 +467,11 @@ Shows currently applied filters as removable tags below the filter controls.
 .filter-dropdown {
   position: relative;
   display: inline-block;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+    width: 100%;
+  }
 }
 
 .filter-dropdown-button {
@@ -501,7 +481,7 @@ Shows currently applied filters as removable tags below the filter controls.
   color: var(--black);
   display: flex;
   font-family: Arial;
-  font-size: 1.22222rem;
+  font-size: 1.375rem;
   font-style: normal;
   font-weight: 400;
   gap: 0.55556rem;
@@ -535,6 +515,14 @@ Shows currently applied filters as removable tags below the filter controls.
   z-index: 1000;
   top: 100%;
   left: 0;
+
+  @media (max-width: 768px) {
+    max-height: 300px;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 50vh;
+  }
 }
 
 .filter-dropdown.open .filter-dropdown-content {
@@ -549,6 +537,11 @@ Shows currently applied filters as removable tags below the filter controls.
   font-family: Arial;
   font-size: 1rem;
   border-bottom: 1px solid var(--border-gray);
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+    padding: 0.33333rem 0.55556rem;
+  }
 }
 
 .filter-tag-option:hover {
@@ -557,11 +550,4 @@ Shows currently applied filters as removable tags below the filter controls.
 
 .filter-tag-option.selected {
   background-color: var(--light-blue);
-}
-
-@media (max-width: 480px) {
-  /* Filter dropdowns full width */
-  .filter-dropdown-content {
-    max-height: 50vh;
-  }
 }

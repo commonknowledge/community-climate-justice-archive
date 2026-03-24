@@ -1,29 +1,7 @@
-/* todo: create container class instead */
+.container {
+  margin-inline: 1.25rem;
 
-header.homepage {
-  margin-left: 1.11111rem; /* 20px */
-  margin-right: 1.11111rem;
-}
-
-/* .homepage-content
-   Side margins for homepage content area */
-.homepage-content {
-  margin-left: 2.22222rem; /* 40px */
-  margin-right: 2.22222rem;
-}
-
-/* .main-content.wander
-   Side margins for wander page */
-.main-content.wander {
-  margin-left: 2.22222rem;
-  margin-right: 2.22222rem;
-}
-
-@media (max-width: 768px) {
-  /* Main content margins */
-  .homepage-content,
-  .main-content.wander {
-    margin-left: 1.11111rem;
-    margin-right: 1.11111rem;
+  @media (min-width: 768px) {
+    margin-inline: 2.5rem;
   }
 }

@@ -6,13 +6,10 @@
    Main site header (sticks to top when scrolling) */
 header {
   background-color: var(--background);
-  font-family: Arial, sans-serif;
-  margin-left: 2.222222rem;
-  margin-right: 2.222222rem;
   position: sticky; /* Remains visible during scroll */
   top: 0;
   z-index: 101; /* Above popups (z-index: 100) */
-  padding: 1.11111rem 0; /* 20px top and bottom */
+  padding: 1.25rem 0; /* 20px top and bottom */
 }
 
 /* .main-header
@@ -26,13 +23,6 @@ header {
 /* Site title "Dudley Time Portal" — shared by header and mobile overlay */
 header h1,
 .mobile-menu-header h1 {
-  color: var(--black);
-  font-family: Arial;
-  font-size: 22px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.22px;
   margin: 0;
   display: flex;
   align-items: center;
@@ -49,19 +39,6 @@ header h1 a {
    Site title link hover (adds underline) */
 header h1 a:hover {
   text-decoration: underline;
-}
-
-/* header p
-   Paragraphs in header area */
-header p {
-  text-transform: lowercase;
-  color: var(--black);
-  font-family: Arial;
-  font-size: 1.22222rem; /* 22px */
-  font-style: normal;
-  font-weight: 400;
-  line-height: 140%;
-  letter-spacing: -0.01222rem;
 }
 
 /* .header-nav
@@ -96,11 +73,11 @@ header p {
 /* In dark mode, active nav buttons with yellow highlight need black text for contrast */
 [data-theme="dark"] .dashed-button[style*="background-color"] {
   color: #000;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .dashed-button[style*="background-color"] {
-    color: #000;
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      color: #000;
+    }
   }
 }
 
@@ -134,14 +111,13 @@ header p {
   background-color: var(--background);
   z-index: 200;
   flex-direction: column;
-  padding: 1.11111rem;
+  padding: 1.25rem;
   overflow-y: auto;
-}
 
-/* Only open on mobile — never show on desktop regardless of JS state */
-@media (max-width: 768px) {
-  .mobile-menu-overlay.is-open {
-    display: flex;
+  @media (max-width: 768px) {
+    &.is-open {
+      display: flex;
+    }
   }
 }
 
@@ -161,8 +137,8 @@ header p {
 .mobile-menu-nav {
   display: flex;
   flex-direction: column;
-  gap: 1.11111rem;
-  padding-top: 1.11111rem;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
 }
 
 .mobile-menu-link {
@@ -176,30 +152,14 @@ header p {
   border-style: solid;
 }
 
-@media (max-width: 768px) {
-  /* Header - Show menu button, hide desktop nav */
-  .header-nav-desktop {
+.header-nav-desktop {
+  @media (max-width: 768px) {
     display: none;
-  }
-
-  .mobile-menu-toggle {
-    display: inline-flex;
-  }
-
-  header {
-    margin-left: 1.11111rem;
-    margin-right: 1.11111rem;
-    padding: 1.11111rem 0;
-  }
-
-  header h1 {
-    font-size: 22px;
   }
 }
 
-@media (max-width: 480px) {
-  /* Mobile menu links smaller */
-  .mobile-menu-link {
-    font-size: 1.33333rem;
+.mobile-menu-toggle {
+  @media (max-width: 768px) {
+    display: inline-flex;
   }
 }
