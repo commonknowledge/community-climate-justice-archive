@@ -36,7 +36,9 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
+	"unicode"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/config"
@@ -47,8 +49,10 @@ import (
 
 const defaultRecordsPageSize = 100
 const (
-	relationshipCountInspiredByField  = "Inspired by"
-	relationshipCountHasInspiredField = "Has inspired"
+	relationshipCountInspiredByField         = "Inspired by"
+	relationshipCountHasInspiredField        = "Has inspired"
+	relationshipCountContributorsField       = "Contributors"
+	relationshipCountPublicContributorsField = "Public Contributors"
 )
 
 // Client wraps the NocoDB client with our configuration.
@@ -66,6 +70,7 @@ type Client struct {
 	// cacheOnlyMode forces reads to come from disk/in-memory cache and blocks API requests.
 	cacheOnlyMode bool
 	diskCacheMode bool // If true, allow reading/writing debug-cache-nocodb.json
+	fieldIDByTitle map[string]string
 }
 
 // NewClient creates a new NocoDB client with configuration from environment variables
@@ -509,10 +514,16 @@ func contains(s, substr string) bool {
 // fetchAndCacheRelationships fetches relationship data for all records and stores it in the cache
 func (c *Client) fetchAndCacheRelationships(records []map[string]interface{}) {
 	attachmentLookup := buildConnectionAttachmentLookup(records)
+	contributorsFieldID := c.getRelationshipFieldIDByTitle(relationshipCountContributorsField)
+	publicContributorsFieldID := c.getRelationshipFieldIDByTitle(relationshipCountPublicContributorsField)
 	skippedInspiredBy := 0
 	skippedHasInspired := 0
 	fetchedInspiredBy := 0
 	fetchedHasInspired := 0
+	skippedContributors := 0
+	skippedPublicContributors := 0
+	fetchedContributors := 0
+	fetchedPublicContributors := 0
 
 	for i, record := range records {
 		recordID := toString(record["Id"])
@@ -539,16 +550,275 @@ func (c *Client) fetchAndCacheRelationships(records []map[string]interface{}) {
 			skippedHasInspired++
 		}
 		records[i]["__cached_has_inspired"] = hasInspired
+
+		contributors := []data.Contributor{}
+		if contributorsFieldID != "" && !isKnownZeroRelationshipCount(record[relationshipCountContributorsField]) {
+			contributors = c.fetchContributorDataWithCache(recordID, contributorsFieldID)
+			fetchedContributors++
+		} else {
+			skippedContributors++
+		}
+		records[i][cachedContributorsKey] = contributors
+
+		publicContributors := []data.Contributor{}
+		if publicContributorsFieldID != "" && !isKnownZeroRelationshipCount(record[relationshipCountPublicContributorsField]) {
+			publicContributors = c.fetchContributorDataWithCache(recordID, publicContributorsFieldID)
+			fetchedPublicContributors++
+		} else {
+			skippedPublicContributors++
+		}
+		records[i][cachedPublicContributorsKey] = publicContributors
 	}
 
 	log.Printf(
-		"Completed relationship fetch for %d records (inspiredBy: fetched=%d skipped_zero=%d, hasInspired: fetched=%d skipped_zero=%d)",
+		"Completed relationship fetch for %d records (inspiredBy: fetched=%d skipped_zero=%d, hasInspired: fetched=%d skipped_zero=%d, contributors: fetched=%d skipped=%d, publicContributors: fetched=%d skipped=%d)",
 		len(records),
 		fetchedInspiredBy,
 		skippedInspiredBy,
 		fetchedHasInspired,
 		skippedHasInspired,
+		fetchedContributors,
+		skippedContributors,
+		fetchedPublicContributors,
+		skippedPublicContributors,
 	)
+}
+
+func (c *Client) getRelationshipFieldIDByTitle(title string) string {
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return ""
+	}
+	normalizedTitle := normalizeRelationshipFieldTitle(title)
+
+	if c.fieldIDByTitle == nil {
+		c.fieldIDByTitle = make(map[string]string)
+	}
+
+	if fieldID, ok := c.fieldIDByTitle[normalizedTitle]; ok {
+		return fieldID
+	}
+
+	if err := c.populateRelationshipFieldIDMapFromV2(); err != nil {
+		log.Printf("Warning: Failed loading relationship metadata from v2 endpoint: %v", err)
+		if fallbackErr := c.populateRelationshipFieldIDMapFromV1(); fallbackErr != nil {
+			log.Printf("Warning: Failed loading relationship metadata from v1 endpoint: %v", fallbackErr)
+		}
+	}
+
+	fieldID := c.fieldIDByTitle[normalizedTitle]
+	if fieldID == "" {
+		log.Printf("Warning: Relationship field ID not found for title %q", title)
+	}
+
+	return fieldID
+}
+
+func (c *Client) populateRelationshipFieldIDMapFromV2() error {
+	url := fmt.Sprintf("%s/api/v2/meta/tables/%s/columns", config.AppConfig.NocoDBEndpoint, config.AppConfig.NocoDBTableID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create v2 columns metadata request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch v2 columns metadata: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("v2 columns metadata API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read v2 columns metadata response: %w", err)
+	}
+
+	var payload map[string]interface{}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return fmt.Errorf("failed to parse v2 columns metadata response: %w", err)
+	}
+
+	columnsRaw, ok := payload["list"].([]interface{})
+	if !ok {
+		columnsRaw, ok = payload["columns"].([]interface{})
+	}
+	if !ok {
+		return fmt.Errorf("unexpected v2 columns metadata payload shape")
+	}
+
+	c.storeRelationshipFieldIDs(columnsRaw)
+	return nil
+}
+
+func (c *Client) populateRelationshipFieldIDMapFromV1() error {
+	url := fmt.Sprintf("%s/api/v1/db/meta/tables/%s", config.AppConfig.NocoDBEndpoint, config.AppConfig.NocoDBTableID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create v1 table metadata request: %w", err)
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to fetch v1 table metadata: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("v1 table metadata API returned status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read v1 table metadata response: %w", err)
+	}
+
+	var payload map[string]interface{}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return fmt.Errorf("failed to parse v1 table metadata response: %w", err)
+	}
+
+	columnsRaw, ok := payload["columns"].([]interface{})
+	if !ok {
+		return fmt.Errorf("unexpected v1 table metadata payload shape")
+	}
+
+	c.storeRelationshipFieldIDs(columnsRaw)
+	return nil
+}
+
+func (c *Client) storeRelationshipFieldIDs(columnsRaw []interface{}) {
+	for _, rawColumn := range columnsRaw {
+		columnMap, ok := rawColumn.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		columnTitle := strings.TrimSpace(toString(columnMap["title"]))
+		if columnTitle == "" {
+			columnTitle = strings.TrimSpace(toString(columnMap["column_name"]))
+		}
+		if columnTitle == "" {
+			columnTitle = strings.TrimSpace(toString(columnMap["columnName"]))
+		}
+
+		columnID := strings.TrimSpace(toString(columnMap["fk_column_id"]))
+		if columnID == "" {
+			columnID = strings.TrimSpace(toString(columnMap["id"]))
+		}
+		if columnID == "" {
+			columnID = strings.TrimSpace(toString(columnMap["Id"]))
+		}
+
+		if columnTitle != "" && columnID != "" {
+			c.fieldIDByTitle[normalizeRelationshipFieldTitle(columnTitle)] = columnID
+		}
+	}
+}
+
+func normalizeRelationshipFieldTitle(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	value = strings.ToLower(strings.TrimSpace(value))
+	var builder strings.Builder
+	builder.Grow(len(value))
+
+	for _, r := range value {
+		if unicode.IsLetter(r) || unicode.IsNumber(r) {
+			builder.WriteRune(r)
+		}
+	}
+
+	return builder.String()
+}
+
+func (c *Client) fetchContributorDataWithCache(recordID, fieldID string) []data.Contributor {
+	url := fmt.Sprintf("%s/api/v2/tables/%s/links/%s/records/%s",
+		config.AppConfig.NocoDBEndpoint,
+		config.AppConfig.NocoDBTableID,
+		fieldID,
+		recordID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("Warning: Failed to create contributor request for record %s field %s: %v", recordID, fieldID, err)
+		return []data.Contributor{}
+	}
+
+	req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		log.Printf("Warning: Failed to fetch contributor links for record %s field %s: %v", recordID, fieldID, err)
+		return []data.Contributor{}
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Warning: Contributor links API returned status %d for record %s field %s", resp.StatusCode, recordID, fieldID)
+		return []data.Contributor{}
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Warning: Failed to read contributor links response for record %s field %s: %v", recordID, fieldID, err)
+		return []data.Contributor{}
+	}
+
+	var linkResponse struct {
+		List []map[string]interface{} `json:"list"`
+	}
+
+	if err := json.Unmarshal(body, &linkResponse); err != nil {
+		log.Printf("Warning: Failed to parse contributor links response for record %s field %s: %v", recordID, fieldID, err)
+		return []data.Contributor{}
+	}
+
+	contributors := make([]data.Contributor, 0, len(linkResponse.List))
+	for _, item := range linkResponse.List {
+		name := strings.TrimSpace(toString(item["name"]))
+		if name == "" {
+			name = strings.TrimSpace(toString(item["Name"]))
+		}
+		if name == "" {
+			name = strings.TrimSpace(toString(item["title"]))
+		}
+		if name == "" {
+			name = strings.TrimSpace(toString(item["Title"]))
+		}
+		if name == "" {
+			continue
+		}
+
+		email := strings.TrimSpace(toString(item["email"]))
+		if email == "" {
+			email = strings.TrimSpace(toString(item["Email"]))
+		}
+
+		approved := strings.TrimSpace(toString(item["approved"]))
+		if approved == "" {
+			approved = strings.TrimSpace(toString(item["Approved"]))
+		}
+
+		contributors = append(contributors, data.Contributor{
+			Name:     name,
+			Email:    email,
+			Approved: approved,
+		})
+	}
+
+	return contributors
 }
 
 func isKnownZeroRelationshipCount(value interface{}) bool {

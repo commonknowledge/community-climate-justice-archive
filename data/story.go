@@ -101,6 +101,13 @@ type TimePeriod struct {
 	Colour string // The colour for this time period
 }
 
+// Contributor is a person linked from the Contributors table in NocoDB.
+type Contributor struct {
+	Name     string // Contributor display name
+	Email    string // Contributor email address
+	Approved string // Contributor approval status from NocoDB
+}
+
 // Story is a single contribution to the archive.
 //
 // Each story is something someone from the community has shared - could be a photo,
@@ -133,6 +140,8 @@ type Story struct {
 	OtherComments           string            // Additional notes or context about the story
 	Type                    []Type            // Format types (Photo, Poem, Video, etc.)
 	Weather                 []Weather         // Weather conditions associated with the story
+	Contributors            []Contributor     // All contributors linked to this story
+	PublicContributors      []Contributor     // Public contributors linked to this story
 	GiftedBy                []GiftedBy        // Who contributed or co-created this story
 	ScalePermanence         []ScalePermanence // Permanence classification (permaculture concept)
 	WhatWasIsIf             []WhatWasIsIf     // Temporal perspective (past/present/future)
