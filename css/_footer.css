@@ -6,6 +6,7 @@ The site footer with contact information and additional content.
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 2.5rem 0;
 
   @media (min-width: 768px) {
     flex-direction: row;
