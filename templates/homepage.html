@@ -102,9 +102,79 @@
             setInterval(showNext, 7000);
         }
 
+        function initializeLoadMoreThemes() {
+            const themeList = document.querySelector('[data-homepage-theme-list]');
+            const loadMoreButton = document.querySelector('[data-homepage-theme-load-more]');
+
+            if (!themeList || !loadMoreButton) return;
+
+            const themeItems = Array.from(themeList.querySelectorAll('.homepage-theme-item'));
+            const initialVisibleCount = 25;
+            const mobileMediaQuery = window.matchMedia('(max-width: 767px)');
+
+            function hideLoadMoreButton() {
+                loadMoreButton.hidden = true;
+                loadMoreButton.style.display = 'none';
+            }
+
+            function showLoadMoreButton() {
+                loadMoreButton.hidden = false;
+                loadMoreButton.style.removeProperty('display');
+            }
+
+            if (themeItems.length <= initialVisibleCount) {
+                hideLoadMoreButton();
+                return;
+            }
+
+            function showAllThemes() {
+                themeItems.forEach(item => item.classList.remove('homepage-theme-item--hidden'));
+            }
+
+            function applyThemeVisibility() {
+                const isMobile = mobileMediaQuery.matches;
+
+                if (!isMobile) {
+                    showAllThemes();
+                    hideLoadMoreButton();
+                    return;
+                }
+
+                const isExpanded = loadMoreButton.dataset.expanded === 'true';
+
+                if (isExpanded) {
+                    showAllThemes();
+                    hideLoadMoreButton();
+                    return;
+                }
+
+                themeItems.forEach((item, index) => {
+                    item.classList.toggle('homepage-theme-item--hidden', index >= initialVisibleCount);
+                });
+
+                showLoadMoreButton();
+            }
+
+            loadMoreButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                loadMoreButton.dataset.expanded = 'true';
+                showAllThemes();
+                hideLoadMoreButton();
+            });
+
+            if (mobileMediaQuery.addEventListener) {
+                mobileMediaQuery.addEventListener('change', applyThemeVisibility);
+            } else {
+                mobileMediaQuery.addListener(applyThemeVisibility);
+            }
+
+            applyThemeVisibility();
+        }
+
         function pageLoaded() {
             shuffleStories();
             rotateWhatIfs();
+            initializeLoadMoreThemes();
         }
 
         window.addEventListener('load', pageLoaded);
@@ -333,9 +403,10 @@
             </div>
             <div class="homepage-tags">
                 <h2 class="h2">Themes</h2>
-                <ul class="tag-list">{{range .Themes}}
-                    <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                <ul class="tag-list" data-homepage-theme-list>{{range .Themes}}
+                    <li class="homepage-theme-item"><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
                 </ul>
+                <button class="dashed-button homepage-theme-load-more" data-homepage-theme-load-more hidden>Load more</button>
             </div>
 
             <div class="homepage-tags">

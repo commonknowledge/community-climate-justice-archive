@@ -26,6 +26,20 @@
   margin-bottom: 4rem;
 }
 
+.homepage-theme-load-more {
+  margin-top: 1rem;
+}
+
+[data-homepage-theme-load-more][hidden] {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .homepage-theme-item--hidden {
+    display: none;
+  }
+}
+
 /* Connections View
  *
  * Interactive scattered layout for showing story connections on homepage
