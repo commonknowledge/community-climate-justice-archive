@@ -48,7 +48,7 @@
 .connections-view {
   position: relative;
   width: 100%;
-  height: 843px;
+  height: calc(80vh - 82px); /* 82 px = sticky header height */
   overflow: auto;
   scroll-behavior: smooth;
   margin-bottom: 4rem;
