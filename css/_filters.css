@@ -12,7 +12,6 @@
    - Gap creates consistent spacing between dropdowns */
 .archive-filters {
   display: flex;
-  flex-wrap: wrap; /* Stack on small screens */
   gap: 1.25rem; /* 20px between dropdowns */
   margin-bottom: 2.5rem; /* 40px below filters */
   align-items: flex-start;
@@ -23,7 +22,6 @@
    - Relative positioning for absolutely positioned dropdown content */
 .filter-dropdown {
   position: relative; /* For absolute dropdown content */
-  min-width: 200px; /* Dropdowns don't get too narrow */
 }
 
 /* .filter-dropdown-button
@@ -89,6 +87,7 @@
   border-top: none;
   z-index: 1000;
   max-height: 400px;
+  min-width: 200px;
   overflow-y: auto;
   padding: 0.55556rem;
 }
@@ -361,6 +360,10 @@ Shows currently applied filters as removable tags below the filter controls.
   }
 }
 
+.archive-header h2 {
+  margin: 0;
+}
+
 .clear-filters-button-top {
   background: var(--background);
   border: none;
@@ -395,25 +398,11 @@ Shows currently applied filters as removable tags below the filter controls.
   position: sticky;
   top: 5.88889rem;
   z-index: 100;
-  padding:  1.25rem 0;
+  padding: 1.25rem 0;
   padding-top: 0;
 
   @media (max-width: 768px) {
     padding: 1rem 0;
-  }
-}
-
-/* Archive Filters */
-.archive-filters {
-  display: flex;
-  gap: 2.5rem; /* 40px from Figma spacing */
-  align-items: center;
-  margin: 0 0 1.25rem 0;
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 
@@ -462,16 +451,6 @@ Shows currently applied filters as removable tags below the filter controls.
   font-family: Arial;
   font-size: 1rem;
   color: var(--gray-text);
-}
-
-.filter-dropdown {
-  position: relative;
-  display: inline-block;
-
-  @media (max-width: 768px) {
-    min-width: auto;
-    width: 100%;
-  }
 }
 
 .filter-dropdown-button {
