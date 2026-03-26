@@ -1,0 +1,12 @@
+.container {
+  --container-padding: 1rem;
+  padding-inline: var(--container-padding);
+
+  @media (min-width: 400px) {
+    --container-padding: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    --container-padding: 2.5rem;
+  }
+}

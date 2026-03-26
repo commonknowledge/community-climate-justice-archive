@@ -18,8 +18,7 @@
 
 	<title> Dudley Time Portal</title>
     <meta name="description" content="Dudley Time Portal is a living archive of gifts: observations, creations and experiments from the past, present and future of Dudley Borough.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/styles.css">
+ 
     <script>
         /*
          * Shuffle Stories Function
@@ -54,12 +53,15 @@
                 fragment.appendChild(stories[i]);
             }
             
-            // Make the list visible
-            storiesList.classList.add('visible');
+      
+            if (storiesList) {
+                // Make the list visible
+                storiesList.classList.add('visible');
 
-            // Clear the list and add all shuffled stories in one operation
-            storiesList.textContent = '';
-            storiesList.appendChild(fragment);
+                // Clear the list and add all shuffled stories in one operation
+                storiesList.textContent = '';
+                storiesList.appendChild(fragment);
+            }
         }
 
         /*
@@ -74,41 +76,105 @@
          * a contemplative, time-portal feeling.
          */
         function rotateWhatIfs() {
-            const items = document.querySelectorAll('.what-if-rotation-item');
+            const items = document.querySelectorAll('.text-rotation__item');
+            if (items.length === 0) return;
+
             let currentIndex = 0;
 
             function showNext() {
                 const nextIndex = (currentIndex + 1) % items.length;
-                
-                // Remove hide from next item but keep it faded out
-                items[nextIndex].classList.remove('hide');
-                items[nextIndex].classList.add('fade-out');
-                
-                // Small delay to ensure the above changes are processed
-                requestAnimationFrame(() => {
-                    // Start fading out current while fading in next
-                    items[currentIndex].classList.add('fade-out');
-                    items[nextIndex].classList.remove('fade-out');
-                    
-                    // After transition completes, hide the old item
-                    // The transition is 2.5 seconds, matching the fade out time in the CSS
-                    setTimeout(() => {
-                        items[currentIndex].classList.add('hide');
-                        currentIndex = nextIndex;
-                    }, 2500);
-                });
+
+                items[currentIndex].style.opacity = '0';
+
+                setTimeout(() => {
+                    items[currentIndex].classList.add('hidden');
+                    items[nextIndex].classList.remove('hidden');
+
+                    requestAnimationFrame(() => {
+                        items[nextIndex].style.opacity = '1';
+                    });
+
+                    currentIndex = nextIndex;
+                }, 500);
             }
 
-            // Show first item
-            items[0].classList.remove('hide', 'fade-out');
-            
-            // Rotate every 7 seconds - allows for full transition + ~4.5s of clear reading time
+            items[0].style.opacity = '1';
             setInterval(showNext, 7000);
+        }
+
+        function initializeLoadMoreThemes() {
+            const themeList = document.querySelector('[data-homepage-theme-list]');
+            const loadMoreButton = document.querySelector('[data-homepage-theme-load-more]');
+
+            if (!themeList || !loadMoreButton) return;
+
+            const themeItems = Array.from(themeList.querySelectorAll('.homepage-theme-item'));
+            const initialVisibleCount = 25;
+            const mobileMediaQuery = window.matchMedia('(max-width: 767px)');
+
+            function hideLoadMoreButton() {
+                loadMoreButton.hidden = true;
+                loadMoreButton.style.display = 'none';
+            }
+
+            function showLoadMoreButton() {
+                loadMoreButton.hidden = false;
+                loadMoreButton.style.removeProperty('display');
+            }
+
+            if (themeItems.length <= initialVisibleCount) {
+                hideLoadMoreButton();
+                return;
+            }
+
+            function showAllThemes() {
+                themeItems.forEach(item => item.classList.remove('homepage-theme-item--hidden'));
+            }
+
+            function applyThemeVisibility() {
+                const isMobile = mobileMediaQuery.matches;
+
+                if (!isMobile) {
+                    showAllThemes();
+                    hideLoadMoreButton();
+                    return;
+                }
+
+                const isExpanded = loadMoreButton.dataset.expanded === 'true';
+
+                if (isExpanded) {
+                    showAllThemes();
+                    hideLoadMoreButton();
+                    return;
+                }
+
+                themeItems.forEach((item, index) => {
+                    item.classList.toggle('homepage-theme-item--hidden', index >= initialVisibleCount);
+                });
+
+                showLoadMoreButton();
+            }
+
+            loadMoreButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                loadMoreButton.dataset.expanded = 'true';
+                showAllThemes();
+                hideLoadMoreButton();
+            });
+
+            if (mobileMediaQuery.addEventListener) {
+                mobileMediaQuery.addEventListener('change', applyThemeVisibility);
+            } else {
+                mobileMediaQuery.addListener(applyThemeVisibility);
+            }
+
+            applyThemeVisibility();
         }
 
         function pageLoaded() {
             shuffleStories();
             rotateWhatIfs();
+            initializeLoadMoreThemes();
         }
 
         window.addEventListener('load', pageLoaded);
@@ -314,78 +380,71 @@
         // Initialize when page loads
         window.addEventListener('load', initializeConnectionsView);
     </script>
-    {{template "grid-code" .}}
-    
-    {{template "theme-init" .}}
+
+{{template "theme-init" .}}
 </head>
 <body>
     {{template "header" .}}
 
-    <div class="homepage-content">
-        <div class="what-if-rotation">
-            <div class="what-if-rotation-item">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    people could develop deep connections with the places they live or work in: connections that invite care, relationships with life, and learning through creative doing that deepens the climate resilience of that place? 
-                </div>
+    <div class="container">
+        <div class="homepage-content">
+            
+            <div class="text-rotation / body-lg">
+                <h3 class="text-rotation__label">What if…</h3>
+                <ul class="text-rotation__items">
+                    <li class="text-rotation__item">people could develop deep connections with the places they live or work in: connections that invite care, relationships with life in that place, and learning through creative doing that deepens the climate resilience of that place?</li>
+                    <li class="text-rotation__item hidden">there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?</li>
+                    <li class="text-rotation__item hidden">this archive was built to last 100 years, passing these knowledges down through generations?</li>
+                </ul>
             </div>
-            <div class="what-if-rotation-item hide">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?
-                </div>
+            
+            <div class="homepage-collage">
+                <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
             </div>
-            <div class="what-if-rotation-item hide">
-                <div class="what-if-rotation-item-title">What if...</div>
-                <div class="what-if-rotation-item-text">
-                    this archive was built to last 100 years, passing these knowledges down through generations?
-                </div>
+            <div class="homepage-tags">
+                <h2 class="h2">Themes</h2>
+                <ul class="tag-list" data-homepage-theme-list>{{range .Themes}}
+                    <li class="homepage-theme-item"><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                </ul>
+                <button class="dashed-button homepage-theme-load-more" data-homepage-theme-load-more hidden>Load more</button>
             </div>
-        </div>
-        <div class="homepage-collage">
-            <img src="/images/processed/Collage.webp" alt="Dudley Time Portal collage" />
-        </div>
-        <div class="tag-list-container">
-            <h2 class="tag-list-header">Themes</h2>
-            <ul class="tag-list">{{range .Themes}}
-                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-            </ul>
-        </div>
 
-        <div class="tag-list-container">
-            <h2 class="tag-list-header">Types</h2>
-            <ul class="tag-list">{{range .Types}}
-                <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
-            </ul>
-        </div>
+            <div class="homepage-tags">
+                <h2 class="h2">Types</h2>
+                <ul class="tag-list">{{range .Types}}
+                    <li><a class="tag large" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a></li>{{end}}
+                </ul>
+            </div>
 
-        <h2 id="wander-through-archive" class="wander-through-archive-header">Wander through our archive…</h2>
-        
-        <!-- Connections View replaces the archive grid -->
-        <div class="connections-view" id="connections-view">
-            <div class="connections-canvas" id="connections-canvas">
-                <svg class="connection-lines"></svg>
-                
-                {{range $index, $story := .ConnectedStories}}
-                {{$storyImage := $story.GetStoryImage}}
-                {{if $storyImage.URL}}
-                <a href="{{$story.URL}}" class="story-link-scattered">
-                    <img 
-                        class="story-image-scattered" 
-                        src="{{$storyImage.ThumbURL}}"
-                        alt="{{$story.Finding}}"
-                        data-story-id="{{$story.ID}}"
-                        data-story-title="{{$story.Finding}}"
-                        data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
-                        data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
-                        data-index="{{$index}}"
-                        loading="lazy"
-                    />
-                </a>
-                {{end}}
-                {{end}}
+            <h2 id="wander-through-archive" class="h2">Wander through our archive…</h2>
+            
+            <!-- Connections View replaces the archive grid -->
+            <div class="connections-view" id="connections-view">
+                <div class="connections-canvas" id="connections-canvas">
+                    <svg class="connection-lines"></svg>
+                    
+                    {{range $index, $story := .ConnectedStories}}
+                    {{$storyImage := $story.GetStoryImage}}
+                    {{if $storyImage.URL}}
+                    <a href="{{$story.URL}}" class="story-link-scattered">
+                        <img 
+                            class="story-image-scattered" 
+                            src="{{$storyImage.ThumbURL}}"
+                            alt="{{$story.Finding}}"
+                            data-story-id="{{$story.ID}}"
+                            data-story-title="{{$story.Finding}}"
+                            data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"
+                            data-has-inspired="{{range $story.HasInspired}}{{.ID}},{{end}}"
+                            data-index="{{$index}}"
+                            loading="lazy"
+                        />
+                    </a>
+                    {{end}}
+                    {{end}}
+                </div>
             </div>
         </div>
     </div>
     {{template "footer" .}}
+    {{template "grid-code" .}}
 </body>

@@ -1,0 +1,40 @@
+/* ============================================================================
+   TAGS
+   ============================================================================
+   
+   Tags are used throughout the archive to show themes, types, weather, and
+   other categories. Each tag has a colour (set inline by Go templates) that
+   represents its category.
+*/
+
+/* .tag-list
+   Displays tags in a wrapping row */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap; /* Tags wrap to new lines */
+  gap: 0.625rem; /* 10px between each tag */
+  list-style-type: none; /* No bullets */
+  padding-inline-start: 0; /* Remove default left padding */
+  margin: 0; /* Remove default margins */
+}
+
+/* .tag
+   Small pill-shaped tags for themes, types, weather (typography is defined in _typography.css) */
+.tag {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.1em 0.25em; /* Relative to font size */
+  background-color: var(--black); /* Default background */
+  color: var(--white-text);
+  text-decoration: none;
+  text-transform: lowercase;
+}
+
+/* .tag:hover
+   All tags turn black on hover (!important overrides inline styles) */
+.tag:hover {
+  background: var(--black) !important;
+  color: var(--background) !important;
+}

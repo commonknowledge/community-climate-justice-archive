@@ -1,0 +1,127 @@
+/* ============================================================================
+   TYPOGRAPHY UTILITY CLASSES
+   ============================================================================ */
+
+/* Base body text styles, applied to body element and .body class for flexibility */
+body,
+.body {
+  font-size: 1.25rem;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+  font-family: "Times New Roman", serif; /* Serif font */
+  -webkit-font-smoothing: antialiased;
+
+  @media (min-width: 1040px) {
+    font-size: 1.5rem;
+  }
+}
+
+/* Larger body text for emphasis or readability */
+.body-lg {
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 140%;
+  letter-spacing: -0.02em;
+
+  @media (min-width: 1040px) {
+    font-size: 2rem;
+    line-height: 115%;
+  }
+}
+
+/* Sans-serif body text used for labels and small text */
+.body-sans-sm,
+.tag:not(.large) {
+  font-weight: 400;
+  font-family: Arial, sans-serif; /* Sans-serif font */
+  font-size: 1rem; /* 16px */
+  line-height: 140%;
+  letter-spacing: -0.01em;
+}
+
+/* Sans-serif body text used for descriptions, tags */
+.body-sans-lg,
+.tag.large,
+.about-pill {
+  font-weight: 400;
+  font-family: Arial, sans-serif; /* Sans-serif font */
+  font-size: 1.375rem;
+  line-height: 140%;
+  letter-spacing: -0.01em;
+}
+
+/* Headings */
+.h1 {
+  font-size: 2rem; /* 32px */
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+
+  @media (min-width: 1040px) {
+    font-size: 3.25rem; /* 52px */
+  }
+}
+
+.h2 {
+  font-weight: 400;
+  font-size: 2rem; /* 32px */
+  line-height: 115%;
+  letter-spacing: -0.02em;
+}
+
+.h2-italic {
+  font-weight: 400;
+  font-size: 2.615rem; /* 42px */
+  line-height: 115%;
+  letter-spacing: -0.02em;
+  font-style: italic;
+}
+
+/* ============================================================================
+   LINKS & BUTTONS
+   ============================================================================ */
+
+/* a - Base link style */
+a {
+  color: currentColor;
+}
+
+/* Default hover style for links without class attribute */
+a:not([class]) {
+  position: relative;
+}
+
+a:not([class])::before {
+  content: ""; /* Required for pseudo-element */
+  position: absolute; /* Positions relative to the link */
+  inset: -5px; /* Shorthand for top/right/bottom/left: -5px */
+  background: transparent; /* Invisible by default */
+  z-index: -1; /* Behind the link text */
+}
+
+a:not([class]):hover::before {
+  background: var(--highlight-yellow); /* Makes the yellow background visible */
+}
+
+/* Dashed Button - button with a dashed border for navigation and actions. */
+.dashed-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border: 2px dashed var(--black);
+  background: var(--background);
+  color: var(--black);
+
+  font-weight: 400;
+  font-family: Arial, sans-serif;
+  font-size: 1.375rem;
+  line-height: 140%;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.dashed-button:hover {
+  border-style: solid;
+}
