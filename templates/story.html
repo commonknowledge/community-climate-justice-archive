@@ -50,6 +50,8 @@
             <span class="debug-separator">|</span>
             <span class="debug-item">Weather:<strong>{{if .Story.Weather}}{{len .Story.Weather}} tags{{else}}None{{end}}</strong></span>
             <span class="debug-separator">|</span>
+            <span class="debug-item">Contributors:<strong>{{len .Story.Contributors}}/{{len .Story.PublicContributors}}</strong></span>
+            <span class="debug-separator">|</span>
             <span class="debug-item">Date:<strong>{{if .Story.StartDateTime}}{{.Story.StartDateTime}}{{else if .Story.PostDate}}{{.Story.PostDate}}{{else if .Story.EndDateTime}}{{.Story.EndDateTime}}{{else}}None{{end}}</strong></span>
             <span class="debug-separator">|</span>
             <span class="debug-close">Press 'D' to close</span>
@@ -155,21 +157,85 @@
     {{else}}
         <!-- Text-only story - display the Finding as the hero content -->
         <div class="story-text-only-hero">
-            <div class="story-text-only-content">
-                <p class="story-text-only-body">{{$story.Finding}}</p>
+            <div class="story-main">
+                <div class="story-finding body">
+                    {{$story.Finding}}
+                </div>
+                <div class="story-actions">
+                    <a
+                        href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/e091e6e7-7818-4dda-bc4b-ac77224ce43e?story_link={{$story.ID}}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="dashed-button"
+                    >
+                        Suggest a tag
+                    </a>
+                    <a 
+                        href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/cc13492d-021a-4a98-b5d7-dac4efa2a18b?story_link={{$story.ID}}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="dashed-button"
+                    >
+                        Suggest a text edit
+                    </a>
+                    <a 
+                        href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/193d6a3e-4878-48f8-8ee6-be1763939936?story_link={{$story.ID}}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="dashed-button"
+                    >
+                        Suggest a connection
+                    </a>
+                </div>
             </div>
         </div>
     {{end}}
         <div class="story-details">
             <!-- Only show Finding in details if story has attachments - text-only shows it in hero -->
             {{if $attachments}}
-            <div class="story-finding body">
-                {{$story.Finding}}
-            </div>
+                <div class="story-main">
+                    <div class="story-finding body">
+                        {{$story.Finding}}
+                    </div>
+                    <div class="story-actions">
+                        <a
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/e091e6e7-7818-4dda-bc4b-ac77224ce43e?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a tag
+                        </a>
+                        <a 
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/cc13492d-021a-4a98-b5d7-dac4efa2a18b?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a text edit
+                        </a>
+                        <a 
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/193d6a3e-4878-48f8-8ee6-be1763939936?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a connection
+                        </a>
+                    </div>
+                </div>
             {{end}}
            
             <div class="story-metadata">
                 <div class="story-metadata-item-group">
+                    {{if $story.PublicContributors}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">
+                            {{if eq (len $story.PublicContributors) 1}}Contributor{{else}}Contributors{{end}}
+                        </span>
+                        <span class="story-metadata-item-value">{{range $index, $contributor := $story.PublicContributors}}{{if ne $index 0}}, {{end}}{{$contributor.Name}}{{end}}</span>
+                    </div>
+                    {{end}}
                     {{if $story.CreatedTime}}
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Created</span>

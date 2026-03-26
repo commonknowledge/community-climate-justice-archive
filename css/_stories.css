@@ -193,6 +193,19 @@ Discrete display when story has no attached media, centered and subtle.
 
 The main content and metadata for a story.
 */
+
+.story-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+
+  @media (min-width: 1040px) {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 5rem;
+  }
+}
+
 .story-details {
   border-top: 1px solid var(--border-color);
   display: flex;
@@ -206,6 +219,13 @@ The main content and metadata for a story.
     margin-block: 1.5rem;
     padding-block: 1.5rem;
   }
+}
+
+.story-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  white-space: nowrap;
 }
 
 /* Story Finding
@@ -754,14 +774,11 @@ Display for stories without media attachments on the story page.
 Shows the Finding text as the primary content.
 */
 .story-text-only-hero {
-  padding: 40px 0 0;
-  max-width: 780px;
-}
+  padding: 1.5rem 0 0;
 
-.story-text-only-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  @media (min-width: 768px) {
+    padding: 4rem 0 0;
+  }
 }
 
 .story-text-only-body {
