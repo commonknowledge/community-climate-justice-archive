@@ -62,48 +62,51 @@ class ArchiveFilters {
      */
     initializeElements() {
         // Store all the HTML elements we'll need
+        const el = (name) => document.querySelector(`[data-el="${name}"]`);
         this.elements = {
             // Primary filter dropdowns
-            themeDropdown: document.getElementById('theme-dropdown'),
-            typeDropdown: document.getElementById('type-dropdown'),
-            whatwasisifDropdown: document.getElementById('whatwasisif-dropdown'),
-            weatherDropdown: document.getElementById('weather-dropdown'),
+            themeDropdown: el('theme-dropdown'),
+            typeDropdown: el('type-dropdown'),
+            whatwasisifDropdown: el('whatwasisif-dropdown'),
+            weatherDropdown: el('weather-dropdown'),
             // More filter dropdowns
-            scalepermanenceDropdown: document.getElementById('scalepermanence-dropdown'),
-            timeperiodDropdown: document.getElementById('timeperiod-dropdown'),
+            scalepermanenceDropdown: el('scalepermanence-dropdown'),
+            timeperiodDropdown: el('timeperiod-dropdown'),
             // Buttons that open the dropdowns
-            themeButton: document.getElementById('theme-button'),
-            typeButton: document.getElementById('type-button'),
-            whatwasisifButton: document.getElementById('whatwasisif-button'),
-            weatherButton: document.getElementById('weather-button'),
-            scalepermanenceButton: document.getElementById('scalepermanence-button'),
-            timeperiodButton: document.getElementById('timeperiod-button'),
+            themeButton: el('theme-button'),
+            typeButton: el('type-button'),
+            whatwasisifButton: el('whatwasisif-button'),
+            weatherButton: el('weather-button'),
+            scalepermanenceButton: el('scalepermanence-button'),
+            timeperiodButton: el('timeperiod-button'),
             // Content areas inside the dropdowns
-            themeContent: document.getElementById('theme-content'),
-            typeContent: document.getElementById('type-content'),
-            whatwasisifContent: document.getElementById('whatwasisif-content'),
-            weatherContent: document.getElementById('weather-content'),
-            scalepermanenceContent: document.getElementById('scalepermanence-content'),
-            timeperiodContent: document.getElementById('timeperiod-content'),
+            themeContent: el('theme-content'),
+            typeContent: el('type-content'),
+            whatwasisifContent: el('whatwasisif-content'),
+            weatherContent: el('weather-content'),
+            scalepermanenceContent: el('scalepermanence-content'),
+            timeperiodContent: el('timeperiod-content'),
             // More filters toggle
-            moreFiltersToggle: document.getElementById('more-filters-toggle'),
-            moreFiltersContainer: document.getElementById('more-filters'),
+            moreFiltersToggle: el('more-filters-toggle'),
+            moreFiltersContainer: el('more-filters'),
             // Sort elements
-            sortDropdown: document.getElementById('sort-dropdown'),
-            sortButton: document.getElementById('sort-button'),
-            sortContent: document.getElementById('sort-content'),
-            sortText: document.getElementById('sort-text'),
+            sortDropdown: el('sort-dropdown'),
+            sortButton: el('sort-button'),
+            sortContent: el('sort-content'),
+            sortText: el('sort-text'),
             // The "Clear filters" button
-            clearFilters: document.getElementById('clear-filters'),
+            clearFilters: el('clear-filters'),
             // Text showing "X of Y stories"
-            filterCount: document.getElementById('filter-count'),
+            filterCount: el('filter-count'),
             // The area showing active filter tags
-            activeFilters: document.getElementById('active-filters'),
-            activeFiltersList: document.getElementById('active-filters-list'),
+            activeFilters: el('active-filters'),
+            activeFiltersList: el('active-filters-list'),
             // Where the story grid gets displayed
-            storiesContainer: document.getElementById('stories-container'),
+            storiesContainer: el('stories-container'),
             // The total count in the header
-            totalCount: document.getElementById('total-count')
+            totalCount: el('total-count'),
+            // The archive heading (text changes when filters are active)
+            archiveHeading: el('archive-heading')
         };
         
         // Safety check - warn if any elements are missing
@@ -190,7 +193,7 @@ class ArchiveFilters {
 
         sortedOptions.forEach(option => {
             const tagButton = document.createElement('button');
-            tagButton.className = 'filter-tag-option';
+            tagButton.className = 'filter-dropdown__option';
 
             // Get color - use default if empty
             let color = option.color;
@@ -512,7 +515,7 @@ class ArchiveFilters {
             const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
-            const options = contentElement.querySelectorAll('.filter-tag-option');
+            const options = contentElement.querySelectorAll('.filter-dropdown__option');
             options.forEach(option => {
                 const isSelected = this.currentFilters[filterType].includes(option.dataset.value);
                 option.classList.toggle('selected', isSelected);
@@ -832,7 +835,21 @@ class ArchiveFilters {
     updateFilterCount() {
         const total = this.filterData ? this.filterData.stories.length : 0;
         const filtered = this.filteredStories.length;
-        
+        const hasActiveFilters = Object.values(this.currentFilters).some(f => f.length > 0);
+
+        // Update the heading text based on whether filters are active
+        if (this.elements.archiveHeading) {
+            const headingPrefix = hasActiveFilters
+                ? 'Filtered items from the archive ('
+                : 'All items from the archive (';
+            // Detach the span first, then clear text, then re-attach
+            const span = this.elements.archiveHeading.querySelector('[data-el="total-count"]');
+            if (span) span.remove();
+            this.elements.archiveHeading.textContent = headingPrefix;
+            if (span) this.elements.archiveHeading.appendChild(span);
+            this.elements.archiveHeading.appendChild(document.createTextNode(')'));
+        }
+
         // Update the main total count in the header
         if (this.elements.totalCount) {
             this.elements.totalCount.textContent = filtered;
@@ -906,7 +923,7 @@ class ArchiveFilters {
     
     createActiveFilterTag(value, filterType) {
         const tag = document.createElement('button');
-        tag.className = 'active-filter-tag';
+        tag.className = 'active-filters__tag tag';
         
         // Find the original color for this filter option
         let color = '#666666'; // Default color
@@ -924,7 +941,7 @@ class ArchiveFilters {
         
         tag.innerHTML = `
             ${value}
-            <span class="active-filter-remove" aria-label="Remove filter">×</span>
+            <span class="tag__remove" aria-label="Remove filter">×</span>
         `;
         
         tag.addEventListener('click', () => this.removeFilter(value, filterType));

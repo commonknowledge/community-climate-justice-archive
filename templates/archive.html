@@ -20,116 +20,135 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "head" .}}
+
     <title>{{.Title}}</title>
     <meta name="description" content="{{.Description}}">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    {{/* The JavaScript that makes filtering work */}}
+
+    <!-- The JavaScript that makes filtering work -->
     <script src="/js/archive-filters.js"></script>
-    {{/* The JavaScript that makes story popups work */}}
+    <!-- The JavaScript that makes story popups work -->
     {{template "grid-code" .}}
 </head>
 
 <body>
     {{template "header" .}}
 
-    <main class="main-content archive container">
-        {{/* Top section with total count and clear filters button */}}
-        <div class="archive-header">
-            <h2 id="explore-archive" class="h1">All items from the archive (<span id="total-count">0</span>)</h2>
-            <button type="button" id="clear-filters" class="clear-filters-button-top">
-                <span class="clear-filters-text">Clear filters</span>
-                <span class="clear-filters-icon">×</span>
-            </button>
-        </div>
-        
-        <!-- Sticky Filter Controls -->
-        <div class="archive-filters-container">
-            <div class="filter-sort-row">
-                <div class="filter-group">
-                    <span class="filter-group-label">Filter by:</span>
-                    <div class="archive-filters" id="archive-filters">
-                {{if .Themes}}<div class="filter-dropdown" id="theme-dropdown">
-                    <button class="filter-dropdown-button" id="theme-button">
-                        <span class="filter-dropdown-text">Themes</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="theme-content"></div>
-                </div>{{end}}
+    <main class="container">
+        <div class="archive">
 
-                {{if .Types}}<div class="filter-dropdown" id="type-dropdown">
-                    <button class="filter-dropdown-button" id="type-button">
-                        <span class="filter-dropdown-text">Types</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="type-content"></div>
-                </div>{{end}}
+            <!-- Sticky Filter Controls -->
+            <div class="archive-filters">
+                <h2 class="archive-filters__heading / h1" data-el="archive-heading">
+                    All items from the archive (<span data-el="total-count">0</span>)
+                </h2>
+                <div class="archive-filters__row">
+                    <div class="filters-group / body-sans-sm">
+                        <h3 class="filters-group__label / caption">Filter by:</h3>
+                        <div class="filters-group__list">
+                            {{if .Themes}}
+                                <div class="filter-dropdown" data-el="theme-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="theme-button">
+                                        Themes
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="theme-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
 
-                {{if .WhatWasIsIf}}<div class="filter-dropdown" id="whatwasisif-dropdown">
-                    <button class="filter-dropdown-button" id="whatwasisif-button">
-                        <span class="filter-dropdown-text">What was/is/if</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="whatwasisif-content"></div>
-                </div>{{end}}
+                            {{if .Types}}
+                                <div class="filter-dropdown" data-el="type-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="type-button">
+                                        Types
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="type-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
 
-                {{if .Weather}}<div class="filter-dropdown" id="weather-dropdown">
-                    <button class="filter-dropdown-button" id="weather-button">
-                        <span class="filter-dropdown-text">Weather</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="weather-content"></div>
-                </div>{{end}}
-                </div>
-                </div>
+                            {{if .WhatWasIsIf}}
+                                <div class="filter-dropdown" data-el="whatwasisif-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="whatwasisif-button">
+                                        What was/is/if
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="whatwasisif-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
 
-                <div class="sort-group">
-                    <span class="filter-group-label">Sort by:</span>
-                    <div class="sort-dropdown" id="sort-dropdown">
-                        <button class="filter-dropdown-button" id="sort-button">
-                            <span class="sort-dropdown-text" id="sort-text">Date experienced</span>
-                            <svg class="sort-arrow-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
+                            {{if .Weather}}
+                                <div class="filter-dropdown" data-el="weather-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="weather-button">
+                                        Weather
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="weather-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <div class="filters-group / body-sans-sm">
+                        <span class="filters-group__label / caption">Sort by:</span>
+                        <div class="filter-dropdown" data-el="sort-dropdown">
+                            <button class="filter-dropdown__trigger / dashed-button" data-el="sort-button">
+                                Date experienced
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
                             </button>
-                        <div class="filter-dropdown-content sort-dropdown-content" id="sort-content">
-                            <button class="sort-option selected" data-sort="dateExperienced">Date experienced</button>
-                            <button class="sort-option" data-sort="dateCreated">Date created</button>
-                            <button class="sort-option" data-sort="random">Random</button>
+                            <div class="filter-dropdown__options" data-el="sort-content">
+                                <button class="sort-option selected" data-sort="dateExperienced">Date experienced</button>
+                                <button class="sort-option" data-sort="dateCreated">Date created</button>
+                                <button class="sort-option" data-sort="random">Random</button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- More Filters (shown only when > 4 filter types have data) -->
+                <button type="button" class="archive-filters__toggle / caption" data-el="more-filters-toggle" style="display: none;">
+                    <span class="more-filters-text">More filters</span>
+                </button>
+                
+                <div class="archive-filters more-filters / body-sans-sm" data-el="more-filters" style="display: none;">
+                    {{if .ScalePermanence}}
+                        <div class="filter-dropdown" data-el="scalepermanence-dropdown">
+                            <button class="filter-dropdown__trigger / dashed-button" data-el="scalepermanence-button">
+                                <span class="filter-dropdown-text">Scale of permanence</span>
+                            </button>
+                            <div class="filter-dropdown__options" data-el="scalepermanence-content">
+                                <!-- Options will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    {{end}}
+
+                    {{if .TimePeriod}}
+                        <div class="filter-dropdown" data-el="timeperiod-dropdown">
+                            <button class="filter-dropdown__trigger / dashed-button" data-el="timeperiod-button">
+                                <span class="filter-dropdown-text">Time period</span>
+                            </button>
+                            <div class="filter-dropdown__options" data-el="timeperiod-content">
+                                <!-- Options will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+
+                <!-- Active Filters Display -->
+                <div class="active-filters" data-el="active-filters" style="display: none;">
+                    <div class="active-filters__list" data-el="active-filters-list"></div>
+                </div>
             </div>
 
-            <!-- More Filters (shown only when > 4 filter types have data) -->
-            <button type="button" class="more-filters-toggle" id="more-filters-toggle" style="display: none;">
-                <span class="more-filters-text">More filters</span>
-            </button>
-            <div class="archive-filters more-filters" id="more-filters" style="display: none;">
-                {{if .ScalePermanence}}<div class="filter-dropdown" id="scalepermanence-dropdown">
-                    <button class="filter-dropdown-button" id="scalepermanence-button">
-                        <span class="filter-dropdown-text">Scale of permanence</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="scalepermanence-content"></div>
-                </div>{{end}}
-
-                {{if .TimePeriod}}<div class="filter-dropdown" id="timeperiod-dropdown">
-                    <button class="filter-dropdown-button" id="timeperiod-button">
-                        <span class="filter-dropdown-text">Time period</span>
-                    </button>
-                    <div class="filter-dropdown-content" id="timeperiod-content"></div>
-                </div>{{end}}
+            <!-- Stories Container -->
+            <div class="stories-list" data-el="stories-container">
+                {{template "stories-list" .}}
             </div>
-
-            <!-- Active Filters Display -->
-            <div class="active-filters" id="active-filters" style="display: none;">
-                <div class="active-filters-list" id="active-filters-list"></div>
-            </div>
-        </div>
-        
-        <!-- Stories Container -->
-        <div class="stories-list" id="stories-container">
-            {{template "stories-list" .}}
         </div>
     </main>
-
     {{template "footer" .}}
 </body>
 
