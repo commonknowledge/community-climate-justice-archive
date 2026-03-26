@@ -92,6 +92,7 @@
   padding: 0.5rem;
   padding-right: 1.5rem; /* Extra space for checkmark */
   max-height: 320px;
+  overflow-x: clip;
   overflow-y: auto;
   border: 2px solid var(--black);
   background: var(--background);
