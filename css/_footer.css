@@ -1,0 +1,52 @@
+/* Main Footer
+
+The site footer with contact information and additional content.
+*/
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2.5rem 0;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 5rem 0;
+  }
+}
+
+/* Footer Content
+
+The main content area in the footer.
+*/
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 50ch;
+}
+
+/* Footer Address
+
+Contact information in the footer.
+*/
+.address {
+  order: -1;
+
+  @media (min-width: 768px) {
+    order: 0;
+  }
+}
+
+.address address {
+  text-decoration: underline;
+  font-style: normal;
+}
+
+/* Compilation Information
+
+Copyright and compilation information in the footer.
+*/
+.compilation-information {
+  margin-top: 2.5rem;
+}

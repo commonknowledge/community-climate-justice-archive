@@ -1,0 +1,166 @@
+/* ============================================================================
+   HEADER & NAVIGATION
+   ============================================================================ */
+
+/* header
+   Main site header (sticks to top when scrolling) */
+header {
+  background-color: var(--background);
+  position: sticky; /* Remains visible during scroll */
+  top: 0;
+  z-index: 101; /* Above popups (z-index: 100) */
+  padding: 1.25rem 0; /* 20px top and bottom */
+}
+
+/* .main-header
+   Layout for header - site title on left, navigation on right */
+.main-header {
+  display: flex;
+  justify-content: space-between; /* Pushes children apart */
+  align-items: center; /* Vertically centers */
+}
+
+/* Site title "Dudley Time Portal" — shared by header and mobile overlay */
+header h1,
+.mobile-menu-header h1 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* header h1 a
+   Site title link (no underline by default) */
+header h1 a {
+  text-decoration: none;
+}
+
+/* header h1 a:hover
+   Site title link hover (adds underline) */
+header h1 a:hover {
+  text-decoration: underline;
+}
+
+/* .header-nav
+   Holds the Wander/Archive/Random/Add navigation buttons */
+.header-nav {
+  display: flex;
+  gap: 20px; /* Space between buttons */
+  align-items: center;
+}
+
+/* .theme-toggle
+   Dark/light mode toggle button in the header nav */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.22222rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--black);
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* In dark mode, active nav buttons with yellow highlight need black text for contrast */
+[data-theme="dark"] .dashed-button[style*="background-color"] {
+  color: #000;
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      color: #000;
+    }
+  }
+}
+
+/* .header-nav .dashed-button
+   Navigation buttons (Wander, Archive, Random, Add) */
+.header-nav .dashed-button {
+  height: 41px;
+  padding: 5px 10px;
+  text-transform: lowercase;
+}
+
+/* .header-nav .dashed-button:hover
+   Navigation button hover state (repeats padding to prevent movement) */
+.header-nav .dashed-button:hover {
+  padding: 5px 10px;
+}
+
+/* Mobile Menu Toggle Button - Hidden by default (desktop), shown only on mobile */
+.mobile-menu-toggle {
+  display: none;
+}
+
+/* Mobile Menu Overlay - Full screen navigation */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background);
+  z-index: 200;
+  flex-direction: column;
+  padding: 1.25rem;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    &.is-open {
+      display: flex;
+    }
+  }
+}
+
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2rem;
+}
+
+.mobile-menu-header h1 a {
+  text-decoration: none;
+  color: var(--black);
+}
+
+/* Mobile navigation links */
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1.25rem;
+}
+
+.mobile-menu-link {
+  width: 100%;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.mobile-menu-link.active {
+  background-color: var(--highlight-yellow);
+  color: black;
+  border-style: solid;
+}
+
+.header-nav-desktop {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.mobile-menu-toggle {
+  @media (max-width: 768px) {
+    display: inline-flex;
+  }
+}

@@ -20,6 +20,12 @@
 <script>
     // Wait for the page to finish loading before running this code
     document.addEventListener('DOMContentLoaded', () => {
+        // Only enable hover popups on devices that support true hover (desktop/laptop)
+        const canUseHoverPopups = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (!canUseHoverPopups) {
+            return;
+        }
+
         // How long to wait before showing/hiding popups (in milliseconds)
         // These delays prevent flickering when moving the mouse around
         const HOVER_SHOW_DELAY = 150;  // Wait 150ms before showing a popup
@@ -50,6 +56,17 @@
         // Check if a popup is currently open
         const isOpen = (popup) => popup.dataset.storyOpen === 'true';
 
+        // Safely call closest() even when event targets are text nodes or other non-Elements
+        const closestFromTarget = (target, selector) => {
+            if (target instanceof Element) {
+                return target.closest(selector);
+            }
+            if (target && target.parentElement instanceof Element) {
+                return target.parentElement.closest(selector);
+            }
+            return null;
+        };
+
         // Close all open popups
         function closeAllPopups() {
             // Cancel any pending hide timeout
@@ -69,7 +86,6 @@
         // Show the popup for a specific story
         function showPopup(container) {
             const storyId = container.dataset.storyId;
-            console.log(`Opening popup for story ${storyId}`);
 
             // Try to find the popup in our cache first
             let storyPopup = popupCache.get(storyId);
@@ -136,7 +152,7 @@
         // When the mouse enters a story preview...
         document.addEventListener('mouseenter', (e) => {
             // Check if the mouse entered a story container
-            const container = e.target.closest('.story-image-container');
+            const container = closestFromTarget(e.target, '.story-image-container');
             if (!container) return;  // Not a story container, ignore
             
             const storyId = container.dataset.storyId;
@@ -166,7 +182,7 @@
 
         // When the mouse leaves a story preview...
         document.addEventListener('mouseleave', (e) => {
-            const container = e.target.closest('.story-image-container');
+            const container = closestFromTarget(e.target, '.story-image-container');
             if (!container) return;
             
             const storyId = container.dataset.storyId;
@@ -199,7 +215,7 @@
         
         // When the mouse enters the popup's text area...
         document.addEventListener('mouseenter', (e) => {
-            const popupText = e.target.closest('.story-popup-text');
+            const popupText = closestFromTarget(e.target, '.story-popup-text');
             if (!popupText) return;
             
             const popup = popupText.closest('.story-popup');
@@ -215,7 +231,7 @@
 
         // When the mouse leaves the popup's text area...
         document.addEventListener('mouseleave', (e) => {
-            const popupText = e.target.closest('.story-popup-text');
+            const popupText = closestFromTarget(e.target, '.story-popup-text');
             if (!popupText) return;
             
             const popup = popupText.closest('.story-popup');

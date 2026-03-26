@@ -713,17 +713,11 @@ class ArchiveFilters {
             
             storyDiv.innerHTML = content;
         } else {
+            // Text-only story - show the finding text in the card
             storyDiv.innerHTML = `
-                <a class="story-image-container no-attachment" href="${story.url}" data-story-id="${story.id}">
-                    <div class="story-no-attachment">
-                        <div class="no-attachment-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                <polyline points="21,15 16,10 5,21"></polyline>
-                            </svg>
-                        </div>
-                        <div class="no-attachment-text">View story</div>
+                <a class="story-image-container story-text-only-card" href="${story.url}" data-story-id="${story.id}">
+                    <div class="story-text-only-preview">
+                        <p class="story-text-only-preview-text">${story.finding}</p>
                     </div>
                 </a>
             `;
@@ -768,15 +762,10 @@ class ArchiveFilters {
                 `;
             }
         } else {
+            // Text-only story - show text in popup
             popupContent = `
-                <div class="popup-no-attachment">
-                    <div class="no-attachment-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21,15 16,10 5,21"></polyline>
-                        </svg>
-                    </div>
+                <div class="popup-text-only">
+                    <p class="popup-text-only-content">${story.finding}</p>
                 </div>
             `;
         }
@@ -1078,14 +1067,6 @@ class ArchiveFilters {
             this.updateDropdownDisplay();
             this.applyFilters();
             this.updateActiveFiltersDisplay();
-        }
-    }
-    
-    updateSelectFromFilters(dropdownType, filterValues) {
-        // This method is now handled by updateDropdownDisplay()
-        // but we keep it for compatibility with loadFiltersFromURL
-        if (this.filterData) {
-            this.updateDropdownDisplay();
         }
     }
     
