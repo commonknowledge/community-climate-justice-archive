@@ -22,9 +22,11 @@
 
 <body>
     {{template "header" .}}
-    <div class="theme-index-header">Items for: <span class="tag medium" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></div>
-    <div class="stories-list standard-margins">
-        {{template "stories-list" .}}
+    <div class="container">
+        <h2 class="h2">Items for: <span class="tag large" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span></h2>
+        <div class="stories-list">
+            {{template "stories-list" .}}
+        </div>
     </div>
     {{template "footer" .}}
 </body>

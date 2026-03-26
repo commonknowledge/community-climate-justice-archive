@@ -1,0 +1,61 @@
+/*
+ Modern CSS Reset based on Josh W. Comeau's CSS Reset:
+ https://www.joshwcomeau.com/css/custom-css-reset/
+*/
+
+/* 1. Use a more-intuitive box-sizing model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 3. Enable keyword animations */
+html {
+  @media (prefers-reduced-motion: no-preference) {
+    interpolate-size: allow-keywords;
+  }
+}
+
+:root {
+  font-size: 16px; /* Base font size for rem calculations */
+}
+
+
+body {
+  margin: 0;
+  background-color: var(--background); /* #FFFAF3 cream colour */
+  color: var(--black); /* Default text colour for all elements */
+  max-width: 100%; /* 100% of viewport width */
+  overflow-x: clip; /* Hides horizontal scrollbar */
+}
+
+
+/* 6. Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 7. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 8. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}

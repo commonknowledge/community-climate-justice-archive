@@ -62,655 +62,657 @@
     {{if $attachments}}
         {{$multipleAttachments := gt (len $attachments) 1}}
     
-    <!-- Navigation container with arrows outside the attachment loop -->
-    <div class="story-attachment-navigation">
-        {{if $multipleAttachments}}
-        <div class="story-nav-arrow">
-            <a href="#" onclick="previousAttachment(); return false;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
-                    <path
-                        d="M42.6395 11.57C43.1195 11.8233 43.3595 12.1433 43.3595 12.53C43.3595 12.9167 43.1195 13.2367 42.6395 13.49H5.96945L6.10945 13.63C9.40945 16.1633 11.5695 19.3967 12.5895 23.33C12.7828 24.0367 12.8795 24.4367 12.8795 24.53C12.8795 24.8833 12.5428 25.06 11.8695 25.06C11.4895 25.06 11.2428 25.02 11.1295 24.94C11.0161 24.86 10.9295 24.66 10.8695 24.34C10.8028 24.1133 10.7361 23.84 10.6695 23.52C10.0961 21.1867 9.00279 19.1067 7.38945 17.28C5.76945 15.46 3.82279 14.1 1.54945 13.2C1.06945 13.0067 0.782786 12.83 0.689453 12.67C0.689453 12.2567 0.97612 11.9867 1.54945 11.86C3.82279 10.96 5.76945 9.6 7.38945 7.78C9.00279 5.95333 10.0961 3.87333 10.6695 1.54C10.7028 1.44 10.7361 1.29667 10.7695 1.11C10.8028 0.916667 10.8261 0.786668 10.8395 0.720001C10.8595 0.660001 10.8928 0.563334 10.9395 0.43C10.9861 0.303334 11.0428 0.216667 11.1095 0.17C11.1695 0.123333 11.2628 0.0833345 11.3895 0.0500011C11.5228 0.0166678 11.6828 0 11.8695 0C12.5428 0 12.8795 0.176667 12.8795 0.530001C12.8795 0.623334 12.7828 1.02333 12.5895 1.73C11.6295 5.53667 9.46945 8.77 6.10945 11.43L5.96945 11.57H42.6395Z"
-                        fill="#404040" />
-                </svg>
-            </a>
-        </div>
-        {{end}}
-        
-        <!-- Attachment content loop -->
-        {{range $index, $attachment := $attachments}}
-        <div class="story-image-container attachment-item" data-attachment-index="{{$index}}" {{if ne $index 0}}style="display: none;"{{end}}>
-        {{if $attachment.IsImage}}
-            <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
-        {{else if $attachment.IsAudio}}
-            <div class="story-audio">
-                <audio controls>
-                    <source src="{{$attachment.URL}}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            </div>
-        {{else if $attachment.IsDocument}}
-            <div class="story-document">
-                <div class="document-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
+    <div class="container">
+        <!-- Navigation container with arrows outside the attachment loop -->
+        <div class="story-attachment-navigation">
+            {{if $multipleAttachments}}
+            <div class="story-nav-arrow">
+                <a href="#" onclick="previousAttachment(); return false;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
+                        <path
+                            d="M42.6395 11.57C43.1195 11.8233 43.3595 12.1433 43.3595 12.53C43.3595 12.9167 43.1195 13.2367 42.6395 13.49H5.96945L6.10945 13.63C9.40945 16.1633 11.5695 19.3967 12.5895 23.33C12.7828 24.0367 12.8795 24.4367 12.8795 24.53C12.8795 24.8833 12.5428 25.06 11.8695 25.06C11.4895 25.06 11.2428 25.02 11.1295 24.94C11.0161 24.86 10.9295 24.66 10.8695 24.34C10.8028 24.1133 10.7361 23.84 10.6695 23.52C10.0961 21.1867 9.00279 19.1067 7.38945 17.28C5.76945 15.46 3.82279 14.1 1.54945 13.2C1.06945 13.0067 0.782786 12.83 0.689453 12.67C0.689453 12.2567 0.97612 11.9867 1.54945 11.86C3.82279 10.96 5.76945 9.6 7.38945 7.78C9.00279 5.95333 10.0961 3.87333 10.6695 1.54C10.7028 1.44 10.7361 1.29667 10.7695 1.11C10.8028 0.916667 10.8261 0.786668 10.8395 0.720001C10.8595 0.660001 10.8928 0.563334 10.9395 0.43C10.9861 0.303334 11.0428 0.216667 11.1095 0.17C11.1695 0.123333 11.2628 0.0833345 11.3895 0.0500011C11.5228 0.0166678 11.6828 0 11.8695 0C12.5428 0 12.8795 0.176667 12.8795 0.530001C12.8795 0.623334 12.7828 1.02333 12.5895 1.73C11.6295 5.53667 9.46945 8.77 6.10945 11.43L5.96945 11.57H42.6395Z"
+                            fill="#404040" />
                     </svg>
-                </div>
-                <a href="{{$attachment.URL}}" download="{{$attachment.Filename}}" class="download-link">
-                    Download {{$attachment.Filename}}
                 </a>
+            </div>
+            {{end}}
+            
+            <!-- Attachment content loop -->
+            {{range $index, $attachment := $attachments}}
+            <div class="story-image-container attachment-item" data-attachment-index="{{$index}}" {{if ne $index 0}}style="display: none;"{{end}}>
+            {{if $attachment.IsImage}}
+                <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
+            {{else if $attachment.IsAudio}}
+                <div class="story-audio">
+                    <audio controls>
+                        <source src="{{$attachment.URL}}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            {{else if $attachment.IsDocument}}
+                <div class="story-document">
+                    <div class="document-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10,9 9,9 8,9"></polyline>
+                        </svg>
+                    </div>
+                    <a href="{{$attachment.URL}}" download="{{$attachment.Filename}}" class="download-link">
+                        Download {{$attachment.Filename}}
+                    </a>
+                    </div>
+                {{end}}
                 </div>
             {{end}}
-            </div>
-        {{end}}
-        
-        {{if $multipleAttachments}}
-        <div class="story-nav-arrow">
-            <a href="#" onclick="nextAttachment(); return false;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
-                    <path
-                        d="M1.35945 13.49C0.912786 13.2633 0.689453 12.9433 0.689453 12.53C0.689453 12.1167 0.912786 11.7967 1.35945 11.57H38.0795C35.8061 9.87667 34.0461 7.83 32.7995 5.43C31.9995 3.89 31.4728 2.37 31.2195 0.870001C31.2195 0.803334 31.2095 0.736667 31.1895 0.67C31.1761 0.61 31.1695 0.563334 31.1695 0.530001C31.1695 0.176667 31.4895 0 32.1295 0C32.5095 0 32.7561 0.0400008 32.8695 0.120001C32.9828 0.200001 33.0728 0.383333 33.1395 0.67C33.2328 1.31 33.4061 1.96667 33.6595 2.64C34.3661 4.78667 35.5361 6.7 37.1695 8.38C38.8028 10.06 40.7061 11.2667 42.8795 12C43.1661 12.1 43.3095 12.2767 43.3095 12.53C43.3095 12.7833 43.1661 12.96 42.8795 13.06C40.7061 13.7933 38.8028 15 37.1695 16.68C35.5361 18.36 34.3661 20.2733 33.6595 22.42C33.4395 23.0933 33.2661 23.7333 33.1395 24.34C33.0728 24.66 32.9828 24.86 32.8695 24.94C32.7561 25.02 32.5095 25.06 32.1295 25.06C31.4561 25.06 31.1195 24.8833 31.1195 24.53C31.1195 24.4367 31.2161 24.0367 31.4095 23.33C32.4028 19.33 34.6261 16.05 38.0795 13.49H1.35945Z"
-                        fill="#404040" />
-                </svg>
-            </a>
-        </div>
-        {{end}}
-    </div>
-    
-    <script>
-        {{if gt (len $attachments) 1}}
-        let currentAttachmentIndex = 0;
-        const totalAttachments = {{len $attachments}};
-        
-        function showAttachment(index) {
-            // Hide all attachments
-            document.querySelectorAll('.attachment-item').forEach(item => {
-                item.style.display = 'none';
-            });
             
-            // Show current attachment
-            const currentItem = document.querySelector(`[data-attachment-index="${index}"]`);
-            if (currentItem) {
-                currentItem.style.display = 'block';
+            {{if $multipleAttachments}}
+            <div class="story-nav-arrow">
+                <a href="#" onclick="nextAttachment(); return false;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="26" viewBox="0 0 44 26" fill="none">
+                        <path
+                            d="M1.35945 13.49C0.912786 13.2633 0.689453 12.9433 0.689453 12.53C0.689453 12.1167 0.912786 11.7967 1.35945 11.57H38.0795C35.8061 9.87667 34.0461 7.83 32.7995 5.43C31.9995 3.89 31.4728 2.37 31.2195 0.870001C31.2195 0.803334 31.2095 0.736667 31.1895 0.67C31.1761 0.61 31.1695 0.563334 31.1695 0.530001C31.1695 0.176667 31.4895 0 32.1295 0C32.5095 0 32.7561 0.0400008 32.8695 0.120001C32.9828 0.200001 33.0728 0.383333 33.1395 0.67C33.2328 1.31 33.4061 1.96667 33.6595 2.64C34.3661 4.78667 35.5361 6.7 37.1695 8.38C38.8028 10.06 40.7061 11.2667 42.8795 12C43.1661 12.1 43.3095 12.2767 43.3095 12.53C43.3095 12.7833 43.1661 12.96 42.8795 13.06C40.7061 13.7933 38.8028 15 37.1695 16.68C35.5361 18.36 34.3661 20.2733 33.6595 22.42C33.4395 23.0933 33.2661 23.7333 33.1395 24.34C33.0728 24.66 32.9828 24.86 32.8695 24.94C32.7561 25.02 32.5095 25.06 32.1295 25.06C31.4561 25.06 31.1195 24.8833 31.1195 24.53C31.1195 24.4367 31.2161 24.0367 31.4095 23.33C32.4028 19.33 34.6261 16.05 38.0795 13.49H1.35945Z"
+                            fill="#404040" />
+                    </svg>
+                </a>
+            </div>
+            {{end}}
+        </div>
+        
+        <script>
+            {{if gt (len $attachments) 1}}
+            let currentAttachmentIndex = 0;
+            const totalAttachments = {{len $attachments}};
+            
+            function showAttachment(index) {
+                // Hide all attachments
+                document.querySelectorAll('.attachment-item').forEach(item => {
+                    item.style.display = 'none';
+                });
+                
+                // Show current attachment
+                const currentItem = document.querySelector(`[data-attachment-index="${index}"]`);
+                if (currentItem) {
+                    currentItem.style.display = 'block';
+                }
+                
+                currentAttachmentIndex = index;
             }
             
-            currentAttachmentIndex = index;
-        }
-        
-        function nextAttachment() {
-            const nextIndex = (currentAttachmentIndex + 1) % totalAttachments;
-            showAttachment(nextIndex);
-        }
-        
-        function previousAttachment() {
-            const prevIndex = (currentAttachmentIndex - 1 + totalAttachments) % totalAttachments;
-            showAttachment(prevIndex);
-        }
-        {{end}}
-    </script>
-    {{else}}
-    <div class="story-no-attachments">
-        <div class="no-attachment-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21,15 16,10 5,21"></polyline>
-            </svg>
-        </div>
-        <p>This story has no attached media</p>
-    </div>
-    {{end}}
-    <div class="story-details">
-        <div class="story-finding">
-            {{$story.Finding}}
-        </div>
-        <div class="story-metadata">
-            <div class="story-metadata-item-group">
-                {{if $story.CreatedTime}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Created</span>
-                    <span class="story-metadata-item-value">{{$story.CreatedTime}}</span>
-                </div>
-                {{end}}
-                {{if $story.EndDateTime}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Added to Archive</span>
-                    <span class="story-metadata-item-value">{{$story.EndDateTime}}</span>
-                </div>
-                {{end}}
-                {{if $story.StartDateTime}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Experienced</span>
-                    <span class="story-metadata-item-value">{{$story.StartDateTime}}</span>
-                </div>
-                {{end}}
-                {{if $story.UpdatedAt}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Last Updated</span>
-                    <span class="story-metadata-item-value">{{$story.UpdatedAt}}</span>
-                </div>
-                {{end}}
-                {{if $story.Location}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Location</span>
-                    <span class="story-metadata-item-value">{{$story.Location}}</span>
-                </div>
-                {{end}}
-                {{if $story.Season}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Season</span>
-                    <span class="story-metadata-item-value">{{$story.Season}}</span>
-                </div>
-                {{end}}
-                {{if $story.StreetDetectoristClue}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Street Detectorist Clue</span>
-                    <span class="story-metadata-item-value">{{$story.StreetDetectoristClue}}</span>
-                </div>
-                {{end}}
-                {{if $story.Experience}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Experience</span>
-                    <span class="story-metadata-item-value">{{$story.Experience}}</span>
-                </div>
-                {{end}}
-                {{if $story.ReflectionLearning}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Reflection / Learning</span>
-                    <span class="story-metadata-item-value">{{$story.ReflectionLearning}}</span>
-                </div>
-                {{end}}
-                {{if $story.TimeSpan}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Time Span</span>
-                    <span class="story-metadata-item-value">{{$story.TimeSpan}}</span>
-                </div>
-                {{end}}
-                {{if $story.OtherComments}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Other Comments</span>
-                    <span class="story-metadata-item-value">{{$story.OtherComments}}</span>
-                </div>
-                {{end}}
-                {{if $story.PersonFinder}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Person Finder</span>
-                    <span class="story-metadata-item-value">{{$story.PersonFinder}}</span>
-                </div>
-                {{end}}
-            </div>
+            function nextAttachment() {
+                const nextIndex = (currentAttachmentIndex + 1) % totalAttachments;
+                showAttachment(nextIndex);
+            }
             
-            <div class="story-metadata-item-group">
-                {{if $story.Type}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Type</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.Type}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.Weather}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Weather</span>
-                    <span class="story-metadata-item-value tags">
-                        {{ range $story.Weather }}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.Themes}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Themes</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.GiftedBy}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Gifted or co-created by</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.GiftedBy}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.ScalePermanence}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Scale of permanence</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.ScalePermanence}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.WhatWasIsIf}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">What was/is/if</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.WhatWasIsIf}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
-                {{if $story.TimePeriod}}
-                <div class="story-metadata-item">
-                    <span class="story-metadata-item-label">Time period</span>
-                    <span class="story-metadata-item-value tags">
-                        {{range $story.TimePeriod}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
-                        {{end}}
-                    </span>
-                </div>
-                {{end}}
+            function previousAttachment() {
+                const prevIndex = (currentAttachmentIndex - 1 + totalAttachments) % totalAttachments;
+                showAttachment(prevIndex);
+            }
+            {{end}}
+        </script>
+        {{else}}
+        <div class="story-no-attachments">
+            <div class="no-attachment-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21,15 16,10 5,21"></polyline>
+                </svg>
             </div>
-        </div>
-    </div>
-    
-    <div class="story-connections">
-        {{if $story.InspiredBy}}
-        <div class="story-connections-section">
-            <h2 class="story-connections-title">Inspired by</h2>
-            <div class="story-connections-grid">
-                {{range $story.InspiredBy}}
-                <a href="{{.URL}}" class="big-button">
-                    {{if eq .AttachmentType "image"}}
-                    <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
-                    {{else if eq .AttachmentType "audio"}}
-                        <div class="big-button-image">
-                            <div class="story-audio-preview">
-                                <div class="audio-play-button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    {{else if eq .AttachmentType "document"}}
-                        <div class="big-button-image">
-                            <div class="story-document-preview">
-                                <div class="document-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    {{else}}
-                        <div class="big-button-image">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    {{end}}
-                    <div class="big-button-content">
-                        <p class="big-button-title">{{.Finding}}</p>
-                    </div>
-                </a>
-                {{end}}
-            </div>
+            <p>This story has no attached media</p>
         </div>
         {{end}}
+        <div class="story-details">
+            <div class="story-finding body">
+                {{$story.Finding}}
+            </div>
+            <div class="story-metadata">
+                <div class="story-metadata-item-group">
+                    {{if $story.CreatedTime}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Created</span>
+                        <span class="story-metadata-item-value">{{$story.CreatedTime}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.EndDateTime}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Added to Archive</span>
+                        <span class="story-metadata-item-value">{{$story.EndDateTime}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.StartDateTime}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Experienced</span>
+                        <span class="story-metadata-item-value">{{$story.StartDateTime}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.UpdatedAt}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Last Updated</span>
+                        <span class="story-metadata-item-value">{{$story.UpdatedAt}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.Location}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Location</span>
+                        <span class="story-metadata-item-value">{{$story.Location}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.Season}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Season</span>
+                        <span class="story-metadata-item-value">{{$story.Season}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.StreetDetectoristClue}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Street Detectorist Clue</span>
+                        <span class="story-metadata-item-value">{{$story.StreetDetectoristClue}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.Experience}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Experience</span>
+                        <span class="story-metadata-item-value">{{$story.Experience}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.ReflectionLearning}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Reflection / Learning</span>
+                        <span class="story-metadata-item-value">{{$story.ReflectionLearning}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.TimeSpan}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Time Span</span>
+                        <span class="story-metadata-item-value">{{$story.TimeSpan}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.OtherComments}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Other Comments</span>
+                        <span class="story-metadata-item-value">{{$story.OtherComments}}</span>
+                    </div>
+                    {{end}}
+                    {{if $story.PersonFinder}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Person Finder</span>
+                        <span class="story-metadata-item-value">{{$story.PersonFinder}}</span>
+                    </div>
+                    {{end}}
+                </div>
+                
+                <div class="story-metadata-item-group">
+                    {{if $story.Type}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Type</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.Type}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.Weather}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Weather</span>
+                        <span class="story-metadata-item-value tags">
+                            {{ range $story.Weather }}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.Themes}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Themes</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.GiftedBy}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Gifted or co-created by</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.GiftedBy}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.ScalePermanence}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Scale of permanence</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.ScalePermanence}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.WhatWasIsIf}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">What was/is/if</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.WhatWasIsIf}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.TimePeriod}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Time period</span>
+                        <span class="story-metadata-item-value tags">
+                            {{range $story.TimePeriod}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
         
-        {{if $story.HasInspired}}
-        <div class="story-connections-section">
-            <h2 class="story-connections-title">Has inspired</h2>
-            <div class="story-connections-grid">
-                {{range $story.HasInspired}}
-                <a href="{{.URL}}" class="big-button">
-                    {{if eq .AttachmentType "image"}}
-                    <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
-                    {{else if eq .AttachmentType "audio"}}
-                        <div class="big-button-image">
-                            <div class="story-audio-preview">
-                                <div class="audio-play-button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                    </svg>
+        <div class="story-connections">
+            {{if $story.InspiredBy}}
+            <div class="story-connections-section">
+                <h2 class="story-connections-title">Inspired by</h2>
+                <div class="story-connections-grid">
+                    {{range $story.InspiredBy}}
+                    <a href="{{.URL}}" class="big-button">
+                        {{if eq .AttachmentType "image"}}
+                        <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                        {{else if eq .AttachmentType "audio"}}
+                            <div class="big-button-image">
+                                <div class="story-audio-preview">
+                                    <div class="audio-play-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {{else if eq .AttachmentType "document"}}
-                        <div class="big-button-image">
-                            <div class="story-document-preview">
-                                <div class="document-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
+                        {{else if eq .AttachmentType "document"}}
+                            <div class="big-button-image">
+                                <div class="story-document-preview">
+                                    <div class="document-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {{else}}
-                        <div class="big-button-image">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
+                        {{else}}
+                            <div class="big-button-image">
+                                <div class="story-no-attachment">
+                                    <div class="no-attachment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
+                        {{end}}
+                        <div class="big-button-content">
+                            <p class="big-button-title">{{.Finding}}</p>
                         </div>
+                    </a>
                     {{end}}
-                    <div class="big-button-content">
-                        <p class="big-button-title">{{.Finding}}</p>
+                </div>
+            </div>
+            {{end}}
+            
+            {{if $story.HasInspired}}
+            <div class="story-connections-section">
+                <h2 class="story-connections-title">Has inspired</h2>
+                <div class="story-connections-grid">
+                    {{range $story.HasInspired}}
+                    <a href="{{.URL}}" class="big-button">
+                        {{if eq .AttachmentType "image"}}
+                        <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                        {{else if eq .AttachmentType "audio"}}
+                            <div class="big-button-image">
+                                <div class="story-audio-preview">
+                                    <div class="audio-play-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        {{else if eq .AttachmentType "document"}}
+                            <div class="big-button-image">
+                                <div class="story-document-preview">
+                                    <div class="document-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        {{else}}
+                            <div class="big-button-image">
+                                <div class="story-no-attachment">
+                                    <div class="no-attachment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        {{end}}
+                        <div class="big-button-content">
+                            <p class="big-button-title">{{.Finding}}</p>
+                        </div>
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <div class="related-stories-container">
+            {{if .FirstMoreTaggedStories}}
+            <div class="related-stories-item">
+                <h3 class="body-sans-lg">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
+                    {{if .FirstMoreTaggedStories.Tag}}
+                    <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
+                    {{else}}
+                    <span class="tag large">unknown</span>
+                    {{end}}
+                </h3>
+                {{if gt (len .FirstMoreTaggedStories.Stories) 0}}
+                <div class="related-stories">
+                {{range .FirstMoreTaggedStories.Stories}}
+                    <div class="related-story">
+                        {{ $story := . }}
+                        {{ $attachment := .GetStoryAttachment }}
+                        
+                        {{if and $attachment.URL $attachment.IsImage}}
+                            <!-- Images: use original related-story-image class for proper sizing -->
+                        <a href="{{$story.URL}}" class="related-story-link">
+                            <img 
+                                class="related-story-image" 
+                                    src="{{$attachment.ThumbURL}}" 
+                                srcset="
+                                        {{$attachment.ThumbURL}} 300w,
+                                        {{$attachment.MediumURL}} 800w
+                                "
+                                sizes="(max-width: 600px) 300px, 800px"
+                                    alt="{{$attachment.AlternativeText}}">
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsAudio}}
+                            <!-- Audio: show audio preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-audio-preview">
+                                    <div class="audio-play-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div class="audio-filename">{{$attachment.Filename}}</div>
+                                </div>
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsDocument}}
+                            <!-- Documents: show document preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-document-preview">
+                                    <div class="document-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="document-filename">{{$attachment.Filename}}</div>
+                                </div>
+                            </a>
+                        {{else}}
+                            <!-- No attachments: show placeholder -->
+                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
+                                <div class="story-no-attachment">
+                                    <div class="no-attachment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="no-attachment-text">View story</div>
+                                </div>
+                        </a>
+                        {{end}}
                     </div>
-                </a>
+                {{end}}
+                </div>
                 {{end}}
             </div>
-        </div>
-        {{end}}
-    </div>
-
-    <div class="related-stories-container">
-        {{if .FirstMoreTaggedStories}}
-        <div class="related-stories-item">
-            <div class="related-stories-item-title">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
-                {{if .FirstMoreTaggedStories.Tag}}
-                <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
-                {{else}}
-                <span class="tag large">unknown</span>
-                {{end}}
-            </div>
-            {{if gt (len .FirstMoreTaggedStories.Stories) 0}}
-            <div class="related-stories">
-            {{range .FirstMoreTaggedStories.Stories}}
-                <div class="related-story">
-                    {{ $story := . }}
-                    {{ $attachment := .GetStoryAttachment }}
-                    
-                    {{if and $attachment.URL $attachment.IsImage}}
-                        <!-- Images: use original related-story-image class for proper sizing -->
-                    <a href="{{$story.URL}}">
-                        <img 
-                            class="related-story-image" 
-                                src="{{$attachment.ThumbURL}}" 
-                            srcset="
-                                    {{$attachment.ThumbURL}} 300w,
-                                    {{$attachment.MediumURL}} 800w
-                            "
-                            sizes="(max-width: 600px) 300px, 800px"
-                                alt="{{$attachment.AlternativeText}}">
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsAudio}}
-                        <!-- Audio: show audio preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-audio-preview">
-                                <div class="audio-play-button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                    </svg>
-                                </div>
-                                <div class="audio-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsDocument}}
-                        <!-- Documents: show document preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-document-preview">
-                                <div class="document-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="document-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
+            {{end}}
+            {{if .SecondMoreTaggedStories}}
+            <div class="related-stories-item">
+                <h3 class="body-sans-lg">More tagged with {{ .SecondMoreTaggedStories.TagType }} 
+                    {{if .SecondMoreTaggedStories.Tag}}
+                    <a class="tag large" href="{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
                     {{else}}
-                        <!-- No attachments: show placeholder -->
-                        <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
+                    <span class="tag large">unknown</span>
+                    {{end}}
+                </h3>
+                {{if gt (len .SecondMoreTaggedStories.Stories) 0}}
+                <div class="related-stories">
+                {{range .SecondMoreTaggedStories.Stories}}
+                    <div class="related-story">
+                        {{ $story := . }}
+                        {{ $attachment := .GetStoryAttachment }}
+                        
+                        {{if and $attachment.URL $attachment.IsImage}}
+                            <!-- Images: use original related-story-image class for proper sizing -->
+                        <a href="{{$story.URL}}" class="related-story-link">
+                            <img 
+                                class="related-story-image" 
+                                    src="{{$attachment.ThumbURL}}" 
+                                srcset="
+                                        {{$attachment.ThumbURL}} 300w,
+                                        {{$attachment.MediumURL}} 800w
+                                "
+                                sizes="(max-width: 600px) 300px, 800px"
+                                    alt="{{$attachment.AlternativeText}}">
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsAudio}}
+                            <!-- Audio: show audio preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-audio-preview">
+                                    <div class="audio-play-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div class="audio-filename">{{$attachment.Filename}}</div>
                                 </div>
-                                <div class="no-attachment-text">View story</div>
-                            </div>
-                    </a>
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsDocument}}
+                            <!-- Documents: show document preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-document-preview">
+                                    <div class="document-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="document-filename">{{$attachment.Filename}}</div>
+                                </div>
+                            </a>
+                        {{else}}
+                            <!-- No attachments: show placeholder -->
+                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
+                                <div class="story-no-attachment">
+                                    <div class="no-attachment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="no-attachment-text">View story</div>
+                                </div>
+                        </a>
+                        {{end}}
+                    </div>
+                {{end}}
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+            {{if .ThirdMoreTaggedStories }}
+            <div class="related-stories-item">
+                <h3 class="body-sans-lg">More tagged with {{ .ThirdMoreTaggedStories.TagType }} 
+                    {{if .ThirdMoreTaggedStories.Tag}}
+                    <a class="tag large" href="{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
+                    {{else}}
+                    <span class="tag large">unknown</span>
+                    {{end}}
+                </h3>
+                {{if gt (len .ThirdMoreTaggedStories.Stories) 0}}
+                <div class="related-stories">
+                {{range .ThirdMoreTaggedStories.Stories}}
+                    <div class="related-story">
+                        {{ $story := . }}
+                        {{ $attachment := .GetStoryAttachment }}
+                        
+                        {{if and $attachment.URL $attachment.IsImage}}
+                            <!-- Images: use original related-story-image class for proper sizing -->
+                        <a href="{{$story.URL}}" class="related-story-link">
+                            <img 
+                                class="related-story-image" 
+                                    src="{{$attachment.ThumbURL}}" 
+                                srcset="
+                                        {{$attachment.ThumbURL}} 300w,
+                                        {{$attachment.MediumURL}} 800w
+                                "
+                                sizes="(max-width: 600px) 300px, 800px"
+                                    alt="{{$attachment.AlternativeText}}">
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsAudio}}
+                            <!-- Audio: show audio preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-audio-preview">
+                                    <div class="audio-play-button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                                        </svg>
+                                    </div>
+                                    <div class="audio-filename">{{$attachment.Filename}}</div>
+                                </div>
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsDocument}}
+                            <!-- Documents: show document preview -->
+                            <a class="story-image-container" href="{{$story.URL}}">
+                                <div class="story-document-preview">
+                                    <div class="document-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14,2 14,8 20,8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10,9 9,9 8,9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="document-filename">{{$attachment.Filename}}</div>
+                                </div>
+                            </a>
+                        {{else}}
+                            <!-- No attachments: show placeholder -->
+                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
+                                <div class="story-no-attachment">
+                                    <div class="no-attachment-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="no-attachment-text">View story</div>
+                                </div>
+                        </a>
+                        {{end}}
+                    </div>
+                {{end}}
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+
+        <div class="story-navigation">
+            {{if .LastStory.ID}}
+            <a href="{{.LastStory.URL}}" class="story-nav-button previous">
+                <div class="story-nav-image">
+                    {{$prevAttachment := .LastStory.GetStoryAttachment}}
+                    {{if and $prevAttachment.URL $prevAttachment.IsImage}}
+                    <img src="{{$prevAttachment.ThumbURL}}" alt="{{$prevAttachment.AlternativeText}}">
+                    {{else}}
+                    <div class="story-no-attachment">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                    </div>
                     {{end}}
                 </div>
+                <div class="story-nav-text">
+                    <p class="story-nav-label">Previous</p>
+                </div>
+            </a>
+            {{else}}
+            <div></div>
             {{end}}
-            </div>
-            {{end}}
-        </div>
-        {{end}}
-        {{if .SecondMoreTaggedStories}}
-        <div class="related-stories-item">
-            <div class="related-stories-item-title">More tagged with {{ .SecondMoreTaggedStories.TagType }} 
-                {{if .SecondMoreTaggedStories.Tag}}
-                <a class="tag large" href="{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
-                {{else}}
-                <span class="tag large">unknown</span>
-                {{end}}
-            </div>
-            {{if gt (len .SecondMoreTaggedStories.Stories) 0}}
-            <div class="related-stories">
-            {{range .SecondMoreTaggedStories.Stories}}
-                <div class="related-story">
-                    {{ $story := . }}
-                    {{ $attachment := .GetStoryAttachment }}
-                    
-                    {{if and $attachment.URL $attachment.IsImage}}
-                        <!-- Images: use original related-story-image class for proper sizing -->
-                    <a href="{{$story.URL}}">
-                        <img 
-                            class="related-story-image" 
-                                src="{{$attachment.ThumbURL}}" 
-                            srcset="
-                                    {{$attachment.ThumbURL}} 300w,
-                                    {{$attachment.MediumURL}} 800w
-                            "
-                            sizes="(max-width: 600px) 300px, 800px"
-                                alt="{{$attachment.AlternativeText}}">
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsAudio}}
-                        <!-- Audio: show audio preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-audio-preview">
-                                <div class="audio-play-button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                    </svg>
-                                </div>
-                                <div class="audio-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsDocument}}
-                        <!-- Documents: show document preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-document-preview">
-                                <div class="document-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="document-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
+
+            {{if .NextStory.ID}}
+            <a href="{{.NextStory.URL}}" class="story-nav-button next">
+                <div class="story-nav-text">
+                    <p class="story-nav-label">Next</p>
+                </div>
+                <div class="story-nav-image">
+                    {{$nextAttachment := .NextStory.GetStoryAttachment}}
+                    {{if and $nextAttachment.URL $nextAttachment.IsImage}}
+                    <img src="{{$nextAttachment.ThumbURL}}" alt="{{$nextAttachment.AlternativeText}}">
                     {{else}}
-                        <!-- No attachments: show placeholder -->
-                        <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="no-attachment-text">View story</div>
-                            </div>
-                    </a>
+                    <div class="story-no-attachment">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                    </div>
                     {{end}}
                 </div>
-            {{end}}
-            </div>
-            {{end}}
-        </div>
-        {{end}}
-        {{if .ThirdMoreTaggedStories}}
-        <div class="related-stories-item">
-            <div class="related-stories-item-title">More tagged with {{ .ThirdMoreTaggedStories.TagType }} 
-                {{if .ThirdMoreTaggedStories.Tag}}
-                <a class="tag large" href="{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
-                {{else}}
-                <span class="tag large">unknown</span>
-                {{end}}
-            </div>
-            {{if gt (len .ThirdMoreTaggedStories.Stories) 0}}
-            <div class="related-stories">
-            {{range .ThirdMoreTaggedStories.Stories}}
-                <div class="related-story">
-                    {{ $story := . }}
-                    {{ $attachment := .GetStoryAttachment }}
-                    
-                    {{if and $attachment.URL $attachment.IsImage}}
-                        <!-- Images: use original related-story-image class for proper sizing -->
-                    <a href="{{$story.URL}}">
-                        <img 
-                            class="related-story-image" 
-                                src="{{$attachment.ThumbURL}}" 
-                            srcset="
-                                    {{$attachment.ThumbURL}} 300w,
-                                    {{$attachment.MediumURL}} 800w
-                            "
-                            sizes="(max-width: 600px) 300px, 800px"
-                                alt="{{$attachment.AlternativeText}}">
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsAudio}}
-                        <!-- Audio: show audio preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-audio-preview">
-                                <div class="audio-play-button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                    </svg>
-                                </div>
-                                <div class="audio-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
-                    {{else if and $attachment.URL $attachment.IsDocument}}
-                        <!-- Documents: show document preview -->
-                        <a class="story-image-container" href="{{$story.URL}}">
-                            <div class="story-document-preview">
-                                <div class="document-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="document-filename">{{$attachment.Filename}}</div>
-                            </div>
-                        </a>
-                    {{else}}
-                        <!-- No attachments: show placeholder -->
-                        <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                            <div class="story-no-attachment">
-                                <div class="no-attachment-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21,15 16,10 5,21"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="no-attachment-text">View story</div>
-                            </div>
-                    </a>
-                    {{end}}
-                </div>
-            {{end}}
-            </div>
+            </a>
+            {{else}}
+            <div></div>
             {{end}}
         </div>
-        {{end}}
-    </div>
-
-    <div class="story-navigation standard-margins">
-        {{if .LastStory.ID}}
-        <a href="{{.LastStory.URL}}" class="story-nav-button previous">
-            <div class="story-nav-image">
-                {{$prevAttachment := .LastStory.GetStoryAttachment}}
-                {{if and $prevAttachment.URL $prevAttachment.IsImage}}
-                <img src="{{$prevAttachment.ThumbURL}}" alt="{{$prevAttachment.AlternativeText}}">
-                {{else}}
-                <div class="story-no-attachment">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21,15 16,10 5,21"></polyline>
-                    </svg>
-                </div>
-                {{end}}
-            </div>
-            <div class="story-nav-text">
-                <p class="story-nav-label">Previous</p>
-            </div>
-        </a>
-        {{else}}
-        <div></div>
-        {{end}}
-
-        {{if .NextStory.ID}}
-        <a href="{{.NextStory.URL}}" class="story-nav-button next">
-            <div class="story-nav-text">
-                <p class="story-nav-label">Next</p>
-            </div>
-            <div class="story-nav-image">
-                {{$nextAttachment := .NextStory.GetStoryAttachment}}
-                {{if and $nextAttachment.URL $nextAttachment.IsImage}}
-                <img src="{{$nextAttachment.ThumbURL}}" alt="{{$nextAttachment.AlternativeText}}">
-                {{else}}
-                <div class="story-no-attachment">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21,15 16,10 5,21"></polyline>
-                    </svg>
-                </div>
-                {{end}}
-            </div>
-        </a>
-        {{else}}
-        <div></div>
-        {{end}}
     </div>
 
     {{template "footer" .}}
