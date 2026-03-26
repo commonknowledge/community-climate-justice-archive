@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"community-climate-justice-archive/data"
@@ -37,8 +38,10 @@ const (
 	relationshipFieldHasInspiredID = "cilfzk65ypiw6o4"
 
 	// Cache keys used by client.fetchAndCacheRelationships.
-	cachedInspiredByKey  = "__cached_inspired_by"
-	cachedHasInspiredKey = "__cached_has_inspired"
+	cachedInspiredByKey         = "__cached_inspired_by"
+	cachedHasInspiredKey        = "__cached_has_inspired"
+	cachedContributorsKey       = "__cached_contributors"
+	cachedPublicContributorsKey = "__cached_public_contributors"
 )
 
 // NocoDBStoryDTO is what NocoDB sends us when we ask for a story.
@@ -69,6 +72,8 @@ type NocoDBStoryDTO struct {
 	HasInspired             interface{} `json:"Has inspired"`
 	OtherComments           interface{} `json:"Description"`
 	Type                    interface{} `json:"Type"`
+	Contributors            interface{} `json:"Contributors"`
+	PublicContributors      interface{} `json:"Public Contributors"`
 	GiftedBy                interface{} `json:"Gifted or co-created by…"`
 	ScalePermanence         interface{} `json:"Scale of permanence"`
 	TimePeriod              interface{} `json:"Time period"`
@@ -132,6 +137,26 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		giftedBy = []data.GiftedBy{}
 	}
 
+	// Convert contributors
+	contributors, err := ParseContributorsFromNocoDB(dto.Contributors)
+	if err != nil {
+		log.Printf("Warning: failed to parse contributors: %v", err)
+		contributors = []data.Contributor{}
+	}
+	if cached := fetchContributorsDirect(toString(dto.ID), cachedContributorsKey, client); len(cached) > 0 {
+		contributors = cached
+	}
+
+	// Convert public contributors
+	publicContributors, err := ParseContributorsFromNocoDB(dto.PublicContributors)
+	if err != nil {
+		log.Printf("Warning: failed to parse public contributors: %v", err)
+		publicContributors = []data.Contributor{}
+	}
+	if cached := fetchContributorsDirect(toString(dto.ID), cachedPublicContributorsKey, client); len(cached) > 0 {
+		publicContributors = cached
+	}
+
 	// Convert scale of permanence
 	scalePermanence, err := ParseScalePermanenceFromNocoDB(dto.ScalePermanence)
 	if err != nil {
@@ -180,6 +205,8 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
+		Contributors:            contributors,
+		PublicContributors:      publicContributors,
 		GiftedBy:                giftedBy,
 		ScalePermanence:         scalePermanence,
 		WhatWasIsIf:             whatWasIsIf,
@@ -455,6 +482,121 @@ func ParseGiftedByFromNocoDB(giftedByField interface{}) ([]data.GiftedBy, error)
 	}
 
 	return giftedBy, nil
+}
+
+// ParseContributorsFromNocoDB parses linked contributor records from NocoDB fields.
+func ParseContributorsFromNocoDB(contributorsField interface{}) ([]data.Contributor, error) {
+	if contributorsField == nil {
+		return []data.Contributor{}, nil
+	}
+
+	isLikelyCount := func(value string) bool {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			return false
+		}
+		_, err := strconv.Atoi(trimmed)
+		return err == nil
+	}
+
+	toContributor := func(raw map[string]interface{}) data.Contributor {
+		name := strings.TrimSpace(toString(raw["name"]))
+		if name == "" {
+			name = strings.TrimSpace(toString(raw["Name"]))
+		}
+		if name == "" {
+			name = strings.TrimSpace(toString(raw["title"]))
+		}
+		if name == "" {
+			name = strings.TrimSpace(toString(raw["Title"]))
+		}
+
+		email := strings.TrimSpace(toString(raw["email"]))
+		if email == "" {
+			email = strings.TrimSpace(toString(raw["Email"]))
+		}
+
+		approved := strings.TrimSpace(toString(raw["approved"]))
+		if approved == "" {
+			approved = strings.TrimSpace(toString(raw["Approved"]))
+		}
+
+		return data.Contributor{
+			Name:     name,
+			Email:    email,
+			Approved: approved,
+		}
+	}
+
+	var contributors []data.Contributor
+
+	switch v := contributorsField.(type) {
+	case string:
+		if v == "" {
+			return []data.Contributor{}, nil
+		}
+
+		var objectArray []map[string]interface{}
+		if err := json.Unmarshal([]byte(v), &objectArray); err == nil {
+			for _, item := range objectArray {
+				contributor := toContributor(item)
+				if contributor.Name != "" {
+					contributors = append(contributors, contributor)
+				}
+			}
+			return contributors, nil
+		}
+
+		var stringArray []string
+		if err := json.Unmarshal([]byte(v), &stringArray); err == nil {
+			for _, name := range stringArray {
+				name = strings.TrimSpace(name)
+				if name != "" && !isLikelyCount(name) {
+					contributors = append(contributors, data.Contributor{Name: name})
+				}
+			}
+			return contributors, nil
+		}
+
+		for _, name := range strings.Split(v, ",") {
+			name = strings.TrimSpace(name)
+			if name != "" && !isLikelyCount(name) {
+				contributors = append(contributors, data.Contributor{Name: name})
+			}
+		}
+
+	case []interface{}:
+		for _, item := range v {
+			switch parsed := item.(type) {
+			case map[string]interface{}:
+				contributor := toContributor(parsed)
+				if contributor.Name != "" {
+					contributors = append(contributors, contributor)
+				}
+			case string:
+				name := strings.TrimSpace(parsed)
+				if name != "" && !isLikelyCount(name) {
+					contributors = append(contributors, data.Contributor{Name: name})
+				}
+			}
+		}
+
+	case []string:
+		for _, name := range v {
+			name = strings.TrimSpace(name)
+			if name != "" && !isLikelyCount(name) {
+				contributors = append(contributors, data.Contributor{Name: name})
+			}
+		}
+
+	default:
+		str := strings.TrimSpace(toString(v))
+		if str != "" && !isLikelyCount(str) {
+			contributors = append(contributors, data.Contributor{Name: str})
+		}
+	}
+
+	return contributors, nil
 }
 
 // ParseScalePermanenceFromNocoDB parses scale of permanence from NocoDB field
@@ -863,4 +1005,74 @@ func convertInterfaceSliceToConnections(interfaceSlice []interface{}) []data.Sto
 	}
 
 	return connections
+}
+
+// fetchContributorsDirect reads cached contributor relationship data from record cache.
+func fetchContributorsDirect(recordID, cacheKey string, client *Client) []data.Contributor {
+	if client == nil || recordID == "" || cacheKey == "" {
+		return []data.Contributor{}
+	}
+
+	if !client.cacheLoaded {
+		_, err := client.GetAllRecords()
+		if err != nil {
+			log.Printf("Warning: Failed to get cached records for contributor record %s: %v", recordID, err)
+			return []data.Contributor{}
+		}
+	}
+
+	record, found := client.getCachedRecordByID(recordID)
+	if !found {
+		return []data.Contributor{}
+	}
+
+	if cachedData, exists := record[cacheKey]; exists {
+		if cachedData == nil {
+			return []data.Contributor{}
+		}
+
+		if contributors, ok := cachedData.([]data.Contributor); ok {
+			return contributors
+		}
+
+		if interfaceSlice, ok := cachedData.([]interface{}); ok {
+			return convertInterfaceSliceToContributors(interfaceSlice)
+		}
+	}
+
+	return []data.Contributor{}
+}
+
+func convertInterfaceSliceToContributors(interfaceSlice []interface{}) []data.Contributor {
+	var contributors []data.Contributor
+
+	for _, item := range interfaceSlice {
+		if contributorMap, ok := item.(map[string]interface{}); ok {
+			name := strings.TrimSpace(toString(contributorMap["name"]))
+			if name == "" {
+				name = strings.TrimSpace(toString(contributorMap["Name"]))
+			}
+			if name == "" {
+				continue
+			}
+
+			email := strings.TrimSpace(toString(contributorMap["email"]))
+			if email == "" {
+				email = strings.TrimSpace(toString(contributorMap["Email"]))
+			}
+
+			approved := strings.TrimSpace(toString(contributorMap["approved"]))
+			if approved == "" {
+				approved = strings.TrimSpace(toString(contributorMap["Approved"]))
+			}
+
+			contributors = append(contributors, data.Contributor{
+				Name:     name,
+				Email:    email,
+				Approved: approved,
+			})
+		}
+	}
+
+	return contributors
 }

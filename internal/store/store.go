@@ -278,6 +278,12 @@ func sortStoryTags(story *data.Story) {
 	sort.Slice(story.Weather, func(i, j int) bool {
 		return story.Weather[i].Title < story.Weather[j].Title
 	})
+	sort.Slice(story.Contributors, func(i, j int) bool {
+		return story.Contributors[i].Name < story.Contributors[j].Name
+	})
+	sort.Slice(story.PublicContributors, func(i, j int) bool {
+		return story.PublicContributors[i].Name < story.PublicContributors[j].Name
+	})
 	sort.Slice(story.GiftedBy, func(i, j int) bool {
 		return story.GiftedBy[i].Title < story.GiftedBy[j].Title
 	})
