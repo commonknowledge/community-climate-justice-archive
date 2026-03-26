@@ -6,6 +6,7 @@
    (not native <select> elements) for better styling control.
 */
 
+/* Main layout container for the archive page */
 .archive {
   display: flex;
   flex-direction: column;
@@ -18,6 +19,7 @@
   }
 }
 
+/* Container for the filter/sort controls row */
 .archive-filters {
   display: flex;
   flex-direction: column;
@@ -55,6 +57,7 @@
   cursor: pointer;
 }
 
+/* Group containing a label and list of filter/sort dropdowns */
 .filters-group {
   display: flex;
   flex-direction: column;
@@ -71,6 +74,7 @@
   gap: 1.25rem;
 }
 
+/* Individual filter dropdown (Themes, Types, Weather, etc.) */
 .filter-dropdown {
   position: relative;
 }
@@ -98,11 +102,6 @@
   background: var(--background);
 }
 
-/* no flex gap for sorting dropdown */
-.filter-dropdown__options:has(.sort-option) {
-  gap: 0;
-}
-
 .filter-dropdown__option {
   position: relative;
   padding: 0.25em 0.5em;
@@ -118,7 +117,7 @@
 }
 
 .filter-dropdown__option.selected::after {
-  content: "✓";
+  content: "✓"; /* Checkmark next to selected option */
   z-index: 1;
   position: absolute;
   right: -1.25rem;
@@ -132,6 +131,11 @@
   display: none;
 }
 
+.filter-dropdown__options:has(.sort-option) {
+  gap: 0; /* no flex gap for sorting dropdown - sort-option has vertical padding */
+}
+
+/* Sort dropdown option items */
 .sort-option {
   display: block;
   width: 100%;
@@ -153,6 +157,7 @@
   font-weight: 700;
 }
 
+/* List of active/selected filter tags shown below the dropdowns */
 .active-filters__list {
   display: flex;
   flex-wrap: wrap;
