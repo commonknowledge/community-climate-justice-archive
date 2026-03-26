@@ -700,6 +700,10 @@ Uses cream background with dashed border and flexible layout.
   line-clamp: 2;
   text-overflow: ellipsis;
 
+  &:last-child {
+    margin-bottom: 0;
+  }
+
   @media (max-width: 768px) {
     font-size: 1rem;
   }
