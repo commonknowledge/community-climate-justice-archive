@@ -67,6 +67,10 @@ func WriteArchivePage() error {
 	log.Println("Starting archive page generation")
 	themes := store.GetThemes()
 	types := store.GetTypes()
+	weather := store.GetWeather()
+	whatWasIsIf := store.GetWhatWasIsIfTypes()
+	scalePermanence := store.GetScalePermanenceTypes()
+	timePeriod := store.GetTimePeriodTypes()
 	allStories := getAllStories()
 
 	// Shuffle all stories and take first 40 for initial display
@@ -86,13 +90,17 @@ func WriteArchivePage() error {
 	}
 
 	page := data.Page{
-		Title:          "Archive – Dudley Time Portal",
-		Description:    "Explore the complete Dudley Time Portal with filters for themes, types, and weather",
-		Themes:         themes,
-		Types:          types,
-		Stories:        stories, // Only 40 random stories for initial display
-		RandomStoryURL: randomStoryURL(allStories),
-		StoriesJSON:    storiesJSON,
+		Title:           "Archive – Dudley Time Portal",
+		Description:     "Explore the complete Dudley Time Portal with filters for themes, types, and weather",
+		Themes:          themes,
+		Types:           types,
+		Weather:         weather,
+		WhatWasIsIf:     whatWasIsIf,
+		ScalePermanence: scalePermanence,
+		TimePeriod:      timePeriod,
+		Stories:         stories, // Only 40 random stories for initial display
+		RandomStoryURL:  randomStoryURL(allStories),
+		StoriesJSON:     storiesJSON,
 	}
 
 	tmpl, err := loadTemplatesCached()

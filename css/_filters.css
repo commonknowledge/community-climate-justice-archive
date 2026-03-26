@@ -530,3 +530,80 @@ Shows currently applied filters as removable tags below the filter controls.
 .filter-tag-option.selected {
   background-color: var(--light-blue);
 }
+
+archive-filters .filter-dropdown {
+  flex: none;
+}
+
+/* Sort dropdown */
+.sort-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.sort-dropdown-content {
+  min-width: 100%;
+}
+
+.sort-option {
+  display: block;
+  width: 100%;
+  padding: 0.55556rem;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  border: none;
+  background: none;
+  text-align: left;
+  color: var(--black);
+}
+
+.sort-option:hover {
+  background-color: var(--highlight-yellow);
+}
+
+.sort-option.selected {
+  font-weight: 700;
+}
+
+.sort-dropdown.open .filter-dropdown-content {
+  display: block;
+}
+
+.sort-dropdown.open .filter-dropdown-button {
+  border: 2px solid var(--black);
+}
+
+.sort-group .filter-dropdown-button {
+  justify-content: center;
+  gap: 0.27778rem;
+  width: 100%;
+}
+
+/* More Filters toggle */
+.more-filters-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 0.88889rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04444rem;
+  text-decoration: underline;
+  color: var(--black);
+  padding: 0;
+  align-self: flex-start;
+}
+
+.more-filters-toggle:hover {
+  opacity: 0.7;
+}
+
+
+.filter-sort-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}

@@ -142,9 +142,11 @@ class ArchiveFilters {
             
             // Start with all stories visible
             this.filteredStories = [...this.filterData.stories];
-            
-            // Show "X stories" in the header
-            this.updateFilterCount();
+
+            // Re-apply URL filters (if any), then render stories/count from JSON data
+            this.updateDropdownDisplay();
+            this.applyFilters();
+            this.updateActiveFiltersDisplay();
             
         } catch (error) {
             console.error('Error loading filter data:', error);
