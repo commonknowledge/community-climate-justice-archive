@@ -1,0 +1,241 @@
+{{/*
+    About Page Template
+
+    This page tells the story of the Dudley Time Portal project - its origins,
+    what you'll find in it, and how to get involved.
+
+    The page is organised into three time perspectives:
+    - In the past: How the project started and what inspired it
+    - In the present: What you'll find in the archive today
+    - In the future: Upcoming gatherings and events
+
+    Content is static - edit this template directly to update the page.
+*/}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "head" .}}
+    
+    <title>About the project - Dudley Time Portal</title>
+    <meta name="description" content="Learn about the Dudley Time Portal, a community archive bringing together local stories of the past with observations of the present and imaginings of the future.">
+    {{template "theme-init" .}}
+</head>
+
+<body>
+    {{template "header" .}}
+
+    <main class="container">
+        <div class="about-page">
+            <h1 class="h1">About the project</h1>
+
+            <div class="about-layout">
+                <!-- Sticky sidebar navigation -->
+                <nav class="about-sidebar">
+                    <a href="#past" class="dashed-button about-nav-button active">In the past</a>
+                    <a href="#present" class="dashed-button about-nav-button">In the present</a>
+                    <a href="#future" class="dashed-button about-nav-button">In the future</a>
+                </nav>
+
+                <!-- Main content -->
+                <div class="about-content">
+                    <!-- PAST SECTION -->
+                    <section id="past">
+                        <h2 class="h2">In the past…</h2>
+                        <p>
+                            <a href="https://medium.com/colab-dudley/co-creation-of-stories-of-place-e90beb9c9b0d#:~:text=Black%20Space%20Manifesto-,Cultivating%20a%20lake,-%E2%80%98In%20many%20Indigenous" target="_blank" rel="noopener noreferrer">Back in 2021</a>, folk who care about Dudley were curious about co-creating an archive that brings together local stories of the past with observations and activities of the present with imaginings of the future. We wanted to spend time with this archive to reveal many understandings of Dudley and inspire imaginings of futures in which all life can flourish so we can find ways to bring us closer to those futures.
+                        </p>
+                        <h2 class="body-sans-lg">We were inspired by…</h2>
+                        <div class="about-quotes">
+                            <div class="about-indent">
+                                <blockquote class="about-quote">
+                                    <p class="h2">'In many Indigenous ways of knowing, time is not a river, but a lake in which the past, the present, and the future exist.'</p>
+                                    <cite class="body-sans-sm">Robin Wall Kimmerer, Braiding Sweetgrass: Indigenous Wisdom, Scientific Knowledge, and the Teaching of Plants</cite>
+                                </blockquote>
+                            </div>
+                            <div class="about-quote-with-image">
+                                <figure class="about-figure">
+                                    <img src="/static/andean-time-spiral.png" alt="A representation of an Andean concept of time, showing a spiral with Future, Past, and Present interconnected, with objects, places, and people at the centre.">
+                                </figure>
+
+                                <blockquote class="about-quote">
+                                    <p class="h2">'In an Andean understanding of time, the past, present and future are directly interconnected and happening in the same moment… objects, people and places… transcend time, bringing a living past into the present to influence and inform the future.'</p>
+                                    <cite class="body-sans-sm">
+                                        <a href="https://www.britishmuseum.org/exhibitions/peru-journey-time" target="_blank" rel="noopener noreferrer">British Museum, Peru: A Journey in Time</a>
+                                    </cite>
+                                </blockquote>
+                            </div>
+                        </div>
+
+                        <p>
+                            The CoLab Dudley team created an online archive to get us started. In 2024, community technologists Common Knowledge joined us to co-create a more Nature, people and time friendly and inspiring Dudley Time Portal.
+                        </p>
+
+                        <div class="about-indent">
+                            <div class="text-rotation / body-lg">
+                                <h3 class="text-rotation__label">What if…</h3>
+                                <ul class="text-rotation__items">
+                                    <li class="text-rotation__item">people could develop deep connections with the places they live or work in: connections that invite care, relationships with life in that place, and learning through creative doing that deepens the climate resilience of that place?</li>
+                                    <li class="text-rotation__item hidden">there was an archive that cared for and shared the stories and knowledges behind these connections, so anyone making that place their home or passing through could weave in and build on these connections?</li>
+                                    <li class="text-rotation__item hidden">this archive was built to last 100 years, passing these knowledges down through generations?</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p>
+                            <strong>The people who co-created this archive:</strong> Alan Reynolds, Alex Worrad-Andrews, Bill Laybourne, Caz Emery, Deb McDonald, Dionne Williams, Erica Williams, Gemma Copeland, Helen Garbett, Holly Doron, Jack Williams, Jan Norton, Jasmine Lawrence, Jo Orchard-Webb, Kirren Channa, Laura Onions, Lorna Prescott, Luke Hudson, Miriam Atikpo, Nat WB, Peter True, Rachael Othala, Rebekah Warmington, Rick Sanders, Sita Patel, Soheila Javaheri
+                        </p>
+                    </section>
+
+                    <!-- PRESENT SECTION -->
+                    <section id="present">
+                        <h2 class="h2">In the present…</h2>
+
+                        <p>In the Dudley Time Portal you will find…</p>
+
+                        <div class="about-category">
+                            <span class="about-pill">Gifts</span>
+                            <p>
+                                ideas, photos, stories, doodles, knowledge, collages, models, poems, thoughts, sounds, experiments, drawings, research, videos that have been gifted to the archive by…
+                            </p>
+                        </div>
+
+                        <div class="about-category">
+                            <span class="about-pill">Co-creators</span>
+                            <p>
+                                Many people who care about Dudley Borough have contributed to the evolution of Dudley Time Portal: learners, doers, history sharers, artists, film makers, architects, educators, photographers, researchers, Nature stewards, passersby… and maybe even you! You are welcome to become a co-creator of the Dudley Time Portal and add your own gifts through this invitation. You are also invited to join us at our collective archiving evenings: warm gatherings to share food while celebrating and connecting the gifts through archiving together. You are also welcome to become part of our community of…
+                            </p>
+                        </div>
+
+                        <div class="about-category">
+                            <span class="about-pill">Stewards</span>
+                            <p>
+                                Dudley Time Portal is a place of collective and distributed care - if one person looked after the archive, it wouldn't last long. Instead, several stewards tend to the archive in the hope it will become more resilient.
+                            </p>
+                        </div>
+
+                        <div class="about-category">
+                            <span class="about-pill">More-than-human* companions</span>
+                            <p>
+                                Throughout Dudley Time Portal you will meet beings from Nature. They invite us to experience the world in different ways so we can imagine futures where all life can flourish. You are welcome to choose a more-than-human companion to keep you company through your visit here.
+                            </p>
+                            <p class="about-footnote / body-sans-sm">
+                                * Ecologist and philosopher, David Abram, coined the term 'more-than-human' to describe all living and non-living entities and their relationships.
+                            </p>
+                        </div>
+
+                    </section>
+
+                    <!-- FUTURE SECTION -->
+                    <section id="future">
+                        <h2 class="h2">In the future…</h2>
+                        <p>
+                            CoLab Dudley, who currently host Dudley Time Portal, will not always exist. This is why we are trying to create conditions now for people who care about Dudley to build the archive's resilience so it can flourish for generations to come.
+                        </p>
+
+                        <p>
+                            How might we use oral story-telling to hold the archive and carry the ideas here to different lands, communities and neighbourhoods?
+                        </p>
+
+                        <p>
+                            How might we create social rituals around archiving?
+                        </p>
+
+                        <p>
+                            This is where we will share upcoming gatherings to spend time with and add to Dudley Time Portal.
+                        </p>
+
+                        <p>
+                            You are also welcome to send us suggestions.
+                        </p>
+                    </section>
+
+                    <!-- SHARING SECTION -->
+                    <section class="about-section about-sharing">
+                        <h2 class="h2">An invitation to share with care</h2>
+
+                        <p>
+                            Everything in the Dudley Time Portal is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a> which requires reusers/evolvers to give credit to the co-creators. It allows reusers/evolvers to share, remix, adapt, and build upon the material in any medium or format, for noncommercial purposes only, under the same share-alike terms. If do you use ideas or creative works from the Dudley Time Portal we'd love to hear about what you create and who it's shared with. Drop us an email to <a href="mailto:colabdudley@gmail.com">colabdudley@gmail.com</a>.
+                        </p>
+
+                        <p>
+                            At various stages of its evolution, Dudley Time Portal has been funded by National Lottery Climate Action Fund, The Space Black Country Digital Firsts, Joseph Rowntree Foundation Emerging Futures Pathfinders, Arts Council England Cultural Compact and Projects grants, National Lottery Community Fund Reaching Communities.
+                        </p>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {{template "footer" .}}
+
+    <script>
+        // Simple script to highlight active section in sidebar
+        (function () {
+            const sections = document.querySelectorAll('.about-section[id]');
+            const navButtons = document.querySelectorAll('.about-nav-button');
+
+            function updateActiveNav() {
+                let current = 'past'; // Default to "In the past" section
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navButtons.forEach(button => {
+                    button
+                        .classList
+                        .remove('active');
+                    if (button.getAttribute('href') === '#' + current) {
+                        button
+                            .classList
+                            .add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+            updateActiveNav();
+        })();
+
+        /*
+         * Rotate "What If" Quotes
+         * Fades between different "What If" prompts every 7 seconds.
+         */
+        (function () {
+            const items = document.querySelectorAll('.text-rotation__item');
+            if (items.length === 0) 
+                return;
+            
+            let currentIndex = 0;
+
+            function showNext() {
+                const nextIndex = (currentIndex + 1) % items.length;
+
+                items[currentIndex].style.opacity = '0';
+
+                setTimeout(() => {
+                    items[currentIndex]
+                        .classList
+                        .add('hidden');
+                    items[nextIndex]
+                        .classList
+                        .remove('hidden');
+
+                    requestAnimationFrame(() => {
+                        items[nextIndex].style.opacity = '1';
+                    });
+
+                    currentIndex = nextIndex;
+                }, 500);
+            }
+
+            items[0].style.opacity = '1';
+            setInterval(showNext, 7000);
+        })();
+    </script>
+</body>
+
+</html>

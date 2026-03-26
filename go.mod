@@ -1,6 +1,6 @@
 module community-climate-justice-archive
 
-go 1.24.2
+go 1.24
 
 require (
 	github.com/bep/gowebp v0.4.0

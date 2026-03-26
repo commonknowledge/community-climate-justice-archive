@@ -1,0 +1,100 @@
+/* ============================================================================
+   CSS VARIABLES (Custom Properties)
+   ============================================================================
+   
+   These variables store reusable values. Reference them throughout the
+   stylesheet with var(--variable-name). Change the value here to update
+   it everywhere it's used.
+*/
+
+:root {
+  /* Type sizes */
+  --text-sm: 1rem; /* 16px */
+  --text-md: 1.375rem; /* 22px */
+  --text-lg: 1.5rem; /* 24px */
+  --text-xl: 2rem; /* 32px */
+  --text-2xl: 2.615rem; /* 42px */
+  --text-3xl: 3.25rem; /* 52px */
+
+  /* Background Colours */
+  --background: #fff5cf; /* Warm cream background */
+  --white: #ffffff;
+  --highlight-yellow: #ffff99; /* Used for hovers */
+  --light-gray: var(--light-gray);
+  --light-blue: var(--light-blue);
+  --border-gray: var(--border-gray);
+
+  /* Text Colours */
+  --black: #000;
+  --white-text: #fff;
+  --gray-text: #666;
+  --black-alt: #000000;
+  --border-color: #000;
+
+  /* Shadow Colours - RGBA values for transparency */
+  --shadow-light: rgba(0, 0, 0, 0.1); /* 10% opacity */
+  --shadow-medium: rgba(0, 0, 0, 0.15); /* 15% opacity */
+  --shadow-dark: rgba(0, 0, 0, 0.2); /* 20% opacity */
+  --shadow-darker: rgba(0, 0, 0, 0.25); /* 25% opacity */
+  --shadow-darkest: rgba(0, 0, 0, 0.3); /* 30% opacity */
+  --shadow-scroll-track: rgba(0, 0, 0, 0.1);
+  --shadow-scroll-thumb: rgba(0, 0, 0, 0.3);
+  --shadow-scroll-thumb-hover: rgba(0, 0, 0, 0.5);
+  --shadow-text: rgba(0, 0, 0, 0.5);
+  --shadow-heavy: #00000040;
+
+  @media (prefers-color-scheme: dark) {
+    &:not([data-theme="light"]) {
+      --background: #080339;
+      --white: #1a1a2e;
+      --highlight-yellow: #ffff99;
+      --black: #fff;
+      --white-text: #fff;
+      --gray-text: #aaa;
+      --black-alt: #ffffff;
+      --border-color: #fff;
+      --shadow-light: rgba(255, 255, 255, 0.05);
+      --shadow-medium: rgba(255, 255, 255, 0.08);
+      --shadow-dark: rgba(255, 255, 255, 0.1);
+      --shadow-darker: rgba(255, 255, 255, 0.12);
+      --shadow-darkest: rgba(255, 255, 255, 0.15);
+      --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+      --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+      --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+      --shadow-text: rgba(255, 255, 255, 0.5);
+      --shadow-heavy: rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+/* ============================================================================
+   DARK MODE
+   ============================================================================
+
+   Dark theme overrides. Activated by setting data-theme="dark" on <html>.
+   Falls back to the user's OS preference via prefers-color-scheme.
+*/
+
+/* When user explicitly selects dark mode */
+[data-theme="dark"] {
+  --background: #080339;
+  --white: #1a1a2e;
+  --highlight-yellow: #ffff99;
+  --black: #fff;
+  --white-text: #fff;
+  --gray-text: #aaa;
+  --black-alt: #ffffff;
+  --border-color: #fff;
+  --shadow-light: rgba(255, 255, 255, 0.05);
+  --shadow-medium: rgba(255, 255, 255, 0.08);
+  --shadow-dark: rgba(255, 255, 255, 0.1);
+  --shadow-darker: rgba(255, 255, 255, 0.12);
+  --shadow-darkest: rgba(255, 255, 255, 0.15);
+  --shadow-scroll-track: rgba(255, 255, 255, 0.05);
+  --shadow-scroll-thumb: rgba(255, 255, 255, 0.15);
+  --shadow-scroll-thumb-hover: rgba(255, 255, 255, 0.25);
+  --shadow-text: rgba(255, 255, 255, 0.5);
+  --shadow-heavy: rgba(0, 0, 0, 0.4);
+}
+
+/* When no explicit preference is set, respect OS-level setting */

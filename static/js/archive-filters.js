@@ -583,25 +583,25 @@ class ArchiveFilters {
             `;
         }
         
-        // Build tag content with proper colors
+        // Build tag content with proper colors (sorted alphabetically)
         let tagContent = '';
-        if (story.types && story.types.length > 0) {
-            story.types.forEach(type => {
-                const color = this.getTagColor(type, 'types');
-                tagContent += `<span class="tag" style="background-color: ${color};">${type}</span>`;
-            });
+
+        const sortedTypes = this.sortAlphabetically(story.types);
+        for (const type of sortedTypes) {
+            const color = this.getTagColor(type, 'types');
+            tagContent += `<span class="tag" style="background-color: ${color};">${type}</span>`;
         }
-        if (story.weather && story.weather.length > 0) {
-            story.weather.forEach(weather => {
-                const color = this.getTagColor(weather, 'weather');
-                tagContent += `<span class="tag" style="background-color: ${color};">${weather}</span>`;
-            });
+
+        const sortedWeather = this.sortAlphabetically(story.weather);
+        for (const weather of sortedWeather) {
+            const color = this.getTagColor(weather, 'weather');
+            tagContent += `<span class="tag" style="background-color: ${color};">${weather}</span>`;
         }
-        if (story.themes && story.themes.length > 0) {
-            story.themes.forEach(theme => {
-                const color = this.getTagColor(theme, 'themes');
-                tagContent += `<span class="tag" style="background-color: ${color};">${theme}</span>`;
-            });
+
+        const sortedThemes = this.sortAlphabetically(story.themes);
+        for (const theme of sortedThemes) {
+            const color = this.getTagColor(theme, 'themes');
+            tagContent += `<span class="tag" style="background-color: ${color};">${theme}</span>`;
         }
         
         popupDiv.innerHTML = `
@@ -815,14 +815,6 @@ class ArchiveFilters {
         }
     }
     
-    updateSelectFromFilters(dropdownType, filterValues) {
-        // This method is now handled by updateDropdownDisplay()
-        // but we keep it for compatibility with loadFiltersFromURL
-        if (this.filterData) {
-            this.updateDropdownDisplay();
-        }
-    }
-    
     showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'filter-error';
@@ -852,6 +844,23 @@ class ArchiveFilters {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    }
+
+    /**
+     * Sort an array of strings alphabetically
+     *
+     * Returns a new sorted array without modifying the original.
+     * Used to ensure tags are displayed in a consistent order.
+     */
+    sortAlphabetically(items) {
+        if (!items || items.length === 0) {
+            return [];
+        }
+
+        // Create a copy and sort it
+        const sorted = items.slice();
+        sorted.sort();
+        return sorted;
     }
 }
 

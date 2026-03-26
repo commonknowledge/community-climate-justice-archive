@@ -7,23 +7,39 @@
 // How to use it:
 // 1. Call Initialize() when the app starts - this sets up the connection to NocoDB
 // 2. Then use functions like GetAllStories(), GetStoriesForTheme(), etc.
-// 3. The NocoDB client handles caching, so calling things multiple times is fast
+// 3. The NocoDB client handles raw-record caching, reducing repeat API calls
+//
+// Important scope note:
+// - Raw NocoDB records are cached in internal/nocodb.
+// - Converted []data.Story values are cached here for reuse across store calls.
 package store
 
 import (
 	"fmt"
 	"log"
-	"math/rand"
-	"path/filepath"
+	"sort"
 
 	"community-climate-justice-archive/data"
 	"community-climate-justice-archive/internal/nocodb"
-	"community-climate-justice-archive/internal/util"
 )
 
 // client is the NocoDB client that talks to the database.
 // It gets set up once when Initialize() is called, then used by everything else.
 var client *nocodb.Client
+
+// storiesCache stores converted Story data so we only do raw->Story conversion once
+// per cache lifecycle.
+var storiesCache []data.Story
+
+// storiesCacheLoaded tracks whether storiesCache currently holds a valid dataset.
+// We need this separate flag so an empty dataset is still treated as cached.
+var storiesCacheLoaded bool
+
+// resetStoriesCache clears converted story cache.
+func resetStoriesCache() {
+	storiesCache = nil
+	storiesCacheLoaded = false
+}
 
 // Initialize sets up the connection to NocoDB.
 // Call this once when the application starts, before using any other functions.
@@ -33,6 +49,7 @@ func Initialize() error {
 	if err != nil {
 		return fmt.Errorf("failed to create NocoDB client: %w", err)
 	}
+	resetStoriesCache()
 	log.Println("Store initialised with NocoDB client")
 	return nil
 }
@@ -52,6 +69,7 @@ func DropCache() error {
 	if client == nil {
 		return fmt.Errorf("store not initialised")
 	}
+	resetStoriesCache()
 	client.DropCache()
 	return nil
 }
@@ -64,6 +82,16 @@ func ClearDiskCache() error {
 		return fmt.Errorf("store not initialised")
 	}
 	return client.ClearDiskCache()
+}
+
+// SetDiskCacheMode enables/disables disk cache for debugging.
+//
+// When disabled (default), the app always fetches fresh data from NocoDB and
+// only keeps it in memory for the current run.
+func SetDiskCacheMode(enabled bool) {
+	if client != nil {
+		client.SetDiskCacheMode(enabled)
+	}
 }
 
 // SetCacheOnlyMode tells the store to only use cached data, never hitting the API.
@@ -89,11 +117,14 @@ func GetRawRecords() ([]map[string]interface{}, error) {
 // Stories
 // -------------------------------------------------------------------
 
-// GetAllStories fetches every story in the archive.
+// GetAllStories fetches every approved story in the archive.
 //
-// This is probably the most-used function - it grabs all stories from NocoDB
-// and returns them as a list. The NocoDB client handles caching, so calling
-// this multiple times doesn't hammer the database.
+// This is probably the most-used function - it grabs all stories from NocoDB,
+// converts them once per cache lifecycle, then filters to only include approved
+// stories (Approved = "Yes-Live") before returning them.
+//
+// The NocoDB client cache prevents repeated network calls. Store-level story
+// conversion caching prevents repeated raw-record conversion across store calls.
 //
 // If something goes wrong talking to the database, the program stops - we can't
 // really do anything useful without story data.
@@ -102,13 +133,28 @@ func GetAllStories() []data.Story {
 		log.Fatal("Store not initialised - call Initialize() first")
 	}
 
+	if storiesCacheLoaded {
+		return storiesCache
+	}
+
 	records, err := client.GetAllRecords()
 	if err != nil {
 		log.Fatalf("Failed to get all records from NocoDB: %v", err)
 	}
 
-	stories := convertRecordsToStories(records)
-	return stories
+	allStories := convertRecordsToStories(records)
+
+	// Filter to only include approved stories
+	var approvedStories []data.Story
+	for _, story := range allStories {
+		if story.Approved == "Yes-Live" {
+			approvedStories = append(approvedStories, story)
+		}
+	}
+
+	storiesCache = approvedStories
+	storiesCacheLoaded = true
+	return storiesCache
 }
 
 // GetStoryByID finds a single story by its ID.
@@ -134,6 +180,9 @@ func GetStoryByID(id string) (data.Story, error) {
 	if story.URL == "" {
 		story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 	}
+
+	// Sort tags alphabetically for consistent display
+	sortStoryTags(&story)
 
 	return story, nil
 }
@@ -211,410 +260,37 @@ func convertRecordsToStories(records []map[string]interface{}) []data.Story {
 			story.URL = CreateStoryURLFromFindingWithID(story.Finding, story.ID)
 		}
 
+		// Sort tags alphabetically for consistent display
+		sortStoryTags(&story)
+
 		stories = append(stories, story)
 	}
 
 	return stories
 }
 
-// -------------------------------------------------------------------
-// Themes
-// -------------------------------------------------------------------
-
-// GetStoriesForTheme finds all stories tagged with a particular theme.
-//
-// Themes are things like "Climate Change", "Community", "Nature" - the big topics
-// that stories can be about. This loops through all stories and returns the ones
-// that have the given theme in their tags.
-func GetStoriesForTheme(themeTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, theme := range story.Themes {
-			if theme.Title == themeTitle {
-				result = append(result, story)
-				break // Found it, no need to check other themes on this story
-			}
-		}
-	}
-
-	return result
-}
-
-// GetThemes collects all the unique themes from across the archive.
-//
-// This looks at every story and gathers up all the themes that appear. Each theme
-// only shows up once in the results, even if dozens of stories have it.
-func GetThemes() []data.Theme {
-	allStories := GetAllStories()
-
-	// Use a map to collect unique themes
-	themeMap := make(map[string]data.Theme)
-
-	for _, story := range allStories {
-		for _, theme := range story.Themes {
-			if theme.Title != "" {
-				themeMap[theme.Title] = theme
-			}
-		}
-	}
-
-	// Turn the map into a list
-	var themes []data.Theme
-	for _, theme := range themeMap {
-		themes = append(themes, theme)
-	}
-
-	return themes
-}
-
-// -------------------------------------------------------------------
-// Types
-// -------------------------------------------------------------------
-
-// GetStoriesForType finds all stories of a particular type.
-//
-// Types describe what form the story takes - "Photo", "Poem", "Video", "Drawing",
-// "Text", and so on. A story can have multiple types (like a photo with a poem).
-func GetStoriesForType(typeTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, typ := range story.Type {
-			if typ.Title == typeTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetTypes collects all the unique types from across the archive.
-func GetTypes() []data.Type {
-	allStories := GetAllStories()
-
-	typeMap := make(map[string]data.Type)
-
-	for _, story := range allStories {
-		for _, typ := range story.Type {
-			if typ.Title != "" {
-				typeMap[typ.Title] = typ
-			}
-		}
-	}
-
-	var types []data.Type
-	for _, typ := range typeMap {
-		types = append(types, typ)
-	}
-
-	return types
-}
-
-// -------------------------------------------------------------------
-// Weather
-// -------------------------------------------------------------------
-
-// GetStoriesForWeather finds all stories tagged with a particular weather condition.
-//
-// Weather is a lovely way to browse the archive - was it sunny when this story
-// happened? Rainy? Foggy? It adds an atmospheric dimension to exploring.
-func GetStoriesForWeather(weatherTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, weather := range story.Weather {
-			if weather.Title == weatherTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetWeather collects all the unique weather conditions from across the archive.
-func GetWeather() []data.Weather {
-	allStories := GetAllStories()
-
-	weatherMap := make(map[string]data.Weather)
-
-	for _, story := range allStories {
-		for _, weather := range story.Weather {
-			if weather.Title != "" {
-				weatherMap[weather.Title] = weather
-			}
-		}
-	}
-
-	var weather []data.Weather
-	for _, w := range weatherMap {
-		weather = append(weather, w)
-	}
-
-	return weather
-}
-
-// -------------------------------------------------------------------
-// GiftedBy (Contributors)
-// -------------------------------------------------------------------
-
-// GetStoriesForGiftedBy finds all stories from a particular contributor.
-//
-// "Gifted by" tracks who shared or co-created each story - local schools,
-// community groups, individuals. It's a nice way to celebrate everyone
-// who's contributed to the archive.
-func GetStoriesForGiftedBy(giftedByTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, giftedBy := range story.GiftedBy {
-			if giftedBy.Title == giftedByTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetGiftedByTypes collects all the unique contributors from across the archive.
-func GetGiftedByTypes() []data.GiftedBy {
-	allStories := GetAllStories()
-
-	giftedByMap := make(map[string]data.GiftedBy)
-
-	for _, story := range allStories {
-		for _, giftedBy := range story.GiftedBy {
-			if giftedBy.Title != "" {
-				giftedByMap[giftedBy.Title] = giftedBy
-			}
-		}
-	}
-
-	var giftedByTypes []data.GiftedBy
-	for _, giftedBy := range giftedByMap {
-		giftedByTypes = append(giftedByTypes, giftedBy)
-	}
-
-	return giftedByTypes
-}
-
-// -------------------------------------------------------------------
-// Scale of Permanence
-// -------------------------------------------------------------------
-
-// GetStoriesForScalePermanence finds all stories with a particular permanence level.
-//
-// Scale of permanence comes from permaculture - it's about how long-lasting things
-// are, from temporary to permanent. It's an interesting lens for thinking about
-// the stories in the archive.
-func GetStoriesForScalePermanence(scalePermanenceTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, sp := range story.ScalePermanence {
-			if sp.Title == scalePermanenceTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetScalePermanenceTypes collects all the unique permanence levels from the archive.
-func GetScalePermanenceTypes() []data.ScalePermanence {
-	allStories := GetAllStories()
-
-	spMap := make(map[string]data.ScalePermanence)
-
-	for _, story := range allStories {
-		for _, sp := range story.ScalePermanence {
-			if sp.Title != "" {
-				spMap[sp.Title] = sp
-			}
-		}
-	}
-
-	var scalePermanenceTypes []data.ScalePermanence
-	for _, sp := range spMap {
-		scalePermanenceTypes = append(scalePermanenceTypes, sp)
-	}
-
-	return scalePermanenceTypes
-}
-
-// -------------------------------------------------------------------
-// What Was/Is/If (Temporal Perspective)
-// -------------------------------------------------------------------
-
-// GetStoriesForWhatWasIsIf finds all stories with a particular temporal perspective.
-//
-// "What Was" is about the past, "What Is" about the present, "What If" about
-// imagined futures. It's a lovely way to think about how stories relate to time.
-func GetStoriesForWhatWasIsIf(whatWasIsIfTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, wwii := range story.WhatWasIsIf {
-			if wwii.Title == whatWasIsIfTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetWhatWasIsIfTypes collects all the unique temporal perspectives from the archive.
-func GetWhatWasIsIfTypes() []data.WhatWasIsIf {
-	allStories := GetAllStories()
-
-	wwiiMap := make(map[string]data.WhatWasIsIf)
-
-	for _, story := range allStories {
-		for _, wwii := range story.WhatWasIsIf {
-			if wwii.Title != "" {
-				wwiiMap[wwii.Title] = wwii
-			}
-		}
-	}
-
-	var whatWasIsIfTypes []data.WhatWasIsIf
-	for _, wwii := range wwiiMap {
-		whatWasIsIfTypes = append(whatWasIsIfTypes, wwii)
-	}
-
-	return whatWasIsIfTypes
-}
-
-// -------------------------------------------------------------------
-// Time Period
-// -------------------------------------------------------------------
-
-// GetStoriesForTimePeriod finds all stories from a particular era.
-//
-// Time periods might be things like "1960s", "Victorian Era", "Present Day" -
-// whenever the story relates to. It helps people explore stories from particular
-// moments in history.
-func GetStoriesForTimePeriod(timePeriodTitle string) []data.Story {
-	allStories := GetAllStories()
-
-	var result []data.Story
-	for _, story := range allStories {
-		for _, tp := range story.TimePeriod {
-			if tp.Title == timePeriodTitle {
-				result = append(result, story)
-				break
-			}
-		}
-	}
-
-	return result
-}
-
-// GetTimePeriodTypes collects all the unique time periods from the archive.
-func GetTimePeriodTypes() []data.TimePeriod {
-	allStories := GetAllStories()
-
-	tpMap := make(map[string]data.TimePeriod)
-
-	for _, story := range allStories {
-		for _, tp := range story.TimePeriod {
-			if tp.Title != "" {
-				tpMap[tp.Title] = tp
-			}
-		}
-	}
-
-	var timePeriodTypes []data.TimePeriod
-	for _, tp := range tpMap {
-		timePeriodTypes = append(timePeriodTypes, tp)
-	}
-
-	return timePeriodTypes
-}
-
-// -------------------------------------------------------------------
-// URL Helpers
-// -------------------------------------------------------------------
-
-// CreateStoryURLFromFinding makes a URL for a story page based on its title.
-//
-// It turns the title into a URL-safe slug. So "Climate Change Story" becomes
-// "/stories/climate-change-story.html"
-//
-// Note: If two stories happen to have identical titles, they'd get the same URL,
-// which would be a problem. Use CreateStoryURLFromFindingWithID instead to be safe.
-func CreateStoryURLFromFinding(finding string) string {
-	slug := util.Slugify(finding)
-	fileName := fmt.Sprintf("%s.html", slug)
-	return filepath.Join("/stories", fileName)
-}
-
-// CreateStoryURLFromFindingWithID makes a unique URL by including the story's ID.
-//
-// So story #42 with title "Climate Change" becomes "/stories/climate-change-42.html"
-//
-// This is the safer option because IDs are always unique, even if two stories
-// happen to have the same title.
-func CreateStoryURLFromFindingWithID(finding, id string) string {
-	slug := util.Slugify(finding)
-	fileName := fmt.Sprintf("%s-%s.html", slug, id)
-	return filepath.Join("/stories", fileName)
-}
-
-// -------------------------------------------------------------------
-// Helpers for Templates
-// -------------------------------------------------------------------
-
-// GetMoreTaggedStories finds other stories with the same tag, for "More like this" sections.
-//
-// Given a story and one of its tags (theme or type), this returns a random selection
-// of other stories that share that tag. Useful for showing related content at the
-// bottom of story pages.
-func GetMoreTaggedStories(story data.Story, tag interface{}, count int) []data.Story {
-	var stories []data.Story
-
-	switch t := tag.(type) {
-	case data.Theme:
-		stories = GetStoriesForTheme(t.Title)
-	case data.Type:
-		stories = GetStoriesForType(t.Title)
-	default:
-		log.Printf("Warning: GetMoreTaggedStories called with unsupported tag type: %T", tag)
-		return []data.Story{}
-	}
-
-	// Remove the current story from the list (we don't want to suggest itself)
-	var filteredStories []data.Story
-	for _, s := range stories {
-		if s.ID != story.ID {
-			filteredStories = append(filteredStories, s)
-		}
-	}
-
-	// Shuffle randomly so you get different suggestions each time
-	rand.Shuffle(len(filteredStories), func(i, j int) {
-		filteredStories[i], filteredStories[j] = filteredStories[j], filteredStories[i]
+// sortStoryTags sorts all tag arrays on a story alphabetically by title.
+// This ensures consistent ordering when tags are displayed.
+func sortStoryTags(story *data.Story) {
+	sort.Slice(story.Themes, func(i, j int) bool {
+		return story.Themes[i].Title < story.Themes[j].Title
 	})
-
-	// Return up to 'count' stories
-	if len(filteredStories) <= count {
-		return filteredStories
-	}
-	return filteredStories[:count]
+	sort.Slice(story.Weather, func(i, j int) bool {
+		return story.Weather[i].Title < story.Weather[j].Title
+	})
+	sort.Slice(story.GiftedBy, func(i, j int) bool {
+		return story.GiftedBy[i].Title < story.GiftedBy[j].Title
+	})
+	sort.Slice(story.Type, func(i, j int) bool {
+		return story.Type[i].Title < story.Type[j].Title
+	})
+	sort.Slice(story.ScalePermanence, func(i, j int) bool {
+		return story.ScalePermanence[i].Title < story.ScalePermanence[j].Title
+	})
+	sort.Slice(story.WhatWasIsIf, func(i, j int) bool {
+		return story.WhatWasIsIf[i].Title < story.WhatWasIsIf[j].Title
+	})
+	sort.Slice(story.TimePeriod, func(i, j int) bool {
+		return story.TimePeriod[i].Title < story.TimePeriod[j].Title
+	})
 }

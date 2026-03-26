@@ -31,6 +31,16 @@ import (
 	"community-climate-justice-archive/internal/util"
 )
 
+const (
+	// NocoDB field IDs for self-referential story connection fields.
+	relationshipFieldInspiredByID  = "ccsugv6du8wnisr"
+	relationshipFieldHasInspiredID = "cilfzk65ypiw6o4"
+
+	// Cache keys used by client.fetchAndCacheRelationships.
+	cachedInspiredByKey  = "__cached_inspired_by"
+	cachedHasInspiredKey = "__cached_has_inspired"
+)
+
 // NocoDBStoryDTO is what NocoDB sends us when we ask for a story.
 //
 // The field names match NocoDB's JSON exactly (notice they have spaces and slashes).
@@ -78,6 +88,7 @@ type NocoDBStoryDTO struct {
 	InstaImage              interface{} `json:"Insta image"`
 	ReflectionLearning      interface{} `json:"Reflection / learning"`
 	UpdatedAt               interface{} `json:"UpdatedAt"`
+	Approved                interface{} `json:"Approved"`
 }
 
 // ToStory converts a NocoDB record map to a Story struct
@@ -164,8 +175,8 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		Themes:                  themes,
 		Experience:              toString(dto.Experience),
 		TimeSpan:                toString(dto.TimeSpan),
-		InspiredBy:              fetchStoryConnectionsDirect(toString(dto.ID), "ccsugv6du8wnisr", client),
-		HasInspired:             fetchStoryConnectionsDirect(toString(dto.ID), "cilfzk65ypiw6o4", client),
+		InspiredBy:              fetchStoryConnectionsDirect(toString(dto.ID), relationshipFieldInspiredByID, client),
+		HasInspired:             fetchStoryConnectionsDirect(toString(dto.ID), relationshipFieldHasInspiredID, client),
 		OtherComments:           toString(dto.OtherComments),
 		Type:                    types,
 		Weather:                 weather,
@@ -189,6 +200,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		InstaImage:              toString(dto.InstaImage),
 		ReflectionLearning:      toString(dto.ReflectionLearning),
 		UpdatedAt:               toString(dto.UpdatedAt),
+		Approved:                toString(dto.Approved),
 	}
 
 	// Set URL based on finding with ID suffix
@@ -780,52 +792,52 @@ func fetchStoryConnectionsDirect(recordID, fieldID string, client *Client) []dat
 		return []data.StoryConnection{}
 	}
 
-	// Get all cached records and find the one matching our recordID
-	allRecords, err := client.GetAllRecords()
-	if err != nil {
-		log.Printf("Warning: Failed to get cached records for record %s: %v", recordID, err)
-		return []data.StoryConnection{}
-	}
-
-	// Find the record with matching ID
-	for _, record := range allRecords {
-		if toString(record["Id"]) == recordID {
-			// Determine which cached field to read based on fieldID
-			var cacheKey string
-			if fieldID == "ccsugv6du8wnisr" { // Inspired by
-				cacheKey = "__cached_inspired_by"
-			} else if fieldID == "cilfzk65ypiw6o4" { // Has inspired
-				cacheKey = "__cached_has_inspired"
-			} else {
-				log.Printf("Warning: Unknown fieldID %s for record %s", fieldID, recordID)
-				return []data.StoryConnection{}
-			}
-
-			// Get the cached relationships
-			if cachedData, exists := record[cacheKey]; exists {
-				// Handle nil case (no relationships)
-				if cachedData == nil {
-					return []data.StoryConnection{}
-				}
-
-				// Handle both fresh cache ([]data.StoryConnection) and disk-loaded cache ([]interface{})
-				if connections, ok := cachedData.([]data.StoryConnection); ok {
-					// Fresh cache data - use directly
-					return connections
-				} else if interfaceSlice, ok := cachedData.([]interface{}); ok {
-					// Disk-loaded cache data - convert from generic interfaces
-					return convertInterfaceSliceToConnections(interfaceSlice)
-				} else {
-					log.Printf("Warning: Cached relationship data has unexpected type %T for record %s", cachedData, recordID)
-				}
-			}
-
-			// If no cached data found, return empty slice (this is normal for records with no relationships)
+	// Ensure cache is loaded once before direct lookups.
+	if !client.cacheLoaded {
+		_, err := client.GetAllRecords()
+		if err != nil {
+			log.Printf("Warning: Failed to get cached records for record %s: %v", recordID, err)
 			return []data.StoryConnection{}
 		}
 	}
 
-	log.Printf("Warning: Record %s not found in cache", recordID)
+	record, found := client.getCachedRecordByID(recordID)
+	if !found {
+		log.Printf("Warning: Record %s not found in cache", recordID)
+		return []data.StoryConnection{}
+	}
+
+	// Determine which cached field to read based on fieldID
+	var cacheKey string
+	if fieldID == relationshipFieldInspiredByID {
+		cacheKey = cachedInspiredByKey
+	} else if fieldID == relationshipFieldHasInspiredID {
+		cacheKey = cachedHasInspiredKey
+	} else {
+		log.Printf("Warning: Unknown fieldID %s for record %s", fieldID, recordID)
+		return []data.StoryConnection{}
+	}
+
+	// Get the cached relationships
+	if cachedData, exists := record[cacheKey]; exists {
+		// Handle nil case (no relationships)
+		if cachedData == nil {
+			return []data.StoryConnection{}
+		}
+
+		// Handle both fresh cache ([]data.StoryConnection) and disk-loaded cache ([]interface{})
+		if connections, ok := cachedData.([]data.StoryConnection); ok {
+			// Fresh cache data - use directly
+			return connections
+		} else if interfaceSlice, ok := cachedData.([]interface{}); ok {
+			// Disk-loaded cache data - convert from generic interfaces
+			return convertInterfaceSliceToConnections(interfaceSlice)
+		} else {
+			log.Printf("Warning: Cached relationship data has unexpected type %T for record %s", cachedData, recordID)
+		}
+	}
+
+	// If no cached data found, return empty slice (this is normal for records with no relationships)
 	return []data.StoryConnection{}
 }
 

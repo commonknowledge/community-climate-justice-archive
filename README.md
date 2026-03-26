@@ -8,7 +8,7 @@ At the time of writing, this contains the second version of the archive, release
 
 ### Go
 
-[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled], which makes it more efficient in terms of energy consumption.
+[Go](https://go.dev/) was chosen for this project because of its simplicity, maintainability, high quality and low carbon footprint. In comparison to higher level languages like Python and JavaScript, Go is a compiled language[^compiled]. This makes it more efficient in terms of energy consumption.
 
 ### SQLite
 
@@ -84,9 +84,9 @@ graph TB
         ASSETS[internal/generate/assets.go<br/>Processes images]
     end
     
-    subgraph "Store Layer - The Adapter"
-        ADAPTER[internal/store/adapter.go<br/>Defines how to fetch data]
-        NOCODB[internal/store/nocodb_adapter.go<br/>Talks to NocoDB]
+    subgraph "Store Layer"
+        STORE[internal/store/<br/>Data access and taxonomy filtering]
+        NOCODB[internal/nocodb/client.go<br/>NocoDB API + caching]
     end
     
     subgraph "Data Layer"
@@ -100,8 +100,8 @@ graph TB
     
     CMD --> GEN
     CMD --> ASSETS
-    GEN --> ADAPTER
-    ADAPTER --> NOCODB
+    GEN --> STORE
+    STORE --> NOCODB
     NOCODB --> TYPES
     TYPES --> STORY
     GEN --> TMPL
@@ -109,7 +109,7 @@ graph TB
     style CMD fill:#ffebee
     style GEN fill:#e1f5ff
     style ASSETS fill:#e1f5ff
-    style ADAPTER fill:#fff9c4
+    style STORE fill:#fff9c4
     style NOCODB fill:#fff9c4
     style TYPES fill:#e8f5e9
     style STORY fill:#e8f5e9
@@ -144,36 +144,11 @@ flowchart TD
     style Done fill:#e8f5e9
 ```
 
-### The Store Layer: The Adapter Pattern
+### The Store Layer
 
-The store layer is like a translator. The rest of the code just asks "give me stories" and doesn't need to know if they're coming from NocoDB, SQLite, or anywhere else.
+The `internal/store` package is a single place for data access and filtering. It uses the NocoDB client under the hood, then exposes archive-focused functions like `GetAllStories()`, `GetThemes()`, and `GetStoriesForTheme()`.
 
-**Why we have this:**
-- We can swap NocoDB for SQLite later without rewriting everything
-- The code is cleaner because fetching data is separate from displaying it
-- Testing is easier because we can create fake adapters
-
-```go
-// The interface - what the adapter promises to do
-type DataAdapter interface {
-    GetAllStories() ([]data.Story, error)
-    GetStoryByID(id string) (data.Story, error)
-    GetStoriesForTheme(theme string) ([]data.Story, error)
-    // ... and so on
-}
-
-// The NocoDB version - how we do it right now
-type NocoDBAdapter struct {
-    client *nocodb.Client
-}
-
-// In the future, we might have:
-type SQLiteAdapter struct {
-    db *sql.DB
-}
-```
-
-The rest of the code just uses `GetAdapter()` and doesn't care which adapter it is.
+This keeps generation code simple because page builders can ask the store for exactly the data they need without handling NocoDB API details directly.
 
 ### How Stories Get Transformed
 
@@ -218,8 +193,8 @@ graph TB
     D --> G[Convert to WebP]
     E --> G
     F --> G
-    G --> H[Save to out/images/processed/]
-    H --> I[Templates reference<br/>processed/photo-thumb.webp<br/>processed/photo-medium.webp<br/>processed/photo-large.webp]
+    G --> H[Save to images/processed/]
+    H --> I[Templates reference<br/>/images/processed/photo-thumb.webp<br/>/images/processed/photo-medium.webp<br/>/images/processed/photo-large.webp]
     
     style A fill:#ffebee
     style G fill:#e8f5e9
@@ -266,7 +241,7 @@ graph TB
     OTHER --> CSS
     
     CSS[Copy CSS to out/] --> DONE{Development mode?}
-    DONE -->|Yes -d flag| SERVER[Start local server<br/>http://localhost:8080<br/>Watch for template changes]
+    DONE -->|Yes -d flag| SERVER[Start local server<br/>http://localhost:8080<br/>Press Enter to regenerate templates<br/>Watch CSS for copy-on-change]
     DONE -->|No| FINISH([Done! Website in out/ folder])
     
     style START fill:#e8f5e9
@@ -281,8 +256,8 @@ graph TB
 **Development Mode** (`-d` flag):
 - Builds the website
 - Starts a local web server on http://localhost:8080
-- Watches for template changes
-- Press Enter to regenerate pages
+- Watches CSS for changes and copies it automatically
+- Press Enter to regenerate pages after template/content changes
 - Perfect for testing changes quickly
 
 **Production Mode** (no flags):
@@ -299,12 +274,15 @@ If you need to make changes, here's where to look:
 |------|-------------|
 | `cmd/archive/main.go` | Entry point - starts everything |
 | `internal/config/config.go` | Loads settings from .env |
-| `internal/store/adapter.go` | Defines the adapter interface |
-| `internal/store/nocodb_adapter.go` | NocoDB implementation |
+| `internal/store/store.go` | Story retrieval, cache warming, and connection helpers |
+| `internal/store/store_taxonomies.go` | Theme/type/weather taxonomy retrieval and filtering |
+| `internal/nocodb/client.go` | NocoDB API client and cache handling |
 | `internal/nocodb/types.go` | Translates NocoDB → Go structs |
 | `data/story.go` | Main Story struct & helpers |
 | `data/tags.go` | Theme, Type, Weather structs |
-| `internal/generate/generate.go` | Creates all HTML pages |
+| `internal/generate/generate.go` | Story pages, filter data, and shared generation helpers |
+| `internal/generate/pages.go` | Homepage, archive, wander, and about page writers |
+| `internal/generate/taxonomy_indexes.go` | Theme/type/weather and other taxonomy index writers |
 | `internal/generate/assets.go` | Processes images & copies CSS |
 | `templates/*.html` | HTML templates |
 
@@ -318,8 +296,8 @@ If you need to make changes, here's where to look:
 
 **Want to add a new page type?**
 1. Create a template in `templates/`
-2. Add a generation function in `internal/generate/generate.go`
-3. Call it from `cmd/archive/main.go` in both `generateArchive()` and `hotRegenerate()`
+2. Add a generation function in the relevant file under `internal/generate/` (`pages.go`, `taxonomy_indexes.go`, or another writer file)
+3. Call it from `generateArchive()` in `cmd/archive/main.go`
 
 **Want to change how pages look?**
 - Edit `css/styles.css` for styling
@@ -328,14 +306,19 @@ If you need to make changes, here's where to look:
 
 ### Caching: Keeping Things Fast
 
-The archive caches story data in a JSON file (`debug-cache-nocodb.json`) so it doesn't have to fetch from NocoDB every single time during development. 
+By default, the archive fetches fresh story data from NocoDB on each run.
 
-If you need fresh data (like after updating stories in NocoDB), just delete the cache file:
+Disk caching (`debug-cache-nocodb.json`) is **debug-only** and must be explicitly enabled with:
+
+```bash
+go run ./cmd/archive --debug-disk-cache
+```
+
+If you are using debug disk cache and need fresh data, delete the cache file:
+
 ```bash
 rm debug-cache-nocodb.json
 ```
-
-The next time you build, it'll fetch everything fresh from NocoDB.
 
 ### Troubleshooting Tips
 
@@ -349,7 +332,7 @@ The next time you build, it'll fetch everything fresh from NocoDB.
 - Or restart the archive
 
 **Story data seems stale?**
-- Delete `debug-cache-nocodb.json`
+- If you enabled debug disk cache, delete `debug-cache-nocodb.json`
 - Rebuild the archive
 
 **Build failing?**
@@ -635,7 +618,7 @@ type StoryData struct {
 Run the field analysis utility to verify the field shows as `FULLY_MAPPED`:
 
 ```bash
-go run cmd/analyze-api-fields/main.go
+go run utilities/analyze-api-fields/main.go
 ```
 
 The field should appear with `processing_category: "standard"` and `status: "FULLY_MAPPED"` if properly integrated.
@@ -784,50 +767,39 @@ Add the field display using the tag pattern:
 ```
 
 #### 7. Add Store Functions
-**File**: `internal/store/` (add to appropriate adapter file)
+**File**: `internal/store/store_taxonomies.go`
 
 Add functions to retrieve and filter by the new field:
 
 ```go
-func (s *SQLiteAdapter) GetNewFieldTypes() []data.NewFieldType {
+func GetNewFieldTypes() []data.NewFieldType {
     // Get all unique values for the new field
     // Similar to GetThemes(), GetTypes(), GetWeather()
 }
 
-func (s *SQLiteAdapter) GetStoriesForNewFieldType(fieldValue string) ([]data.Story, error) {
+func GetStoriesForNewFieldType(fieldValue string) []data.Story {
     // Filter stories by the new field value
     // Similar to GetStoriesForTheme(), GetStoriesForType(), GetStoriesForWeather()
 }
 ```
 
 #### 8. Add Index Page Generation
-**File**: `internal/generate/generate.go`
+**File**: `internal/generate/taxonomy_indexes.go`
 
 Add a function to generate individual pages for each field value:
 
 ```go
-func WriteNewFieldIndexPages(stories []data.Story, store store.Adapter) error {
-    newFieldTypes := store.GetNewFieldTypes()
-    
-    for _, fieldType := range newFieldTypes {
-        fieldStories, err := store.GetStoriesForNewFieldType(fieldType.Title)
-        if err != nil {
-            return fmt.Errorf("failed to get stories for new field %s: %w", fieldType.Title, err)
-        }
-
-        page := data.Page{
-            Title:       fieldType.Title,
-            Stories:     fieldStories,
-            NewFieldType: &fieldType,
-        }
-
-        filename := fmt.Sprintf("newfield/%s.html", fieldType.URL)
-        if err := writePageToFile(filename, "newfield-index.html", page); err != nil {
-            return fmt.Errorf("failed to write new field page %s: %w", filename, err)
-        }
-    }
-
-    return nil
+func WriteNewFieldIndexPages() error {
+    return writeTaxonomyIndexPages(taxonomyIndexConfig[data.NewFieldType]{
+        label:       "new-field index",
+        outputDir:   "newfield",
+        template:    "newfield-index.html",
+        description: func(title string) string { return "Stories tagged with " + title },
+        list:        store.GetNewFieldTypes,
+        storiesFor:  store.GetStoriesForNewFieldType,
+        title:       func(item data.NewFieldType) string { return item.Title },
+        color:       func(item data.NewFieldType) string { return item.Colour },
+    })
 }
 ```
 
@@ -840,7 +812,7 @@ Create a template similar to `theme-index.html`, `type-index.html`, `weather-ind
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{.Title}} - Community Climate Justice Archive</title>
+    <title>{{.Title}} - Dudley Time Portal</title>
     <!-- ... head content similar to other index templates ... -->
 </head>
 <body>
@@ -873,7 +845,7 @@ Ensure the new field tags have consistent styling with existing tags:
 #### 11. Integrate Index Generation into Main Build Process
 **File**: `cmd/archive/main.go`
 
-Add calls to your new index generation functions in both `generateArchive()` and `hotRegenerate()` functions:
+Add a call to your new index generation function in `generateArchive()`:
 
 ```go
 // In generateArchive() function, after WriteWeatherIndexes():
@@ -881,35 +853,9 @@ if err := generate.WriteNewFieldIndexPages(); err != nil {
     return fmt.Errorf("failed to write new field indexes: %v", err)
 }
 
-// In hotRegenerate() function, after WriteWeatherIndexes():
-if err := generate.WriteNewFieldIndexPages(); err != nil {
-    return fmt.Errorf("failed to write new field indexes: %v", err)
-}
 ```
 
 **Important**: Without this step, the index pages won't be generated and the tag links won't work!
-
-## Deprecated Tools
-
-### Image Field Consolidation Tool
-
-**Status: DEPRECATED - No longer needed**
-
-The `cmd/consolidate-image-fields/` tool was created to migrate data from legacy `SourceImage` and `Image` fields into the unified `ImageVideoSound` field. This migration has been completed.
-
-**Important Notes:**
-- The tool is **idempotent** and safe to run multiple times
-- Running it now will not cause any issues as it will detect no changes are needed
-- The tool is kept for historical reference and potential future migrations
-- All stories now use only the `ImageVideoSound` field for attachments
-
-**Usage (if needed):**
-```bash
-go build -o consolidate-image-fields ./cmd/consolidate-image-fields
-./consolidate-image-fields --checksum  # Verify consolidation is complete
-```
-
----
 
 ## Technical Terms Glossary
 

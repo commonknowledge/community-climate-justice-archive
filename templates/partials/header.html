@@ -16,61 +16,249 @@
 */}}
 {{define "header"}}
 <header>
-    <div class="main-header">
-        <h1><a href="/">Dudley Time Portal</a></h1>
-        <nav class="header-nav">
-            <!-- Navigation buttons -->
-            <a class="dashed-button" href="/">Wander</a>
-            <a class="dashed-button" href="/archive.html">Archive</a>
-            <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
-            <!-- Link to NocoDB form where people can add new stories -->
-            <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
-        </nav>
+    <div class="container">
+        <div class="main-header">
+            <h1 class="body-sans-lg">
+                <a href="/">Dudley Time Portal</a>
+                <!-- Dark/Light mode toggle -->
+                <button class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+                </button>
+            </h1>
+            <!-- Desktop navigation (hidden on mobile) -->
+            <nav class="header-nav header-nav-desktop">
+                <a class="dashed-button" href="/">Wander</a>
+                <a class="dashed-button" href="/archive.html">Archive</a>
+                <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
+                <a class="dashed-button" href="/about.html">About</a>
+                <!-- Link to NocoDB form where people can add new stories -->
+                <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
+            </nav>
+            <!-- Mobile menu button (hidden on desktop) -->
+            <button class="dashed-button mobile-menu-toggle" aria-label="Open menu" aria-expanded="false">menu</button>
+        </div>
     </div>
 </header>
+
+<!-- Mobile menu overlay (hidden by default) -->
+<div class="mobile-menu-overlay" aria-hidden="true">
+    <div class="mobile-menu-header">
+        <h1 class="body-sans-lg">
+            <a href="/">Dudley Time Portal</a>
+            <!-- Theme toggle — same position as in the main header h1 -->
+            <button class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+            </button>
+        </h1>
+        <button class="dashed-button mobile-menu-close" aria-label="Close menu">close</button>
+    </div>
+    <nav class="mobile-menu-nav / body-sans-lg">
+        <a class="dashed-button mobile-menu-link" href="/">wander</a>
+        <a class="dashed-button mobile-menu-link" href="/archive.html">archive</a>
+        <a class="dashed-button mobile-menu-link random-story-link-mobile" href="{{.RandomStoryURL}}">random</a>
+        <a class="dashed-button mobile-menu-link" href="/about.html">about the project</a>
+        <a class="dashed-button mobile-menu-link" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
+    </nav>
+</div>
 <script>
+    // Theme toggle (dark/light mode)
+    // Handles all .theme-toggle buttons on the page (desktop header + mobile overlay)
+    (function() {
+        var toggles = document.querySelectorAll('.theme-toggle');
+        if (toggles.length === 0) return;
+
+        function getPreferredTheme() {
+            var stored = localStorage.getItem('theme');
+            if (stored) return stored;
+            return null; // Let CSS prefers-color-scheme handle it
+        }
+
+        function getEffectiveTheme() {
+            var stored = localStorage.getItem('theme');
+            if (stored) return stored;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function applyTheme(theme) {
+            if (theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            updateIcons();
+        }
+
+        function updateIcons() {
+            var effective = getEffectiveTheme();
+            var label = effective === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            toggles.forEach(function(toggle) {
+                var moonIcon = toggle.querySelector('.icon-moon');
+                var sunIcon = toggle.querySelector('.icon-sun');
+                if (effective === 'dark') {
+                    if (moonIcon) moonIcon.style.display = 'none';
+                    if (sunIcon) sunIcon.style.display = 'block';
+                } else {
+                    if (moonIcon) moonIcon.style.display = 'block';
+                    if (sunIcon) sunIcon.style.display = 'none';
+                }
+                toggle.title = label;
+                toggle.setAttribute('aria-label', label);
+            });
+        }
+
+        // Apply saved preference on load
+        var preferred = getPreferredTheme();
+        applyTheme(preferred);
+
+        // Toggle on click — any toggle button toggles theme for all
+        toggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                var current = getEffectiveTheme();
+                var next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                applyTheme(next);
+            });
+        });
+
+        // Listen for OS theme changes when no explicit preference is stored
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            if (!localStorage.getItem('theme')) {
+                updateIcons();
+            }
+        });
+    })();
+
     // Make the Random button work properly
     // The Go program gives us a list of all story URLs, and we pick one at random
-    
+
     window.storyUrls = {{.StoriesJSON}};  // List of all story URLs from the Go program
     (function() {
-        const randomLink = document.querySelector('.random-story-link');
-        if (!randomLink) return;  // Safety check - make sure the button exists
-        
-        // This function picks a random story from the list and updates the button's link
-        function updateRandomLink() {
+        // Update both desktop and mobile random links
+        const randomLinks = document.querySelectorAll('.random-story-link, .random-story-link-mobile');
+        if (randomLinks.length === 0) return;
+
+        // This function picks a random story from the list and updates all random buttons
+        function updateRandomLinks() {
             if (window.storyUrls && window.storyUrls.length > 0) {
-                // Pick a random story URL from the list
                 const randomUrl = window.storyUrls[Math.floor(Math.random() * window.storyUrls.length)];
-                const baseUrl = window.location.origin;  // Like "https://archive.example.com"
-                randomLink.href = baseUrl + '/' + randomUrl;  // Update the button's destination
+                const baseUrl = window.location.origin;
+                randomLinks.forEach(link => {
+                    link.href = baseUrl + '/' + randomUrl;
+                });
             }
         }
 
         // Pick a random story when the page first loads
-        updateRandomLink();
-        
-        // Pick a new random story each time someone clicks the button
-        randomLink.addEventListener('click', function(e) {
-            updateRandomLink();
+        updateRandomLinks();
+
+        // Pick a new random story each time someone clicks either random button
+        randomLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                updateRandomLinks();
+            });
         });
     })();
 
-    // Highlight the current page's button
-    // So if you're on the Archive page, the Archive button gets a yellow background
+    // Highlight the current page's button (desktop nav)
+    // Automatically matches nav links to the current URL - no need to update when adding new pages
     (function() {
-        const navButtons = document.querySelectorAll('.header-nav .dashed-button');
-        const currentPath = window.location.pathname;  // Like "/archive.html"
-        
-        navButtons.forEach(button => {
+        function removeLeadingSlash(path) {
+            if (path.startsWith('/')) return path.slice(1);
+            return path;
+        }
+
+        function removeHtmlExtension(path) {
+            if (path.endsWith('.html')) return path.slice(0, -5);
+            return path;
+        }
+
+        function getPageName(href) {
+            let pageName = href;
+            pageName = removeLeadingSlash(pageName);
+            pageName = removeHtmlExtension(pageName);
+            return pageName;
+        }
+
+        const currentPath = window.location.pathname;
+
+        document.querySelectorAll('.header-nav-desktop .dashed-button').forEach(button => {
             const href = button.getAttribute('href');
-            
-            // Check if this button's link matches the current page
-            if (currentPath === href || 
-                (currentPath === '/' && href === '/') ||
-                (currentPath.includes('archive') && href === '/archive.html') ||
-                (currentPath.includes('wander') && href === '/wander.html')) {
-                button.style.backgroundColor = '#FFFF99';  // Yellow highlight
+
+            // Skip external links
+            if (href.startsWith('http')) return;
+
+            // Get the page name from the href, e.g. "/archive.html" becomes "archive"
+            const pageName = getPageName(href);
+
+            // Check if this button matches the current page
+            let isMatch = false;
+            if (currentPath === href) {
+                isMatch = true;
+            }
+            if (pageName && currentPath.includes(pageName)) {
+                isMatch = true;
+            }
+
+            if (isMatch) {
+                button.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--highlight-yellow').trim();
+            }
+        });
+    })();
+
+    // Highlight the current page's link in the mobile menu
+    (function() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.mobile-menu-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('http')) return;
+            const pageName = href.replace(/^\//, '').replace(/\.html$/, '');
+            if (currentPath === href || (pageName && currentPath.includes(pageName))) {
+                link.classList.add('active');
+            }
+        });
+    })();
+
+    // Mobile menu toggle functionality
+    (function() {
+        const menuToggle = document.querySelector('.mobile-menu-toggle');
+        const menuClose = document.querySelector('.mobile-menu-close');
+        const menuOverlay = document.querySelector('.mobile-menu-overlay');
+
+        if (!menuToggle || !menuOverlay) return;
+
+        function openMenu() {
+            menuOverlay.classList.add('is-open');
+            menuOverlay.setAttribute('aria-hidden', 'false');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            menuOverlay.classList.remove('is-open');
+            menuOverlay.setAttribute('aria-hidden', 'true');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+
+        menuToggle.addEventListener('click', openMenu);
+        if (menuClose) {
+            menuClose.addEventListener('click', closeMenu);
+        }
+
+        // Close menu when clicking a link
+        const menuLinks = menuOverlay.querySelectorAll('.mobile-menu-link');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && menuOverlay.classList.contains('is-open')) {
+                closeMenu();
             }
         });
     })();

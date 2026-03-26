@@ -26,10 +26,11 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"strings"
 )
+
+const nocodbStoryDashboardURLTemplate = "https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path="
 
 // StoryConnection is when one story is connected to another.
 //
@@ -153,6 +154,7 @@ type Story struct {
 	ReflectionLearning      string            // Reflections or learnings associated with the story
 	UpdatedAt               string            // When this story was last modified
 	URL                     string            // The URL path to this story's page in the archive
+	Approved                string            // Approval status ("Yes-Live" means visible, "No-Hidden" means hidden)
 }
 
 // StoryAttachment is a file attached to a story.
@@ -248,42 +250,6 @@ func GetFileTypeFromExtension(filename string) string {
 	return "document"
 }
 
-// processAttachmentSlice processes a slice of attachments and sets URLs/metadata
-func processAttachmentSlice(attachments []StoryAttachment) []StoryAttachment {
-	for i := range attachments {
-		// Determine file type based on extension
-		attachments[i].FileType = GetFileTypeFromExtension(attachments[i].Filename)
-
-		// Split filename into name and extension
-		ext := filepath.Ext(attachments[i].Filename)
-		name := strings.TrimSuffix(attachments[i].Filename, ext)
-
-		// Handle different file types
-		if attachments[i].IsImage() {
-			// For images, check if WebP version exists
-			webpPath := filepath.Join("images", name+".webp")
-			if _, err := os.Stat(webpPath); err == nil {
-				// WebP version exists, use it
-				attachments[i].Filename = name + ".webp"
-				attachments[i].Type = "image/webp"
-			}
-
-			// Set URLs for different sizes (images only)
-			attachments[i].URL = "/images/processed/" + name + ".webp"
-			attachments[i].ThumbURL = "/images/processed/" + name + "_thumb.webp"
-			attachments[i].MediumURL = "/images/processed/" + name + "_medium.webp"
-			attachments[i].LargeURL = "/images/processed/" + name + "_large.webp"
-		} else {
-			// For non-images (audio, documents), just set the direct URL
-			attachments[i].URL = "/images/" + attachments[i].Filename
-			attachments[i].ThumbURL = ""
-			attachments[i].MediumURL = ""
-			attachments[i].LargeURL = ""
-		}
-	}
-	return attachments
-}
-
 // GetStoryAttachments gets all the files attached to a story.
 //
 // Stories can have images, audio files, or documents attached. NocoDB stores these
@@ -331,7 +297,6 @@ func (s Story) GetStoryAttachments() []StoryAttachment {
 func (s Story) GetStoryAttachment() StoryAttachment {
 	attachments := s.GetStoryAttachments()
 	if len(attachments) > 0 {
-		log.Println("Found", len(attachments), "attachments for story", attachments[0].URL)
 		return attachments[0]
 	}
 	return StoryAttachment{}
@@ -339,11 +304,6 @@ func (s Story) GetStoryAttachment() StoryAttachment {
 
 // GetStoryImage returns the first image attachment for backward compatibility
 func (s Story) GetStoryImage() StoryAttachment {
-	return s.GetFirstImageAttachment()
-}
-
-// GetFirstImageAttachment returns the first image attachment specifically, or empty if none
-func (s Story) GetFirstImageAttachment() StoryAttachment {
 	attachments := s.GetStoryAttachments()
 	for _, attachment := range attachments {
 		if attachment.IsImage() {
@@ -362,11 +322,6 @@ func (s Story) GetFirstNonImageAttachment() StoryAttachment {
 		}
 	}
 	return StoryAttachment{}
-}
-
-// GetStoryImages returns all attachments for backward compatibility
-func (s Story) GetStoryImages() []StoryAttachment {
-	return s.GetStoryAttachments()
 }
 
 // TitleToHexColor creates a colour from text that's always the same.
@@ -439,7 +394,7 @@ func hsbToRGB(hue, saturation, brightness float64) (uint8, uint8, uint8) {
 
 // GetNocoDBURL returns a direct link to this story in the NocoDB interface for debugging
 func (s Story) GetNocoDBURL() string {
-	return fmt.Sprintf("https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path=", s.ID)
+	return fmt.Sprintf(nocodbStoryDashboardURLTemplate, s.ID)
 }
 
 // convertNocoDBAttachment converts a NocoDB attachment object to StoryAttachment format
