@@ -50,6 +50,8 @@
             <span class="debug-separator">|</span>
             <span class="debug-item">Weather:<strong>{{if .Story.Weather}}{{len .Story.Weather}} tags{{else}}None{{end}}</strong></span>
             <span class="debug-separator">|</span>
+            <span class="debug-item">Contributors:<strong>{{len .Story.Contributors}}/{{len .Story.PublicContributors}}</strong></span>
+            <span class="debug-separator">|</span>
             <span class="debug-item">Date:<strong>{{if .Story.StartDateTime}}{{.Story.StartDateTime}}{{else if .Story.PostDate}}{{.Story.PostDate}}{{else if .Story.EndDateTime}}{{.Story.EndDateTime}}{{else}}None{{end}}</strong></span>
             <span class="debug-separator">|</span>
             <span class="debug-close">Press 'D' to close</span>
@@ -59,10 +61,10 @@
     {{template "header" .}}
     {{$story := .Story}}
     {{$attachments := .Attachments}}
+
+    <div class="container">
     {{if $attachments}}
         {{$multipleAttachments := gt (len $attachments) 1}}
-    
-    <div class="container">
         <!-- Navigation container with arrows outside the attachment loop -->
         <div class="story-attachment-navigation">
             {{if $multipleAttachments}}
@@ -152,19 +154,9 @@
             }
             {{end}}
         </script>
-        {{else}}
-        <div class="story-no-attachments">
-            <div class="no-attachment-placeholder">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21,15 16,10 5,21"></polyline>
-                </svg>
-            </div>
-            <p>This story has no attached media</p>
-        </div>
-        {{end}}
-        <div class="story-details">
+    {{else}}
+        <!-- Text-only story - display the Finding as the hero content -->
+        <div class="story-text-only-hero">
             <div class="story-main">
                 <div class="story-finding body">
                     {{$story.Finding}}
@@ -196,8 +188,54 @@
                     </a>
                 </div>
             </div>
+        </div>
+    {{end}}
+        <div class="story-details">
+            <!-- Only show Finding in details if story has attachments - text-only shows it in hero -->
+            {{if $attachments}}
+                <div class="story-main">
+                    <div class="story-finding body">
+                        {{$story.Finding}}
+                    </div>
+                    <div class="story-actions">
+                        <a
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/e091e6e7-7818-4dda-bc4b-ac77224ce43e?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a tag
+                        </a>
+                        <a 
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/cc13492d-021a-4a98-b5d7-dac4efa2a18b?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a text edit
+                        </a>
+                        <a 
+                            href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/193d6a3e-4878-48f8-8ee6-be1763939936?story_link={{$story.ID}}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="dashed-button"
+                        >
+                            Suggest a connection
+                        </a>
+                    </div>
+                </div>
+            {{end}}
+           
             <div class="story-metadata">
                 <div class="story-metadata-item-group">
+                    {{if $story.PublicContributors}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">
+                            {{if eq (len $story.PublicContributors) 1}}Contributor{{else}}Contributors{{end}}
+                        </span>
+                        <span class="story-metadata-item-value">{{range $index, $contributor := $story.PublicContributors}}{{if ne $index 0}}, {{end}}{{$contributor.Name}}{{end}}</span>
+                    </div>
+                    {{end}}
                     {{if $story.CreatedTime}}
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Created</span>
@@ -348,7 +386,7 @@
                     {{range $story.InspiredBy}}
                     <a href="{{.URL}}" class="big-button">
                         {{if eq .AttachmentType "image"}}
-                        <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                            <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
                         {{else if eq .AttachmentType "audio"}}
                             <div class="big-button-image">
                                 <div class="story-audio-preview">
@@ -375,19 +413,9 @@
                                 </div>
                             </div>
                         {{else}}
-                            <div class="big-button-image">
-                                <div class="story-no-attachment">
-                                    <div class="no-attachment-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Text-only: no image area needed, text shows in content -->
                         {{end}}
-                        <div class="big-button-content">
+                        <div class="big-button-content {{if eq .AttachmentType "none"}}big-button-content-text-only{{end}}">
                             <p class="big-button-title">{{.Finding}}</p>
                         </div>
                     </a>
@@ -430,17 +458,7 @@
                                 </div>
                             </div>
                         {{else}}
-                            <div class="big-button-image">
-                                <div class="story-no-attachment">
-                                    <div class="no-attachment-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Text-only: no image area needed, text shows in content -->
                         {{end}}
                         <div class="big-button-content">
                             <p class="big-button-title">{{.Finding}}</p>
@@ -512,19 +530,12 @@
                                 </div>
                             </a>
                         {{else}}
-                            <!-- No attachments: show placeholder -->
-                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                                <div class="story-no-attachment">
-                                    <div class="no-attachment-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="no-attachment-text">View story</div>
+                            <!-- If the story has no attachment, show text preview card -->
+                             <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
+                                <div class="story-text-only-preview">
+                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
                                 </div>
-                        </a>
+                            </a>
                         {{end}}
                     </div>
                 {{end}}
@@ -591,19 +602,12 @@
                                 </div>
                             </a>
                         {{else}}
-                            <!-- No attachments: show placeholder -->
-                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                                <div class="story-no-attachment">
-                                    <div class="no-attachment-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="no-attachment-text">View story</div>
+                            <!-- If the story has no attachment, show text preview card -->
+                            <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
+                                <div class="story-text-only-preview">
+                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
                                 </div>
-                        </a>
+                            </a>
                         {{end}}
                     </div>
                 {{end}}
@@ -670,19 +674,12 @@
                                 </div>
                             </a>
                         {{else}}
-                            <!-- No attachments: show placeholder -->
-                            <a class="story-image-container no-attachment" href="{{$story.URL}}">
-                                <div class="story-no-attachment">
-                                    <div class="no-attachment-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="no-attachment-text">View story</div>
+                             <!-- If the story has no attachment, show text preview card -->
+                            <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
+                                <div class="story-text-only-preview">
+                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
                                 </div>
-                        </a>
+                            </a>
                         {{end}}
                     </div>
                 {{end}}

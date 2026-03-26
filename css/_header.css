@@ -149,6 +149,7 @@ header h1 a:hover {
 
 .mobile-menu-link.active {
   background-color: var(--highlight-yellow);
+  color: black;
   border-style: solid;
 }
 

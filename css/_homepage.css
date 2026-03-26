@@ -26,6 +26,20 @@
   margin-bottom: 4rem;
 }
 
+.homepage-theme-load-more {
+  margin-top: 1rem;
+}
+
+[data-homepage-theme-load-more][hidden] {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .homepage-theme-item--hidden {
+    display: none;
+  }
+}
+
 /* Connections View
  *
  * Interactive scattered layout for showing story connections on homepage
@@ -34,7 +48,7 @@
 .connections-view {
   position: relative;
   width: 100%;
-  height: 843px;
+  height: calc(80vh - 82px); /* 82 px = sticky header height */
   overflow: auto;
   scroll-behavior: smooth;
   margin-bottom: 4rem;
