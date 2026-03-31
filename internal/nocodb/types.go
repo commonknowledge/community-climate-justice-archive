@@ -70,7 +70,7 @@ type NocoDBStoryDTO struct {
 	TimeSpan                interface{} `json:"-"`
 	InspiredBy              interface{} `json:"Inspired by"`
 	HasInspired             interface{} `json:"Has inspired"`
-	OtherComments           interface{} `json:"Description"`
+	OtherComments           interface{} `json:"-"` // TODO: map to correct NocoDB field name once known
 	Type                    interface{} `json:"Type"`
 	GiftedBy                interface{} `json:"-"` // ellipsis (U+2026) is not valid in Go JSON tags; read directly from record map
 	Contributors            interface{} `json:"Contributors"`

@@ -237,7 +237,7 @@ The main text content of a story.
   max-width: 780px;
 }
 
-.story-finding-title {
+.story-finding__title {
   margin: 0 0 0.75rem;
 }
 
