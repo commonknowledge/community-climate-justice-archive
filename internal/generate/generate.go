@@ -167,10 +167,15 @@ type StoryData struct {
 	Season        string          `json:"season"`
 	Experience    string          `json:"experience"`
 	TimeSpan      string          `json:"timeSpan"`
-	Themes        []string        `json:"themes"`
-	Types         []string        `json:"types"`
-	Weather       []string        `json:"weather"`
-	Attachment    StoryAttachment `json:"attachment"`
+	Themes           []string        `json:"themes"`
+	Types            []string        `json:"types"`
+	Weather          []string        `json:"weather"`
+	WhatWasIsIf      []string        `json:"whatWasIsIf"`
+	GiftedBy         []string        `json:"giftedBy"`
+	ScalePermanence  []string        `json:"scalePermanence"`
+	TimePeriod       []string        `json:"timePeriod"`
+	CreatedTime      string          `json:"createdTime"`
+	Attachment       StoryAttachment `json:"attachment"`
 }
 
 // StoryAttachment represents the attachment data for a story
@@ -186,10 +191,14 @@ type StoryAttachment struct {
 
 // FilterData represents all the data needed for client-side filtering
 type FilterData struct {
-	Themes  []FilterOption `json:"themes"`
-	Types   []FilterOption `json:"types"`
-	Weather []FilterOption `json:"weather"`
-	Stories []StoryData    `json:"stories"`
+	Themes          []FilterOption `json:"themes"`
+	Types           []FilterOption `json:"types"`
+	Weather         []FilterOption `json:"weather"`
+	WhatWasIsIf     []FilterOption `json:"whatWasIsIf"`
+	GiftedBy        []FilterOption `json:"giftedBy"`
+	ScalePermanence []FilterOption `json:"scalePermanence"`
+	TimePeriod      []FilterOption `json:"timePeriod"`
+	Stories         []StoryData    `json:"stories"`
 }
 
 // FilterOption represents a filter option with title and count
@@ -201,7 +210,7 @@ type FilterOption struct {
 }
 
 // convertStoriesToFilterData converts stories to comprehensive filter data
-func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather) (string, error) {
+func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types []data.Type, weather []data.Weather, whatWasIsIf []data.WhatWasIsIf, giftedBy []data.GiftedBy, scalePermanence []data.ScalePermanence, timePeriod []data.TimePeriod) (string, error) {
 	// Create story data
 	storyData := make([]StoryData, len(stories))
 	for i, story := range stories {
@@ -225,6 +234,30 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			weatherNames[j] = w.Title
 		}
 
+		// Extract what was/is/if titles
+		whatWasIsIfNames := make([]string, len(story.WhatWasIsIf))
+		for j, wwii := range story.WhatWasIsIf {
+			whatWasIsIfNames[j] = wwii.Title
+		}
+
+		// Extract gifted by titles
+		giftedByNames := make([]string, len(story.GiftedBy))
+		for j, gb := range story.GiftedBy {
+			giftedByNames[j] = gb.Title
+		}
+
+		// Extract scale permanence titles
+		scalePermanenceNames := make([]string, len(story.ScalePermanence))
+		for j, sp := range story.ScalePermanence {
+			scalePermanenceNames[j] = sp.Title
+		}
+
+		// Extract time period titles
+		timePeriodNames := make([]string, len(story.TimePeriod))
+		for j, tp := range story.TimePeriod {
+			timePeriodNames[j] = tp.Title
+		}
+
 		storyData[i] = StoryData{
 			ID:            story.ID,
 			Finding:       story.Finding,
@@ -235,9 +268,14 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Season:        story.Season,
 			Experience:    story.Experience,
 			TimeSpan:      story.TimeSpan,
-			Themes:        themeNames,
-			Types:         typeNames,
-			Weather:       weatherNames,
+			Themes:          themeNames,
+			Types:           typeNames,
+			Weather:         weatherNames,
+			WhatWasIsIf:     whatWasIsIfNames,
+			GiftedBy:        giftedByNames,
+			ScalePermanence: scalePermanenceNames,
+			TimePeriod:      timePeriodNames,
+			CreatedTime:     story.CreatedTime,
 			Attachment: StoryAttachment{
 				URL:       attachment.URL,
 				ThumbURL:  attachment.ThumbURL,
@@ -308,11 +346,91 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		}
 	}
 
+	whatWasIsIfOptions := make([]FilterOption, len(whatWasIsIf))
+	for i, wwii := range whatWasIsIf {
+		count := 0
+		for _, story := range stories {
+			for _, storyWWII := range story.WhatWasIsIf {
+				if storyWWII.Title == wwii.Title {
+					count++
+					break
+				}
+			}
+		}
+		whatWasIsIfOptions[i] = FilterOption{
+			Title: wwii.Title,
+			URL:   wwii.URL,
+			Count: count,
+			Color: wwii.Colour,
+		}
+	}
+
+	giftedByOptions := make([]FilterOption, len(giftedBy))
+	for i, gb := range giftedBy {
+		count := 0
+		for _, story := range stories {
+			for _, storyGB := range story.GiftedBy {
+				if storyGB.Title == gb.Title {
+					count++
+					break
+				}
+			}
+		}
+		giftedByOptions[i] = FilterOption{
+			Title: gb.Title,
+			URL:   gb.URL,
+			Count: count,
+			Color: gb.Colour,
+		}
+	}
+
+	scalePermanenceOptions := make([]FilterOption, len(scalePermanence))
+	for i, sp := range scalePermanence {
+		count := 0
+		for _, story := range stories {
+			for _, storySP := range story.ScalePermanence {
+				if storySP.Title == sp.Title {
+					count++
+					break
+				}
+			}
+		}
+		scalePermanenceOptions[i] = FilterOption{
+			Title: sp.Title,
+			URL:   sp.URL,
+			Count: count,
+			Color: sp.Colour,
+		}
+	}
+
+	timePeriodOptions := make([]FilterOption, len(timePeriod))
+	for i, tp := range timePeriod {
+		count := 0
+		for _, story := range stories {
+			for _, storyTP := range story.TimePeriod {
+				if storyTP.Title == tp.Title {
+					count++
+					break
+				}
+			}
+		}
+		timePeriodOptions[i] = FilterOption{
+			Title: tp.Title,
+			URL:   tp.URL,
+			Count: count,
+			Color: tp.Colour,
+		}
+	}
+
 	filterData := FilterData{
-		Themes:  themeOptions,
-		Types:   typeOptions,
-		Weather: weatherOptions,
-		Stories: storyData,
+		Themes:          themeOptions,
+		Types:           typeOptions,
+		Weather:         weatherOptions,
+		WhatWasIsIf:     whatWasIsIfOptions,
+		GiftedBy:        giftedByOptions,
+		ScalePermanence: scalePermanenceOptions,
+		TimePeriod:      timePeriodOptions,
+		Stories:         storyData,
 	}
 
 	jsonData, err := json.Marshal(filterData)
@@ -527,10 +645,14 @@ func WriteFilterData() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	weather := store.GetWeather()
-	allStories := getAllStories()
+	whatWasIsIfTypes := store.GetWhatWasIsIfTypes()
+	giftedByTypes := store.GetGiftedByTypes()
+	scalePermanenceTypes := store.GetScalePermanenceTypes()
+	timePeriodTypes := store.GetTimePeriodTypes()
+	allStories := store.GetAllStories()
 
 	// Convert to filter data JSON
-	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather)
+	filterDataJSON, err := convertStoriesToFilterData(allStories, themes, types, weather, whatWasIsIfTypes, giftedByTypes, scalePermanenceTypes, timePeriodTypes)
 	if err != nil {
 		return err
 	}

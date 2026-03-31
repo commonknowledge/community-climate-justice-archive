@@ -67,17 +67,17 @@ type NocoDBStoryDTO struct {
 	StreetDetectoristClue   interface{} `json:"If you would like to fill out a Street Detectorist map, you can download it here:"`
 	Themes                  interface{} `json:"Themes"`
 	Experience              interface{} `json:"Description"`
-	TimeSpan                interface{} `json:"Scale of permanence"`
+	TimeSpan                interface{} `json:"-"`
 	InspiredBy              interface{} `json:"Inspired by"`
 	HasInspired             interface{} `json:"Has inspired"`
 	OtherComments           interface{} `json:"Description"`
 	Type                    interface{} `json:"Type"`
+	GiftedBy                interface{} `json:"-"` // ellipsis (U+2026) is not valid in Go JSON tags; read directly from record map
 	Contributors            interface{} `json:"Contributors"`
 	PublicContributors      interface{} `json:"Public Contributors"`
-	GiftedBy                interface{} `json:"Gifted or co-created by…"`
 	ScalePermanence         interface{} `json:"Scale of permanence"`
 	TimePeriod              interface{} `json:"Time period"`
-	PersonFinder            interface{} `json:"Gifted or co-created by…"`
+	PersonFinder            interface{} `json:"-"`
 	MapCache                interface{} `json:"Map Cache"`
 	MapSize                 interface{} `json:"Map Size"`
 	Created                 interface{} `json:"CreatedAt"`
@@ -130,8 +130,10 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		weather = []data.Weather{}
 	}
 
-	// Convert gifted by
-	giftedBy, err := ParseGiftedByFromNocoDB(dto.GiftedBy)
+	// Convert gifted by — read directly from record because the NocoDB column name
+	// "Gifted or co-created by…" contains U+2026 (ellipsis), which is not a valid
+	// character in Go JSON struct tags, so dto.GiftedBy is always nil.
+	giftedBy, err := ParseGiftedByFromNocoDB(record["Gifted or co-created by\u2026"])
 	if err != nil {
 		log.Printf("Warning: failed to parse gifted by: %v", err)
 		giftedBy = []data.GiftedBy{}

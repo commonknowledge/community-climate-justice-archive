@@ -35,12 +35,16 @@ class ArchiveFilters {
         this.currentFilters = {
             themes: [],
             types: [],
-            weather: []
+            weather: [],
+            whatWasIsIf: [],
+            scalePermanence: [],
+            timePeriod: []
         };
         this.filteredStories = [];
+        this.currentSort = 'dateExperienced';
         this.currentPage = 0;
         this.storiesPerPage = 20;
-        
+
         this.initializeElements();
         this.loadFilterData();
         this.setupEventListeners();
@@ -58,30 +62,51 @@ class ArchiveFilters {
      */
     initializeElements() {
         // Store all the HTML elements we'll need
+        const el = (name) => document.querySelector(`[data-el="${name}"]`);
         this.elements = {
-            // The three dropdown menus for filters
-            themeDropdown: document.getElementById('theme-dropdown'),
-            typeDropdown: document.getElementById('type-dropdown'),
-            weatherDropdown: document.getElementById('weather-dropdown'),
-            // The buttons that open the dropdowns
-            themeButton: document.getElementById('theme-button'),
-            typeButton: document.getElementById('type-button'),
-            weatherButton: document.getElementById('weather-button'),
-            // The content areas inside the dropdowns (where the filter options go)
-            themeContent: document.getElementById('theme-content'),
-            typeContent: document.getElementById('type-content'),
-            weatherContent: document.getElementById('weather-content'),
+            // Primary filter dropdowns
+            themeDropdown: el('theme-dropdown'),
+            typeDropdown: el('type-dropdown'),
+            whatwasisifDropdown: el('whatwasisif-dropdown'),
+            weatherDropdown: el('weather-dropdown'),
+            // More filter dropdowns
+            scalepermanenceDropdown: el('scalepermanence-dropdown'),
+            timeperiodDropdown: el('timeperiod-dropdown'),
+            // Buttons that open the dropdowns
+            themeButton: el('theme-button'),
+            typeButton: el('type-button'),
+            whatwasisifButton: el('whatwasisif-button'),
+            weatherButton: el('weather-button'),
+            scalepermanenceButton: el('scalepermanence-button'),
+            timeperiodButton: el('timeperiod-button'),
+            // Content areas inside the dropdowns
+            themeContent: el('theme-content'),
+            typeContent: el('type-content'),
+            whatwasisifContent: el('whatwasisif-content'),
+            weatherContent: el('weather-content'),
+            scalepermanenceContent: el('scalepermanence-content'),
+            timeperiodContent: el('timeperiod-content'),
+            // More filters toggle
+            moreFiltersToggle: el('more-filters-toggle'),
+            moreFiltersContainer: el('more-filters'),
+            // Sort elements
+            sortDropdown: el('sort-dropdown'),
+            sortButton: el('sort-button'),
+            sortContent: el('sort-content'),
+            sortText: el('sort-text'),
             // The "Clear filters" button
-            clearFilters: document.getElementById('clear-filters'),
+            clearFilters: el('clear-filters'),
             // Text showing "X of Y stories"
-            filterCount: document.getElementById('filter-count'),
+            filterCount: el('filter-count'),
             // The area showing active filter tags
-            activeFilters: document.getElementById('active-filters'),
-            activeFiltersList: document.getElementById('active-filters-list'),
+            activeFilters: el('active-filters'),
+            activeFiltersList: el('active-filters-list'),
             // Where the story grid gets displayed
-            storiesContainer: document.getElementById('stories-container'),
+            storiesContainer: el('stories-container'),
             // The total count in the header
-            totalCount: document.getElementById('total-count')
+            totalCount: el('total-count'),
+            // The archive heading (text changes when filters are active)
+            archiveHeading: el('archive-heading')
         };
         
         // Safety check - warn if any elements are missing
@@ -120,9 +145,11 @@ class ArchiveFilters {
             
             // Start with all stories visible
             this.filteredStories = [...this.filterData.stories];
-            
-            // Show "X stories" in the header
-            this.updateFilterCount();
+
+            // Re-apply URL filters (if any), then render stories/count from JSON data
+            this.updateDropdownDisplay();
+            this.applyFilters();
+            this.updateActiveFiltersDisplay();
             
         } catch (error) {
             console.error('Error loading filter data:', error);
@@ -133,48 +160,59 @@ class ArchiveFilters {
     
     populateFilterDropdowns() {
         if (!this.filterData) return;
-        
-        // Populate themes
+
+        // Populate primary filters
         this.populateDropdown(this.elements.themeContent, this.filterData.themes, 'themes');
-        
-        // Populate types
         this.populateDropdown(this.elements.typeContent, this.filterData.types, 'types');
-        
-        // Populate weather
+        this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
         this.populateDropdown(this.elements.weatherContent, this.filterData.weather, 'weather');
+
+        // Populate "more" filters
+        this.populateDropdown(this.elements.scalepermanenceContent, this.filterData.scalePermanence, 'scalePermanence');
+        this.populateDropdown(this.elements.timeperiodContent, this.filterData.timePeriod, 'timePeriod');
+
+        // Show "More filters" toggle only if any of the extra filter types have data
+        const hasMoreFilters = (this.filterData.scalePermanence && this.filterData.scalePermanence.length > 0) ||
+            (this.filterData.timePeriod && this.filterData.timePeriod.length > 0);
+
+        if (hasMoreFilters && this.elements.moreFiltersToggle) {
+            this.elements.moreFiltersToggle.style.display = '';
+        }
     }
     
     populateDropdown(contentElement, options, filterType) {
         if (!contentElement || !options) return;
-        
+
         // Clear existing content
         contentElement.innerHTML = '';
-        
+
+        if (options.length === 0) return;
+
         // Add options sorted by title
         const sortedOptions = [...options].sort((a, b) => a.title.localeCompare(b.title));
-        
+
         sortedOptions.forEach(option => {
             const tagButton = document.createElement('button');
-            tagButton.className = 'filter-tag-option';
-            
+            tagButton.className = 'filter-dropdown__option';
+
             // Get color - use default if empty
             let color = option.color;
             if (!color || color === '') {
                 color = this.getDefaultColor(option.title, filterType);
             }
-            
+
             tagButton.style.backgroundColor = color;
             tagButton.style.color = this.getContrastColor(color);
             tagButton.textContent = option.title;
             tagButton.dataset.value = option.title;
             tagButton.dataset.filterType = filterType;
-            
+
             tagButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleFilter(option.title, filterType);
             });
-            
+
             contentElement.appendChild(tagButton);
         });
     }
@@ -279,11 +317,74 @@ class ArchiveFilters {
                 this.toggleDropdown('weather');
             });
         }
-        
+
+        if (this.elements.whatwasisifButton) {
+            this.elements.whatwasisifButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('whatwasisif');
+            });
+        }
+
+        if (this.elements.scalepermanenceButton) {
+            this.elements.scalepermanenceButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('scalepermanence');
+            });
+        }
+
+        if (this.elements.timeperiodButton) {
+            this.elements.timeperiodButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('timeperiod');
+            });
+        }
+
+        // More filters toggle
+        if (this.elements.moreFiltersToggle) {
+            this.elements.moreFiltersToggle.addEventListener('click', () => {
+                const container = this.elements.moreFiltersContainer;
+                if (!container) return;
+                const isOpen = container.style.display !== 'none';
+                container.style.display = isOpen ? 'none' : '';
+                this.elements.moreFiltersToggle.classList.toggle('open', !isOpen);
+                const textEl = this.elements.moreFiltersToggle.querySelector('.more-filters-text');
+                if (textEl) {
+                    textEl.textContent = isOpen ? 'More filters' : 'Fewer filters';
+                }
+            });
+        }
+
+        // Sort dropdown toggle
+        if (this.elements.sortButton) {
+            this.elements.sortButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const dropdown = this.elements.sortDropdown;
+                if (!dropdown) return;
+                const isOpen = dropdown.classList.contains('open');
+                this.closeAllDropdowns();
+                this.closeSortDropdown();
+                if (!isOpen) {
+                    dropdown.classList.add('open');
+                }
+            });
+        }
+
+        // Sort option selection
+        if (this.elements.sortContent) {
+            this.elements.sortContent.addEventListener('click', (e) => {
+                const option = e.target.closest('.sort-option');
+                if (!option) return;
+                e.stopPropagation();
+                this.setSort(option.dataset.sort);
+            });
+        }
+
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.filter-dropdown')) {
+            if (!e.target.closest('.filter-dropdown') && !e.target.closest('.sort-dropdown')) {
                 this.closeAllDropdowns();
+                this.closeSortDropdown();
             }
         });
         
@@ -302,12 +403,12 @@ class ArchiveFilters {
     toggleDropdown(dropdownType) {
         const dropdown = this.elements[`${dropdownType}Dropdown`];
         if (!dropdown) return;
-        
+
         const isOpen = dropdown.classList.contains('open');
-        
-        // Close all dropdowns first
+
+        // Close all dropdowns (including sort) first
         this.closeAllDropdowns();
-        
+
         // Toggle the clicked dropdown
         if (!isOpen) {
             dropdown.classList.add('open');
@@ -315,14 +416,70 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather'].forEach(type => {
+        ['theme', 'type', 'weather', 'whatwasisif', 'scalepermanence', 'timeperiod'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
             }
         });
+        this.closeSortDropdown();
     }
-    
+
+    closeSortDropdown() {
+        if (this.elements.sortDropdown) {
+            this.elements.sortDropdown.classList.remove('open');
+        }
+    }
+
+    setSort(sortKey) {
+        this.currentSort = sortKey;
+
+        // Update button text
+        const labels = {
+            dateExperienced: 'Date experienced',
+            dateCreated: 'Date created',
+            random: 'Random'
+        };
+        if (this.elements.sortText) {
+            this.elements.sortText.textContent = labels[sortKey] || sortKey;
+        }
+
+        // Update selected state in dropdown
+        if (this.elements.sortContent) {
+            this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.sort === sortKey);
+            });
+        }
+
+        this.closeSortDropdown();
+        this.sortStories();
+        this.currentPage = 0;
+        this.renderStories();
+        this.updateURL();
+    }
+
+    sortStories() {
+        if (this.currentSort === 'random') {
+            // Fisher-Yates shuffle
+            for (let i = this.filteredStories.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.filteredStories[i], this.filteredStories[j]] = [this.filteredStories[j], this.filteredStories[i]];
+            }
+        } else if (this.currentSort === 'dateExperienced') {
+            this.filteredStories.sort((a, b) => {
+                const dateA = a.startDateTime || '';
+                const dateB = b.startDateTime || '';
+                return dateB.localeCompare(dateA);
+            });
+        } else if (this.currentSort === 'dateCreated') {
+            this.filteredStories.sort((a, b) => {
+                const dateA = a.createdTime || '';
+                const dateB = b.createdTime || '';
+                return dateB.localeCompare(dateA);
+            });
+        }
+    }
+
     toggleFilter(value, filterType) {
         const filters = this.currentFilters[filterType];
         const index = filters.indexOf(value);
@@ -346,11 +503,19 @@ class ArchiveFilters {
     
     updateDropdownDisplay() {
         // Update the visual state of filter options to show which are selected
-        ['themes', 'types', 'weather'].forEach(filterType => {
-            const contentElement = this.elements[`${filterType.slice(0, -1)}Content`];
+        const filterTypeToElement = {
+            themes: this.elements.themeContent,
+            types: this.elements.typeContent,
+            weather: this.elements.weatherContent,
+            whatWasIsIf: this.elements.whatwasisifContent,
+            scalePermanence: this.elements.scalepermanenceContent,
+            timePeriod: this.elements.timeperiodContent
+        };
+        ['themes', 'types', 'weather', 'whatWasIsIf', 'scalePermanence', 'timePeriod'].forEach(filterType => {
+            const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
-            const options = contentElement.querySelectorAll('.filter-tag-option');
+            const options = contentElement.querySelectorAll('.filter-dropdown__option');
             options.forEach(option => {
                 const isSelected = this.currentFilters[filterType].includes(option.dataset.value);
                 option.classList.toggle('selected', isSelected);
@@ -400,19 +565,46 @@ class ArchiveFilters {
             // Check weather filters
             if (this.currentFilters.weather.length > 0) {
                 // Does this story have at least one of the selected weather conditions?
-                const hasMatchingWeather = this.currentFilters.weather.some(weather => 
+                const hasMatchingWeather = this.currentFilters.weather.some(weather =>
                     story.weather.includes(weather)
                 );
                 if (!hasMatchingWeather) return false;  // Doesn't match, hide it
             }
-            
+
+            // Check what was/is/if filters
+            if (this.currentFilters.whatWasIsIf.length > 0) {
+                const hasMatchingWhatWasIsIf = this.currentFilters.whatWasIsIf.some(wwii =>
+                    story.whatWasIsIf.includes(wwii)
+                );
+                if (!hasMatchingWhatWasIsIf) return false;
+            }
+
+            // Check scale permanence filters
+            if (this.currentFilters.scalePermanence.length > 0) {
+                const hasMatchingScalePermanence = this.currentFilters.scalePermanence.some(sp =>
+                    story.scalePermanence.includes(sp)
+                );
+                if (!hasMatchingScalePermanence) return false;
+            }
+
+            // Check time period filters
+            if (this.currentFilters.timePeriod.length > 0) {
+                const hasMatchingTimePeriod = this.currentFilters.timePeriod.some(tp =>
+                    story.timePeriod.includes(tp)
+                );
+                if (!hasMatchingTimePeriod) return false;
+            }
+
             // If we get here, the story matches all filters
             return true;
         });
         
+        // Apply current sort
+        this.sortStories();
+
         // Reset to the first page
         this.currentPage = 0;
-        
+
         // Redraw the story grid with the filtered results
         this.renderStories();
         
@@ -643,7 +835,21 @@ class ArchiveFilters {
     updateFilterCount() {
         const total = this.filterData ? this.filterData.stories.length : 0;
         const filtered = this.filteredStories.length;
-        
+        const hasActiveFilters = Object.values(this.currentFilters).some(f => f.length > 0);
+
+        // Update the heading text based on whether filters are active
+        if (this.elements.archiveHeading) {
+            const headingPrefix = hasActiveFilters
+                ? 'Filtered items from the archive ('
+                : 'All items from the archive (';
+            // Detach the span first, then clear text, then re-attach
+            const span = this.elements.archiveHeading.querySelector('[data-el="total-count"]');
+            if (span) span.remove();
+            this.elements.archiveHeading.textContent = headingPrefix;
+            if (span) this.elements.archiveHeading.appendChild(span);
+            this.elements.archiveHeading.appendChild(document.createTextNode(')'));
+        }
+
         // Update the main total count in the header
         if (this.elements.totalCount) {
             this.elements.totalCount.textContent = filtered;
@@ -692,11 +898,32 @@ class ArchiveFilters {
                 this.createActiveFilterTag(weather, 'weather')
             );
         });
+
+        // Add what was/is/if filters
+        this.currentFilters.whatWasIsIf.forEach(wwii => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(wwii, 'whatWasIsIf')
+            );
+        });
+
+        // Add scale permanence filters
+        this.currentFilters.scalePermanence.forEach(sp => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(sp, 'scalePermanence')
+            );
+        });
+
+        // Add time period filters
+        this.currentFilters.timePeriod.forEach(tp => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(tp, 'timePeriod')
+            );
+        });
     }
     
     createActiveFilterTag(value, filterType) {
         const tag = document.createElement('button');
-        tag.className = 'active-filter-tag';
+        tag.className = 'active-filters__tag tag';
         
         // Find the original color for this filter option
         let color = '#666666'; // Default color
@@ -714,7 +941,7 @@ class ArchiveFilters {
         
         tag.innerHTML = `
             ${value}
-            <span class="active-filter-remove" aria-label="Remove filter">×</span>
+            <span class="tag__remove" aria-label="Remove filter">×</span>
         `;
         
         tag.addEventListener('click', () => this.removeFilter(value, filterType));
@@ -738,7 +965,10 @@ class ArchiveFilters {
         this.currentFilters = {
             themes: [],
             types: [],
-            weather: []
+            weather: [],
+            whatWasIsIf: [],
+            scalePermanence: [],
+            timePeriod: []
         };
         
         this.updateDropdownDisplay();
@@ -795,7 +1025,23 @@ class ArchiveFilters {
         if (this.currentFilters.weather.length > 0) {
             params.set('weather', this.currentFilters.weather.join(','));
         }
-        
+
+        if (this.currentFilters.whatWasIsIf.length > 0) {
+            params.set('whatWasIsIf', this.currentFilters.whatWasIsIf.join(','));
+        }
+
+        if (this.currentFilters.scalePermanence.length > 0) {
+            params.set('scalePermanence', this.currentFilters.scalePermanence.join(','));
+        }
+
+        if (this.currentFilters.timePeriod.length > 0) {
+            params.set('timePeriod', this.currentFilters.timePeriod.join(','));
+        }
+
+        if (this.currentSort && this.currentSort !== 'dateExperienced') {
+            params.set('sort', this.currentSort);
+        }
+
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
         window.history.pushState(null, '', newURL);
     }
@@ -806,7 +1052,35 @@ class ArchiveFilters {
         this.currentFilters.themes = params.get('themes') ? params.get('themes').split(',') : [];
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];
-        
+        this.currentFilters.whatWasIsIf = params.get('whatWasIsIf') ? params.get('whatWasIsIf').split(',') : [];
+        this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
+        this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
+
+        // Restore sort from URL
+        const sortParam = params.get('sort');
+        if (sortParam && ['dateExperienced', 'dateCreated', 'random'].includes(sortParam)) {
+            this.currentSort = sortParam;
+            const labels = { dateExperienced: 'Date experienced', dateCreated: 'Date created', random: 'Random' };
+            if (this.elements.sortText) {
+                this.elements.sortText.textContent = labels[sortParam];
+            }
+            if (this.elements.sortContent) {
+                this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.sort === sortParam);
+                });
+            }
+        }
+
+        // If any "more" filters are active from URL, auto-expand the more filters section
+        const hasMoreFilterParams = this.currentFilters.scalePermanence.length > 0 ||
+            this.currentFilters.timePeriod.length > 0;
+        if (hasMoreFilterParams && this.elements.moreFiltersContainer) {
+            this.elements.moreFiltersContainer.style.display = '';
+            if (this.elements.moreFiltersToggle) {
+                this.elements.moreFiltersToggle.classList.add('open');
+            }
+        }
+
         // Update dropdown displays
         if (this.filterData) {
             this.updateDropdownDisplay();
