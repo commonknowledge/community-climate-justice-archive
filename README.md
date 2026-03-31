@@ -469,6 +469,28 @@ If you are running the archive in development mode, then the CSS will automatica
 
 When you've made your change, simply refresh the page to see the effect.
 
+When adding new components to the page, use [BEM methodology](https://en.bem.info/methodology/) for styling.
+
+BEM stands for **Block, Element, Modifier** — a naming convention that keeps styles predictable and scoped:
+
+- **Block** — a standalone component (`card`, `nav`, `button`)
+- **Element** — a part of a block, separated by `__` (`card__title`, `nav__link`)
+- **Modifier** — a variant or state, separated by `--` (`button--primary`, `card--featured`)
+
+```css
+/* Block */
+.card { ... }
+
+/* Elements */
+.card__title { ... }
+.card__image { ... }
+.card__footer { ... }
+
+/* Modifiers */
+.card--featured { ... }
+.card__title--large { ... }
+` ``
+```
 
 
 ### Templating in HTML
