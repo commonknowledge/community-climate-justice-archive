@@ -300,7 +300,7 @@ If you need to make changes, here's where to look:
 3. Call it from `generateArchive()` in `cmd/archive/main.go`
 
 **Want to change how pages look?**
-- Edit `css/styles.css` for styling
+- Edit stylesheets in `css/` for styling
 - Edit templates in `templates/` for structure
 - Images in `images/` get processed automatically
 
@@ -463,11 +463,13 @@ This will launch a development server at [http://localhost:8080](http://localhos
 
 ### Styling in CSS
 
-Edit the file `css/styles.css`.
+Edit the files in `css/` directory.
 
 If you are running the archive in development mode, then the CSS will automatically be copied to the directory that the development webserver serves.
 
 When you've made your change, simply refresh the page to see the effect.
+
+
 
 ### Templating in HTML
 
