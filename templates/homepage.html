@@ -426,11 +426,15 @@
                     {{range $index, $story := .ConnectedStories}}
                     {{$storyImage := $story.GetStoryImage}}
                     {{if $storyImage.URL}}
-                    <a href="{{$story.URL}}" class="story-link-scattered">
+                    <a
+                        href="{{$story.URL}}"
+                        class="story-link-scattered"
+                        aria-label="View story: {{$story.Finding}}"
+                    >
                         <img 
                             class="story-image-scattered" 
                             src="{{$storyImage.ThumbURL}}"
-                            alt="{{$story.Finding}}"
+                            alt=""
                             data-story-id="{{$story.ID}}"
                             data-story-title="{{$story.Finding}}"
                             data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"

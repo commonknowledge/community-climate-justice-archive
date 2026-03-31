@@ -87,6 +87,11 @@ Navigation wrapper that contains arrows and attachment content.
   padding: 0;
   width: 100%;
   flex: 1;
+  text-decoration: none;
+}
+
+.story-image-container figcaption {
+  margin-top: 1rem;
 }
 
 /* Story Image
