@@ -92,6 +92,7 @@ Navigation wrapper that contains arrows and attachment content.
 
 .story-image-container figcaption {
   margin-top: 1rem;
+  text-align: center;
 }
 
 /* Story Image
