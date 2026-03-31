@@ -489,7 +489,6 @@ BEM stands for **Block, Element, Modifier** — a naming convention that keeps s
 /* Modifiers */
 .card--featured { ... }
 .card__title--large { ... }
-` ``
 ```
 
 
