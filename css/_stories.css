@@ -114,7 +114,7 @@ The main video for individual stories.
   background: #000;
 }
 
-.story-video-thumb {
+.story-video-preview__thumb {
   display: block;
   width: 100%;
   height: auto;
@@ -123,21 +123,15 @@ The main video for individual stories.
   pointer-events: none;
 }
 
-.story-video-overlay {
+.story-video-preview__overlay {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.1));
+  color: white;
   pointer-events: none;
-}
-
-.story-video-overlay .audio-play-button {
-  align-items: center;
-  color: #fff;
-  display: flex;
-  justify-content: center;
 }
 
 /* Story Audio
