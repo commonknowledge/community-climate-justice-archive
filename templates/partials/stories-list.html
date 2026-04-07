@@ -37,7 +37,7 @@
                         <figcaption class="body-sans-lg">{{$story.Finding}}</figcaption>
                     </figure>
                     
-                {{/* If it's audio, show a play button and the filename */}}
+                {{/* If it's audio, show a play button and the story finding */}}
                 {{else if $attachment.IsAudio}}
                     <div class="story-audio-preview">
                         <div class="audio-play-button">
@@ -46,7 +46,7 @@
                                 <polygon points="10,8 16,12 10,16 10,8"></polygon>
                             </svg>
                         </div>
-                        <div class="audio-filename">{{$attachment.Filename}}</div>
+                        <div class="audio-filename">{{$story.Finding}}</div>
                     </div>
                 {{/* If it's a document (PDF, Word, etc.), show a document icon */}}
                 {{else if $attachment.IsDocument}}
@@ -84,12 +84,7 @@
                         {{if $attachment.IsImage}}
                             <img data-src="{{$attachment.LargeURL}}" alt="" class="popup-img">
                         {{else if $attachment.IsAudio}}
-                            <div class="popup-audio">
-                                <audio controls>
-                                    <source src="{{$attachment.URL}}" type="audio/mpeg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
+                            <div></div>
                         {{else if $attachment.IsDocument}}
                             <div class="popup-document">
                                 <div class="document-icon-large">

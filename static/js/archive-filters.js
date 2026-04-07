@@ -693,7 +693,7 @@ class ArchiveFilters {
                                     <polygon points="10,8 16,12 10,16 10,8"></polygon>
                                 </svg>
                             </div>
-                            <div class="audio-filename">${attachment.filename}</div>
+                            <div class="audio-filename">${story.finding}</div>
                         </div>
                     </a>
                 `;
@@ -741,12 +741,7 @@ class ArchiveFilters {
                 popupContent = `<img data-src="${attachment.largeUrl || attachment.url}" alt="" class="popup-img">`;
             } else if (attachment.fileType === 'audio') {
                 popupContent = `
-                    <div class="popup-audio">
-                        <audio controls>
-                            <source src="${attachment.url}" type="audio/mpeg">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
+                    <div></div>
                 `;
             } else if (attachment.fileType === 'document') {
                 popupContent = `
