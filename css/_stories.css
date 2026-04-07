@@ -122,6 +122,16 @@ Audio player display for main story attachments, centered between navigation arr
   max-width: 100%;
 }
 
+.story-document-preview,
+.story-audio-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
 /* Story Document
 
 Document download display for main story attachments, centered between navigation arrows.
