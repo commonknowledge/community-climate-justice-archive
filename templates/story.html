@@ -84,10 +84,17 @@
             <div class="story-image-container attachment-item" data-attachment-index="{{$index}}" {{if ne $index 0}}style="display: none;"{{end}}>
             {{if $attachment.IsImage}}
                 <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
+            {{else if $attachment.IsVideo}}
+                <div class="story-video">
+                    <video class="story-image" controls preload="metadata">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
+                        Your browser does not support the video element.
+                    </video>
+                </div>
             {{else if $attachment.IsAudio}}
                 <div class="story-audio">
                     <audio controls>
-                        <source src="{{$attachment.URL}}" type="audio/mpeg">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
                         Your browser does not support the audio element.
                     </audio>
                 </div>

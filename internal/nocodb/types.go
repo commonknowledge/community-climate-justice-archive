@@ -913,13 +913,13 @@ func attachmentObjectsFromField(attachmentField interface{}) ([]map[string]inter
 }
 
 func localAttachmentPath(filename, mimetype string) string {
+	// Keep downloaded source attachments together in images/ so the existing build
+	// pipeline can process/copy mixed media from one place.
 	switch attachmentCategoryFromMimeType(mimetype) {
-	case "image":
+	case "image", "audio", "video", "document":
 		return filepath.Join("images", filename)
-	case "audio":
-		return filepath.Join("audio", filename)
 	default:
-		return filepath.Join("documents", filename)
+		return filepath.Join("images", filename)
 	}
 }
 
@@ -929,6 +929,8 @@ func attachmentCategoryFromMimeType(mimetype string) string {
 		return "image"
 	case strings.HasPrefix(mimetype, "audio/"):
 		return "audio"
+	case strings.HasPrefix(mimetype, "video/"):
+		return "video"
 	default:
 		return "document"
 	}

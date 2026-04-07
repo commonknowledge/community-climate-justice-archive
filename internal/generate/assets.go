@@ -570,6 +570,55 @@ func CopyAudioToOutput() error {
 	return nil
 }
 
+// CopyVideosToOutput copies video files to the out/videos directory.
+func CopyVideosToOutput() error {
+	log.Println("Starting video copy process")
+
+	err := os.MkdirAll("out/videos", 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create output videos directory: %w", err)
+	}
+
+	copyCount := 0
+	unchangedCount := 0
+	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		ext := strings.ToLower(filepath.Ext(path))
+		switch ext {
+		case ".mp4", ".mov", ".webm", ".m4v", ".avi":
+			filename := filepath.Base(path)
+			destinationPath := filepath.Join("out/videos", filename)
+
+			copied, err := copyFileIfChanged(path, destinationPath)
+			if err != nil {
+				return fmt.Errorf("failed to copy video %s: %w", path, err)
+			}
+
+			if copied {
+				copyCount++
+			} else {
+				unchangedCount++
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error walking directories for video files: %w", err)
+	}
+
+	log.Printf("Video copy complete: copied=%d unchanged=%d", copyCount, unchangedCount)
+	return nil
+}
+
 // CopyDocumentsToOutput copies document files to the out/documents directory.
 func CopyDocumentsToOutput() error {
 	log.Println("Starting documents copy process")

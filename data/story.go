@@ -180,7 +180,7 @@ type StoryAttachment struct {
 	Filename        string               // What the file is called (like "photo.jpg")
 	AlternativeText string               // Description for screen readers (usually just the filename)
 	Type            string               // The technical file type (like "image/jpeg" or "audio/mp3")
-	FileType        string               // Simple category: "image", "audio", or "document"
+	FileType        string               // Simple category: "image", "audio", "video", or "document"
 	Size            int                  // How big the file is, in bytes
 	Width           int                  // How wide the image is (0 if it's not an image)
 	Height          int                  // How tall the image is (0 if it's not an image)
@@ -201,14 +201,19 @@ func (a StoryAttachment) IsAudio() bool {
 	return a.FileType == "audio"
 }
 
+// IsVideo returns true if the attachment is a video
+func (a StoryAttachment) IsVideo() bool {
+	return a.FileType == "video"
+}
+
 // IsDocument returns true if the attachment is a document
 func (a StoryAttachment) IsDocument() bool {
 	return a.FileType == "document"
 }
 
-// IsPlayable returns true if the attachment can be played (audio files)
+// IsPlayable returns true if the attachment can be played (audio or video files)
 func (a StoryAttachment) IsPlayable() bool {
-	return a.IsAudio()
+	return a.IsAudio() || a.IsVideo()
 }
 
 // IsDownloadable returns true if the attachment should be downloaded (documents)
@@ -245,8 +250,14 @@ func GetFileTypeFromExtension(filename string) string {
 
 	// Audio files
 	switch ext {
-	case ".mp3", ".wav", ".ogg":
+	case ".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac":
 		return "audio"
+	}
+
+	// Video files
+	switch ext {
+	case ".mp4", ".mov", ".webm", ".m4v", ".avi":
+		return "video"
 	}
 
 	// Document files
@@ -423,8 +434,11 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 		return StoryAttachment{} // Return empty if no filename
 	}
 
-	// Determine file type from mimetype (not just extension)
+	// Determine file type from mimetype (and fall back to the extension if needed).
 	fileType := s.getFileTypeFromMimeType(mimetype)
+	if inferredType := GetFileTypeFromExtension(filename); fileType == "document" && inferredType != "document" {
+		fileType = inferredType
+	}
 
 	attachment := StoryAttachment{
 		Filename:        filename,
@@ -458,11 +472,15 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 
 	case "audio":
 		// For audio files, use original file path (no processing needed)
-		attachment.URL = "/audio/" + filename // Assuming audio files go in /audio/
+		attachment.URL = "/audio/" + filename
+
+	case "video":
+		// For videos, use the copied public video path.
+		attachment.URL = "/videos/" + filename
 
 	case "document":
 		// For documents (PDF, Word), use original file path
-		attachment.URL = "/documents/" + filename // Assuming docs go in /documents/
+		attachment.URL = "/documents/" + filename
 	}
 
 	return attachment
