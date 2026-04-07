@@ -476,7 +476,7 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 
 	case "video":
 		// For videos, use the copied public video path.
-		attachment.URL = "/videos/" + filename
+		attachment.URL = "/video/" + filename
 
 	case "document":
 		// For documents (PDF, Word), use original file path

@@ -522,16 +522,21 @@ func CopyJSToOutput() error {
 func CopyAudioToOutput() error {
 	log.Println("Starting audio copy process")
 
+	srcDir := "audio"
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		log.Println("No audio directory found, skipping audio copy")
+		return nil
+	}
+
 	// Create the output directory for audio
 	err := os.MkdirAll("out/audio", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output audio directory: %w", err)
 	}
 
-	// Walk through the images directory to find audio files (they might be mixed in)
 	copyCount := 0
 	unchangedCount := 0
-	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -570,18 +575,24 @@ func CopyAudioToOutput() error {
 	return nil
 }
 
-// CopyVideosToOutput copies video files to the out/videos directory.
+// CopyVideosToOutput copies video files to the out/video directory.
 func CopyVideosToOutput() error {
 	log.Println("Starting video copy process")
 
-	err := os.MkdirAll("out/videos", 0755)
+	srcDir := "video"
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		log.Println("No video directory found, skipping video copy")
+		return nil
+	}
+
+	err := os.MkdirAll("out/video", 0755)
 	if err != nil {
-		return fmt.Errorf("failed to create output videos directory: %w", err)
+		return fmt.Errorf("failed to create output video directory: %w", err)
 	}
 
 	copyCount := 0
 	unchangedCount := 0
-	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -594,7 +605,7 @@ func CopyVideosToOutput() error {
 		switch ext {
 		case ".mp4", ".mov", ".webm", ".m4v", ".avi":
 			filename := filepath.Base(path)
-			destinationPath := filepath.Join("out/videos", filename)
+			destinationPath := filepath.Join("out/video", filename)
 
 			copied, err := copyFileIfChanged(path, destinationPath)
 			if err != nil {
@@ -623,16 +634,21 @@ func CopyVideosToOutput() error {
 func CopyDocumentsToOutput() error {
 	log.Println("Starting documents copy process")
 
+	srcDir := "documents"
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		log.Println("No documents directory found, skipping documents copy")
+		return nil
+	}
+
 	// Create the output directory for documents
 	err := os.MkdirAll("out/documents", 0755)
 	if err != nil {
 		return fmt.Errorf("failed to create output documents directory: %w", err)
 	}
 
-	// Walk through the images directory to find document files (they might be mixed in)
 	copyCount := 0
 	unchangedCount := 0
-	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
