@@ -92,9 +92,7 @@
                         {{if $attachment.IsImage}}
                             <img data-src="{{$attachment.LargeURL}}" alt="" class="popup-img">
                         {{else if $attachment.IsVideo}}
-                            <video class="popup-img" muted playsinline preload="metadata" aria-hidden="true">
-                                <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
-                            </video>
+                            <div></div>
                         {{else if $attachment.IsAudio}}
                             <div class="popup-audio">
                                 <audio controls>

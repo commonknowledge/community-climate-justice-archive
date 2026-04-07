@@ -757,9 +757,7 @@ class ArchiveFilters {
                 popupContent = `<img data-src="${attachment.largeUrl || attachment.url}" alt="" class="popup-img">`;
             } else if (attachment.fileType === 'video') {
                 popupContent = `
-                    <video class="popup-img" muted playsinline preload="metadata" aria-hidden="true">
-                        <source src="${attachment.url}#t=0.1" type="${attachment.type || 'video/mp4'}">
-                    </video>
+                    <div></div>
                 `;
             } else if (attachment.fileType === 'audio') {
                 popupContent = `

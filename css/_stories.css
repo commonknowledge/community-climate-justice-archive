@@ -134,6 +134,16 @@ The main video for individual stories.
   pointer-events: none;
 }
 
+.related-story .story-video-preview {
+  max-width: 8.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.related-story .story-video-preview__thumb {
+  max-height: none;
+}
+
 /* Story Audio
 
 Audio player display for main story attachments, centered between navigation arrows.
@@ -575,7 +585,8 @@ Uses cream background with dashed border and flexible layout.
   }
 }
 
-.story-popup img {
+.story-popup img,
+.story-popup video {
   background-color: var(--background);
   box-shadow: 0px 10px 10px 0px var(--shadow-heavy);
   max-width: 40%;
