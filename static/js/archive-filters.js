@@ -702,9 +702,16 @@ class ArchiveFilters {
                     </a>
                 `;
             } else if (attachment.fileType === 'document') {
-                content = `
-                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
-                        <div class="story-document-preview">
+                const previewOrIconMarkup = attachment.thumbUrl
+                    ? `
+                            <img
+                                src="${attachment.thumbUrl}"
+                                srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
+                                sizes="(max-width: 600px) 300px, 800px"
+                                alt="${attachment.alt || ''}"
+                                loading="lazy"
+                            >`
+                    : `
                             <div class="document-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -713,7 +720,12 @@ class ArchiveFilters {
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
                                     <polyline points="10,9 9,9 8,9"></polyline>
                                 </svg>
-                            </div>
+                            </div>`;
+
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <div class="story-document-preview">
+                            ${previewOrIconMarkup}
                             <div class="body-sans-lg">${story.finding}</div>
                         </div>
                     </a>
@@ -748,9 +760,9 @@ class ArchiveFilters {
                     <div></div>
                 `;
             } else if (attachment.fileType === 'document') {
-                popupContent = `
-                    <div></div>
-                `;
+                popupContent = attachment.largeUrl
+                    ? `<img data-src="${attachment.largeUrl}" alt="" class="popup-img">`
+                    : `<div></div>`;
             }
         } else {
             // Text-only story - show text in popup
