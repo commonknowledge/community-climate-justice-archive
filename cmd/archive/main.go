@@ -131,6 +131,7 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 	// Copy assets to output folder in parallel.
 	assetTasks := []buildTask{
 		{name: "copy audio files", run: generate.CopyAudioToOutput},
+		{name: "copy video files", run: generate.CopyVideosToOutput},
 		{name: "copy document files", run: generate.CopyDocumentsToOutput},
 		{name: "copy CSS", run: generate.CopyCSSToOutput},
 		{name: "copy JavaScript", run: generate.CopyJSToOutput},
