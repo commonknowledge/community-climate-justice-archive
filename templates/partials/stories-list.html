@@ -26,13 +26,20 @@
             {{/* If the story has an attachment (image, audio, or document) */}}
             {{if $attachment.URL}}
             <a class="story-image-container" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
-                {{/* If it's an image, show it with responsive sizing */}}
+                {{/* If it is an image, show it with responsive sizing */}}
                 {{if $attachment.IsImage}}
                     {{/* The srcset provides different sizes for different screen widths */}}
-                    <img src="{{$attachment.ThumbURL}}" srcset="
+                <figure>
+                    <img
+                        src="{{$attachment.ThumbURL}}"
+                        srcset="
                             {{$attachment.ThumbURL}} 300w,
-                            {{$attachment.MediumURL}} 800w
-                        " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
+                            {{$attachment.MediumURL}} 800w"
+                        sizes="(max-width: 600px) 300px, 800px"
+                        alt="{{$attachment.AlternativeText}}"
+                    >
+                    <figcaption class="body-sans-lg">{{$story.Finding}}</figcaption>
+                </figure>
                 {{/* If it's a video, show a thumbnail frame with a play icon */}}
                 {{else if $attachment.IsVideo}}
                     <div class="story-video-preview">
@@ -46,6 +53,10 @@
                             </svg>
                         </div>
                     </div>
+
+                    
+                    
+                {{/* If it's audio, show a play button and the filename */}}
                 {{else if $attachment.IsAudio}}
                     <div class="story-audio-preview">
                         <div class="audio-play-button">

@@ -79,6 +79,7 @@
             const items = document.querySelectorAll('.text-rotation__item');
             if (items.length === 0) return;
 
+            const interval = 15000; // 15 seconds
             let currentIndex = 0;
 
             function showNext() {
@@ -99,7 +100,7 @@
             }
 
             items[0].style.opacity = '1';
-            setInterval(showNext, 7000);
+            setInterval(showNext, interval);
         }
 
         function initializeLoadMoreThemes() {
@@ -426,11 +427,15 @@
                     {{range $index, $story := .ConnectedStories}}
                     {{$storyImage := $story.GetStoryImage}}
                     {{if $storyImage.URL}}
-                    <a href="{{$story.URL}}" class="story-link-scattered">
+                    <a
+                        href="{{$story.URL}}"
+                        class="story-link-scattered"
+                        aria-label="View story: {{$story.Finding}}"
+                    >
                         <img 
                             class="story-image-scattered" 
                             src="{{$storyImage.ThumbURL}}"
-                            alt="{{$story.Finding}}"
+                            alt=""
                             data-story-id="{{$story.ID}}"
                             data-story-title="{{$story.Finding}}"
                             data-inspired-by="{{range $story.InspiredBy}}{{.ID}},{{end}}"

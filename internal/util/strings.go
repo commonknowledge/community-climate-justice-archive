@@ -11,11 +11,26 @@
 package util
 
 import (
+	"html"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
 	"unicode"
+)
+
+var (
+	markdownHeading1Re = regexp.MustCompile(`^#\s+(.+)$`)
+	markdownHeading2Re = regexp.MustCompile(`^##\s+(.+)$`)
+	markdownHeading3Re = regexp.MustCompile(`^###\s+(.+)$`)
+	htmlBreakTagRe     = regexp.MustCompile(`(?i)<br\s*/?>`)
+	markdownCodeRe     = regexp.MustCompile("`([^`]+)`")
+	markdownBoldARe    = regexp.MustCompile(`\*\*(.+?)\*\*`)
+	markdownBoldBRe    = regexp.MustCompile(`__(.+?)__`)
+	markdownItalicARe  = regexp.MustCompile(`\*(.+?)\*`)
+	markdownItalicBRe  = regexp.MustCompile(`_(.+?)_`)
+	markdownLinkRe     = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
 )
 
 // FormatDate takes a date from the database and makes it nice to read.
@@ -164,4 +179,151 @@ func Slugify(s string) string {
 
 	// Trim hyphens from start and end
 	return strings.Trim(s, "-")
+}
+
+// MarkdownToHTML converts a limited subset of markdown to HTML.
+//
+// Supported blocks: headings (#, ##, ###), paragraphs, and unordered lists.
+// Supported inline styles: links, bold, italic, and inline code.
+func MarkdownToHTML(markdown string) string {
+	// NocoDB sometimes stores manual HTML line breaks inside text.
+	// Convert them to newlines so markdown paragraph handling can format them.
+	markdown = htmlBreakTagRe.ReplaceAllString(markdown, "\n")
+	markdown = strings.TrimSpace(strings.ReplaceAll(markdown, "\r\n", "\n"))
+	if markdown == "" {
+		return ""
+	}
+
+	lines := strings.Split(markdown, "\n")
+	var out strings.Builder
+	var paragraph []string
+	inList := false
+
+	flushParagraph := func() {
+		if len(paragraph) == 0 {
+			return
+		}
+		out.WriteString("<p>")
+		out.WriteString(renderInlineMarkdown(strings.Join(paragraph, " ")))
+		out.WriteString("</p>")
+		paragraph = nil
+	}
+
+	closeList := func() {
+		if inList {
+			out.WriteString("</ul>")
+			inList = false
+		}
+	}
+
+	for _, rawLine := range lines {
+		line := strings.TrimSpace(rawLine)
+		if line == "" {
+			flushParagraph()
+			closeList()
+			continue
+		}
+
+		if matches := markdownHeading3Re.FindStringSubmatch(line); len(matches) == 2 {
+			flushParagraph()
+			closeList()
+			out.WriteString("<h3>")
+			out.WriteString(renderInlineMarkdown(matches[1]))
+			out.WriteString("</h3>")
+			continue
+		}
+
+		if matches := markdownHeading2Re.FindStringSubmatch(line); len(matches) == 2 {
+			flushParagraph()
+			closeList()
+			out.WriteString("<h2>")
+			out.WriteString(renderInlineMarkdown(matches[1]))
+			out.WriteString("</h2>")
+			continue
+		}
+
+		if matches := markdownHeading1Re.FindStringSubmatch(line); len(matches) == 2 {
+			flushParagraph()
+			closeList()
+			out.WriteString("<h1>")
+			out.WriteString(renderInlineMarkdown(matches[1]))
+			out.WriteString("</h1>")
+			continue
+		}
+
+		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
+			flushParagraph()
+			if !inList {
+				out.WriteString("<ul>")
+				inList = true
+			}
+			itemText := strings.TrimSpace(line[2:])
+			out.WriteString("<li>")
+			out.WriteString(renderInlineMarkdown(itemText))
+			out.WriteString("</li>")
+			continue
+		}
+
+		closeList()
+		paragraph = append(paragraph, line)
+	}
+
+	flushParagraph()
+	closeList()
+
+	return out.String()
+}
+
+func renderInlineMarkdown(input string) string {
+	escaped := html.EscapeString(input)
+
+	escaped = markdownCodeRe.ReplaceAllString(escaped, "<code>$1</code>")
+	escaped = markdownBoldARe.ReplaceAllString(escaped, "<strong>$1</strong>")
+	escaped = markdownBoldBRe.ReplaceAllString(escaped, "<strong>$1</strong>")
+	escaped = markdownItalicARe.ReplaceAllString(escaped, "<em>$1</em>")
+	escaped = markdownItalicBRe.ReplaceAllString(escaped, "<em>$1</em>")
+
+	escaped = markdownLinkRe.ReplaceAllStringFunc(escaped, func(match string) string {
+		matches := markdownLinkRe.FindStringSubmatch(match)
+		if len(matches) != 3 {
+			return match
+		}
+
+		label := matches[1]
+		rawURL := html.UnescapeString(matches[2])
+		safeURL := sanitizeURL(rawURL)
+		if safeURL == "" {
+			return label
+		}
+
+		return `<a href="` + html.EscapeString(safeURL) + `" target="_blank" rel="noopener noreferrer">` + label + `</a>`
+	})
+
+	return escaped
+}
+
+func sanitizeURL(raw string) string {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return ""
+	}
+
+	parsed, err := url.Parse(trimmed)
+	if err != nil {
+		return ""
+	}
+
+	if parsed.Scheme == "" {
+		if strings.HasPrefix(trimmed, "/") || strings.HasPrefix(trimmed, "#") {
+			return trimmed
+		}
+		return ""
+	}
+
+	switch strings.ToLower(parsed.Scheme) {
+	case "http", "https", "mailto":
+		return trimmed
+	default:
+		return ""
+	}
 }

@@ -87,7 +87,9 @@ func createStoryOutputPathFromFindingWithID(finding, id string) string {
 
 // loadTemplates loads all templates and partials needed by the application.
 func loadTemplates() (*template.Template, error) {
-	tmpl := template.New("")
+	tmpl := template.New("").Funcs(template.FuncMap{
+		"markdownToHTML": util.MarkdownToHTML,
+	})
 
 	// Parse all HTML files in templates directory
 	tmpl, err := tmpl.ParseGlob("templates/*.html")
@@ -158,24 +160,24 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 
 // StoryData represents a story with all necessary data for filtering
 type StoryData struct {
-	ID            string          `json:"id"`
-	Finding       string          `json:"finding"`
-	URL           string          `json:"url"`
-	Location      string          `json:"location"`
-	StartDateTime string          `json:"startDateTime"`
-	EndDateTime   string          `json:"endDateTime"`
-	Season        string          `json:"season"`
-	Experience    string          `json:"experience"`
-	TimeSpan      string          `json:"timeSpan"`
-	Themes           []string        `json:"themes"`
-	Types            []string        `json:"types"`
-	Weather          []string        `json:"weather"`
-	WhatWasIsIf      []string        `json:"whatWasIsIf"`
-	GiftedBy         []string        `json:"giftedBy"`
-	ScalePermanence  []string        `json:"scalePermanence"`
-	TimePeriod       []string        `json:"timePeriod"`
-	CreatedTime      string          `json:"createdTime"`
-	Attachment       StoryAttachment `json:"attachment"`
+	ID              string          `json:"id"`
+	Finding         string          `json:"finding"`
+	URL             string          `json:"url"`
+	Location        string          `json:"location"`
+	StartDateTime   string          `json:"startDateTime"`
+	EndDateTime     string          `json:"endDateTime"`
+	Season          string          `json:"season"`
+	Experience      string          `json:"experience"`
+	TimeSpan        string          `json:"timeSpan"`
+	Themes          []string        `json:"themes"`
+	Types           []string        `json:"types"`
+	Weather         []string        `json:"weather"`
+	WhatWasIsIf     []string        `json:"whatWasIsIf"`
+	GiftedBy        []string        `json:"giftedBy"`
+	ScalePermanence []string        `json:"scalePermanence"`
+	TimePeriod      []string        `json:"timePeriod"`
+	CreatedTime     string          `json:"createdTime"`
+	Attachment      StoryAttachment `json:"attachment"`
 }
 
 // StoryAttachment represents the attachment data for a story
@@ -259,15 +261,15 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		}
 
 		storyData[i] = StoryData{
-			ID:            story.ID,
-			Finding:       story.Finding,
-			URL:           story.URL,
-			Location:      story.Location,
-			StartDateTime: story.StartDateTime,
-			EndDateTime:   story.EndDateTime,
-			Season:        story.Season,
-			Experience:    story.Experience,
-			TimeSpan:      story.TimeSpan,
+			ID:              story.ID,
+			Finding:         story.Finding,
+			URL:             story.URL,
+			Location:        story.Location,
+			StartDateTime:   story.StartDateTime,
+			EndDateTime:     story.EndDateTime,
+			Season:          story.Season,
+			Experience:      story.Experience,
+			TimeSpan:        story.TimeSpan,
 			Themes:          themeNames,
 			Types:           typeNames,
 			Weather:         weatherNames,
