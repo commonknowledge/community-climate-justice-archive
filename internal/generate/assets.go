@@ -27,6 +27,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -402,6 +403,99 @@ func ProcessImages() error {
 	return nil
 }
 
+// isDocumentPreviewUpToDate reports whether all expected preview variants exist and
+// are newer than the source document file.
+func isDocumentPreviewUpToDate(sourcePath string, outputBaseName string) bool {
+	sourceInfo, err := os.Stat(sourcePath)
+	if err != nil {
+		return false
+	}
+
+	for suffix := range ImageSizes {
+		previewPath := filepath.Join("out/documents/processed", fmt.Sprintf("%s_%s.webp", outputBaseName, suffix))
+		if !isOutputUpToDate(previewPath, sourceInfo.ModTime()) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// generateDocumentPreview creates WebP preview sizes for one document using
+// macOS Quick Look to rasterize the first page.
+func generateDocumentPreview(sourcePath string, outputBaseName string) error {
+	if _, err := exec.LookPath("qlmanage"); err != nil {
+		return nil
+	}
+
+	if isDocumentPreviewUpToDate(sourcePath, outputBaseName) {
+		return nil
+	}
+
+	if err := os.MkdirAll("out/documents/processed", 0755); err != nil {
+		return fmt.Errorf("failed to create document preview directory: %w", err)
+	}
+
+	tempDir, err := os.MkdirTemp("", "doc-preview-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory for document preview: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	cmd := exec.Command("qlmanage", "-t", "-s", "2000", "-o", tempDir, sourcePath)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to render document preview with qlmanage: %w", err)
+	}
+
+	matches, err := filepath.Glob(filepath.Join(tempDir, "*.png"))
+	if err != nil {
+		return fmt.Errorf("failed to find rendered preview image: %w", err)
+	}
+	if len(matches) == 0 {
+		return fmt.Errorf("qlmanage did not produce a PNG preview for %s", sourcePath)
+	}
+
+	previewImagePath := matches[0]
+	previewImg, err := readImage(previewImagePath)
+	if err != nil {
+		return fmt.Errorf("failed to read rendered document preview image: %w", err)
+	}
+
+	bounds := previewImg.Bounds()
+	if bounds.Dx() == 0 || bounds.Dy() == 0 {
+		return fmt.Errorf("rendered document preview has invalid dimensions")
+	}
+
+	for suffix, width := range ImageSizes {
+		ratio := float64(bounds.Dy()) / float64(bounds.Dx())
+		height := int(float64(width) * ratio)
+		outPath := filepath.Join("out/documents/processed", fmt.Sprintf("%s_%s.webp", outputBaseName, suffix))
+
+		resized := imaging.Resize(previewImg, width, height, imaging.Lanczos)
+
+		output, err := os.Create(outPath)
+		if err != nil {
+			return fmt.Errorf("failed to create document preview output file: %w", err)
+		}
+
+		if err := libwebp.Encode(output, resized, webpoptions.EncodingOptions{
+			Quality:        75,
+			EncodingPreset: webpoptions.EncodingPreset(webpoptions.EncodingPresetDefault),
+			UseSharpYuv:    true,
+		}); err != nil {
+			output.Close()
+			_ = os.Remove(outPath)
+			return fmt.Errorf("failed to encode document preview webp: %w", err)
+		}
+
+		if err := output.Close(); err != nil {
+			return fmt.Errorf("failed to close document preview output file: %w", err)
+		}
+	}
+
+	return nil
+}
+
 // CopyImagesToOutput copies all images from the images directory to the out/images directory.
 func CopyImagesToOutput() error {
 	log.Println("Starting image copy process")
@@ -583,6 +677,8 @@ func CopyDocumentsToOutput() error {
 	// Walk through the images directory to find document files (they might be mixed in)
 	copyCount := 0
 	unchangedCount := 0
+	previewCount := 0
+	previewFailureCount := 0
 	err = filepath.Walk("images", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -597,6 +693,7 @@ func CopyDocumentsToOutput() error {
 		switch ext {
 		case ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".rtf":
 			filename := filepath.Base(path)
+			baseName := strings.TrimSuffix(filename, filepath.Ext(filename))
 			destinationPath := filepath.Join("out/documents", filename)
 
 			copied, err := copyFileIfChanged(path, destinationPath)
@@ -609,6 +706,13 @@ func CopyDocumentsToOutput() error {
 			} else {
 				unchangedCount++
 			}
+
+			if previewErr := generateDocumentPreview(path, baseName); previewErr != nil {
+				previewFailureCount++
+				log.Printf("Warning: failed to generate document preview for %s: %v", path, previewErr)
+			} else {
+				previewCount++
+			}
 		}
 
 		return nil
@@ -618,7 +722,7 @@ func CopyDocumentsToOutput() error {
 		return fmt.Errorf("error walking directories for document files: %w", err)
 	}
 
-	log.Printf("Document copy complete: copied=%d unchanged=%d", copyCount, unchangedCount)
+	log.Printf("Document copy complete: copied=%d unchanged=%d previews=%d preview_failures=%d", copyCount, unchangedCount, previewCount, previewFailureCount)
 	return nil
 }
 
