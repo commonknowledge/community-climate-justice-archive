@@ -209,6 +209,7 @@
             if (items.length === 0) 
                 return;
             
+            const interval = 15000; // 15 seconds
             let currentIndex = 0;
 
             function showNext() {
@@ -233,7 +234,7 @@
             }
 
             items[0].style.opacity = '1';
-            setInterval(showNext, 7000);
+            setInterval(showNext, interval);
         })();
     </script>
 </body>
