@@ -41,7 +41,7 @@ class ArchiveFilters {
             timePeriod: []
         };
         this.filteredStories = [];
-        this.currentSort = 'dateExperienced';
+        this.currentSort = 'random';
         this.currentPage = 0;
         this.storiesPerPage = 20;
 
@@ -431,25 +431,29 @@ class ArchiveFilters {
         }
     }
 
-    setSort(sortKey) {
-        this.currentSort = sortKey;
-
-        // Update button text
+    updateSortDisplay() {
         const labels = {
             dateExperienced: 'Date experienced',
             dateCreated: 'Date created',
+            title: 'Title (A-Z)',
             random: 'Random'
         };
+        const label = labels[this.currentSort] || this.currentSort;
+
         if (this.elements.sortText) {
-            this.elements.sortText.textContent = labels[sortKey] || sortKey;
+            this.elements.sortText.textContent = label;
         }
 
-        // Update selected state in dropdown
         if (this.elements.sortContent) {
             this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
-                opt.classList.toggle('selected', opt.dataset.sort === sortKey);
+                opt.classList.toggle('selected', opt.dataset.sort === this.currentSort);
             });
         }
+    }
+
+    setSort(sortKey) {
+        this.currentSort = sortKey;
+        this.updateSortDisplay();
 
         this.closeSortDropdown();
         this.sortStories();
@@ -476,6 +480,12 @@ class ArchiveFilters {
                 const dateA = a.createdTime || '';
                 const dateB = b.createdTime || '';
                 return dateB.localeCompare(dateA);
+            });
+        } else if (this.currentSort === 'title') {
+            this.filteredStories.sort((a, b) => {
+                const titleA = (a.finding || a.title || '').trim();
+                const titleB = (b.finding || b.title || '').trim();
+                return titleA.localeCompare(titleB, undefined, { sensitivity: 'base' });
             });
         }
     }
@@ -675,12 +685,15 @@ class ArchiveFilters {
             if (attachment.fileType === 'image') {
                 content = `
                     <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
-                        <img 
-                            src="${attachment.thumbUrl}" 
-                            srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
-                            sizes="(max-width: 600px) 300px, 800px"
-                            alt="${attachment.alt || ''}"
-                            loading="lazy">
+                        <figure>
+                            <img 
+                                src="${attachment.thumbUrl}" 
+                                srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
+                                sizes="(max-width: 600px) 300px, 800px"
+                                alt="${attachment.alt || ''}"
+                                loading="lazy">
+                            <figcaption class="body-sans-lg">${story.finding}</figcaption>
+                        </figure>
                     </a>
                 `;
             } else if (attachment.fileType === 'audio') {
@@ -1038,7 +1051,7 @@ class ArchiveFilters {
             params.set('timePeriod', this.currentFilters.timePeriod.join(','));
         }
 
-        if (this.currentSort && this.currentSort !== 'dateExperienced') {
+        if (this.currentSort && this.currentSort !== 'random') {
             params.set('sort', this.currentSort);
         }
 
@@ -1056,20 +1069,14 @@ class ArchiveFilters {
         this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
         this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
 
-        // Restore sort from URL
+        // Restore sort from URL, defaulting to random when none is specified
         const sortParam = params.get('sort');
-        if (sortParam && ['dateExperienced', 'dateCreated', 'random'].includes(sortParam)) {
+        if (sortParam && ['dateExperienced', 'dateCreated', 'title', 'random'].includes(sortParam)) {
             this.currentSort = sortParam;
-            const labels = { dateExperienced: 'Date experienced', dateCreated: 'Date created', random: 'Random' };
-            if (this.elements.sortText) {
-                this.elements.sortText.textContent = labels[sortParam];
-            }
-            if (this.elements.sortContent) {
-                this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
-                    opt.classList.toggle('selected', opt.dataset.sort === sortParam);
-                });
-            }
+        } else {
+            this.currentSort = 'random';
         }
+        this.updateSortDisplay();
 
         // If any "more" filters are active from URL, auto-expand the more filters section
         const hasMoreFilterParams = this.currentFilters.scalePermanence.length > 0 ||
