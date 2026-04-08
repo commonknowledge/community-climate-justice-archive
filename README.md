@@ -300,7 +300,7 @@ If you need to make changes, here's where to look:
 3. Call it from `generateArchive()` in `cmd/archive/main.go`
 
 **Want to change how pages look?**
-- Edit `css/styles.css` for styling
+- Edit stylesheets in `css/` for styling
 - Edit templates in `templates/` for structure
 - Images in `images/` get processed automatically
 
@@ -463,11 +463,34 @@ This will launch a development server at [http://localhost:8080](http://localhos
 
 ### Styling in CSS
 
-Edit the file `css/styles.css`.
+Edit the files in `css/` directory.
 
 If you are running the archive in development mode, then the CSS will automatically be copied to the directory that the development webserver serves.
 
 When you've made your change, simply refresh the page to see the effect.
+
+When adding new components to the page, use [BEM methodology](https://en.bem.info/methodology/) for styling.
+
+BEM stands for **Block, Element, Modifier** — a naming convention that keeps styles predictable and scoped:
+
+- **Block** — a standalone component (`card`, `nav`, `button`)
+- **Element** — a part of a block, separated by `__` (`card__title`, `nav__link`)
+- **Modifier** — a variant or state, separated by `--` (`button--primary`, `card--featured`)
+
+```css
+/* Block */
+.card { ... }
+
+/* Elements */
+.card__title { ... }
+.card__image { ... }
+.card__footer { ... }
+
+/* Modifiers */
+.card--featured { ... }
+.card__title--large { ... }
+```
+
 
 ### Templating in HTML
 
