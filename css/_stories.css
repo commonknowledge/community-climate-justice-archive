@@ -157,6 +157,8 @@ Document download display for main story attachments, centered between navigatio
 
 .story-document .download-link {
   font-size: 1.375rem;
+  margin-top: 1rem;
+  display: inline-block;
   padding: 0.5rem 1rem;
   border: 2px solid var(--border-color);
   text-decoration: none;
