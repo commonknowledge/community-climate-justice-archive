@@ -881,6 +881,17 @@ func syncAttachmentsFromNocoDB(attachmentField interface{}) error {
 	return nil
 }
 
+// attachmentObjectsFromField normalizes the different attachment shapes NocoDB can
+// return into a slice of generic attachment metadata objects.
+//
+// Supported inputs are:
+//   - `nil`, which yields no attachments
+//   - `[]map[string]interface{}`, which is returned as-is
+//   - `[]interface{}` containing attachment objects, which is filtered and converted
+//   - a JSON string representing an array of attachment objects
+//
+// This helper is intentionally permissive because NocoDB fields can arrive in
+// slightly different forms depending on the API path and earlier processing.
 func attachmentObjectsFromField(attachmentField interface{}) ([]map[string]interface{}, error) {
 	if attachmentField == nil {
 		return nil, nil
@@ -912,6 +923,12 @@ func attachmentObjectsFromField(attachmentField interface{}) ([]map[string]inter
 	}
 }
 
+// localAttachmentPath returns the repository-relative destination path for an
+// attachment after it has been categorized.
+//
+// The helper keeps the storage layout predictable: images go to `images/`,
+// audio to `audio/`, video to `video/`, and all remaining files to
+// `documents/`.
 func localAttachmentPath(filename, mimetype string) string {
 	switch attachmentCategoryForFile(filename, mimetype) {
 	case "image":
@@ -925,6 +942,12 @@ func localAttachmentPath(filename, mimetype string) string {
 	}
 }
 
+// attachmentCategoryForFile chooses the archive asset bucket for a file.
+//
+// It prefers the MIME type when that is specific enough (`image`, `audio`, or
+// `video`). If the MIME type is missing or only resolves to the generic
+// `document` bucket, it falls back to the filename extension so local storage is
+// still routed sensibly.
 func attachmentCategoryForFile(filename, mimetype string) string {
 	if category := attachmentCategoryFromMimeType(mimetype); category != "document" {
 		return category
@@ -933,6 +956,14 @@ func attachmentCategoryForFile(filename, mimetype string) string {
 	return data.GetFileTypeFromExtension(filename)
 }
 
+// attachmentCategoryFromMimeType maps a MIME type to the broad storage category
+// used by the archive pipeline.
+//
+// The categories are intentionally coarse-grained:
+//   - `image` for `image/*`
+//   - `audio` for `audio/*`
+//   - `video` for `video/*`
+//   - `document` for all other or unknown MIME types
 func attachmentCategoryFromMimeType(mimetype string) string {
 	switch {
 	case strings.HasPrefix(mimetype, "image/"):
