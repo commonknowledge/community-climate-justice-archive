@@ -87,6 +87,12 @@ Navigation wrapper that contains arrows and attachment content.
   padding: 0;
   width: 100%;
   flex: 1;
+  text-decoration: none;
+}
+
+.story-image-container figcaption {
+  margin-top: 1rem;
+  text-align: center;
 }
 
 /* Story Image
@@ -237,7 +243,7 @@ The main text content of a story.
   max-width: 780px;
 }
 
-.story-finding-title {
+.story-finding__title {
   margin: 0 0 0.75rem;
 }
 

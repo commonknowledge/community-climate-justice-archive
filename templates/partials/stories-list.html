@@ -29,10 +29,14 @@
                 {{/* If it's an image, show it with responsive sizing */}}
                 {{if $attachment.IsImage}}
                     {{/* The srcset provides different sizes for different screen widths */}}
-                    <img src="{{$attachment.ThumbURL}}" srcset="
-                            {{$attachment.ThumbURL}} 300w,
-                            {{$attachment.MediumURL}} 800w
-                        " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
+                    <figure>
+                        <img src="{{$attachment.ThumbURL}}" srcset="
+                                {{$attachment.ThumbURL}} 300w,
+                                {{$attachment.MediumURL}} 800w
+                            " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
+                        <figcaption class="body-sans-lg">{{$story.Finding}}</figcaption>
+                    </figure>
+                    
                 {{/* If it's audio, show a play button and the filename */}}
                 {{else if $attachment.IsAudio}}
                     <div class="story-audio-preview">

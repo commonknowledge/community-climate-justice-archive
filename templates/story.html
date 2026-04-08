@@ -158,8 +158,9 @@
         <!-- Text-only story - display the Finding as the hero content -->
         <div class="story-text-only-hero">
             <div class="story-main">
-                <div class="story-finding body">
-                    {{$story.Finding}}
+                <div class="story-finding">
+                    <h2 class="story-finding__title / h2">{{$story.Finding}}</h2>
+                    {{if ne $story.Experience $story.Finding}}<div class="body">{{markdownToHTML $story.Experience}}</div>{{end}}
                 </div>
                 <div class="story-actions">
                     <a
@@ -194,8 +195,9 @@
             <!-- Only show Finding in details if story has attachments - text-only shows it in hero -->
             {{if $attachments}}
                 <div class="story-main">
-                    <div class="story-finding body">
-                        {{$story.Finding}}
+                    <div class="story-finding">
+                        <h2 class="story-finding__title / h2">{{$story.Finding}}</h2>
+                        {{if ne $story.Experience $story.Finding}}<div class="body">{{markdownToHTML $story.Experience}}</div>{{end}}
                     </div>
                     <div class="story-actions">
                         <a
@@ -276,12 +278,6 @@
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Street Detectorist Clue</span>
                         <span class="story-metadata-item-value">{{$story.StreetDetectoristClue}}</span>
-                    </div>
-                    {{end}}
-                    {{if $story.Experience}}
-                    <div class="story-metadata-item">
-                        <span class="story-metadata-item-label">Experience</span>
-                        <span class="story-metadata-item-value">{{$story.Experience}}</span>
                     </div>
                     {{end}}
                     {{if $story.ReflectionLearning}}
