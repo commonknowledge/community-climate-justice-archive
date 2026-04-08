@@ -913,14 +913,24 @@ func attachmentObjectsFromField(attachmentField interface{}) ([]map[string]inter
 }
 
 func localAttachmentPath(filename, mimetype string) string {
-	switch attachmentCategoryFromMimeType(mimetype) {
+	switch attachmentCategoryForFile(filename, mimetype) {
 	case "image":
 		return filepath.Join("images", filename)
 	case "audio":
 		return filepath.Join("audio", filename)
+	case "video":
+		return filepath.Join("video", filename)
 	default:
 		return filepath.Join("documents", filename)
 	}
+}
+
+func attachmentCategoryForFile(filename, mimetype string) string {
+	if category := attachmentCategoryFromMimeType(mimetype); category != "document" {
+		return category
+	}
+
+	return data.GetFileTypeFromExtension(filename)
 }
 
 func attachmentCategoryFromMimeType(mimetype string) string {
@@ -929,6 +939,8 @@ func attachmentCategoryFromMimeType(mimetype string) string {
 		return "image"
 	case strings.HasPrefix(mimetype, "audio/"):
 		return "audio"
+	case strings.HasPrefix(mimetype, "video/"):
+		return "video"
 	default:
 		return "document"
 	}

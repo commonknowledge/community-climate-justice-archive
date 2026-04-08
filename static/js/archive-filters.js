@@ -683,6 +683,22 @@ class ArchiveFilters {
                             loading="lazy">
                     </a>
                 `;
+            } else if (attachment.fileType === 'video') {
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <div class="story-video-preview">
+                            <video class="story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                <source src="${attachment.url}#t=0.1" type="${attachment.type || 'video/mp4'}">
+                            </video>
+                            <div class="story-video-preview__overlay" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                    <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                `;
             } else if (attachment.fileType === 'audio') {
                 content = `
                     <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
@@ -739,11 +755,15 @@ class ArchiveFilters {
             const attachment = story.attachment;
             if (attachment.fileType === 'image') {
                 popupContent = `<img data-src="${attachment.largeUrl || attachment.url}" alt="" class="popup-img">`;
+            } else if (attachment.fileType === 'video') {
+                popupContent = `
+                    <div></div>
+                `;
             } else if (attachment.fileType === 'audio') {
                 popupContent = `
                     <div class="popup-audio">
                         <audio controls>
-                            <source src="${attachment.url}" type="audio/mpeg">
+                            <source src="${attachment.url}" type="${attachment.type || 'audio/mpeg'}">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
