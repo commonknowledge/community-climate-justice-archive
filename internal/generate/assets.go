@@ -424,8 +424,9 @@ func isDocumentPreviewUpToDate(sourcePath string, outputBaseName string) bool {
 // generateDocumentPreview creates WebP preview sizes for one document using
 // macOS Quick Look to rasterize the first page.
 func generateDocumentPreview(sourcePath string, outputBaseName string) error {
-	if _, err := exec.LookPath("qlmanage"); err != nil {
-		return nil
+	qlmanagePath, err := exec.LookPath("qlmanage")
+	if err != nil {
+		return fmt.Errorf("qlmanage is not available in PATH; cannot generate document preview for %s: %w", sourcePath, err)
 	}
 
 	if isDocumentPreviewUpToDate(sourcePath, outputBaseName) {
@@ -442,7 +443,7 @@ func generateDocumentPreview(sourcePath string, outputBaseName string) error {
 	}
 	defer os.RemoveAll(tempDir)
 
-	cmd := exec.Command("qlmanage", "-t", "-s", "2000", "-o", tempDir, sourcePath)
+	cmd := exec.Command(qlmanagePath, "-t", "-s", "2000", "-o", tempDir, sourcePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to render document preview with qlmanage: %w", err)
 	}
