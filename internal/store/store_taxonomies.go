@@ -2,6 +2,7 @@ package store
 
 import (
 	"sort"
+	"strings"
 
 	"community-climate-justice-archive/data"
 )
@@ -97,6 +98,35 @@ func GetWeather() []data.Weather {
 	return getUniqueTaxonomies(
 		func(story data.Story) []data.Weather { return story.Weather },
 		func(weather data.Weather) string { return weather.Title },
+	)
+}
+
+// GetStoriesForProject finds all stories linked to a particular High St Experiment project.
+func GetStoriesForProject(projectTitle string) []data.Story {
+	return getStoriesForTaxonomy(
+		projectTitle,
+		func(story data.Story) []string {
+			title := strings.TrimSpace(story.HighStExperiment)
+			if title == "" {
+				return nil
+			}
+			return []string{title}
+		},
+		func(project string) string { return project },
+	)
+}
+
+// GetProjectTypes collects all the unique High St Experiment project names from across the archive.
+func GetProjectTypes() []string {
+	return getUniqueTaxonomies(
+		func(story data.Story) []string {
+			title := strings.TrimSpace(story.HighStExperiment)
+			if title == "" {
+				return nil
+			}
+			return []string{title}
+		},
+		func(project string) string { return project },
 	)
 }
 

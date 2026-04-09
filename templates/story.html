@@ -268,12 +268,6 @@
                         <span class="story-metadata-item-value">{{$story.Location}}</span>
                     </div>
                     {{end}}
-                    {{if $story.HighStExperiment}}
-                    <div class="story-metadata-item">
-                        <span class="story-metadata-item-label">High St Experiment</span>
-                        <span class="story-metadata-item-value">{{$story.HighStExperiment}}</span>
-                    </div>
-                    {{end}}
                     {{if $story.Season}}
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Season</span>
@@ -337,6 +331,14 @@
                         <span class="story-metadata-item-value tags">
                             {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                             {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.HighStExperiment}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Project</span>
+                        <span class="story-metadata-item-value tags">
+                            <a class="tag" href="{{$story.GetProjectURL}}" style="background-color: {{$story.GetProjectColor}};">{{$story.HighStExperiment}}</a>
                         </span>
                     </div>
                     {{end}}

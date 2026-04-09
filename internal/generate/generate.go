@@ -255,6 +255,7 @@ func buildHighStExperimentOptions(stories []data.Story) []FilterOption {
 	for _, title := range titles {
 		options = append(options, FilterOption{
 			Title: title,
+			URL:   "/projects/" + util.Slugify(title) + ".html",
 			Count: counts[title],
 			Color: data.TitleToHexColor(title),
 		})

@@ -28,6 +28,8 @@ import (
 	"math/rand"
 	"path/filepath"
 	"strings"
+
+	"community-climate-justice-archive/internal/util"
 )
 
 const nocodbStoryDashboardURLTemplate = "https://nocodb-r87d.onrender.com/dashboard/#/nc/pqw5yaekkqvo25h/me04vwwhvh4jbsg?rowId=%s&path="
@@ -366,6 +368,26 @@ func TitleToHexColor(title string) string {
 
 	// Format as hex
 	return fmt.Sprintf("#%02x%02x%02x", redValue, greenValue, blueValue)
+}
+
+// GetProjectURL returns the project index page for the story's High St Experiment value.
+func (s Story) GetProjectURL() string {
+	title := strings.TrimSpace(s.HighStExperiment)
+	if title == "" {
+		return ""
+	}
+
+	return "/projects/" + util.Slugify(title) + ".html"
+}
+
+// GetProjectColor returns the display color for the story's project tag.
+func (s Story) GetProjectColor() string {
+	title := strings.TrimSpace(s.HighStExperiment)
+	if title == "" {
+		return "#666666"
+	}
+
+	return TitleToHexColor(title)
 }
 
 // hsbToRGB converts HSB (HSV) color values to RGB
