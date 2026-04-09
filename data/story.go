@@ -503,10 +503,6 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 	case "document":
 		// For documents (PDF, Word), use original file path
 		attachment.URL = "/documents/" + filename // Assuming docs go in /documents/
-		baseName := strings.TrimSuffix(filename, filepath.Ext(filename))
-		attachment.ThumbURL = "/documents/processed/" + baseName + "_thumb.webp"
-		attachment.MediumURL = "/documents/processed/" + baseName + "_medium.webp"
-		attachment.LargeURL = "/documents/processed/" + baseName + "_large.webp"
 	}
 
 	return attachment

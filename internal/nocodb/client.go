@@ -884,11 +884,9 @@ func buildConnectionAttachmentLookup(records []map[string]interface{}) map[strin
 
 		attachment := story.GetFirstNonImageAttachment()
 		if attachment.URL != "" && attachment.IsAudio() {
-			info.thumbURL = attachment.ThumbURL
 			info.attachmentType = "audio"
 			info.attachmentFilename = attachment.Filename
 		} else if attachment.URL != "" && attachment.IsDocument() {
-			info.thumbURL = attachment.ThumbURL
 			info.attachmentType = "document"
 			info.attachmentFilename = attachment.Filename
 		}
