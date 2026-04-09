@@ -502,7 +502,7 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 
 	case "document":
 		// For documents (PDF, Word), use original file path
-		attachment.URL = "/documents/" + filename
+		attachment.URL = "/documents/" + filename // Assuming docs go in /documents/
 	}
 
 	return attachment

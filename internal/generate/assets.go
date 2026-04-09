@@ -648,6 +648,7 @@ func CopyDocumentsToOutput() error {
 
 	copyCount := 0
 	unchangedCount := 0
+	
 	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

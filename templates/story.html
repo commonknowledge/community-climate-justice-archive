@@ -100,6 +100,9 @@
                 </div>
             {{else if $attachment.IsDocument}}
                 <div class="story-document">
+                    {{if $attachment.LargeURL}}
+                    <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
+                    {{else}}
                     <div class="document-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -109,10 +112,11 @@
                             <polyline points="10,9 9,9 8,9"></polyline>
                         </svg>
                     </div>
+                    {{end}}
                     <a href="{{$attachment.URL}}" download="{{$attachment.Filename}}" class="download-link">
                         Download {{$attachment.Filename}}
                     </a>
-                    </div>
+                </div>
                 {{end}}
                 </div>
             {{end}}
@@ -412,6 +416,9 @@
                         {{else if eq .AttachmentType "document"}}
                             <div class="big-button-image">
                                 <div class="story-document-preview">
+                                    {{if .ThumbURL}}
+                                    <img src="{{.ThumbURL}}" alt="{{.Finding}}">
+                                    {{else}}
                                     <div class="document-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -421,6 +428,7 @@
                                             <polyline points="10,9 9,9 8,9"></polyline>
                                         </svg>
                                     </div>
+                                    {{end}}
                                 </div>
                             </div>
                         {{else}}
@@ -457,15 +465,19 @@
                         {{else if eq .AttachmentType "document"}}
                             <div class="big-button-image">
                                 <div class="story-document-preview">
+                                    {{if .ThumbURL}}
+                                    <img src="{{.ThumbURL}}" alt="{{.Finding}}">
+                                    {{else}}
                                     <div class="document-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path>
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                             <polyline points="14,2 14,8 20,8"></polyline>
                                             <line x1="16" y1="13" x2="8" y2="13"></line>
                                             <line x1="16" y1="17" x2="8" y2="17"></line>
                                             <polyline points="10,9 9,9 8,9"></polyline>
                                         </svg>
                                     </div>
+                                    {{end}}
                                 </div>
                             </div>
                         {{else}}
@@ -482,273 +494,9 @@
         </div>
 
         <div class="related-stories-container">
-            {{if .FirstMoreTaggedStories}}
-            <div class="related-stories-item">
-                <h3 class="body-sans-lg">More tagged with {{ .FirstMoreTaggedStories.TagType }} 
-                    {{if .FirstMoreTaggedStories.Tag}}
-                    <a class="tag large" href="{{.FirstMoreTaggedStories.Tag.URL}}" style="background-color: {{.FirstMoreTaggedStories.Tag.Colour}};">{{.FirstMoreTaggedStories.Tag.Title}}</a>
-                    {{else}}
-                    <span class="tag large">unknown</span>
-                    {{end}}
-                </h3>
-                {{if gt (len .FirstMoreTaggedStories.Stories) 0}}
-                <div class="related-stories">
-                {{range .FirstMoreTaggedStories.Stories}}
-                    <div class="related-story">
-                        {{ $story := . }}
-                        {{ $attachment := .GetStoryAttachment }}
-                        
-                        {{if and $attachment.URL $attachment.IsImage}}
-                            <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}" class="related-story-link">
-                            <img 
-                                class="related-story-image" 
-                                    src="{{$attachment.ThumbURL}}" 
-                                srcset="
-                                        {{$attachment.ThumbURL}} 300w,
-                                        {{$attachment.MediumURL}} 800w
-                                "
-                                sizes="(max-width: 600px) 300px, 800px"
-                                    alt="{{$attachment.AlternativeText}}">
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsVideo}}
-                            <!-- Videos: show a static thumbnail with a play indicator -->
-                            <a href="{{$story.URL}}" class="related-story-link">
-                                <div class="story-video-preview">
-                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
-                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
-                                    </video>
-                                    <div class="story-video-preview__overlay" aria-hidden="true">
-                                        <div class="audio-play-button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsAudio}}
-                            <!-- Audio: show audio preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-audio-preview">
-                                    <div class="audio-play-button">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                        </svg>
-                                    </div>
-                                    <div class="audio-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsDocument}}
-                            <!-- Documents: show document preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-document-preview">
-                                    <div class="document-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14,2 14,8 20,8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10,9 9,9 8,9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="document-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else}}
-                            <!-- If the story has no attachment, show text preview card -->
-                             <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
-                                <div class="story-text-only-preview">
-                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
-                                </div>
-                            </a>
-                        {{end}}
-                    </div>
-                {{end}}
-                </div>
-                {{end}}
-            </div>
-            {{end}}
-            {{if .SecondMoreTaggedStories}}
-            <div class="related-stories-item">
-                <h3 class="body-sans-lg">More tagged with {{ .SecondMoreTaggedStories.TagType }} 
-                    {{if .SecondMoreTaggedStories.Tag}}
-                    <a class="tag large" href="{{.SecondMoreTaggedStories.Tag.URL}}" style="background-color: {{.SecondMoreTaggedStories.Tag.Colour}};">{{.SecondMoreTaggedStories.Tag.Title}}</a>
-                    {{else}}
-                    <span class="tag large">unknown</span>
-                    {{end}}
-                </h3>
-                {{if gt (len .SecondMoreTaggedStories.Stories) 0}}
-                <div class="related-stories">
-                {{range .SecondMoreTaggedStories.Stories}}
-                    <div class="related-story">
-                        {{ $story := . }}
-                        {{ $attachment := .GetStoryAttachment }}
-                        
-                        {{if and $attachment.URL $attachment.IsImage}}
-                            <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}" class="related-story-link">
-                            <img 
-                                class="related-story-image" 
-                                    src="{{$attachment.ThumbURL}}" 
-                                srcset="
-                                        {{$attachment.ThumbURL}} 300w,
-                                        {{$attachment.MediumURL}} 800w
-                                "
-                                sizes="(max-width: 600px) 300px, 800px"
-                                    alt="{{$attachment.AlternativeText}}">
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsVideo}}
-                            <!-- Videos: show a static thumbnail with a play indicator -->
-                            <a href="{{$story.URL}}" class="related-story-link">
-                                <div class="story-video-preview">
-                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
-                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
-                                    </video>
-                                    <div class="story-video-preview__overlay" aria-hidden="true">
-                                        <div class="audio-play-button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsAudio}}
-                            <!-- Audio: show audio preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-audio-preview">
-                                    <div class="audio-play-button">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                        </svg>
-                                    </div>
-                                    <div class="audio-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsDocument}}
-                            <!-- Documents: show document preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-document-preview">
-                                    <div class="document-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14,2 14,8 20,8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10,9 9,9 8,9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="document-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else}}
-                            <!-- If the story has no attachment, show text preview card -->
-                            <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
-                                <div class="story-text-only-preview">
-                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
-                                </div>
-                            </a>
-                        {{end}}
-                    </div>
-                {{end}}
-                </div>
-                {{end}}
-            </div>
-            {{end}}
-            {{if .ThirdMoreTaggedStories }}
-            <div class="related-stories-item">
-                <h3 class="body-sans-lg">More tagged with {{ .ThirdMoreTaggedStories.TagType }} 
-                    {{if .ThirdMoreTaggedStories.Tag}}
-                    <a class="tag large" href="{{.ThirdMoreTaggedStories.Tag.URL}}" style="background-color: {{.ThirdMoreTaggedStories.Tag.Colour}};">{{.ThirdMoreTaggedStories.Tag.Title}}</a>
-                    {{else}}
-                    <span class="tag large">unknown</span>
-                    {{end}}
-                </h3>
-                {{if gt (len .ThirdMoreTaggedStories.Stories) 0}}
-                <div class="related-stories">
-                {{range .ThirdMoreTaggedStories.Stories}}
-                    <div class="related-story">
-                        {{ $story := . }}
-                        {{ $attachment := .GetStoryAttachment }}
-                        
-                        {{if and $attachment.URL $attachment.IsImage}}
-                            <!-- Images: use original related-story-image class for proper sizing -->
-                        <a href="{{$story.URL}}" class="related-story-link">
-                            <img 
-                                class="related-story-image" 
-                                    src="{{$attachment.ThumbURL}}" 
-                                srcset="
-                                        {{$attachment.ThumbURL}} 300w,
-                                        {{$attachment.MediumURL}} 800w
-                                "
-                                sizes="(max-width: 600px) 300px, 800px"
-                                    alt="{{$attachment.AlternativeText}}">
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsVideo}}
-                            <!-- Videos: show a static thumbnail with a play indicator -->
-                            <a href="{{$story.URL}}" class="related-story-link">
-                                <div class="story-video-preview">
-                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
-                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
-                                    </video>
-                                    <div class="story-video-preview__overlay" aria-hidden="true">
-                                        <div class="audio-play-button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsAudio}}
-                            <!-- Audio: show audio preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-audio-preview">
-                                    <div class="audio-play-button">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                                        </svg>
-                                    </div>
-                                    <div class="audio-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else if and $attachment.URL $attachment.IsDocument}}
-                            <!-- Documents: show document preview -->
-                            <a class="story-image-container" href="{{$story.URL}}">
-                                <div class="story-document-preview">
-                                    <div class="document-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14,2 14,8 20,8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10,9 9,9 8,9"></polyline>
-                                        </svg>
-                                    </div>
-                                    <div class="document-filename">{{$attachment.Filename}}</div>
-                                </div>
-                            </a>
-                        {{else}}
-                             <!-- If the story has no attachment, show text preview card -->
-                            <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
-                                <div class="story-text-only-preview">
-                                    <p class="story-text-only-preview-text">{{$story.Finding}}</p>
-                                </div>
-                            </a>
-                        {{end}}
-                    </div>
-                {{end}}
-                </div>
-                {{end}}
-            </div>
-            {{end}}
+            {{template "more-tagged-stories" .FirstMoreTaggedStories}}
+            {{template "more-tagged-stories" .SecondMoreTaggedStories}}
+            {{template "more-tagged-stories" .ThirdMoreTaggedStories}}
         </div>
 
         <div class="story-navigation">

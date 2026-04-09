@@ -720,17 +720,20 @@ class ArchiveFilters {
             } else if (attachment.fileType === 'video') {
                 content = `
                     <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
-                        <div class="story-video-preview">
-                            <video class="story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
-                                <source src="${attachment.url}#t=0.1" type="${attachment.type || 'video/mp4'}">
-                            </video>
-                            <div class="story-video-preview__overlay" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                    <polygon points="10,9 16,12 10,15 10,9"></polygon>
-                                </svg>
+                        <figure>
+                            <div class="story-video-preview">
+                                <video class="story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                    <source src="${attachment.url}#t=0.1" type="${attachment.type || 'video/mp4'}">
+                                </video>
+                                <div class="story-video-preview__overlay" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
+                            <figcaption class="body-sans-lg">${story.finding}</figcaption>
+                        </figure>
                     </a>
                 `;
             } else if (attachment.fileType === 'audio') {
@@ -743,14 +746,21 @@ class ArchiveFilters {
                                     <polygon points="10,8 16,12 10,16 10,8"></polygon>
                                 </svg>
                             </div>
-                            <div class="audio-filename">${attachment.filename}</div>
+                            <div class="body-sans-lg">${story.finding}</div>
                         </div>
                     </a>
                 `;
             } else if (attachment.fileType === 'document') {
-                content = `
-                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
-                        <div class="story-document-preview">
+                const previewOrIconMarkup = attachment.thumbUrl
+                    ? `
+                            <img
+                                src="${attachment.thumbUrl}"
+                                srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
+                                sizes="(max-width: 600px) 300px, 800px"
+                                alt="${attachment.alt || ''}"
+                                loading="lazy"
+                            >`
+                    : `
                             <div class="document-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -759,8 +769,13 @@ class ArchiveFilters {
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
                                     <polyline points="10,9 9,9 8,9"></polyline>
                                 </svg>
-                            </div>
-                            <div class="document-filename">${attachment.filename}</div>
+                            </div>`;
+
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <div class="story-document-preview">
+                            ${previewOrIconMarkup}
+                            <div class="body-sans-lg">${story.finding}</div>
                         </div>
                     </a>
                 `;
@@ -795,30 +810,12 @@ class ArchiveFilters {
                 `;
             } else if (attachment.fileType === 'audio') {
                 popupContent = `
-                    <div class="popup-audio">
-                        <audio controls>
-                            <source src="${attachment.url}" type="${attachment.type || 'audio/mpeg'}">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
+                    <div></div>
                 `;
             } else if (attachment.fileType === 'document') {
-                popupContent = `
-                    <div class="popup-document">
-                        <div class="document-icon-large">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14,2 14,8 20,8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10,9 9,9 8,9"></polyline>
-                            </svg>
-                        </div>
-                        <a href="${attachment.url}" download="${attachment.filename}" class="download-link">
-                            Download ${attachment.filename}
-                        </a>
-                    </div>
-                `;
+                popupContent = attachment.largeUrl
+                    ? `<img data-src="${attachment.largeUrl}" alt="" class="popup-img">`
+                    : `<div></div>`;
             }
         } else {
             // Text-only story - show text in popup

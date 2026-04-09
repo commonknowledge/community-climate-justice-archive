@@ -1,0 +1,108 @@
+{{/*
+    More Tagged Stories Partial
+
+    Reusable section for the "More tagged with ..." blocks on story pages.
+    It only renders when there is a real tag and at least one related story.
+*/}}
+
+{{define "more-tagged-stories"}}
+{{if and .Tag (gt (len .Stories) 0)}}
+    <div class="related-stories-item">
+        <h3 class="body-sans-lg">More tagged with {{.TagType}}
+            <a class="tag large" href="{{.Tag.URL}}" style="background-color: {{.Tag.Colour}};">{{.Tag.Title}}</a>
+        </h3>
+        <div class="related-stories">
+            {{range .Stories}}
+                {{template "related-story-card" .}}
+            {{end}}
+        </div>
+    </div>
+{{end}}
+{{end}}
+
+{{define "related-story-card"}}
+<div class="related-story">
+    {{ $story := . }}
+    {{ $attachment := .GetStoryAttachment }}
+
+    {{if and $attachment.URL $attachment.IsImage}}
+        <a href="{{$story.URL}}" class="related-story-link">
+            <img
+            class="related-story-image"
+            src="{{$attachment.ThumbURL}}"
+            srcset="
+                {{$attachment.ThumbURL}} 300w,
+                {{$attachment.MediumURL}} 800w
+            "
+            sizes="(max-width: 600px) 300px, 800px"
+            alt="{{$attachment.AlternativeText}}">
+        </a>
+    {{else if and $attachment.URL $attachment.IsVideo}}
+        <!-- Videos: show a static thumbnail with a play indicator -->
+        <a href="{{$story.URL}}" class="related-story-link">
+            <div class="story-video-preview">
+                <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                    <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
+                </video>
+                <div class="story-video-preview__overlay" aria-hidden="true">
+                    <div class="audio-play-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </a>
+    {{else if and $attachment.URL $attachment.IsAudio}}
+        <!-- Audio: show audio preview -->
+        <a class="story-image-container" href="{{$story.URL}}">
+            <div class="story-audio-preview">
+                <div class="audio-play-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                    </svg>
+                </div>
+                <div class="audio-filename">{{$attachment.Filename}}</div>
+            </div>
+        </a>
+    {{else if and $attachment.URL $attachment.IsDocument}}
+        <a class="story-image-container" href="{{$story.URL}}">
+            {{if $attachment.ThumbURL}}
+                <div class="story-document-preview">
+                    <img
+                        src="{{$attachment.ThumbURL}}"
+                        srcset="
+                        {{$attachment.ThumbURL}} 300w,
+                        {{$attachment.MediumURL}} 800w
+                        "
+                        sizes="(max-width: 600px) 300px, 800px"
+                        alt="{{$attachment.AlternativeText}}" class="related-story-image"
+                    >
+                </div>
+            {{else}}
+                <div class="story-document-preview">
+                    <div class="document-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10,9 9,9 8,9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="body-sans-lg">{{$story.Finding}}</div>
+                </div>
+            {{end}}
+
+        </a>
+    {{else}}
+        <a class="story-image-container story-text-only-card story-text-only-card--sm" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
+            <div class="story-text-only-preview">
+                <p class="story-text-only-preview-text">{{$story.Finding}}</p>
+            </div>
+        </a>
+    {{end}}
+</div>
+{{end}}

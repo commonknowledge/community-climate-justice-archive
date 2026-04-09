@@ -68,8 +68,8 @@ type Client struct {
 	// cacheLoaded indicates whether cachedRecords currently represents a valid complete dataset.
 	cacheLoaded bool
 	// cacheOnlyMode forces reads to come from disk/in-memory cache and blocks API requests.
-	cacheOnlyMode bool
-	diskCacheMode bool // If true, allow reading/writing debug-cache-nocodb.json
+	cacheOnlyMode  bool
+	diskCacheMode  bool // If true, allow reading/writing debug-cache-nocodb.json
 	fieldIDByTitle map[string]string
 }
 

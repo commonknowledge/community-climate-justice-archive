@@ -56,7 +56,7 @@
 
                     
                     
-                {{/* If it's audio, show a play button and the filename */}}
+                {{/* If it's audio, show a play button and the story finding */}}
                 {{else if $attachment.IsAudio}}
                     <div class="story-audio-preview">
                         <div class="audio-play-button">
@@ -65,11 +65,17 @@
                                 <polygon points="10,8 16,12 10,16 10,8"></polygon>
                             </svg>
                         </div>
-                        <div class="audio-filename">{{$attachment.Filename}}</div>
+                        <div class="body-sans-lg">{{$story.Finding}}</div>
                     </div>
-                {{/* If it's a document (PDF, Word, etc.), show a document icon */}}
+                {{/* If it's a document (PDF, Word, etc.), show a document preview */}}
                 {{else if $attachment.IsDocument}}
                     <div class="story-document-preview">
+                        {{if $attachment.ThumbURL}}
+                        <img src="{{$attachment.ThumbURL}}" srcset="
+                                {{$attachment.ThumbURL}} 300w,
+                                {{$attachment.MediumURL}} 800w
+                            " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
+                        {{else}}
                         <div class="document-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -79,7 +85,8 @@
                                 <polyline points="10,9 9,9 8,9"></polyline>
                             </svg>
                         </div>
-                        <div class="document-filename">{{$attachment.Filename}}</div>
+                        {{end}}
+                        <div class="body-sans-lg">{{$story.Finding}}</div>
                     </div>
                 {{end}}
             </a>
@@ -105,27 +112,13 @@
                         {{else if $attachment.IsVideo}}
                             <div></div>
                         {{else if $attachment.IsAudio}}
-                            <div class="popup-audio">
-                                <audio controls>
-                                    <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
+                            <div></div>
                         {{else if $attachment.IsDocument}}
-                            <div class="popup-document">
-                                <div class="document-icon-large">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <polyline points="14,2 14,8 20,8"></polyline>
-                                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                                        <polyline points="10,9 9,9 8,9"></polyline>
-                                    </svg>
-                                </div>
-                                <a href="{{$attachment.URL}}" download="{{$attachment.Filename}}" class="download-link">
-                                    Download {{$attachment.Filename}}
-                                </a>
-                            </div>
+                            {{if $attachment.LargeURL}}
+                                <img data-src="{{$attachment.LargeURL}}" alt="" class="popup-img">
+                            {{else}}
+                                <div></div>
+                            {{end}}
                         {{end}}
                     {{else}}
                         {{/* Text-only story - show text in popup */}}

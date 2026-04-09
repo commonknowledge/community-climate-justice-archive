@@ -77,15 +77,12 @@ Navigation wrapper that contains arrows and attachment content.
 }
 
 .story-image-container {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
+  display: block;
+  width: 100%;
   margin: 0;
   max-width: 100vw;
   overflow-x: hidden;
   padding: 0;
-  width: 100%;
   flex: 1;
   text-decoration: none;
 }
@@ -166,6 +163,16 @@ Audio player display for main story attachments, centered between navigation arr
   max-width: 100%;
 }
 
+.story-document-preview,
+.story-audio-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
 /* Story Document
 
 Document download display for main story attachments, centered between navigation arrows.
@@ -191,6 +198,8 @@ Document download display for main story attachments, centered between navigatio
 
 .story-document .download-link {
   font-size: 1.375rem;
+  margin-top: 1rem;
+  display: inline-block;
   padding: 0.5rem 1rem;
   border: 2px solid var(--border-color);
   text-decoration: none;
