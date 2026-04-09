@@ -1,0 +1,34 @@
+{{/*
+    Project Index Template
+
+    Shows all stories linked to a specific High St Experiment project.
+*/}}
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+    {{ template "head" .}}
+
+    <title>{{.Title}} Project</title>
+
+    {{template "grid-code" .}}
+    {{template "theme-init" .}}
+</head>
+
+<body>
+    {{template "header" .}}
+
+    <div class="container">
+        <h2 class="h2">
+            Project: <span class="tag large" style="background-color: {{.TaxonomyColour}};">{{.Title}}</span>
+        </h2>
+
+        <div class="stories-list">
+            {{template "stories-list" .}}
+        </div>
+    </div>
+
+    {{template "footer" .}}
+</body>
+
+</html>

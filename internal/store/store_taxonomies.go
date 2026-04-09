@@ -2,6 +2,7 @@ package store
 
 import (
 	"sort"
+	"strings"
 
 	"community-climate-justice-archive/data"
 )
@@ -97,6 +98,38 @@ func GetWeather() []data.Weather {
 	return getUniqueTaxonomies(
 		func(story data.Story) []data.Weather { return story.Weather },
 		func(weather data.Weather) string { return weather.Title },
+	)
+}
+
+// GetStoriesForProject finds all stories linked to one project name.
+//
+// Unlike themes or weather, this value is stored as one plain string field on the story,
+// so we wrap it in a one-item slice to reuse the generic taxonomy helper.
+func GetStoriesForProject(projectTitle string) []data.Story {
+	return getStoriesForTaxonomy(
+		projectTitle,
+		func(story data.Story) []string {
+			title := strings.TrimSpace(story.HighStExperiment)
+			if title == "" {
+				return nil
+			}
+			return []string{title}
+		},
+		func(project string) string { return project },
+	)
+}
+
+// GetProjectTypes collects unique project names from the `HighStExperiment` field.
+func GetProjectTypes() []string {
+	return getUniqueTaxonomies(
+		func(story data.Story) []string {
+			title := strings.TrimSpace(story.HighStExperiment)
+			if title == "" {
+				return nil
+			}
+			return []string{title}
+		},
+		func(project string) string { return project },
 	)
 }
 

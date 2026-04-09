@@ -72,6 +72,7 @@ func WriteArchivePage() error {
 	scalePermanence := store.GetScalePermanenceTypes()
 	timePeriod := store.GetTimePeriodTypes()
 	allStories := getAllStories()
+	highStExperiments := collectHighStExperiments(allStories)
 
 	// Shuffle all stories and take first 40 for initial display
 	shuffledStories := make([]data.Story, len(allStories))
@@ -90,17 +91,18 @@ func WriteArchivePage() error {
 	}
 
 	page := data.Page{
-		Title:           "Archive – Dudley Time Portal",
-		Description:     "Explore the complete Dudley Time Portal with filters for themes, types, and weather",
-		Themes:          themes,
-		Types:           types,
-		Weather:         weather,
-		WhatWasIsIf:     whatWasIsIf,
-		ScalePermanence: scalePermanence,
-		TimePeriod:      timePeriod,
-		Stories:         stories, // Only 40 random stories for initial display
-		RandomStoryURL:  randomStoryURL(allStories),
-		StoriesJSON:     storiesJSON,
+		Title:            "Archive – Dudley Time Portal",
+		Description:      "Explore the complete Dudley Time Portal with filters for themes, types, and weather",
+		HighStExperiment: highStExperiments,
+		Themes:           themes,
+		Types:            types,
+		Weather:          weather,
+		WhatWasIsIf:      whatWasIsIf,
+		ScalePermanence:  scalePermanence,
+		TimePeriod:       timePeriod,
+		Stories:          stories, // Only 40 random stories for initial display
+		RandomStoryURL:   randomStoryURL(allStories),
+		StoriesJSON:      storiesJSON,
 	}
 
 	tmpl, err := loadTemplatesCached()

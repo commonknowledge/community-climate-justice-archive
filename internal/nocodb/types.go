@@ -180,6 +180,12 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		timePeriod = []data.TimePeriod{}
 	}
 
+	// Ensure any newly uploaded NocoDB attachments exist locally before the
+	// image-processing step runs later in the build.
+	if err := syncAttachmentsFromNocoDB(dto.ImageVideoSound); err != nil {
+		log.Printf("Warning: failed to sync attachments for story %s: %v", toString(dto.ID), err)
+	}
+
 	story := data.Story{
 		ID:               toString(dto.ID),
 		CreatedTime:      toString(dto.CreatedTime),
@@ -797,24 +803,13 @@ func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
 
 		for _, item := range v {
 			if attachmentObj, ok := item.(map[string]interface{}); ok {
-				// Extract filename and download path from NocoDB object
-				var filename string
-				var downloadPath string
-
-				if title, exists := attachmentObj["title"]; exists {
-					filename = toString(title)
-				}
-				if path, exists := attachmentObj["path"]; exists {
-					downloadPath = toString(path)
-				}
+				filename := toString(firstNonNil(attachmentObj["title"], attachmentObj["filename"]))
+				downloadPath := toString(firstNonNil(attachmentObj["path"], attachmentObj["url"]))
+				mimetype := toString(firstNonNil(attachmentObj["mimetype"], attachmentObj["type"]))
 
 				if filename != "" {
-					// Use original filename since we're downloading files now
-					// No need to clean NocoDB suffixes anymore
-
-					// Check if we need to download the file
-					localFilePath := filepath.Join("images", filename)
-					if downloadPath != "" && !fileExists(localFilePath) {
+					localFilePath := localAttachmentPath(filename, mimetype)
+					if downloadPath != "" && localFilePath != "" && !fileExists(localFilePath) {
 						err := downloadFileFromNocoDB(downloadPath, localFilePath)
 						if err != nil {
 							log.Printf("Warning: failed to download file %s: %v", filename, err)
@@ -822,14 +817,16 @@ func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
 						}
 					}
 
-					// Create StoryAttachment-compatible object
 					storyAttachment := map[string]interface{}{
+						"title":    filename,
 						"filename": filename,
-						"url":      "",                         // Will be set by GetStoryAttachments()
-						"type":     "application/octet-stream", // Default, will be corrected later
-						"size":     0,
-						"width":    0,
-						"height":   0,
+						"url":      "", // Will be set by GetStoryAttachments()
+						"path":     downloadPath,
+						"mimetype": mimetype,
+						"type":     mimetype,
+						"size":     firstNonNil(attachmentObj["size"], 0),
+						"width":    firstNonNil(attachmentObj["width"], 0),
+						"height":   firstNonNil(attachmentObj["height"], 0),
 					}
 					storyAttachments = append(storyAttachments, storyAttachment)
 				}
@@ -854,6 +851,146 @@ func ParseAttachmentsFromNocoDB(attachmentField interface{}) (string, error) {
 	}
 }
 
+// syncAttachmentsFromNocoDB downloads any missing NocoDB-hosted attachments into
+// the local asset folders so later build steps can process and copy them.
+func syncAttachmentsFromNocoDB(attachmentField interface{}) error {
+	attachments, err := attachmentObjectsFromField(attachmentField)
+	if err != nil {
+		return err
+	}
+
+	for _, attachmentObj := range attachments {
+		filename := toString(firstNonNil(attachmentObj["title"], attachmentObj["filename"]))
+		downloadPath := toString(firstNonNil(attachmentObj["path"], attachmentObj["url"]))
+		mimetype := toString(firstNonNil(attachmentObj["mimetype"], attachmentObj["type"]))
+
+		if filename == "" || downloadPath == "" {
+			continue
+		}
+
+		localFilePath := localAttachmentPath(filename, mimetype)
+		if localFilePath == "" || fileExists(localFilePath) {
+			continue
+		}
+
+		log.Printf("Syncing NocoDB attachment: %s -> %s", filename, localFilePath)
+		if err := downloadFileFromNocoDB(downloadPath, localFilePath); err != nil {
+			return fmt.Errorf("failed to download %s to %s: %w", filename, localFilePath, err)
+		}
+	}
+
+	return nil
+}
+
+// attachmentObjectsFromField normalizes the different attachment shapes NocoDB can
+// return into a slice of generic attachment metadata objects.
+//
+// Supported inputs are:
+//   - `nil`, which yields no attachments
+//   - `[]map[string]interface{}`, which is returned as-is
+//   - `[]interface{}` containing attachment objects, which is filtered and converted
+//   - a JSON string representing an array of attachment objects
+//
+// This helper is intentionally permissive because NocoDB fields can arrive in
+// slightly different forms depending on the API path and earlier processing.
+func attachmentObjectsFromField(attachmentField interface{}) ([]map[string]interface{}, error) {
+	if attachmentField == nil {
+		return nil, nil
+	}
+
+	switch v := attachmentField.(type) {
+	case []map[string]interface{}:
+		return v, nil
+	case []interface{}:
+		attachments := make([]map[string]interface{}, 0, len(v))
+		for _, item := range v {
+			if attachmentObj, ok := item.(map[string]interface{}); ok {
+				attachments = append(attachments, attachmentObj)
+			}
+		}
+		return attachments, nil
+	case string:
+		if strings.TrimSpace(v) == "" {
+			return nil, nil
+		}
+
+		var attachments []map[string]interface{}
+		if err := json.Unmarshal([]byte(v), &attachments); err != nil {
+			return nil, fmt.Errorf("failed to parse attachment JSON: %w", err)
+		}
+		return attachments, nil
+	default:
+		return nil, nil
+	}
+}
+
+// localAttachmentPath returns the repository-relative destination path for an
+// attachment after it has been categorized.
+//
+// The helper keeps the storage layout predictable: images go to `images/`,
+// audio to `audio/`, video to `video/`, and all remaining files to
+// `documents/`.
+func localAttachmentPath(filename, mimetype string) string {
+	switch attachmentCategoryForFile(filename, mimetype) {
+	case "image":
+		return filepath.Join("images", filename)
+	case "audio":
+		return filepath.Join("audio", filename)
+	case "video":
+		return filepath.Join("video", filename)
+	default:
+		return filepath.Join("documents", filename)
+	}
+}
+
+// attachmentCategoryForFile chooses the archive asset bucket for a file.
+//
+// It prefers the MIME type when that is specific enough (`image`, `audio`, or
+// `video`). If the MIME type is missing or only resolves to the generic
+// `document` bucket, it falls back to the filename extension so local storage is
+// still routed sensibly.
+func attachmentCategoryForFile(filename, mimetype string) string {
+	if category := attachmentCategoryFromMimeType(mimetype); category != "document" {
+		return category
+	}
+
+	return data.GetFileTypeFromExtension(filename)
+}
+
+// attachmentCategoryFromMimeType maps a MIME type to the broad storage category
+// used by the archive pipeline.
+//
+// The categories are intentionally coarse-grained:
+//   - `image` for `image/*`
+//   - `audio` for `audio/*`
+//   - `video` for `video/*`
+//   - `document` for all other or unknown MIME types
+func attachmentCategoryFromMimeType(mimetype string) string {
+	switch {
+	case strings.HasPrefix(mimetype, "image/"):
+		return "image"
+	case strings.HasPrefix(mimetype, "audio/"):
+		return "audio"
+	case strings.HasPrefix(mimetype, "video/"):
+		return "video"
+	default:
+		return "document"
+	}
+}
+
+func firstNonNil(values ...interface{}) interface{} {
+	for _, value := range values {
+		if value == nil {
+			continue
+		}
+		if str, ok := value.(string); ok && strings.TrimSpace(str) == "" {
+			continue
+		}
+		return value
+	}
+	return nil
+}
+
 // Helper function to convert a single filename to the expected JSON format
 func convertSingleFilenameToJSON(filename string) string {
 	if filename == "" {
@@ -864,9 +1001,11 @@ func convertSingleFilenameToJSON(filename string) string {
 	// No need to clean NocoDB suffixes anymore
 
 	storyImage := map[string]interface{}{
+		"title":    filename,
 		"filename": filename,
 		"url":      "",           // Will be set by GetStoryAttachments()
-		"type":     "image/jpeg", // Default, will be corrected later
+		"mimetype": "image/jpeg", // Default, will be corrected later
+		"type":     "image/jpeg",
 		"size":     0,
 		"width":    0,
 		"height":   0,
