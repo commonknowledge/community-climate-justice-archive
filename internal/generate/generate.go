@@ -160,7 +160,7 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 	return string(jsonData), nil
 }
 
-// StoryData is the lightweight story shape written into `filter-data.json`.
+// StoryData represents a story with all necessary data for filtering
 type StoryData struct {
 	ID               string          `json:"id"`
 	Finding          string          `json:"finding"`
@@ -194,7 +194,7 @@ type StoryAttachment struct {
 	Filename  string `json:"filename"`
 }
 
-// FilterData is the complete payload the browser uses to build filter dropdowns.
+// FilterData represents all the data needed for client-side filtering
 type FilterData struct {
 	Themes           []FilterOption `json:"themes"`
 	Types            []FilterOption `json:"types"`
