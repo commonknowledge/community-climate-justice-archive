@@ -84,10 +84,17 @@
             <div class="story-image-container attachment-item" data-attachment-index="{{$index}}" {{if ne $index 0}}style="display: none;"{{end}}>
             {{if $attachment.IsImage}}
                 <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
+            {{else if $attachment.IsVideo}}
+                <div class="story-video">
+                    <video class="story-image" controls preload="metadata">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
+                        Your browser does not support the video element.
+                    </video>
+                </div>
             {{else if $attachment.IsAudio}}
                 <div class="story-audio">
                     <audio controls>
-                        <source src="{{$attachment.URL}}" type="audio/mpeg">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
                         Your browser does not support the audio element.
                     </audio>
                 </div>
@@ -496,6 +503,23 @@
                                 sizes="(max-width: 600px) 300px, 800px"
                                     alt="{{$attachment.AlternativeText}}">
                             </a>
+                        {{else if and $attachment.URL $attachment.IsVideo}}
+                            <!-- Videos: show a static thumbnail with a play indicator -->
+                            <a href="{{$story.URL}}" class="related-story-link">
+                                <div class="story-video-preview">
+                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
+                                    </video>
+                                    <div class="story-video-preview__overlay" aria-hidden="true">
+                                        <div class="audio-play-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
                         {{else if and $attachment.URL $attachment.IsAudio}}
                             <!-- Audio: show audio preview -->
                             <a class="story-image-container" href="{{$story.URL}}">
@@ -568,6 +592,23 @@
                                 sizes="(max-width: 600px) 300px, 800px"
                                     alt="{{$attachment.AlternativeText}}">
                             </a>
+                        {{else if and $attachment.URL $attachment.IsVideo}}
+                            <!-- Videos: show a static thumbnail with a play indicator -->
+                            <a href="{{$story.URL}}" class="related-story-link">
+                                <div class="story-video-preview">
+                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
+                                    </video>
+                                    <div class="story-video-preview__overlay" aria-hidden="true">
+                                        <div class="audio-play-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
                         {{else if and $attachment.URL $attachment.IsAudio}}
                             <!-- Audio: show audio preview -->
                             <a class="story-image-container" href="{{$story.URL}}">
@@ -639,6 +680,23 @@
                                 "
                                 sizes="(max-width: 600px) 300px, 800px"
                                     alt="{{$attachment.AlternativeText}}">
+                            </a>
+                        {{else if and $attachment.URL $attachment.IsVideo}}
+                            <!-- Videos: show a static thumbnail with a play indicator -->
+                            <a href="{{$story.URL}}" class="related-story-link">
+                                <div class="story-video-preview">
+                                    <video class="related-story-image story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                        <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
+                                    </video>
+                                    <div class="story-video-preview__overlay" aria-hidden="true">
+                                        <div class="audio-play-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
                             </a>
                         {{else if and $attachment.URL $attachment.IsAudio}}
                             <!-- Audio: show audio preview -->
