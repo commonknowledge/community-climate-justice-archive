@@ -33,6 +33,7 @@ class ArchiveFilters {
     constructor() {
         this.filterData = null;
         this.currentFilters = {
+            highStExperiment: [],
             themes: [],
             types: [],
             weather: [],
@@ -65,6 +66,7 @@ class ArchiveFilters {
         const el = (name) => document.querySelector(`[data-el="${name}"]`);
         this.elements = {
             // Primary filter dropdowns
+            highstexperimentDropdown: el('highstexperiment-dropdown'),
             themeDropdown: el('theme-dropdown'),
             typeDropdown: el('type-dropdown'),
             whatwasisifDropdown: el('whatwasisif-dropdown'),
@@ -73,6 +75,7 @@ class ArchiveFilters {
             scalepermanenceDropdown: el('scalepermanence-dropdown'),
             timeperiodDropdown: el('timeperiod-dropdown'),
             // Buttons that open the dropdowns
+            highstexperimentButton: el('highstexperiment-button'),
             themeButton: el('theme-button'),
             typeButton: el('type-button'),
             whatwasisifButton: el('whatwasisif-button'),
@@ -80,6 +83,7 @@ class ArchiveFilters {
             scalepermanenceButton: el('scalepermanence-button'),
             timeperiodButton: el('timeperiod-button'),
             // Content areas inside the dropdowns
+            highstexperimentContent: el('highstexperiment-content'),
             themeContent: el('theme-content'),
             typeContent: el('type-content'),
             whatwasisifContent: el('whatwasisif-content'),
@@ -162,6 +166,7 @@ class ArchiveFilters {
         if (!this.filterData) return;
 
         // Populate primary filters
+        this.populateDropdown(this.elements.highstexperimentContent, this.filterData.highStExperiment, 'highStExperiment');
         this.populateDropdown(this.elements.themeContent, this.filterData.themes, 'themes');
         this.populateDropdown(this.elements.typeContent, this.filterData.types, 'types');
         this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
@@ -297,6 +302,13 @@ class ArchiveFilters {
     
     setupEventListeners() {
         // Dropdown button handlers
+        if (this.elements.highstexperimentButton) {
+            this.elements.highstexperimentButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('highstexperiment');
+            });
+        }
+
         if (this.elements.themeButton) {
             this.elements.themeButton.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -416,7 +428,7 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather', 'whatwasisif', 'scalepermanence', 'timeperiod'].forEach(type => {
+        ['highstexperiment', 'theme', 'type', 'weather', 'whatwasisif', 'scalepermanence', 'timeperiod'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
@@ -514,6 +526,7 @@ class ArchiveFilters {
     updateDropdownDisplay() {
         // Update the visual state of filter options to show which are selected
         const filterTypeToElement = {
+            highStExperiment: this.elements.highstexperimentContent,
             themes: this.elements.themeContent,
             types: this.elements.typeContent,
             weather: this.elements.weatherContent,
@@ -521,7 +534,7 @@ class ArchiveFilters {
             scalePermanence: this.elements.scalepermanenceContent,
             timePeriod: this.elements.timeperiodContent
         };
-        ['themes', 'types', 'weather', 'whatWasIsIf', 'scalePermanence', 'timePeriod'].forEach(filterType => {
+        ['highStExperiment', 'themes', 'types', 'weather', 'whatWasIsIf', 'scalePermanence', 'timePeriod'].forEach(filterType => {
             const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
@@ -554,6 +567,14 @@ class ArchiveFilters {
         
         // Go through all stories and keep only the ones that match
         this.filteredStories = this.filterData.stories.filter(story => {
+            // Check High St Experiment filters
+            if (this.currentFilters.highStExperiment.length > 0) {
+                const hasMatchingHighStExperiment = this.currentFilters.highStExperiment.some(highStExperiment =>
+                    story.highStExperiment === highStExperiment
+                );
+                if (!hasMatchingHighStExperiment) return false;
+            }
+
             // Check theme filters
             if (this.currentFilters.themes.length > 0) {
                 // Does this story have at least one of the selected themes?
@@ -911,6 +932,13 @@ class ArchiveFilters {
         this.elements.activeFilters.style.display = 'flex';
         this.elements.activeFiltersList.innerHTML = '';
         
+        // Add High St Experiment filters
+        this.currentFilters.highStExperiment.forEach(highStExperiment => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(highStExperiment, 'highStExperiment')
+            );
+        });
+
         // Add theme filters
         this.currentFilters.themes.forEach(theme => {
             this.elements.activeFiltersList.appendChild(
@@ -996,6 +1024,7 @@ class ArchiveFilters {
     
     clearAllFilters() {
         this.currentFilters = {
+            highStExperiment: [],
             themes: [],
             types: [],
             weather: [],
@@ -1047,6 +1076,10 @@ class ArchiveFilters {
     updateURL() {
         const params = new URLSearchParams();
         
+        if (this.currentFilters.highStExperiment.length > 0) {
+            params.set('highStExperiment', this.currentFilters.highStExperiment.join(','));
+        }
+
         if (this.currentFilters.themes.length > 0) {
             params.set('themes', this.currentFilters.themes.join(','));
         }
@@ -1082,6 +1115,7 @@ class ArchiveFilters {
     loadFiltersFromURL() {
         const params = new URLSearchParams(window.location.search);
         
+        this.currentFilters.highStExperiment = params.get('highStExperiment') ? params.get('highStExperiment').split(',') : [];
         this.currentFilters.themes = params.get('themes') ? params.get('themes').split(',') : [];
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];

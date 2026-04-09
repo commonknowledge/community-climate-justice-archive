@@ -120,6 +120,7 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		{name: "write themes indexes", run: generate.WriteThemesIndexes},
 		{name: "write weather indexes", run: generate.WriteWeatherIndexes},
 		{name: "write gifted by indexes", run: generate.WriteGiftedByIndexPages},
+		{name: "write project indexes", run: generate.WriteProjectIndexPages},
 		{name: "write scale permanence indexes", run: generate.WriteScalePermanenceIndexPages},
 		{name: "write what was/is/if indexes", run: generate.WriteWhatWasIsIfIndexPages},
 		{name: "write time period indexes", run: generate.WriteTimePeriodIndexPages},

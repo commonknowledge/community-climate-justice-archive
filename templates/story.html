@@ -341,6 +341,14 @@
                         </span>
                     </div>
                     {{end}}
+                    {{if $story.HighStExperiment}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Project</span>
+                        <span class="story-metadata-item-value tags">
+                            <a class="tag" href="{{$story.GetProjectURL}}" style="background-color: {{$story.GetProjectColor}};">{{$story.HighStExperiment}}</a>
+                        </span>
+                    </div>
+                    {{end}}
                     {{if $story.GiftedBy}}
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Gifted or co-created by</span>
