@@ -128,6 +128,20 @@ func WriteGiftedByIndexPages() error {
 	})
 }
 
+// WriteProjectIndexPages generates the project index pages and writes them to the out/projects directory.
+func WriteProjectIndexPages() error {
+	return writeTaxonomyIndexPages(taxonomyIndexConfig[string]{
+		label:       "project index",
+		outputDir:   "projects",
+		template:    "project-index.html",
+		description: func(title string) string { return "A list of stories for the project " + title },
+		list:        store.GetProjectTypes,
+		storiesFor:  store.GetStoriesForProject,
+		title:       func(project string) string { return project },
+		color:       func(project string) string { return data.TitleToHexColor(project) },
+	})
+}
+
 // WriteScalePermanenceIndexPages generates the scale permanence index pages and writes them to the out/scalepermanence directory.
 func WriteScalePermanenceIndexPages() error {
 	return writeTaxonomyIndexPages(taxonomyIndexConfig[data.ScalePermanence]{

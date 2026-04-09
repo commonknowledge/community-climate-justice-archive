@@ -46,6 +46,17 @@
                     <div class="filters-group / body-sans-sm">
                         <h3 class="filters-group__label / caption">Filter by:</h3>
                         <div class="filters-group__list">
+                            {{if .HighStExperiment}}
+                                <div class="filter-dropdown" data-el="highstexperiment-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="highstexperiment-button">
+                                        Projects
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="highstexperiment-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
+
                             {{if .Themes}}
                                 <div class="filter-dropdown" data-el="theme-dropdown">
                                     <button class="filter-dropdown__trigger / dashed-button" data-el="theme-button">
@@ -96,13 +107,14 @@
                         <span class="filters-group__label / caption">Sort by:</span>
                         <div class="filter-dropdown" data-el="sort-dropdown">
                             <button class="filter-dropdown__trigger / dashed-button" data-el="sort-button">
-                                Date experienced
+                                <span data-el="sort-text">Random</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>
                             </button>
                             <div class="filter-dropdown__options" data-el="sort-content">
-                                <button class="sort-option selected" data-sort="dateExperienced">Date experienced</button>
+                                <button class="sort-option selected" data-sort="random">Random</button>
+                                <button class="sort-option" data-sort="dateExperienced">Date experienced</button>
                                 <button class="sort-option" data-sort="dateCreated">Date created</button>
-                                <button class="sort-option" data-sort="random">Random</button>
+                                <button class="sort-option" data-sort="title">Title (A-Z)</button>
                             </div>
                         </div>
                     </div>

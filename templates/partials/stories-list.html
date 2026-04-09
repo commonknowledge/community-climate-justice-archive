@@ -26,16 +26,35 @@
             {{/* If the story has an attachment (image, audio, or document) */}}
             {{if $attachment.URL}}
             <a class="story-image-container" href="{{$story.URL}}" data-story-id="{{$story.ID}}">
-                {{/* If it's an image, show it with responsive sizing */}}
+                {{/* If it is an image, show it with responsive sizing */}}
                 {{if $attachment.IsImage}}
                     {{/* The srcset provides different sizes for different screen widths */}}
-                    <figure>
-                        <img src="{{$attachment.ThumbURL}}" srcset="
-                                {{$attachment.ThumbURL}} 300w,
-                                {{$attachment.MediumURL}} 800w
-                            " sizes="(max-width: 600px) 300px, 800px" alt="{{$attachment.AlternativeText}}">
-                        <figcaption class="body-sans-lg">{{$story.Finding}}</figcaption>
-                    </figure>
+                <figure>
+                    <img
+                        src="{{$attachment.ThumbURL}}"
+                        srcset="
+                            {{$attachment.ThumbURL}} 300w,
+                            {{$attachment.MediumURL}} 800w"
+                        sizes="(max-width: 600px) 300px, 800px"
+                        alt="{{$attachment.AlternativeText}}"
+                    >
+                    <figcaption class="body-sans-lg">{{$story.Finding}}</figcaption>
+                </figure>
+                {{/* If it's a video, show a thumbnail frame with a play icon */}}
+                {{else if $attachment.IsVideo}}
+                    <div class="story-video-preview">
+                        <video class="story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                            <source src="{{$attachment.URL}}#t=0.1" type="{{$attachment.Type}}">
+                        </video>
+                        <div class="story-video-preview__overlay" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+
+                    
                     
                 {{/* If it's audio, show a play button and the story finding */}}
                 {{else if $attachment.IsAudio}}
@@ -90,6 +109,8 @@
                     {{if $attachment.URL}}
                         {{if $attachment.IsImage}}
                             <img data-src="{{$attachment.LargeURL}}" alt="" class="popup-img">
+                        {{else if $attachment.IsVideo}}
+                            <div></div>
                         {{else if $attachment.IsAudio}}
                             <div></div>
                         {{else if $attachment.IsDocument}}

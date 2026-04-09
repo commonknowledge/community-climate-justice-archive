@@ -84,10 +84,17 @@
             <div class="story-image-container attachment-item" data-attachment-index="{{$index}}" {{if ne $index 0}}style="display: none;"{{end}}>
             {{if $attachment.IsImage}}
                 <img class="story-image" src="{{$attachment.LargeURL}}" alt="{{$attachment.AlternativeText}}">
+            {{else if $attachment.IsVideo}}
+                <div class="story-video">
+                    <video class="story-image" controls preload="metadata">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
+                        Your browser does not support the video element.
+                    </video>
+                </div>
             {{else if $attachment.IsAudio}}
                 <div class="story-audio">
                     <audio controls>
-                        <source src="{{$attachment.URL}}" type="audio/mpeg">
+                        <source src="{{$attachment.URL}}" type="{{$attachment.Type}}">
                         Your browser does not support the audio element.
                     </audio>
                 </div>
@@ -335,6 +342,14 @@
                         <span class="story-metadata-item-value tags">
                             {{range $story.Themes}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
                             {{end}}
+                        </span>
+                    </div>
+                    {{end}}
+                    {{if $story.HighStExperiment}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">Project</span>
+                        <span class="story-metadata-item-value tags">
+                            <a class="tag" href="{{$story.GetProjectURL}}" style="background-color: {{$story.GetProjectColor}};">{{$story.HighStExperiment}}</a>
                         </span>
                     </div>
                     {{end}}

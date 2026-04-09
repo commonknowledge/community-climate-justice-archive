@@ -33,6 +33,7 @@ class ArchiveFilters {
     constructor() {
         this.filterData = null;
         this.currentFilters = {
+            highStExperiment: [],
             themes: [],
             types: [],
             weather: [],
@@ -41,7 +42,7 @@ class ArchiveFilters {
             timePeriod: []
         };
         this.filteredStories = [];
-        this.currentSort = 'dateExperienced';
+        this.currentSort = 'random';
         this.currentPage = 0;
         this.storiesPerPage = 20;
 
@@ -65,6 +66,7 @@ class ArchiveFilters {
         const el = (name) => document.querySelector(`[data-el="${name}"]`);
         this.elements = {
             // Primary filter dropdowns
+            highstexperimentDropdown: el('highstexperiment-dropdown'),
             themeDropdown: el('theme-dropdown'),
             typeDropdown: el('type-dropdown'),
             whatwasisifDropdown: el('whatwasisif-dropdown'),
@@ -73,6 +75,7 @@ class ArchiveFilters {
             scalepermanenceDropdown: el('scalepermanence-dropdown'),
             timeperiodDropdown: el('timeperiod-dropdown'),
             // Buttons that open the dropdowns
+            highstexperimentButton: el('highstexperiment-button'),
             themeButton: el('theme-button'),
             typeButton: el('type-button'),
             whatwasisifButton: el('whatwasisif-button'),
@@ -80,6 +83,7 @@ class ArchiveFilters {
             scalepermanenceButton: el('scalepermanence-button'),
             timeperiodButton: el('timeperiod-button'),
             // Content areas inside the dropdowns
+            highstexperimentContent: el('highstexperiment-content'),
             themeContent: el('theme-content'),
             typeContent: el('type-content'),
             whatwasisifContent: el('whatwasisif-content'),
@@ -162,6 +166,7 @@ class ArchiveFilters {
         if (!this.filterData) return;
 
         // Populate primary filters
+        this.populateDropdown(this.elements.highstexperimentContent, this.filterData.highStExperiment, 'highStExperiment');
         this.populateDropdown(this.elements.themeContent, this.filterData.themes, 'themes');
         this.populateDropdown(this.elements.typeContent, this.filterData.types, 'types');
         this.populateDropdown(this.elements.whatwasisifContent, this.filterData.whatWasIsIf, 'whatWasIsIf');
@@ -297,6 +302,13 @@ class ArchiveFilters {
     
     setupEventListeners() {
         // Dropdown button handlers
+        if (this.elements.highstexperimentButton) {
+            this.elements.highstexperimentButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.toggleDropdown('highstexperiment');
+            });
+        }
+
         if (this.elements.themeButton) {
             this.elements.themeButton.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -416,7 +428,7 @@ class ArchiveFilters {
     }
     
     closeAllDropdowns() {
-        ['theme', 'type', 'weather', 'whatwasisif', 'scalepermanence', 'timeperiod'].forEach(type => {
+        ['highstexperiment', 'theme', 'type', 'weather', 'whatwasisif', 'scalepermanence', 'timeperiod'].forEach(type => {
             const dropdown = this.elements[`${type}Dropdown`];
             if (dropdown) {
                 dropdown.classList.remove('open');
@@ -431,25 +443,29 @@ class ArchiveFilters {
         }
     }
 
-    setSort(sortKey) {
-        this.currentSort = sortKey;
-
-        // Update button text
+    updateSortDisplay() {
         const labels = {
             dateExperienced: 'Date experienced',
             dateCreated: 'Date created',
+            title: 'Title (A-Z)',
             random: 'Random'
         };
+        const label = labels[this.currentSort] || this.currentSort;
+
         if (this.elements.sortText) {
-            this.elements.sortText.textContent = labels[sortKey] || sortKey;
+            this.elements.sortText.textContent = label;
         }
 
-        // Update selected state in dropdown
         if (this.elements.sortContent) {
             this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
-                opt.classList.toggle('selected', opt.dataset.sort === sortKey);
+                opt.classList.toggle('selected', opt.dataset.sort === this.currentSort);
             });
         }
+    }
+
+    setSort(sortKey) {
+        this.currentSort = sortKey;
+        this.updateSortDisplay();
 
         this.closeSortDropdown();
         this.sortStories();
@@ -476,6 +492,12 @@ class ArchiveFilters {
                 const dateA = a.createdTime || '';
                 const dateB = b.createdTime || '';
                 return dateB.localeCompare(dateA);
+            });
+        } else if (this.currentSort === 'title') {
+            this.filteredStories.sort((a, b) => {
+                const titleA = (a.finding || a.title || '').trim();
+                const titleB = (b.finding || b.title || '').trim();
+                return titleA.localeCompare(titleB, undefined, { sensitivity: 'base' });
             });
         }
     }
@@ -504,6 +526,7 @@ class ArchiveFilters {
     updateDropdownDisplay() {
         // Update the visual state of filter options to show which are selected
         const filterTypeToElement = {
+            highStExperiment: this.elements.highstexperimentContent,
             themes: this.elements.themeContent,
             types: this.elements.typeContent,
             weather: this.elements.weatherContent,
@@ -511,7 +534,7 @@ class ArchiveFilters {
             scalePermanence: this.elements.scalepermanenceContent,
             timePeriod: this.elements.timeperiodContent
         };
-        ['themes', 'types', 'weather', 'whatWasIsIf', 'scalePermanence', 'timePeriod'].forEach(filterType => {
+        ['highStExperiment', 'themes', 'types', 'weather', 'whatWasIsIf', 'scalePermanence', 'timePeriod'].forEach(filterType => {
             const contentElement = filterTypeToElement[filterType];
             if (!contentElement) return;
             
@@ -544,6 +567,14 @@ class ArchiveFilters {
         
         // Go through all stories and keep only the ones that match
         this.filteredStories = this.filterData.stories.filter(story => {
+            // Check High St Experiment filters
+            if (this.currentFilters.highStExperiment.length > 0) {
+                const hasMatchingHighStExperiment = this.currentFilters.highStExperiment.some(highStExperiment =>
+                    story.highStExperiment === highStExperiment
+                );
+                if (!hasMatchingHighStExperiment) return false;
+            }
+
             // Check theme filters
             if (this.currentFilters.themes.length > 0) {
                 // Does this story have at least one of the selected themes?
@@ -681,8 +712,26 @@ class ArchiveFilters {
                                 srcset="${attachment.thumbUrl} 300w, ${attachment.mediumUrl} 800w"
                                 sizes="(max-width: 600px) 300px, 800px"
                                 alt="${attachment.alt || ''}"
-                                loading="lazy"
-                            >
+                                loading="lazy">
+                            <figcaption class="body-sans-lg">${story.finding}</figcaption>
+                        </figure>
+                    </a>
+                `;
+            } else if (attachment.fileType === 'video') {
+                content = `
+                    <a class="story-image-container" href="${story.url}" data-story-id="${story.id}">
+                        <figure>
+                            <div class="story-video-preview">
+                                <video class="story-video-preview__thumb" muted playsinline preload="metadata" aria-hidden="true">
+                                    <source src="${attachment.url}#t=0.1" type="${attachment.type || 'video/mp4'}">
+                                </video>
+                                <div class="story-video-preview__overlay" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <polygon points="10,9 16,12 10,15 10,9"></polygon>
+                                    </svg>
+                                </div>
+                            </div>
                             <figcaption class="body-sans-lg">${story.finding}</figcaption>
                         </figure>
                     </a>
@@ -755,6 +804,10 @@ class ArchiveFilters {
             const attachment = story.attachment;
             if (attachment.fileType === 'image') {
                 popupContent = `<img data-src="${attachment.largeUrl || attachment.url}" alt="" class="popup-img">`;
+            } else if (attachment.fileType === 'video') {
+                popupContent = `
+                    <div></div>
+                `;
             } else if (attachment.fileType === 'audio') {
                 popupContent = `
                     <div></div>
@@ -876,6 +929,13 @@ class ArchiveFilters {
         this.elements.activeFilters.style.display = 'flex';
         this.elements.activeFiltersList.innerHTML = '';
         
+        // Add High St Experiment filters
+        this.currentFilters.highStExperiment.forEach(highStExperiment => {
+            this.elements.activeFiltersList.appendChild(
+                this.createActiveFilterTag(highStExperiment, 'highStExperiment')
+            );
+        });
+
         // Add theme filters
         this.currentFilters.themes.forEach(theme => {
             this.elements.activeFiltersList.appendChild(
@@ -961,6 +1021,7 @@ class ArchiveFilters {
     
     clearAllFilters() {
         this.currentFilters = {
+            highStExperiment: [],
             themes: [],
             types: [],
             weather: [],
@@ -1012,6 +1073,10 @@ class ArchiveFilters {
     updateURL() {
         const params = new URLSearchParams();
         
+        if (this.currentFilters.highStExperiment.length > 0) {
+            params.set('highStExperiment', this.currentFilters.highStExperiment.join(','));
+        }
+
         if (this.currentFilters.themes.length > 0) {
             params.set('themes', this.currentFilters.themes.join(','));
         }
@@ -1036,7 +1101,7 @@ class ArchiveFilters {
             params.set('timePeriod', this.currentFilters.timePeriod.join(','));
         }
 
-        if (this.currentSort && this.currentSort !== 'dateExperienced') {
+        if (this.currentSort && this.currentSort !== 'random') {
             params.set('sort', this.currentSort);
         }
 
@@ -1047,6 +1112,7 @@ class ArchiveFilters {
     loadFiltersFromURL() {
         const params = new URLSearchParams(window.location.search);
         
+        this.currentFilters.highStExperiment = params.get('highStExperiment') ? params.get('highStExperiment').split(',') : [];
         this.currentFilters.themes = params.get('themes') ? params.get('themes').split(',') : [];
         this.currentFilters.types = params.get('types') ? params.get('types').split(',') : [];
         this.currentFilters.weather = params.get('weather') ? params.get('weather').split(',') : [];
@@ -1054,20 +1120,14 @@ class ArchiveFilters {
         this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
         this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
 
-        // Restore sort from URL
+        // Restore sort from URL, defaulting to random when none is specified
         const sortParam = params.get('sort');
-        if (sortParam && ['dateExperienced', 'dateCreated', 'random'].includes(sortParam)) {
+        if (sortParam && ['dateExperienced', 'dateCreated', 'title', 'random'].includes(sortParam)) {
             this.currentSort = sortParam;
-            const labels = { dateExperienced: 'Date experienced', dateCreated: 'Date created', random: 'Random' };
-            if (this.elements.sortText) {
-                this.elements.sortText.textContent = labels[sortParam];
-            }
-            if (this.elements.sortContent) {
-                this.elements.sortContent.querySelectorAll('.sort-option').forEach(opt => {
-                    opt.classList.toggle('selected', opt.dataset.sort === sortParam);
-                });
-            }
+        } else {
+            this.currentSort = 'random';
         }
+        this.updateSortDisplay();
 
         // If any "more" filters are active from URL, auto-expand the more filters section
         const hasMoreFilterParams = this.currentFilters.scalePermanence.length > 0 ||
