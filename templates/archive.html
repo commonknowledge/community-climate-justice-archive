@@ -46,6 +46,17 @@
                     <div class="filters-group / body-sans-sm">
                         <h3 class="filters-group__label / caption">Filter by:</h3>
                         <div class="filters-group__list">
+                            {{if .HighStExperiment}}
+                                <div class="filter-dropdown" data-el="highstexperiment-dropdown">
+                                    <button class="filter-dropdown__trigger / dashed-button" data-el="highstexperiment-button">
+                                        Projects
+                                    </button>
+                                    <div class="filter-dropdown__options" data-el="highstexperiment-content">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            {{end}}
+
                             {{if .Themes}}
                                 <div class="filter-dropdown" data-el="theme-dropdown">
                                     <button class="filter-dropdown__trigger / dashed-button" data-el="theme-button">

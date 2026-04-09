@@ -268,6 +268,12 @@
                         <span class="story-metadata-item-value">{{$story.Location}}</span>
                     </div>
                     {{end}}
+                    {{if $story.HighStExperiment}}
+                    <div class="story-metadata-item">
+                        <span class="story-metadata-item-label">High St Experiment</span>
+                        <span class="story-metadata-item-value">{{$story.HighStExperiment}}</span>
+                    </div>
+                    {{end}}
                     {{if $story.Season}}
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Season</span>

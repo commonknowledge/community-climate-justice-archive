@@ -31,6 +31,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
+	"strings"
 	"text/template"
 
 	"community-climate-justice-archive/data"
@@ -160,24 +162,25 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 
 // StoryData represents a story with all necessary data for filtering
 type StoryData struct {
-	ID              string          `json:"id"`
-	Finding         string          `json:"finding"`
-	URL             string          `json:"url"`
-	Location        string          `json:"location"`
-	StartDateTime   string          `json:"startDateTime"`
-	EndDateTime     string          `json:"endDateTime"`
-	Season          string          `json:"season"`
-	Experience      string          `json:"experience"`
-	TimeSpan        string          `json:"timeSpan"`
-	Themes          []string        `json:"themes"`
-	Types           []string        `json:"types"`
-	Weather         []string        `json:"weather"`
-	WhatWasIsIf     []string        `json:"whatWasIsIf"`
-	GiftedBy        []string        `json:"giftedBy"`
-	ScalePermanence []string        `json:"scalePermanence"`
-	TimePeriod      []string        `json:"timePeriod"`
-	CreatedTime     string          `json:"createdTime"`
-	Attachment      StoryAttachment `json:"attachment"`
+	ID               string          `json:"id"`
+	Finding          string          `json:"finding"`
+	HighStExperiment string          `json:"highStExperiment"`
+	URL              string          `json:"url"`
+	Location         string          `json:"location"`
+	StartDateTime    string          `json:"startDateTime"`
+	EndDateTime      string          `json:"endDateTime"`
+	Season           string          `json:"season"`
+	Experience       string          `json:"experience"`
+	TimeSpan         string          `json:"timeSpan"`
+	Themes           []string        `json:"themes"`
+	Types            []string        `json:"types"`
+	Weather          []string        `json:"weather"`
+	WhatWasIsIf      []string        `json:"whatWasIsIf"`
+	GiftedBy         []string        `json:"giftedBy"`
+	ScalePermanence  []string        `json:"scalePermanence"`
+	TimePeriod       []string        `json:"timePeriod"`
+	CreatedTime      string          `json:"createdTime"`
+	Attachment       StoryAttachment `json:"attachment"`
 }
 
 // StoryAttachment represents the attachment data for a story
@@ -193,14 +196,15 @@ type StoryAttachment struct {
 
 // FilterData represents all the data needed for client-side filtering
 type FilterData struct {
-	Themes          []FilterOption `json:"themes"`
-	Types           []FilterOption `json:"types"`
-	Weather         []FilterOption `json:"weather"`
-	WhatWasIsIf     []FilterOption `json:"whatWasIsIf"`
-	GiftedBy        []FilterOption `json:"giftedBy"`
-	ScalePermanence []FilterOption `json:"scalePermanence"`
-	TimePeriod      []FilterOption `json:"timePeriod"`
-	Stories         []StoryData    `json:"stories"`
+	Themes           []FilterOption `json:"themes"`
+	Types            []FilterOption `json:"types"`
+	Weather          []FilterOption `json:"weather"`
+	HighStExperiment []FilterOption `json:"highStExperiment"`
+	WhatWasIsIf      []FilterOption `json:"whatWasIsIf"`
+	GiftedBy         []FilterOption `json:"giftedBy"`
+	ScalePermanence  []FilterOption `json:"scalePermanence"`
+	TimePeriod       []FilterOption `json:"timePeriod"`
+	Stories          []StoryData    `json:"stories"`
 }
 
 // FilterOption represents a filter option with title and count
@@ -209,6 +213,54 @@ type FilterOption struct {
 	URL   string `json:"url"`
 	Count int    `json:"count"`
 	Color string `json:"color"`
+}
+
+func collectHighStExperiments(stories []data.Story) []string {
+	seen := make(map[string]struct{})
+	titles := make([]string, 0)
+
+	for _, story := range stories {
+		title := strings.TrimSpace(story.HighStExperiment)
+		if title == "" {
+			continue
+		}
+		if _, exists := seen[title]; exists {
+			continue
+		}
+		seen[title] = struct{}{}
+		titles = append(titles, title)
+	}
+
+	sort.Strings(titles)
+	return titles
+}
+
+func buildHighStExperimentOptions(stories []data.Story) []FilterOption {
+	counts := make(map[string]int)
+	for _, story := range stories {
+		title := strings.TrimSpace(story.HighStExperiment)
+		if title == "" {
+			continue
+		}
+		counts[title]++
+	}
+
+	titles := make([]string, 0, len(counts))
+	for title := range counts {
+		titles = append(titles, title)
+	}
+	sort.Strings(titles)
+
+	options := make([]FilterOption, 0, len(titles))
+	for _, title := range titles {
+		options = append(options, FilterOption{
+			Title: title,
+			Count: counts[title],
+			Color: data.TitleToHexColor(title),
+		})
+	}
+
+	return options
 }
 
 // convertStoriesToFilterData converts stories to comprehensive filter data
@@ -261,23 +313,24 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 		}
 
 		storyData[i] = StoryData{
-			ID:              story.ID,
-			Finding:         story.Finding,
-			URL:             story.URL,
-			Location:        story.Location,
-			StartDateTime:   story.StartDateTime,
-			EndDateTime:     story.EndDateTime,
-			Season:          story.Season,
-			Experience:      story.Experience,
-			TimeSpan:        story.TimeSpan,
-			Themes:          themeNames,
-			Types:           typeNames,
-			Weather:         weatherNames,
-			WhatWasIsIf:     whatWasIsIfNames,
-			GiftedBy:        giftedByNames,
-			ScalePermanence: scalePermanenceNames,
-			TimePeriod:      timePeriodNames,
-			CreatedTime:     story.CreatedTime,
+			ID:               story.ID,
+			Finding:          story.Finding,
+			HighStExperiment: story.HighStExperiment,
+			URL:              story.URL,
+			Location:         story.Location,
+			StartDateTime:    story.StartDateTime,
+			EndDateTime:      story.EndDateTime,
+			Season:           story.Season,
+			Experience:       story.Experience,
+			TimeSpan:         story.TimeSpan,
+			Themes:           themeNames,
+			Types:            typeNames,
+			Weather:          weatherNames,
+			WhatWasIsIf:      whatWasIsIfNames,
+			GiftedBy:         giftedByNames,
+			ScalePermanence:  scalePermanenceNames,
+			TimePeriod:       timePeriodNames,
+			CreatedTime:      story.CreatedTime,
 			Attachment: StoryAttachment{
 				URL:       attachment.URL,
 				ThumbURL:  attachment.ThumbURL,
@@ -347,6 +400,8 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 			Color: w.Colour,
 		}
 	}
+
+	highStExperimentOptions := buildHighStExperimentOptions(stories)
 
 	whatWasIsIfOptions := make([]FilterOption, len(whatWasIsIf))
 	for i, wwii := range whatWasIsIf {
@@ -425,14 +480,15 @@ func convertStoriesToFilterData(stories []data.Story, themes []data.Theme, types
 	}
 
 	filterData := FilterData{
-		Themes:          themeOptions,
-		Types:           typeOptions,
-		Weather:         weatherOptions,
-		WhatWasIsIf:     whatWasIsIfOptions,
-		GiftedBy:        giftedByOptions,
-		ScalePermanence: scalePermanenceOptions,
-		TimePeriod:      timePeriodOptions,
-		Stories:         storyData,
+		Themes:           themeOptions,
+		Types:            typeOptions,
+		Weather:          weatherOptions,
+		HighStExperiment: highStExperimentOptions,
+		WhatWasIsIf:      whatWasIsIfOptions,
+		GiftedBy:         giftedByOptions,
+		ScalePermanence:  scalePermanenceOptions,
+		TimePeriod:       timePeriodOptions,
+		Stories:          storyData,
 	}
 
 	jsonData, err := json.Marshal(filterData)

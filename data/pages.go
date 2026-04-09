@@ -22,6 +22,7 @@ package data
 type Page struct {
 	Title            string
 	Description      string
+	HighStExperiment []string
 	Themes           []Theme
 	Types            []Type
 	Weather          []Weather
