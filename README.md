@@ -124,7 +124,8 @@ Here's what happens when you run `go run ./cmd/archive`:
 flowchart TD
     Start([Run: go run ./cmd/archive]) --> Config[Load settings from .env file]
     Config --> Fetch[Fetch all stories from NocoDB]
-    Fetch --> Images[Process images<br/>Resize and convert to WebP]
+    Fetch --> Sync[Convert records to Story structs<br/>and sync missing attachments locally]
+    Sync --> Images[Process images<br/>Resize and convert to WebP]
     Images --> Pages[Generate all HTML pages]
     
     Pages --> Home[Homepage]

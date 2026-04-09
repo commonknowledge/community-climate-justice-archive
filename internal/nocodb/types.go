@@ -873,6 +873,7 @@ func syncAttachmentsFromNocoDB(attachmentField interface{}) error {
 			continue
 		}
 
+		log.Printf("Syncing NocoDB attachment: %s -> %s", filename, localFilePath)
 		if err := downloadFileFromNocoDB(downloadPath, localFilePath); err != nil {
 			return fmt.Errorf("failed to download %s to %s: %w", filename, localFilePath, err)
 		}
