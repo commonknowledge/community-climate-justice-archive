@@ -160,11 +160,11 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 	return string(jsonData), nil
 }
 
-// StoryData represents a story with all necessary data for filtering
+// StoryData is the lightweight story shape written into `filter-data.json`.
 type StoryData struct {
 	ID               string          `json:"id"`
 	Finding          string          `json:"finding"`
-	HighStExperiment string          `json:"highStExperiment"`
+	HighStExperiment string          `json:"highStExperiment"` // Plain project name used by the archive filter.
 	URL              string          `json:"url"`
 	Location         string          `json:"location"`
 	StartDateTime    string          `json:"startDateTime"`
@@ -194,12 +194,12 @@ type StoryAttachment struct {
 	Filename  string `json:"filename"`
 }
 
-// FilterData represents all the data needed for client-side filtering
+// FilterData is the complete payload the browser uses to build filter dropdowns.
 type FilterData struct {
 	Themes           []FilterOption `json:"themes"`
 	Types            []FilterOption `json:"types"`
 	Weather          []FilterOption `json:"weather"`
-	HighStExperiment []FilterOption `json:"highStExperiment"`
+	HighStExperiment []FilterOption `json:"highStExperiment"` // Project dropdown options built from story values.
 	WhatWasIsIf      []FilterOption `json:"whatWasIsIf"`
 	GiftedBy         []FilterOption `json:"giftedBy"`
 	ScalePermanence  []FilterOption `json:"scalePermanence"`
@@ -215,6 +215,7 @@ type FilterOption struct {
 	Color string `json:"color"`
 }
 
+// collectHighStExperiments gathers unique non-empty project names from stories.
 func collectHighStExperiments(stories []data.Story) []string {
 	seen := make(map[string]struct{})
 	titles := make([]string, 0)
@@ -235,6 +236,7 @@ func collectHighStExperiments(stories []data.Story) []string {
 	return titles
 }
 
+// buildHighStExperimentOptions turns project names into dropdown items and links.
 func buildHighStExperimentOptions(stories []data.Story) []FilterOption {
 	counts := make(map[string]int)
 	for _, story := range stories {

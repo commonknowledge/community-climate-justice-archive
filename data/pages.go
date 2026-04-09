@@ -22,7 +22,7 @@ package data
 type Page struct {
 	Title            string
 	Description      string
-	HighStExperiment []string
+	HighStExperiment []string // Unique project names used to decide whether to show the archive project filter.
 	Themes           []Theme
 	Types            []Type
 	Weather          []Weather

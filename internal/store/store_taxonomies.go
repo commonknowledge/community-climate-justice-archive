@@ -101,7 +101,10 @@ func GetWeather() []data.Weather {
 	)
 }
 
-// GetStoriesForProject finds all stories linked to a particular High St Experiment project.
+// GetStoriesForProject finds all stories linked to one project name.
+//
+// Unlike themes or weather, this value is stored as one plain string field on the story,
+// so we wrap it in a one-item slice to reuse the generic taxonomy helper.
 func GetStoriesForProject(projectTitle string) []data.Story {
 	return getStoriesForTaxonomy(
 		projectTitle,
@@ -116,7 +119,7 @@ func GetStoriesForProject(projectTitle string) []data.Story {
 	)
 }
 
-// GetProjectTypes collects all the unique High St Experiment project names from across the archive.
+// GetProjectTypes collects unique project names from the `HighStExperiment` field.
 func GetProjectTypes() []string {
 	return getUniqueTaxonomies(
 		func(story data.Story) []string {
