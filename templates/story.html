@@ -401,7 +401,7 @@
                     {{range $story.InspiredBy}}
                     <a href="{{.URL}}" class="big-button">
                         {{if eq .AttachmentType "image"}}
-                            <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                            <div class="big-button-image" style="background-image: url('{{.GetThumbURL}}');"></div>
                         {{else if eq .AttachmentType "audio"}}
                             <div class="big-button-image">
                                 <div class="story-audio-preview">
@@ -450,7 +450,7 @@
                     {{range $story.HasInspired}}
                     <a href="{{.URL}}" class="big-button">
                         {{if eq .AttachmentType "image"}}
-                        <div class="big-button-image" style="background-image: url('{{.ThumbURL}}');"></div>
+                        <div class="big-button-image" style="background-image: url('{{.GetThumbURL}}');"></div>
                         {{else if eq .AttachmentType "audio"}}
                             <div class="big-button-image">
                                 <div class="story-audio-preview">
