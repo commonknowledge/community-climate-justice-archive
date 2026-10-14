@@ -53,6 +53,18 @@ type StoryConnection struct {
 	AttachmentFilename string `json:"attachmentFilename"` // The filename (for when it's not an image)
 }
 
+// GetThumbURL resolves image thumbnails at render time, after image processing.
+// Relationship data is cached earlier and can still contain the original-image
+// fallback selected before the thumbnail existed.
+func (c StoryConnection) GetThumbURL() string {
+	if c.AttachmentType != "image" || c.AttachmentFilename == "" {
+		return c.ThumbURL
+	}
+
+	baseName := strings.TrimSuffix(c.AttachmentFilename, filepath.Ext(c.AttachmentFilename))
+	return processedImageURLOrOriginal("/images/processed/"+baseName+"_thumb.webp", "/images/"+c.AttachmentFilename)
+}
+
 // GiftedBy is who made or shared a story with the archive.
 //
 // This helps us recognise and celebrate all the different people and groups who've
