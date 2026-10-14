@@ -225,15 +225,19 @@ func CopyCSSToOutput() error {
 // are supported by the image-processing pipeline.
 func readImage(srcPath string) (image.Image, error) {
 	file, err := os.Open(srcPath)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to open image: %w", err)
 	}
+
 	defer file.Close()
 
 	img, format, err := image.Decode(file)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode image: %w", err)
 	}
+
 	if format != "jpeg" && format != "png" {
 		return nil, fmt.Errorf("unsupported image format: %s", format)
 	}
