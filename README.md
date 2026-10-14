@@ -349,11 +349,18 @@ The archive currently deploys to [Render](https://render.com/) as a static site.
 
 When you push commits to the `main` branch, Render automatically:
 1. Detects the change in the repository
-2. Runs the build command: `go run ./cmd/archive` (production mode)
+2. Runs the build command: `go build -o archive ./cmd/archive && ./archive` (production mode)
 3. Generates all the HTML files into the `out/` folder
 4. Serves these HTML files to visitors
 
 That's it! Render does all the work - building the site and hosting it. No GitHub Actions or manual deployment needed.
+
+Keep `--skip-images` out of the production build command. New NocoDB uploads
+must be resized and converted during each build so their WebP URLs are available.
+Existing, up-to-date variants are reused automatically. If a generated variant is
+missing or empty, the site uses the original upload instead; this keeps the image
+visible but transfers a larger file.
+
 ## Local Development
 
 ### Prerequisites

@@ -26,6 +26,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -485,12 +486,14 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 			attachment.Height = int(height)
 		}
 
-		// Create processed image URLs (webp versions)
+		// Prefer generated WebP variants, but keep newly uploaded images visible
+		// when processing was skipped or a variant could not be generated.
+		originalURL := "/images/" + filename
 		processedFilename := strings.TrimSuffix(filename, filepath.Ext(filename)) + ".webp"
-		attachment.URL = "/images/processed/" + processedFilename
-		attachment.ThumbURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_thumb.webp"
-		attachment.MediumURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_medium.webp"
-		attachment.LargeURL = "/images/processed/" + strings.TrimSuffix(processedFilename, ".webp") + "_large.webp"
+		attachment.URL = processedImageURLOrOriginal("/images/processed/"+processedFilename, originalURL)
+		attachment.ThumbURL = processedImageURLOrOriginal("/images/processed/"+strings.TrimSuffix(processedFilename, ".webp")+"_thumb.webp", originalURL)
+		attachment.MediumURL = processedImageURLOrOriginal("/images/processed/"+strings.TrimSuffix(processedFilename, ".webp")+"_medium.webp", originalURL)
+		attachment.LargeURL = processedImageURLOrOriginal("/images/processed/"+strings.TrimSuffix(processedFilename, ".webp")+"_large.webp", originalURL)
 
 	case "audio":
 		// For audio files, use original file path (no processing needed)
@@ -506,6 +509,14 @@ func (s Story) convertNocoDBAttachment(nocoAttachment map[string]interface{}) St
 	}
 
 	return attachment
+}
+
+func processedImageURLOrOriginal(processedURL, originalURL string) string {
+	info, err := os.Stat(strings.TrimPrefix(processedURL, "/"))
+	if err == nil && info.Mode().IsRegular() && info.Size() > 0 {
+		return processedURL
+	}
+	return originalURL
 }
 
 // getFileTypeFromMimeType determines file category from MIME type

@@ -31,8 +31,8 @@ import (
 	"strings"
 	"time"
 
-	"image/jpeg"
-	"image/png"
+	_ "image/jpeg"
+	_ "image/png"
 
 	"github.com/bep/gowebp/libwebp"
 	"github.com/bep/gowebp/libwebp/webpoptions"
@@ -220,8 +220,9 @@ func CopyCSSToOutput() error {
 
 // readImage opens an image file and decodes it into Go's generic image type.
 //
-// The archive only processes JPEG and PNG source files, so unsupported formats
-// are rejected here with a clear error before any resize work starts.
+// Detect the format from the file contents: uploads can contain PNG data even
+// when their filename ends in .jpg (or vice versa). Only JPEG and PNG formats
+// are supported by the image-processing pipeline.
 func readImage(srcPath string) (image.Image, error) {
 	file, err := os.Open(srcPath)
 	if err != nil {
@@ -229,17 +230,12 @@ func readImage(srcPath string) (image.Image, error) {
 	}
 	defer file.Close()
 
-	var img image.Image
-	ext := strings.ToLower(filepath.Ext(srcPath))
-	if ext == ".png" {
-		img, err = png.Decode(file)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		img, err = jpeg.Decode(file)
-	} else {
-		return nil, fmt.Errorf("unsupported image format: %s", ext)
-	}
+	img, format, err := image.Decode(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+	if format != "jpeg" && format != "png" {
+		return nil, fmt.Errorf("unsupported image format: %s", format)
 	}
 
 	return img, nil
@@ -648,7 +644,7 @@ func CopyDocumentsToOutput() error {
 
 	copyCount := 0
 	unchangedCount := 0
-	
+
 	err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
