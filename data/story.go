@@ -62,6 +62,7 @@ func (c StoryConnection) GetThumbURL() string {
 	}
 
 	baseName := strings.TrimSuffix(c.AttachmentFilename, filepath.Ext(c.AttachmentFilename))
+
 	return processedImageURLOrOriginal("/images/processed/"+baseName+"_thumb.webp", "/images/"+c.AttachmentFilename)
 }
 
