@@ -972,6 +972,22 @@ func (c *Client) fetchRelationshipDataWithCache(recordID, fieldID string, attach
 	return connections
 }
 
+// toBool converts a NocoDB checkbox value (bool, number or string) to a bool
+func toBool(v interface{}) bool {
+	switch b := v.(type) {
+	case bool:
+		return b
+	case float64:
+		return b != 0
+	case string:
+		switch strings.ToLower(strings.TrimSpace(b)) {
+		case "true", "1", "yes":
+			return true
+		}
+	}
+	return false
+}
+
 // toString converts interface{} to string safely
 func toString(v interface{}) string {
 	if v == nil {

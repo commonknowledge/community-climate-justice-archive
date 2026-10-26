@@ -180,6 +180,7 @@ type Story struct {
 	UpdatedAt               string            // When this story was last modified
 	URL                     string            // The URL path to this story's page in the archive
 	Approved                string            // Approval status ("Yes-Live" means visible, "No-Hidden" means hidden)
+	ShowInConnectionsView   bool              // Whether editors want this story prioritised in the homepage connections view
 }
 
 // StoryAttachment is a file attached to a story.

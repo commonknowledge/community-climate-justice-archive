@@ -193,6 +193,9 @@ func GetStoryByID(id string) (data.Story, error) {
 // It also includes all the stories they're connected to - so if story A inspired
 // story B, you get both A and B back. This is useful for drawing connection lines
 // on the wander page.
+//
+// Stories with "Show in connections view" checked are chosen first, then the
+// remaining slots are filled with other stories that have connections.
 func GetStoriesWithConnections(limit int) []data.Story {
 	allStories := GetAllStories()
 
@@ -205,11 +208,19 @@ func GetStoriesWithConnections(limit int) []data.Story {
 	// Find stories that have connections
 	var connectedStories []data.Story
 	for _, story := range allStories {
-		if len(story.InspiredBy) > 0 || len(story.HasInspired) > 0 {
+		if story.ShowInConnectionsView {
 			connectedStories = append(connectedStories, story)
-			if len(connectedStories) >= limit {
-				break
-			}
+		}
+	}
+	if len(connectedStories) > limit {
+		connectedStories = connectedStories[:limit]
+	}
+	for _, story := range allStories {
+		if len(connectedStories) >= limit {
+			break
+		}
+		if !story.ShowInConnectionsView && (len(story.InspiredBy) > 0 || len(story.HasInspired) > 0) {
+			connectedStories = append(connectedStories, story)
 		}
 	}
 
