@@ -402,6 +402,41 @@ func ProcessImages() error {
 	return nil
 }
 
+// ProcessHomepageCollageImages processes and copies only the given homepage
+// collage source files, so they are optimised even when a build skips the
+// full image processing/copy steps.
+func ProcessHomepageCollageImages(filenames []string) error {
+	if err := os.MkdirAll("out/images/processed", 0755); err != nil {
+		return fmt.Errorf("failed to create output images directory: %w", err)
+	}
+	for _, filename := range filenames {
+		sourcePath := filepath.Join("images", filename)
+		ext := strings.ToLower(filepath.Ext(filename))
+		toCopy := []string{sourcePath}
+		if ext == ".jpg" || ext == ".jpeg" || ext == ".png" {
+			if !areProcessedImagesUpToDate(sourcePath) {
+				if err := compressImage(sourcePath); err != nil {
+					log.Printf("Warning: Failed to process collage %s: %v", filename, err)
+				}
+			}
+			toCopy = append(toCopy, getProcessedImagePaths(sourcePath)...)
+		}
+		for _, src := range toCopy {
+			if _, err := os.Stat(src); err != nil {
+				continue
+			}
+			rel, err := filepath.Rel("images", src)
+			if err != nil {
+				return err
+			}
+			if _, err := copyFileIfChanged(src, filepath.Join("out/images", rel)); err != nil {
+				return fmt.Errorf("failed to copy collage image %s: %w", src, err)
+			}
+		}
+	}
+	return nil
+}
+
 // CopyImagesToOutput copies all images from the images directory to the out/images directory.
 func CopyImagesToOutput() error {
 	log.Println("Starting image copy process")

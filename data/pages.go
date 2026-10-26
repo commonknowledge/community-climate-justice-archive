@@ -19,6 +19,11 @@
 // which makes everything easier to work with.
 package data
 
+import (
+	"path/filepath"
+	"strings"
+)
+
 type Page struct {
 	Title            string
 	Description      string
@@ -37,10 +42,17 @@ type Page struct {
 }
 
 type HomepageCollage struct {
-	ImageURL  string
+	Filename  string // Image file name inside images/
 	AltText   string
 	StartDate string
 	EndDate   string
+}
+
+// ImageURL returns the processed WebP version once image processing has run,
+// otherwise the original downloaded image.
+func (c HomepageCollage) ImageURL() string {
+	baseName := strings.TrimSuffix(c.Filename, filepath.Ext(c.Filename))
+	return processedImageURLOrOriginal("/images/processed/"+baseName+".webp", "/images/"+c.Filename)
 }
 
 type TaxonomyIndexPage struct {

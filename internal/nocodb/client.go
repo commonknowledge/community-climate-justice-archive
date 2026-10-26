@@ -250,7 +250,7 @@ func (c *Client) GetHomepageCollages() ([]data.HomepageCollage, error) {
 			}
 
 			recordID := firstString(record["Id"], record["id"], fmt.Sprintf("%d", offset+recordIndex))
-			imageURL := ""
+			imageFilename := ""
 			for attachmentIndex, attachment := range attachments {
 				mimeType := firstString(attachment["mimetype"], attachment["type"])
 				if !strings.HasPrefix(strings.ToLower(mimeType), "image/") {
@@ -268,7 +268,7 @@ func (c *Client) GetHomepageCollages() ([]data.HomepageCollage, error) {
 				}
 				localFilename := fmt.Sprintf("homepage-collage-%s-%d-%s",
 					safeFilenamePart(recordID), attachmentIndex, filename)
-				localPath := filepath.Join("images", "homepage-collages", localFilename)
+				localPath := filepath.Join("images", localFilename)
 				if _, err := os.Stat(localPath); os.IsNotExist(err) {
 					if err := c.DownloadAttachment(downloadPath, localPath); err != nil {
 						log.Printf("Skipping homepage collage image %q after download failed: %v", filename, err)
@@ -278,16 +278,16 @@ func (c *Client) GetHomepageCollages() ([]data.HomepageCollage, error) {
 					return nil, fmt.Errorf("failed to check homepage collage image %q: %w", filename, err)
 				}
 
-				imageURL = "/" + filepath.ToSlash(localPath)
+				imageFilename = localFilename
 				break
 			}
-			if imageURL == "" {
+			if imageFilename == "" {
 				continue
 			}
 
 			altText := firstString(record["Alt text"], record["Title"])
 			collages = append(collages, data.HomepageCollage{
-				ImageURL:  imageURL,
+				Filename:  imageFilename,
 				AltText:   altText,
 				StartDate: startDate,
 				EndDate:   endDate,
