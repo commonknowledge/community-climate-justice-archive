@@ -25,6 +25,7 @@ type Page struct {
 	HighStExperiment []string // Unique project names used to decide whether to show the archive project filter.
 	Themes           []Theme
 	Types            []Type
+	HomepageCollages []HomepageCollage
 	Weather          []Weather
 	WhatWasIsIf      []WhatWasIsIf
 	ScalePermanence  []ScalePermanence
@@ -33,6 +34,13 @@ type Page struct {
 	ConnectedStories []Story
 	RandomStoryURL   string
 	StoriesJSON      string
+}
+
+type HomepageCollage struct {
+	ImageURL  string
+	AltText   string
+	StartDate string
+	EndDate   string
 }
 
 type TaxonomyIndexPage struct {

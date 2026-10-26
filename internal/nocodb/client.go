@@ -33,6 +33,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -181,6 +182,207 @@ func (c *Client) GetAllRecords() ([]map[string]interface{}, error) {
 	}
 
 	return allRecords, nil
+}
+
+// GetHomepageCollages retrieves published collage records and downloads their images
+// into the local image directory so they can be served without exposing the API key.
+func (c *Client) GetHomepageCollages() ([]data.HomepageCollage, error) {
+	const limit = 100
+	var collages []data.HomepageCollage
+	tableID := config.AppConfig.HomepageCollagesTableID
+	if tableID == "" {
+		return nil, fmt.Errorf("homepage collages table ID is not configured")
+	}
+
+	for offset := 0; ; offset += limit {
+		endpoint := fmt.Sprintf("%s/api/v2/tables/%s/records?limit=%d&offset=%d",
+			strings.TrimRight(config.AppConfig.NocoDBEndpoint, "/"), tableID, limit, offset)
+		req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create homepage collages request: %w", err)
+		}
+		req.Header.Set("xc-token", config.AppConfig.NocoDBAPIKey)
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch homepage collages at offset %d: %w", offset, err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			resp.Body.Close()
+			return nil, fmt.Errorf("homepage collages API returned status %d", resp.StatusCode)
+		}
+
+		var payload struct {
+			List []map[string]interface{} `json:"list"`
+		}
+		decodeErr := json.NewDecoder(resp.Body).Decode(&payload)
+		closeErr := resp.Body.Close()
+		if decodeErr != nil {
+			return nil, fmt.Errorf("failed to decode homepage collages response: %w", decodeErr)
+		}
+		if closeErr != nil {
+			return nil, fmt.Errorf("failed to close homepage collages response: %w", closeErr)
+		}
+
+		for recordIndex, record := range payload.List {
+			if !isPublishedCollage(record["Published"]) {
+				continue
+			}
+
+			startDate, err := normalizeCollageDate(record["Start date"], true)
+			if err != nil {
+				log.Printf("Skipping published homepage collage with invalid start date: %v", err)
+				continue
+			}
+			endDate, err := normalizeCollageDate(record["End date"], false)
+			if err != nil {
+				log.Printf("Skipping published homepage collage with invalid end date: %v", err)
+				continue
+			}
+
+			attachments, err := collageAttachments(record["Image"])
+			if err != nil {
+				log.Printf("Skipping published homepage collage with invalid image field: %v", err)
+				continue
+			}
+			if len(attachments) == 0 {
+				continue
+			}
+
+			recordID := firstString(record["Id"], record["id"], fmt.Sprintf("%d", offset+recordIndex))
+			imageURL := ""
+			for attachmentIndex, attachment := range attachments {
+				mimeType := firstString(attachment["mimetype"], attachment["type"])
+				if !strings.HasPrefix(strings.ToLower(mimeType), "image/") {
+					continue
+				}
+				filename := firstString(attachment["title"], attachment["filename"])
+				downloadPath := firstString(attachment["path"], attachment["url"])
+				if filename == "" || downloadPath == "" {
+					continue
+				}
+
+				filename = filepath.Base(filename)
+				if filename == "." || filename == string(filepath.Separator) {
+					continue
+				}
+				localFilename := fmt.Sprintf("homepage-collage-%s-%d-%s",
+					safeFilenamePart(recordID), attachmentIndex, filename)
+				localPath := filepath.Join("images", "homepage-collages", localFilename)
+				if _, err := os.Stat(localPath); os.IsNotExist(err) {
+					if err := c.DownloadAttachment(downloadPath, localPath); err != nil {
+						log.Printf("Skipping homepage collage image %q after download failed: %v", filename, err)
+						continue
+					}
+				} else if err != nil {
+					return nil, fmt.Errorf("failed to check homepage collage image %q: %w", filename, err)
+				}
+
+				imageURL = "/" + filepath.ToSlash(localPath)
+				break
+			}
+			if imageURL == "" {
+				continue
+			}
+
+			altText := firstString(record["Alt text"], record["Title"])
+			collages = append(collages, data.HomepageCollage{
+				ImageURL:  imageURL,
+				AltText:   altText,
+				StartDate: startDate,
+				EndDate:   endDate,
+			})
+		}
+
+		if len(payload.List) < limit {
+			break
+		}
+	}
+
+	return collages, nil
+}
+
+func isPublishedCollage(value interface{}) bool {
+	switch published := value.(type) {
+	case bool:
+		return published
+	case string:
+		return strings.EqualFold(strings.TrimSpace(published), "true") ||
+			strings.EqualFold(strings.TrimSpace(published), "yes") ||
+			strings.TrimSpace(published) == "1"
+	case float64:
+		return published != 0
+	case int:
+		return published != 0
+	default:
+		return false
+	}
+}
+
+func normalizeCollageDate(value interface{}, required bool) (string, error) {
+	date, ok := value.(string)
+	if !ok || strings.TrimSpace(date) == "" {
+		if required {
+			return "", fmt.Errorf("date is required")
+		}
+		return "", nil
+	}
+	date = strings.TrimSpace(date)
+	if len(date) >= len("2006-01-02") {
+		date = date[:len("2006-01-02")]
+	}
+	if _, err := time.Parse("2006-01-02", date); err != nil {
+		return "", fmt.Errorf("invalid date %q: %w", date, err)
+	}
+	return date, nil
+}
+
+func collageAttachments(value interface{}) ([]map[string]interface{}, error) {
+	if raw, ok := value.(string); ok {
+		if strings.TrimSpace(raw) == "" {
+			return nil, nil
+		}
+		var attachments []map[string]interface{}
+		if err := json.Unmarshal([]byte(raw), &attachments); err != nil {
+			return nil, err
+		}
+		return attachments, nil
+	}
+	if value == nil {
+		return nil, nil
+	}
+
+	items, ok := value.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected an attachment list, got %T", value)
+	}
+	attachments := make([]map[string]interface{}, 0, len(items))
+	for _, item := range items {
+		attachment, ok := item.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("expected an attachment object, got %T", item)
+		}
+		attachments = append(attachments, attachment)
+	}
+	return attachments, nil
+}
+
+func firstString(values ...interface{}) string {
+	for _, value := range values {
+		if text, ok := value.(string); ok && strings.TrimSpace(text) != "" {
+			return strings.TrimSpace(text)
+		}
+	}
+	return ""
+}
+
+func safeFilenamePart(value string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-' || r == '_' {
+			return r
+		}
+		return '-'
+	}, value)
 }
 
 // GetRecordByID retrieves a single record by its ID
@@ -370,8 +572,18 @@ func (c *Client) GetFilteredRecords(field, value string) ([]map[string]interface
 
 // DownloadAttachment downloads a file from NocoDB using the path from attachment data
 func (c *Client) DownloadAttachment(imagePath, outputPath string) error {
-	// Construct the full URL
-	downloadURL := config.AppConfig.NocoDBEndpoint + "/" + imagePath
+	downloadURL := strings.TrimRight(config.AppConfig.NocoDBEndpoint, "/") + "/" + strings.TrimLeft(imagePath, "/")
+	if parsedURL, err := url.Parse(imagePath); err == nil && parsedURL.IsAbs() {
+		baseURL, baseErr := url.Parse(config.AppConfig.NocoDBEndpoint)
+		if baseErr != nil {
+			return fmt.Errorf("failed to parse NocoDB endpoint: %w", baseErr)
+		}
+		if !strings.EqualFold(parsedURL.Host, baseURL.Host) ||
+			!strings.EqualFold(parsedURL.Scheme, baseURL.Scheme) {
+			return fmt.Errorf("refusing to download attachment from an unexpected host: %s", parsedURL.Host)
+		}
+		downloadURL = parsedURL.String()
+	}
 
 	log.Printf("Downloading image from NocoDB: %s -> %s", downloadURL, outputPath)
 
