@@ -187,71 +187,20 @@ func GetStoryByID(id string) (data.Story, error) {
 	return story, nil
 }
 
-// GetStoriesWithConnections finds stories that have "inspired by" or "has inspired"
-// relationships with other stories.
-//
-// It also includes all the stories they're connected to - so if story A inspired
-// story B, you get both A and B back. This is useful for drawing connection lines
-// on the wander page.
-//
-// Stories with "Show in connections view" checked are chosen first, then the
-// remaining slots are filled with other stories that have connections.
+// GetStoriesWithConnections returns the stories editors have ticked "Show in
+// connections view" for, capped at limit. Connection lines are drawn between
+// them in the browser only when both ends are in this list.
 func GetStoriesWithConnections(limit int) []data.Story {
-	allStories := GetAllStories()
-
-	// Build a map for quick lookups by ID
-	storyMap := make(map[string]data.Story)
-	for _, story := range allStories {
-		storyMap[story.ID] = story
-	}
-
-	// Find stories that have connections
-	var connectedStories []data.Story
-	for _, story := range allStories {
-		if story.ShowInConnectionsView {
-			connectedStories = append(connectedStories, story)
+	var result []data.Story
+	for _, story := range GetAllStories() {
+		if !story.ShowInConnectionsView {
+			continue
 		}
-	}
-	if len(connectedStories) > limit {
-		connectedStories = connectedStories[:limit]
-	}
-	for _, story := range allStories {
-		if len(connectedStories) >= limit {
+		result = append(result, story)
+		if len(result) >= limit {
 			break
 		}
-		if !story.ShowInConnectionsView && (len(story.InspiredBy) > 0 || len(story.HasInspired) > 0) {
-			connectedStories = append(connectedStories, story)
-		}
 	}
-
-	// Also include the stories they're connected to
-	resultMap := make(map[string]data.Story)
-
-	// Add the primary connected stories
-	for _, story := range connectedStories {
-		resultMap[story.ID] = story
-	}
-
-	// Add their connection targets
-	for _, story := range connectedStories {
-		for _, connection := range story.InspiredBy {
-			if targetStory, exists := storyMap[connection.ID]; exists {
-				resultMap[connection.ID] = targetStory
-			}
-		}
-		for _, connection := range story.HasInspired {
-			if targetStory, exists := storyMap[connection.ID]; exists {
-				resultMap[connection.ID] = targetStory
-			}
-		}
-	}
-
-	// Turn the map back into a list
-	var result []data.Story
-	for _, story := range resultMap {
-		result = append(result, story)
-	}
-
 	return result
 }
 
