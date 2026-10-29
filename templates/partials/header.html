@@ -36,6 +36,9 @@
                 <a class="dashed-button" href="/about.html">About</a>
                 <!-- Link to NocoDB form where people can add new stories -->
                 <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
+                <button type="button" class="dashed-button" data-el="search-open" aria-haspopup="dialog">Search
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                </button>
             </nav>
             <!-- Mobile menu button (hidden on desktop) -->
             <button class="dashed-button mobile-menu-toggle" aria-label="Open menu" aria-expanded="false">menu</button>
@@ -62,8 +65,10 @@
         <a class="dashed-button mobile-menu-link random-story-link-mobile" href="{{.RandomStoryURL}}">random</a>
         <a class="dashed-button mobile-menu-link" href="/about.html">about the project</a>
         <a class="dashed-button mobile-menu-link" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">add</a>
+        <button type="button" class="dashed-button mobile-menu-link" data-el="search-open" aria-haspopup="dialog">search</button>
     </nav>
 </div>
+<script src="/js/site-search.js" defer></script>
 <script>
     // Theme toggle (dark/light mode)
     // Handles all .theme-toggle buttons on the page (desktop header + mobile overlay)
