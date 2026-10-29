@@ -23,7 +23,7 @@
 .site-search__backdrop {
   position: absolute;
   inset: 0;
-  background: var(--shadow-darkest);
+  background: var(--backdrop);
 }
 
 .site-search__panel {
