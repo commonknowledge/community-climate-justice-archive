@@ -27,7 +27,7 @@
     let data = null;
     let loading = null;
     let suggestions = [];
-    let modal, input, list, status, filterBar;
+    let modal, input, list, status, filterBar, activeBar;
     let lastFocus = null;
     const selected = {}; // filter key -> Set of selected titles
 
@@ -83,6 +83,8 @@
         form.append(input, submit);
 
         filterBar = el('div', 'site-search__filters');
+        activeBar = el('div', 'site-search__active-filters');
+        activeBar.hidden = true;
 
         status = el('h2', 'site-search__heading caption', 'Suggestions');
         list = el('ul', 'site-search__list');
@@ -94,7 +96,7 @@
         closeBtn.type = 'button';
         closeBtn.addEventListener('click', close);
 
-        panel.append(closeBtn, form, filterBar, results);
+        panel.append(closeBtn, form, filterBar, activeBar, results);
         modal.append(backdrop, panel);
         document.body.appendChild(modal);
 
@@ -102,7 +104,7 @@
             if (e.key === 'Escape') close();
         });
         panel.addEventListener('click', e => {
-            if (!e.target.closest('.site-search__dropdown')) closeDropdowns();
+            if (!e.target.closest('.filter-dropdown')) closeDropdowns();
         });
     }
 
@@ -111,7 +113,7 @@
     }
 
     function closeDropdowns() {
-        modal.querySelectorAll('.site-search__dropdown.open').forEach(d => {
+        modal.querySelectorAll('.filter-dropdown.open').forEach(d => {
             d.classList.remove('open');
             d.querySelector('button').setAttribute('aria-expanded', 'false');
         });
@@ -124,31 +126,30 @@
             if (options.length === 0) return;
             selected[f.key] = selected[f.key] || new Set();
 
-            const wrap = el('div', 'site-search__dropdown');
-            const trigger = el('button', 'site-search__trigger dashed-button', f.label);
+            const wrap = el('div', 'filter-dropdown filter-dropdown--small filter-dropdown--white');
+            const trigger = el('button', 'filter-dropdown__trigger dashed-button', f.label);
             trigger.type = 'button';
             trigger.setAttribute('aria-expanded', 'false');
             trigger.dataset.label = f.label;
-            const menu = el('div', 'site-search__options');
+            const menu = el('div', 'filter-dropdown__options');
 
             [...options]
                 .sort((a, b) => a.title.localeCompare(b.title))
                 .forEach(opt => {
-                    const b = el('button', 'site-search__option', opt.title);
+                    const b = el('button', 'filter-dropdown__option', opt.title);
                     b.type = 'button';
+                    b.dataset.filter = f.key;
+                    b.dataset.value = opt.title;
                     const color = opt.color || '#666666';
                     b.style.backgroundColor = color;
                     b.style.color = contrast(color);
-                    b.setAttribute('aria-pressed', 'false');
                     b.addEventListener('click', e => {
                         e.stopPropagation();
                         const set = selected[f.key];
                         if (set.has(opt.title)) set.delete(opt.title);
                         else set.add(opt.title);
-                        b.setAttribute('aria-pressed', set.has(opt.title) ? 'true' : 'false');
-                        b.classList.toggle('is-selected', set.has(opt.title));
-                        trigger.classList.toggle('has-selection', set.size > 0);
-                        trigger.textContent = set.size ? f.label + ' (' + set.size + ')' : f.label;
+                        closeDropdowns();
+                        renderActiveFilters();
                         render();
                     });
                     menu.appendChild(b);
@@ -166,6 +167,35 @@
 
             wrap.append(trigger, menu);
             filterBar.appendChild(wrap);
+        });
+    }
+
+    // Selected filters shown as removable tags below the dropdowns
+    function renderActiveFilters() {
+        activeBar.innerHTML = '';
+        FILTERS.forEach(f => {
+            (selected[f.key] ? [...selected[f.key]] : []).forEach(title => {
+                const color = colorFor(f.key, title);
+                const tag = el('button', 'site-search__active-tag tag', title);
+                tag.type = 'button';
+                tag.style.backgroundColor = color;
+                tag.style.color = contrast(color);
+                const x = el('span', 'tag__remove', '×');
+                x.setAttribute('aria-label', 'Remove filter');
+                tag.appendChild(x);
+                tag.addEventListener('click', () => {
+                    selected[f.key].delete(title);
+                    renderActiveFilters();
+                    render();
+                });
+                activeBar.appendChild(tag);
+            });
+        });
+        activeBar.hidden = activeBar.children.length === 0;
+
+        // Mark selected options in the dropdowns
+        filterBar.querySelectorAll('.filter-dropdown__option').forEach(o => {
+            o.classList.toggle('selected', selected[o.dataset.filter].has(o.dataset.value));
         });
     }
 
