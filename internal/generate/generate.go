@@ -51,7 +51,7 @@ var (
 
 const (
 	initialStoriesDisplayCount = 40
-	connectedStoriesLimit      = 20
+	connectedStoriesLimit      = 1000
 	relatedStoriesLimit        = 5
 )
 
