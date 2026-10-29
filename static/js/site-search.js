@@ -87,11 +87,14 @@
         status = el('h2', 'site-search__heading caption', 'Suggestions');
         list = el('ul', 'site-search__list');
 
+        const results = el('div', 'site-search__results');
+        results.append(status, list);
+
         const closeBtn = el('button', 'site-search__close dashed-button', 'close');
         closeBtn.type = 'button';
         closeBtn.addEventListener('click', close);
 
-        panel.append(closeBtn, form, filterBar, status, list);
+        panel.append(closeBtn, form, filterBar, results);
         modal.append(backdrop, panel);
         document.body.appendChild(modal);
 
