@@ -399,9 +399,42 @@
                 </ul>
             </div>
             
-            <div class="homepage-collage">
-                <img src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+            <div class="homepage-collage" data-homepage-collage>
+                <img data-homepage-collage-current src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+                {{range .HomepageCollages}}
+                <span data-homepage-collage-option data-image-url="{{.ImageURL}}" data-alt-text="{{.AltText}}" data-start-date="{{.StartDate}}" data-end-date="{{.EndDate}}" hidden></span>
+                {{end}}
             </div>
+            <script>
+                (() => {
+                    const collage = document.querySelector('[data-homepage-collage]');
+                    const image = collage?.querySelector('[data-homepage-collage-current]');
+                    if (!image) return;
+                    const fallbackImageURL = image.src;
+                    const fallbackAltText = image.alt;
+
+                    const dateParts = new Intl.DateTimeFormat('en-GB', {
+                        timeZone: 'Europe/London',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).formatToParts(new Date());
+                    const datePart = type => dateParts.find(part => part.type === type)?.value;
+                    const today = `${datePart('year')}-${datePart('month')}-${datePart('day')}`;
+                    const activeCollage = Array.from(collage.querySelectorAll('[data-homepage-collage-option]'))
+                        .find(option => option.dataset.startDate <= today &&
+                            (!option.dataset.endDate || option.dataset.endDate >= today));
+
+                    if (activeCollage) {
+                        image.addEventListener('error', () => {
+                            image.src = fallbackImageURL;
+                            image.alt = fallbackAltText;
+                        }, {once: true});
+                        image.src = activeCollage.dataset.imageUrl;
+                        image.alt = activeCollage.dataset.altText || fallbackAltText;
+                    }
+                })();
+            </script>
             <div class="homepage-tags">
                 <h2 class="h2">Themes</h2>
                 <ul class="tag-list" data-homepage-theme-list>{{range .Themes}}

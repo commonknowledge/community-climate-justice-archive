@@ -20,9 +20,10 @@ import (
 // in the future, it would go here too.
 type Config struct {
 	// Where NocoDB is and how to talk to it
-	NocoDBEndpoint string // The NocoDB server URL
-	NocoDBAPIKey   string // The API key for authentication
-	NocoDBTableID  string // Which table to read stories from
+	NocoDBEndpoint          string // The NocoDB server URL
+	NocoDBAPIKey            string // The API key for authentication
+	NocoDBTableID           string // Which table to read stories from
+	HomepageCollagesTableID string // Which table to read homepage collage schedules from
 }
 
 // AppConfig is the global config that everyone uses.
@@ -41,9 +42,10 @@ func LoadConfig() {
 	_ = godotenv.Load()
 
 	AppConfig = &Config{
-		NocoDBEndpoint: getEnvWithDefault("NOCODB_ENDPOINT", ""),
-		NocoDBAPIKey:   getEnvWithDefault("NOCODB_API_KEY", ""),
-		NocoDBTableID:  getEnvWithDefault("NOCODB_TABLE_ID", ""),
+		NocoDBEndpoint:          getEnvWithDefault("NOCODB_ENDPOINT", ""),
+		NocoDBAPIKey:            getEnvWithDefault("NOCODB_API_KEY", ""),
+		NocoDBTableID:           getEnvWithDefault("NOCODB_TABLE_ID", ""),
+		HomepageCollagesTableID: getEnvWithDefault("NOCODB_HOMEPAGE_COLLAGES_TABLE_ID", "mirk4oyuzgqttix"),
 	}
 
 	log.Println("Configuration loaded for NocoDB")

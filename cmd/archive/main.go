@@ -101,6 +101,19 @@ func generateArchive(skipImages bool, skipImageCopy bool) error {
 		return fmt.Errorf("failed to warm generator cache: %v", err)
 	}
 
+	if err := store.LoadHomepageCollages(); err != nil {
+		log.Printf("Warning: %v; using the default homepage collage", err)
+	}
+
+	// Collage images are always processed and copied, even in quick builds
+	var collageFiles []string
+	for _, collage := range store.GetHomepageCollages() {
+		collageFiles = append(collageFiles, collage.Filename)
+	}
+	if err := generate.ProcessHomepageCollageImages(collageFiles); err != nil {
+		log.Printf("Warning: %v", err)
+	}
+
 	// Process images (resize, convert to WebP) unless skipped
 	if !skipImages {
 		if err := generate.ProcessImages(); err != nil {

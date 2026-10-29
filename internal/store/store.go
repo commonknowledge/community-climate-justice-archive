@@ -35,10 +35,15 @@ var storiesCache []data.Story
 // We need this separate flag so an empty dataset is still treated as cached.
 var storiesCacheLoaded bool
 
-// resetStoriesCache clears converted story cache.
-func resetStoriesCache() {
+var homepageCollagesCache []data.HomepageCollage
+var homepageCollagesLoaded bool
+
+// resetStoreCaches clears converted records cached by the store.
+func resetStoreCaches() {
 	storiesCache = nil
 	storiesCacheLoaded = false
+	homepageCollagesCache = nil
+	homepageCollagesLoaded = false
 }
 
 // Initialize sets up the connection to NocoDB.
@@ -49,7 +54,7 @@ func Initialize() error {
 	if err != nil {
 		return fmt.Errorf("failed to create NocoDB client: %w", err)
 	}
-	resetStoriesCache()
+	resetStoreCaches()
 	log.Println("Store initialised with NocoDB client")
 	return nil
 }
@@ -63,13 +68,37 @@ func WarmCache() {
 	log.Printf("Cache warmed with %d stories", len(allStories))
 }
 
+// LoadHomepageCollages fetches published homepage collages and downloads their
+// images before image assets are copied into the generated site.
+func LoadHomepageCollages() error {
+	if client == nil {
+		return fmt.Errorf("store not initialised")
+	}
+	if homepageCollagesLoaded {
+		return nil
+	}
+
+	collages, err := client.GetHomepageCollages()
+	if err != nil {
+		return fmt.Errorf("failed to load homepage collages: %w", err)
+	}
+	homepageCollagesCache = collages
+	homepageCollagesLoaded = true
+	return nil
+}
+
+// GetHomepageCollages returns the collage records loaded for the current build.
+func GetHomepageCollages() []data.HomepageCollage {
+	return homepageCollagesCache
+}
+
 // DropCache clears any cached data, forcing a fresh fetch from NocoDB next time.
 // Useful if you know the data has changed and want to see the updates.
 func DropCache() error {
 	if client == nil {
 		return fmt.Errorf("store not initialised")
 	}
-	resetStoriesCache()
+	resetStoreCaches()
 	client.DropCache()
 	return nil
 }
