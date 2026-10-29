@@ -279,7 +279,7 @@
             const tags = el('span', 'site-search__tags');
             story._tags = story._tags || randomSample(story.themes || [], 3);
             story._tags.forEach(t => {
-                const tag = el('span', 'site-search__tag', t);
+                const tag = el('span', 'tag', t);
                 const color = colorFor('themes', t);
                 tag.style.backgroundColor = color;
                 tag.style.color = contrast(color);

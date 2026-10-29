@@ -185,11 +185,3 @@
     justify-content: flex-end;
   }
 }
-
-.site-search__tag {
-  padding: 0.125em 0.5em;
-  font-size: var(--text-sm);
-  font-family: Arial, sans-serif;
-  text-transform: lowercase;
-  white-space: nowrap;
-}
