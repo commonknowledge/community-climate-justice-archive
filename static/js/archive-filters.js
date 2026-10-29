@@ -42,6 +42,7 @@ class ArchiveFilters {
             timePeriod: []
         };
         this.filteredStories = [];
+        this.searchQuery = '';
         this.currentSort = 'random';
         this.currentPage = 0;
         this.storiesPerPage = 20;
@@ -93,6 +94,9 @@ class ArchiveFilters {
             // More filters toggle
             moreFiltersToggle: el('more-filters-toggle'),
             moreFiltersContainer: el('more-filters'),
+            // Title search input
+            searchForm: el('search-form'),
+            searchInput: el('search-input'),
             // Sort elements
             sortDropdown: el('sort-dropdown'),
             sortButton: el('sort-button'),
@@ -400,6 +404,16 @@ class ArchiveFilters {
             }
         });
         
+        // Title search runs when the form is submitted (button click or Enter)
+        if (this.elements.searchForm && this.elements.searchInput) {
+            this.elements.searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.searchQuery = this.elements.searchInput.value.trim();
+                this.applyFilters();
+                this.updateURL();
+            });
+        }
+
         // Clear filters button
         if (this.elements.clearFilters) {
             this.elements.clearFilters.addEventListener('click', () => this.clearAllFilters());
@@ -566,7 +580,14 @@ class ArchiveFilters {
         if (!this.filterData) return;
         
         // Go through all stories and keep only the ones that match
+        const query = this.searchQuery.toLowerCase();
         this.filteredStories = this.filterData.stories.filter(story => {
+            // Check title search
+            if (query) {
+                const title = (story.finding || story.title || '').toLowerCase();
+                if (!title.includes(query)) return false;
+            }
+
             // Check High St Experiment filters
             if (this.currentFilters.highStExperiment.length > 0) {
                 const hasMatchingHighStExperiment = this.currentFilters.highStExperiment.some(highStExperiment =>
@@ -886,7 +907,7 @@ class ArchiveFilters {
     updateFilterCount() {
         const total = this.filterData ? this.filterData.stories.length : 0;
         const filtered = this.filteredStories.length;
-        const hasActiveFilters = Object.values(this.currentFilters).some(f => f.length > 0);
+        const hasActiveFilters = !!this.searchQuery || Object.values(this.currentFilters).some(f => f.length > 0);
 
         // Update the heading text based on whether filters are active
         if (this.elements.archiveHeading) {
@@ -1020,6 +1041,8 @@ class ArchiveFilters {
     }
     
     clearAllFilters() {
+        this.searchQuery = '';
+        if (this.elements.searchInput) this.elements.searchInput.value = '';
         this.currentFilters = {
             highStExperiment: [],
             themes: [],
@@ -1101,6 +1124,10 @@ class ArchiveFilters {
             params.set('timePeriod', this.currentFilters.timePeriod.join(','));
         }
 
+        if (this.searchQuery) {
+            params.set('search', this.searchQuery);
+        }
+
         if (this.currentSort && this.currentSort !== 'random') {
             params.set('sort', this.currentSort);
         }
@@ -1119,6 +1146,9 @@ class ArchiveFilters {
         this.currentFilters.whatWasIsIf = params.get('whatWasIsIf') ? params.get('whatWasIsIf').split(',') : [];
         this.currentFilters.scalePermanence = params.get('scalePermanence') ? params.get('scalePermanence').split(',') : [];
         this.currentFilters.timePeriod = params.get('timePeriod') ? params.get('timePeriod').split(',') : [];
+
+        this.searchQuery = (params.get('search') || '').trim();
+        if (this.elements.searchInput) this.elements.searchInput.value = this.searchQuery;
 
         // Restore sort from URL, defaulting to random when none is specified
         const sortParam = params.get('sort');

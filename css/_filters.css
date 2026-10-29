@@ -81,6 +81,15 @@
 
 .filter-dropdown__trigger {
   cursor: pointer;
+
+  .filter-dropdown--small & {
+    padding: 0.25rem 0.675rem;
+    font-size: var(--text-sm);
+  }
+
+  .filter-dropdown--white & {
+    background: var(--white);
+  }
 }
 
 .filter-dropdown__options {
@@ -100,6 +109,10 @@
   overflow-y: auto;
   border: 2px solid var(--black);
   background: var(--background);
+
+  .filter-dropdown--white & {
+    background: var(--white);
+  }
 }
 
 .filter-dropdown__option {
@@ -110,6 +123,13 @@
   text-transform: lowercase;
   white-space: nowrap;
   cursor: pointer;
+
+  .filter-dropdown--small & {
+    padding: 0.2rem 0.675rem;
+    font-family: Arial, sans-serif;
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
 }
 
 .filter-dropdown__option:hover {
