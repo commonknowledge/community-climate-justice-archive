@@ -154,6 +154,7 @@ func WriteHomePage() error {
 		Description:      "The time portal for the Dudley People's School for Climate Justice",
 		Themes:           themes,
 		Types:            types,
+		HomepageCollages: store.GetHomepageCollages(),
 		Stories:          stories,
 		ConnectedStories: connectedStories,
 		RandomStoryURL:   randomStoryURL(stories),

@@ -19,12 +19,18 @@
 // which makes everything easier to work with.
 package data
 
+import (
+	"path/filepath"
+	"strings"
+)
+
 type Page struct {
 	Title            string
 	Description      string
 	HighStExperiment []string // Unique project names used to decide whether to show the archive project filter.
 	Themes           []Theme
 	Types            []Type
+	HomepageCollages []HomepageCollage
 	Weather          []Weather
 	WhatWasIsIf      []WhatWasIsIf
 	ScalePermanence  []ScalePermanence
@@ -33,6 +39,20 @@ type Page struct {
 	ConnectedStories []Story
 	RandomStoryURL   string
 	StoriesJSON      string
+}
+
+type HomepageCollage struct {
+	Filename  string // Image file name inside images/
+	AltText   string
+	StartDate string
+	EndDate   string
+}
+
+// ImageURL returns the processed WebP version once image processing has run,
+// otherwise the original downloaded image.
+func (c HomepageCollage) ImageURL() string {
+	baseName := strings.TrimSuffix(c.Filename, filepath.Ext(c.Filename))
+	return processedImageURLOrOriginal("/images/processed/"+baseName+".webp", "/images/"+c.Filename)
 }
 
 type TaxonomyIndexPage struct {
