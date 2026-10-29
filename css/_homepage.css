@@ -22,6 +22,17 @@
   display: block;
 }
 
+.homepage-collage__figure {
+  margin: 0;
+}
+
+.homepage-collage__caption {
+  padding: 0.5rem var(--container-padding) 0;
+  text-align: left;
+  font-style: italic;
+  font-size: var(--text-sm);
+}
+
 .homepage-tags {
   margin-bottom: 4rem;
 }
