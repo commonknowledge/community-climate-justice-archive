@@ -400,15 +400,19 @@
             </div>
             
             <div class="homepage-collage" data-homepage-collage>
-                <img data-homepage-collage-current src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+                <figure class="homepage-collage__figure">
+                    <img data-homepage-collage-current src="/images/processed/Collage.webp" alt="Dudley People's School for Climate Justice collage" />
+                    <figcaption class="homepage-collage__caption" data-homepage-collage-caption hidden></figcaption>
+                </figure>
                 {{range .HomepageCollages}}
-                <span data-homepage-collage-option data-image-url="{{.ImageURL}}" data-alt-text="{{.AltText}}" data-start-date="{{.StartDate}}" data-end-date="{{.EndDate}}" hidden></span>
+                <span data-homepage-collage-option data-image-url="{{.ImageURL}}" data-alt-text="{{.AltText}}" data-title="{{.Title}}" data-start-date="{{.StartDate}}" data-end-date="{{.EndDate}}" hidden></span>
                 {{end}}
             </div>
             <script>
                 (() => {
                     const collage = document.querySelector('[data-homepage-collage]');
                     const image = collage?.querySelector('[data-homepage-collage-current]');
+                    const caption = collage?.querySelector('[data-homepage-collage-caption]');
                     if (!image) return;
                     const fallbackImageURL = image.src;
                     const fallbackAltText = image.alt;
@@ -432,6 +436,10 @@
                         }, {once: true});
                         image.src = activeCollage.dataset.imageUrl;
                         image.alt = activeCollage.dataset.altText || fallbackAltText;
+                        if (caption && activeCollage.dataset.title) {
+                            caption.textContent = activeCollage.dataset.title;
+                            caption.hidden = false;
+                        }
                     }
                 })();
             </script>

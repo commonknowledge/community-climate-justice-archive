@@ -288,6 +288,7 @@ func (c *Client) GetHomepageCollages() ([]data.HomepageCollage, error) {
 			altText := firstString(record["Alt text"], record["Title"])
 			collages = append(collages, data.HomepageCollage{
 				Filename:  imageFilename,
+				Title:     firstString(record["Title"]),
 				AltText:   altText,
 				StartDate: startDate,
 				EndDate:   endDate,

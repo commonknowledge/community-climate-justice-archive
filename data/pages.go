@@ -43,6 +43,7 @@ type Page struct {
 
 type HomepageCollage struct {
 	Filename  string // Image file name inside images/
+	Title     string
 	AltText   string
 	StartDate string
 	EndDate   string
