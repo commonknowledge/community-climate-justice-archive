@@ -17,7 +17,10 @@
     Some stories have no attachment, so we show a placeholder icon instead.
 */}}
 {{define "stories-list"}}
-{{range .Stories}}
+{{template "story-cards" .Stories}}
+{{end}}
+{{define "story-cards"}}
+{{range .}}
         <div class="story">
             {{/* Store the current story and its first attachment in variables */}}
             {{$story := .}}

@@ -178,6 +178,7 @@ type Story struct {
 	InstaImage              string            // Image optimized for Instagram sharing
 	ReflectionLearning      string            // Reflections or learnings associated with the story
 	UpdatedAt               string            // When this story was last modified
+	ShowOnHomepage          string            // Whether stewards selected this story for the homepage
 	URL                     string            // The URL path to this story's page in the archive
 	Approved                string            // Approval status ("Yes-Live" means visible, "No-Hidden" means hidden)
 }
