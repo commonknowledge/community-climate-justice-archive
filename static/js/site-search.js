@@ -5,7 +5,7 @@
  * /filter-data.json the first time it is opened, then shows:
  * - a search input (matches story title and description)
  * - filter dropdowns (Projects, Themes, Types, What was/is/if, Weather, Gifted)
- * - 10 random suggested stories (or the matching results once the user
+ * - 6 random suggested stories (or the matching results once the user
  *   types or picks a filter)
  */
 (function () {
@@ -17,7 +17,7 @@
         { key: 'weather', label: 'Weather', field: 'weather' },
         { key: 'giftedBy', label: 'Gifted or co-created by', field: 'giftedBy' },
     ];
-    const SUGGESTION_COUNT = 10;
+    const SUGGESTION_COUNT = 6;
     const MAX_RESULTS = 30;
     const MIN_QUERY_LENGTH = 2;
 
