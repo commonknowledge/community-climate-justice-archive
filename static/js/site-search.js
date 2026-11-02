@@ -67,6 +67,7 @@
         backdrop.addEventListener('click', close);
 
         const panel = el('div', 'site-search__panel');
+        const header = el('div', 'site-search__header');
 
         const form = el('form', 'site-search__form');
         form.addEventListener('submit', e => e.preventDefault());
@@ -96,7 +97,8 @@
         closeBtn.type = 'button';
         closeBtn.addEventListener('click', close);
 
-        panel.append(closeBtn, form, filterBar, activeBar, results);
+        header.append(form, filterBar, activeBar);
+        panel.append(closeBtn, header, results);
         modal.append(backdrop, panel);
         document.body.appendChild(modal);
 
