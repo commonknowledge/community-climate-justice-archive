@@ -2,14 +2,14 @@
     Header Partial Template
     
     This is the top part of every page in the archive - the site title and navigation buttons.
-    It's a "partial" because it gets included in all the other templates, so we don't have to
+    It iss a "partial" because it gets included in all the other templates, so we do not have to
     copy the same HTML everywhere.
     
     What it includes:
     - The site title "Dudley Time Portal" that links back home
     - Navigation buttons: Wander, Archive, Random, and Add
     - JavaScript for making the Random button pick different stories
-    - JavaScript for highlighting which page you're currently on
+    - JavaScript for highlighting which page you are currently on
     
     The {{.RandomStoryURL}} and {{.StoriesJSON}} bits are filled in by the Go program when
     it generates each page.
@@ -32,11 +32,30 @@
             <nav class="header-nav header-nav-desktop">
                 <a class="dashed-button" href="/">Wander</a>
                 <a class="dashed-button" href="/archive.html">Archive</a>
-                <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">Random</a>
                 <a class="dashed-button" href="/about.html">About</a>
+
+                <a class="dashed-button random-story-link" href="{{.RandomStoryURL}}">
+                    Random
+                    <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                        <path d="M10 16v-2h2.6l-3.175-3.175L10.85 9.4 14 12.55V10h2v6zm-8.6 0L0 14.6 12.6 2H10V0h6v6h-2V3.4zm3.775-9.425L0 1.4 1.4 0l5.175 5.175z" fill="currentColor"/>
+                    </svg>
+                </a>
+              
                 <!-- Link to NocoDB form where people can add new stories -->
-                <a class="dashed-button" href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad" target="_blank" rel="noopener noreferrer">Add</a>
-                <button type="button" class="dashed-button" data-el="search-open" aria-haspopup="dialog">Search
+                <a
+                    class="dashed-button"
+                    href="https://nocodb-r87d.onrender.com/dashboard/#/nc/form/22c1e813-ba2f-41a0-8bb8-bd2b0c5aa3ad"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Add
+                    <svg fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                        <path d="M8 18v-8H0V8h8V0h2v8h8v2h-8v8z" fill="currentColor"/>
+                    </svg>
+                </a>
+
+                <button type="button" class="dashed-button" data-el="search-open" aria-haspopup="dialog">
+                    Search
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
                         <path d="M16.6 18L10.3 11.7C9.8 12.1 9.225 12.4167 8.575 12.65C7.925 12.8833 7.23333 13 6.5 13C4.68333 13 3.14583 12.3708 1.8875 11.1125C0.629167 9.85417 0 8.31667 0 6.5C0 4.68333 0.629167 3.14583 1.8875 1.8875C3.14583 0.629167 4.68333 0 6.5 0C8.31667 0 9.85417 0.629167 11.1125 1.8875C12.3708 3.14583 13 4.68333 13 6.5C13 7.23333 12.8833 7.925 12.65 8.575C12.4167 9.225 12.1 9.8 11.7 10.3L18 16.6L16.6 18ZM6.5 11C7.75 11 8.8125 10.5625 9.6875 9.6875C10.5625 8.8125 11 7.75 11 6.5C11 5.25 10.5625 4.1875 9.6875 3.3125C8.8125 2.4375 7.75 2 6.5 2C5.25 2 4.1875 2.4375 3.3125 3.3125C2.4375 4.1875 2 5.25 2 6.5C2 7.75 2.4375 8.8125 3.3125 9.6875C4.1875 10.5625 5.25 11 6.5 11Z" fill="currentColor"/>
                     </svg>
