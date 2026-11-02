@@ -22,7 +22,7 @@
   --highlight-yellow: #ffff99; /* Used for hovers */
   --light-gray: var(--light-gray);
   --light-blue: var(--light-blue);
-  --border-gray: var(--border-gray);
+  --border-gray: #ebebeb;
 
   /* Text Colours */
   --black: #000;
@@ -55,6 +55,7 @@
       --gray-text: #aaa;
       --black-alt: #ffffff;
       --border-color: #fff;
+      --border-gray: #666;
       --shadow-light: rgba(255, 255, 255, 0.05);
       --shadow-medium: rgba(255, 255, 255, 0.08);
       --shadow-dark: rgba(255, 255, 255, 0.1);
