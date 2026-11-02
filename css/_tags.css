@@ -31,12 +31,16 @@
   text-decoration: none;
   text-transform: lowercase;
   border: none;
+}
+
+.tag:is(button, a) {
+  text-decoration: none;
   cursor: pointer;
 }
 
 /* .tag:hover
    All tags turn black on hover (!important overrides inline styles) */
-.tag:hover {
+.tag:is(button, a):hover {
   background: var(--black) !important;
   color: var(--background) !important;
 }

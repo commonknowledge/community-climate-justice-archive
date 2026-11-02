@@ -135,6 +135,8 @@ a:not([class]):hover::before {
   line-height: 140%;
   letter-spacing: -0.01em;
   text-decoration: none;
+
+  cursor: pointer;
 }
 
 .dashed-button:hover {

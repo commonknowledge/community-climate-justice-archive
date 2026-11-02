@@ -32,6 +32,7 @@
 /* Blocks */
 @import "_debug-console.css";
 @import "_filters.css";
+@import "_search.css";
 @import "_stories.css";
 @import "_tags.css";
 @import "_text-rotation.css";

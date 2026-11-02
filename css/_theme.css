@@ -43,6 +43,8 @@
   --shadow-text: rgba(0, 0, 0, 0.5);
   --shadow-heavy: #00000040;
 
+  --backdrop: rgba(0, 0, 0, 0.5);
+
   @media (prefers-color-scheme: dark) {
     &:not([data-theme="light"]) {
       --background: #080339;
