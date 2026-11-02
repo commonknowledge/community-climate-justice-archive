@@ -591,7 +591,7 @@ class ArchiveFilters {
             // Check High St Experiment filters
             if (this.currentFilters.highStExperiment.length > 0) {
                 const hasMatchingHighStExperiment = this.currentFilters.highStExperiment.some(highStExperiment =>
-                    story.highStExperiment === highStExperiment
+                    (Array.isArray(story.highStExperiment) ? story.highStExperiment : [story.highStExperiment]).includes(highStExperiment)
                 );
                 if (!hasMatchingHighStExperiment) return false;
             }

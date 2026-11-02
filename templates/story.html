@@ -349,7 +349,8 @@
                     <div class="story-metadata-item">
                         <span class="story-metadata-item-label">Project</span>
                         <span class="story-metadata-item-value tags">
-                            <a class="tag" href="{{$story.GetProjectURL}}" style="background-color: {{$story.GetProjectColor}};">{{$story.HighStExperiment}}</a>
+                            {{range $story.GetProjects}}<a class="tag" href="{{.URL}}" style="background-color: {{.Colour}};">{{.Title}}</a>
+                            {{end}}
                         </span>
                     </div>
                     {{end}}

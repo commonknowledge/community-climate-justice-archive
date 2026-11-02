@@ -190,7 +190,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		ID:               toString(dto.ID),
 		CreatedTime:      toString(dto.CreatedTime),
 		Finding:          toString(dto.Finding),
-		HighStExperiment: toString(dto.HighStExperiment),
+		HighStExperiment: parseMultiValue(dto.HighStExperiment),
 		ImageVideoSound: func() string {
 			// Keep original NocoDB structure for rich metadata (mimetype, size, dimensions)
 			if dto.ImageVideoSound != nil {
@@ -1216,4 +1216,42 @@ func convertInterfaceSliceToContributors(interfaceSlice []interface{}) []data.Co
 	}
 
 	return contributors
+}
+
+// parseMultiValue splits a NocoDB multi-select value (array, JSON array or
+// comma-separated string) into trimmed, unique, non-empty values.
+func parseMultiValue(field interface{}) []string {
+	var raw []string
+	switch v := field.(type) {
+	case nil:
+	case []string:
+		raw = v
+	case []interface{}:
+		for _, item := range v {
+			raw = append(raw, toString(item))
+		}
+	default:
+		str := strings.TrimSpace(toString(v))
+		if str == "" {
+			break
+		}
+		if err := json.Unmarshal([]byte(str), &raw); err != nil {
+			raw = strings.Split(str, ",")
+		}
+	}
+
+	seen := make(map[string]struct{})
+	values := make([]string, 0, len(raw))
+	for _, item := range raw {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		if _, exists := seen[item]; exists {
+			continue
+		}
+		seen[item] = struct{}{}
+		values = append(values, item)
+	}
+	return values
 }

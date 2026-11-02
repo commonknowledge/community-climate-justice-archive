@@ -141,7 +141,7 @@ type Story struct {
 	ID                      string            // Unique identifier for the story in the database
 	CreatedTime             string            // When this story was first added to the archive
 	Finding                 string            // The primary title/name of the story
-	HighStExperiment        string            // The project or event this story is associated with
+	HighStExperiment        []string          // The project or event this story is associated with
 	ImageVideoSound         string            // JSON string of attachments (images, audio, documents)
 	Location                string            // Where the story takes place or was created
 	StartDateTime           string            // When the story's events began or when it was experienced
@@ -395,24 +395,28 @@ func TitleToHexColor(title string) string {
 	return fmt.Sprintf("#%02x%02x%02x", redValue, greenValue, blueValue)
 }
 
-// GetProjectURL returns the project index page for the story's High St Experiment value.
-func (s Story) GetProjectURL() string {
-	title := strings.TrimSpace(s.HighStExperiment)
-	if title == "" {
-		return ""
-	}
-
-	return "/projects/" + util.Slugify(title) + ".html"
+// ProjectTag is a project/event tag with its link and colour.
+type ProjectTag struct {
+	Title  string
+	URL    string
+	Colour string
 }
 
-// GetProjectColor returns the display color for the story's project tag.
-func (s Story) GetProjectColor() string {
-	title := strings.TrimSpace(s.HighStExperiment)
-	if title == "" {
-		return "#666666"
+// GetProjects returns the story's projects/events as separate tags.
+func (s Story) GetProjects() []ProjectTag {
+	projects := make([]ProjectTag, 0, len(s.HighStExperiment))
+	for _, title := range s.HighStExperiment {
+		title = strings.TrimSpace(title)
+		if title == "" {
+			continue
+		}
+		projects = append(projects, ProjectTag{
+			Title:  title,
+			URL:    "/projects/" + util.Slugify(title) + ".html",
+			Colour: TitleToHexColor(title),
+		})
 	}
-
-	return TitleToHexColor(title)
+	return projects
 }
 
 // hsbToRGB converts HSB (HSV) color values to RGB
