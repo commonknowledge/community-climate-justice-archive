@@ -2,7 +2,6 @@ package store
 
 import (
 	"sort"
-	"strings"
 
 	"community-climate-justice-archive/data"
 )
@@ -109,11 +108,7 @@ func GetStoriesForProject(projectTitle string) []data.Story {
 	return getStoriesForTaxonomy(
 		projectTitle,
 		func(story data.Story) []string {
-			title := strings.TrimSpace(story.HighStExperiment)
-			if title == "" {
-				return nil
-			}
-			return []string{title}
+			return story.HighStExperiment
 		},
 		func(project string) string { return project },
 	)
@@ -123,11 +118,7 @@ func GetStoriesForProject(projectTitle string) []data.Story {
 func GetProjectTypes() []string {
 	return getUniqueTaxonomies(
 		func(story data.Story) []string {
-			title := strings.TrimSpace(story.HighStExperiment)
-			if title == "" {
-				return nil
-			}
-			return []string{title}
+			return story.HighStExperiment
 		},
 		func(project string) string { return project },
 	)

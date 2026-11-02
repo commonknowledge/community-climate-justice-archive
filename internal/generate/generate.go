@@ -164,7 +164,7 @@ func convertStoriesToJSON(stories []data.Story) (string, error) {
 type StoryData struct {
 	ID               string          `json:"id"`
 	Finding          string          `json:"finding"`
-	HighStExperiment string          `json:"highStExperiment"` // Plain project name used by the archive filter.
+	HighStExperiment []string        `json:"highStExperiment"` // Plain project name used by the archive filter.
 	URL              string          `json:"url"`
 	Location         string          `json:"location"`
 	StartDateTime    string          `json:"startDateTime"`
@@ -221,15 +221,17 @@ func collectHighStExperiments(stories []data.Story) []string {
 	titles := make([]string, 0)
 
 	for _, story := range stories {
-		title := strings.TrimSpace(story.HighStExperiment)
-		if title == "" {
-			continue
+		for _, title := range story.HighStExperiment {
+			title = strings.TrimSpace(title)
+			if title == "" {
+				continue
+			}
+			if _, exists := seen[title]; exists {
+				continue
+			}
+			seen[title] = struct{}{}
+			titles = append(titles, title)
 		}
-		if _, exists := seen[title]; exists {
-			continue
-		}
-		seen[title] = struct{}{}
-		titles = append(titles, title)
 	}
 
 	sort.Strings(titles)
@@ -240,11 +242,12 @@ func collectHighStExperiments(stories []data.Story) []string {
 func buildHighStExperimentOptions(stories []data.Story) []FilterOption {
 	counts := make(map[string]int)
 	for _, story := range stories {
-		title := strings.TrimSpace(story.HighStExperiment)
-		if title == "" {
-			continue
+		for _, title := range story.HighStExperiment {
+			title = strings.TrimSpace(title)
+			if title != "" {
+				counts[title]++
+			}
 		}
-		counts[title]++
 	}
 
 	titles := make([]string, 0, len(counts))
