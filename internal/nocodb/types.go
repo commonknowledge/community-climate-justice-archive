@@ -80,7 +80,6 @@ type NocoDBStoryDTO struct {
 	PersonFinder            interface{} `json:"-"`
 	MapCache                interface{} `json:"Map Cache"`
 	MapSize                 interface{} `json:"Map Size"`
-	Created                 interface{} `json:"CreatedAt"`
 	StreetDetectoristMapURL interface{} `json:"StreetDetectoristMapURL"`
 	OtherTheme              interface{} `json:"Other theme"`
 	OtherWeather            interface{} `json:"Other weather"`
@@ -223,7 +222,7 @@ func NocoDBRecordToStoryWithClient(record map[string]interface{}, client *Client
 		PersonFinder:            toString(dto.PersonFinder),
 		MapCache:                toString(dto.MapCache),
 		MapSize:                 toString(dto.MapSize),
-		Created:                 toString(dto.Created),
+		Created:                 toString(dto.CreatedTime),
 		StreetDetectoristMapURL: toString(dto.StreetDetectoristMapURL),
 		OtherTheme:              toString(dto.OtherTheme),
 		OtherWeather:            toString(dto.OtherWeather),

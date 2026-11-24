@@ -5,6 +5,22 @@ import (
 	"testing"
 )
 
+func TestNocoDBRecordToStoryCreationAndExperienceDates(t *testing.T) {
+	story, err := NocoDBRecordToStory(map[string]interface{}{
+		"CreatedAt":                   "2026-03-01 10:00:00",
+		"Dated created / experienced": "2020-05-01",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if story.CreatedTime != "2026-03-01 10:00:00" || story.Created != story.CreatedTime {
+		t.Errorf("creation dates = %q and %q, want both to match CreatedAt", story.CreatedTime, story.Created)
+	}
+	if story.StartDateTime != "2020-05-01" {
+		t.Errorf("experience date = %q, want 2020-05-01", story.StartDateTime)
+	}
+}
+
 func TestLocalAttachmentPathUsesDedicatedMediaDirectories(t *testing.T) {
 	tests := []struct {
 		name     string
