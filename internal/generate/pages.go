@@ -131,6 +131,12 @@ func WriteHomePage() error {
 	themes := store.GetThemes()
 	types := store.GetTypes()
 	allStories := getAllStories()
+	var stewardStories []data.Story
+	for _, story := range allStories {
+		if story.ShowOnHomepage == "Yes" {
+			stewardStories = append(stewardStories, story)
+		}
+	}
 
 	// Get connected stories for the connections view
 	connectedStories := store.GetStoriesWithConnections(connectedStoriesLimit)
@@ -156,6 +162,7 @@ func WriteHomePage() error {
 		Types:            types,
 		HomepageCollages: store.GetHomepageCollages(),
 		Stories:          stories,
+		StewardStories:   stewardStories,
 		ConnectedStories: connectedStories,
 		RandomStoryURL:   randomStoryURL(stories),
 		StoriesJSON:      storiesJSON,

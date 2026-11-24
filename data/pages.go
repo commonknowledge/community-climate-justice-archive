@@ -36,6 +36,7 @@ type Page struct {
 	ScalePermanence  []ScalePermanence
 	TimePeriod       []TimePeriod
 	Stories          []Story
+	StewardStories   []Story
 	ConnectedStories []Story
 	RandomStoryURL   string
 	StoriesJSON      string

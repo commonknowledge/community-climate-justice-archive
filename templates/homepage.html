@@ -35,8 +35,11 @@
             // Find the container where stories are displayed
             const storiesList = document.querySelector('.stories-list.homepage');
 
+            // Only shuffle the homepage list, leaving other story cards (e.g. stewards' selection) alone
+            if (!storiesList) return;
+
             // Get all story elements and convert to an array
-            const stories = Array.prototype.slice.call(document.querySelectorAll('.story'));
+            const stories = Array.prototype.slice.call(storiesList.querySelectorAll('.story'));
             const len = stories.length;
             
             // Fisher-Yates shuffle - the standard algorithm for random shuffling
@@ -501,6 +504,15 @@
                     {{end}}
                 </div>
             </div>
+
+            {{if .StewardStories}}
+            <section class="homepage-tags">
+                <h2 class="h2">Selected by our stewards</h2>
+                <div class="stories-list">
+                    {{template "story-cards" .StewardStories}}
+                </div>
+            </section>
+            {{end}}
         </div>
     </div>
     {{template "footer" .}}
